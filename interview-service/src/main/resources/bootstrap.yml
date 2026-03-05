@@ -1,0 +1,40 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: interview-service
+
+  cloud:
+    nacos:
+      # 注册中心
+      discovery:
+        server-addr: 127.0.0.1:8848
+        namespace: dev
+        group: DEFAULT_GROUP
+        metadata:
+          version: 1.0.0
+          region: beijing
+      # 配置中心
+      config:
+        server-addr: 127.0.0.1:8848
+        namespace: dev
+        group: DEFAULT_GROUP
+        file-extension: yml
+        shared-configs:
+          - data-id: common.yml
+            group: DEFAULT_GROUP
+            refresh: true
+          - data-id: redis.yml
+            group: DEFAULT_GROUP
+            refresh: true
+        extension-configs:
+          - data-id: interview-service-ext.yml
+            group: EXT_GROUP
+            refresh: true
+
+# 日志配置
+logging:
+  level:
+    cn.itzixiao: DEBUG
+    com.alibaba.nacos: WARN

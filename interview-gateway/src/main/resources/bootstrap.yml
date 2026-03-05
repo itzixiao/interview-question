@@ -1,0 +1,76 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: interview-gateway
+
+  cloud:
+    nacos:
+      # 注册中心
+      discovery:
+        server-addr: 127.0.0.1:8848
+        namespace: dev
+        group: DEFAULT_GROUP
+      # 配置中心
+      config:
+        server-addr: 127.0.0.1:8848
+        namespace: dev
+        group: DEFAULT_GROUP
+        file-extension: yml
+        shared-configs:
+          - data-id: common.yml
+            group: DEFAULT_GROUP
+            refresh: true
+
+    gateway:
+      discovery:
+        locator:
+          enabled: true  # 开启服务发现
+          lower-case-service-id: true
+
+      # 路由配置
+      routes:
+        # 面试题服务
+        - id: interview-service
+          uri: lb://interview-service
+          predicates:
+            - Path=/api/interview/**
+          filters:
+            - StripPrefix=1
+            - name: Retry
+              args:
+                retries: 3
+                statuses: BAD_GATEWAY
+            - name: CircuitBreaker
+              args:
+                name: interviewService
+                fallbackUri: forward:/fallback
+
+        # 用户服务（示例）
+        - id: user-service
+          uri: lb://user-service
+          predicates:
+            - Path=/api/user/**
+          filters:
+            - StripPrefix=1
+
+      # 全局默认过滤器
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+        - AddResponseHeader=X-Response-From, Gateway
+
+      # 跨域配置
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowedMethods: "*"
+            allowedHeaders: "*"
+            allowCredentials: true
+
+# 日志配置
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    reactor.netty: INFO
