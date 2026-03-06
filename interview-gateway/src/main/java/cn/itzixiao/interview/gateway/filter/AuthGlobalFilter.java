@@ -1,6 +1,8 @@
 package cn.itzixiao.interview.gateway.filter;
 
+import cn.itzixiao.interview.gateway.config.WhiteListProperties;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
@@ -14,10 +16,14 @@ import reactor.core.publisher.Mono;
 
 /**
  * 认证全局过滤器
+ * 白名单路径通过配置文件动态读取：gateway.white-list.paths
  */
 @Slf4j
 @Component
 public class AuthGlobalFilter implements GlobalFilter, Ordered {
+
+    @Autowired
+    private WhiteListProperties whiteListProperties;
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
@@ -26,8 +32,8 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
 
         log.info("请求路径: {}", path);
 
-        // 跳过登录接口
-        if (path.contains("/login") || path.contains("/register")) {
+        // 白名单路径，直接放行（无需鉴权）
+        if (isWhitePath(path)) {
             return chain.filter(exchange);
         }
 
@@ -56,5 +62,23 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
     @Override
     public int getOrder() {
         return 0;
+    }
+
+    /**
+     * 判断是否属于白名单路径（从配置文件读取）
+     * 支持两种匹配模式：
+     *   - 前缀匹配：路径以 /** 结尾，如 /api/interview/**
+     *   - 包含匹配：路径中包含该字符串，如 /login
+     */
+    private boolean isWhitePath(String path) {
+        return whiteListProperties.getPaths().stream().anyMatch(white -> {
+            if (white.endsWith("/**")) {
+                // 前缀匹配：去掉 ** 后判断路径是否以其开头
+                String prefix = white.substring(0, white.length() - 2);
+                return path.startsWith(prefix);
+            }
+            // 包含匹配
+            return path.contains(white);
+        });
     }
 }

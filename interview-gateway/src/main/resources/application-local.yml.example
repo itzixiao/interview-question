@@ -1,0 +1,44 @@
+server:
+  port: 8080
+
+spring:
+  cloud:
+    nacos:
+      discovery:
+        enabled: false
+      config:
+        enabled: false
+    sentinel:
+      transport:
+        dashboard: localhost:8858
+        eager: true
+
+    gateway:
+      discovery:
+        locator:
+          enabled: false
+          lower-case-service-id: true
+
+      # 路由配置
+      routes:
+        # 面试题服务（本地直连，不走注册中心）
+        - id: interview-service
+          uri: http://localhost:8081
+          predicates:
+            - Path=/api/interview/**
+          filters:
+            - StripPrefix=1
+
+      # 全局默认过滤器
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+        - AddResponseHeader=X-Response-From, Gateway
+
+      # 跨域配置
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowedMethods: "*"
+            allowedHeaders: "*"
+            allowCredentials: true

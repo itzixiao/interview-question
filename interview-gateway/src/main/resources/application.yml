@@ -1,20 +1,21 @@
-# 应用配置（会被 Nacos 配置覆盖）
 spring:
+  application:
+    name: interview-gateway
   profiles:
     active: dev
 
-# Sentinel 配置
-spring:
-  cloud:
-    sentinel:
-      transport:
-        dashboard: localhost:8858
-      eager: true
-      datasource:
-        flow:
-          nacos:
-            server-addr: ${spring.cloud.nacos.config.server-addr}
-            namespace: ${spring.cloud.nacos.config.namespace}
-            dataId: ${spring.application.name}-flow-rules
-            groupId: SENTINEL_GROUP
-            rule-type: flow
+# 白名单配置（无需鉴权的路径）
+# 支持前缀匹配： /api/interview/**  → /api/interview/ 开头的所有路径
+# 支持包含匹配： /login             → 路径中包含 /login 的请求
+gateway:
+  white-list:
+    paths:
+      - /login
+      - /register
+      - /api/interview/**
+
+# 日志配置
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    reactor.netty: INFO
