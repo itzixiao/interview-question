@@ -1,22 +1,9 @@
-# 服务端口
-server:
-  port: 8081
-
 # 应用配置
 spring:
   application:
     name: interview-service
   profiles:
     active: local
-  config:
-    import: optional:nacos:interview-service.yml
-  cloud:
-    nacos:
-      discovery:
-        server-addr: localhost:8848
-      config:
-        server-addr: localhost:8848
-        file-extension: yml
 
 # MyBatis-Plus 配置
 mybatis-plus:
