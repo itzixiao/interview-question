@@ -53,7 +53,6 @@ public class InterviewController {
      */
     @ApiOperation("获取面试题列表")
     @GetMapping("/questions")
-    @SentinelResource(value = "getQuestions", blockHandler = "getQuestionsBlockHandler")
     public Result<String> getQuestions(
             @ApiParam("分类") @RequestParam(required = false) String category) {
         log.info("获取面试题列表, category: {}", category);
@@ -61,31 +60,14 @@ public class InterviewController {
     }
 
     /**
-     * 获取面试题列表限流回调
-     */
-    public Result<String> getQuestionsBlockHandler(String category, BlockException ex) {
-        log.warn("获取面试题列表被限流: {}", ex.getMessage());
-        return Result.error(429, "请求过于频繁，请稍后再试");
-    }
-
-    /**
      * 获取面试题详情 - 带限流保护
      */
     @ApiOperation("获取面试题详情")
     @GetMapping("/question/{id}")
-    @SentinelResource(value = "getQuestion", blockHandler = "getQuestionBlockHandler")
     public Result<String> getQuestion(
             @ApiParam("题目ID") @PathVariable Long id) {
         log.info("获取面试题详情, id: {}", id);
         return Result.success("面试题详情 " + id + " - 来自端口: " + serverPort);
-    }
-
-    /**
-     * 获取面试题详情限流回调
-     */
-    public Result<String> getQuestionBlockHandler(Long id, BlockException ex) {
-        log.warn("获取面试题详情被限流: {}", ex.getMessage());
-        return Result.error(429, "请求过于频繁，请稍后再试");
     }
 
     /**
