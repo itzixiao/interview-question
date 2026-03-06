@@ -1,6 +1,11 @@
 package cn.itzixiao.interview.service.controller;
 
 import cn.itzixiao.interview.common.result.Result;
+import com.alibaba.csp.sentinel.annotation.SentinelResource;
+import com.alibaba.csp.sentinel.slots.block.BlockException;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,6 +18,7 @@ import java.util.Map;
 /**
  * 面试题接口
  */
+@Api(tags = "面试题接口")
 @RestController
 @RequestMapping("/interview")
 @RefreshScope  // 支持配置动态刷新
@@ -32,6 +38,7 @@ public class InterviewController {
     /**
      * 服务信息
      */
+    @ApiOperation("获取服务信息")
     @GetMapping("/info")
     public Result<Map<String, String>> info() {
         Map<String, String> info = new HashMap<>();
@@ -42,26 +49,49 @@ public class InterviewController {
     }
 
     /**
-     * 获取面试题列表
+     * 获取面试题列表 - 带限流保护
      */
+    @ApiOperation("获取面试题列表")
     @GetMapping("/questions")
-    public Result<String> getQuestions(@RequestParam(required = false) String category) {
+    @SentinelResource(value = "getQuestions", blockHandler = "getQuestionsBlockHandler")
+    public Result<String> getQuestions(
+            @ApiParam("分类") @RequestParam(required = false) String category) {
         log.info("获取面试题列表, category: {}", category);
         return Result.success("面试题列表 - 来自端口: " + serverPort);
     }
 
     /**
-     * 获取面试题详情
+     * 获取面试题列表限流回调
      */
+    public Result<String> getQuestionsBlockHandler(String category, BlockException ex) {
+        log.warn("获取面试题列表被限流: {}", ex.getMessage());
+        return Result.error(429, "请求过于频繁，请稍后再试");
+    }
+
+    /**
+     * 获取面试题详情 - 带限流保护
+     */
+    @ApiOperation("获取面试题详情")
     @GetMapping("/question/{id}")
-    public Result<String> getQuestion(@PathVariable Long id) {
+    @SentinelResource(value = "getQuestion", blockHandler = "getQuestionBlockHandler")
+    public Result<String> getQuestion(
+            @ApiParam("题目ID") @PathVariable Long id) {
         log.info("获取面试题详情, id: {}", id);
         return Result.success("面试题详情 " + id + " - 来自端口: " + serverPort);
     }
 
     /**
+     * 获取面试题详情限流回调
+     */
+    public Result<String> getQuestionBlockHandler(Long id, BlockException ex) {
+        log.warn("获取面试题详情被限流: {}", ex.getMessage());
+        return Result.error(429, "请求过于频繁，请稍后再试");
+    }
+
+    /**
      * 健康检查
      */
+    @ApiOperation("健康检查")
     @GetMapping("/health")
     public Result<String> health() {
         return Result.success("UP");
