@@ -5,6 +5,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -480,6 +481,7 @@ class TransactionPropagationBestPractice {
     private JdbcTemplate jdbcTemplate;
 
     @Autowired
+    @Lazy
     private TransactionPropagationBestPractice self;
 
     /**

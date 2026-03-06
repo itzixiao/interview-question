@@ -40,7 +40,7 @@ public class AOPDemo {
                 new AnnotationConfigApplicationContext(AOPConfig.class);
 
         // 获取代理对象
-        UserService userService = context.getBean(UserService.class);
+        UserService userService = context.getBean("aopDemoUserService", UserService.class);
 
         System.out.println("【测试正常方法】");
         userService.addUser("张三");
@@ -62,7 +62,7 @@ public class AOPDemo {
     @EnableAspectJAutoProxy
     static class AOPConfig {
         @Bean
-        public UserService userService() {
+        public UserService aopDemoUserService() {
             return new UserService();
         }
 

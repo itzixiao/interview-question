@@ -131,6 +131,7 @@ public class EqualsAndDoubleEqualsDemo {
         System.out.println("\nInteger i3 = 200, Integer i4 = 200");
         System.out.println("i3 == i4: " + (i3 == i4));  // false，不同对象
         System.out.println("i3.equals(i4): " + i3.equals(i4));  // true
+        System.out.println("i3.intValue() == i4.intValue(): " + (i3.intValue() == i4.intValue()));  // true
 
         // 显式 new（Java 9+ 已废弃）
         Integer i5 = new Integer(100);
@@ -172,7 +173,6 @@ public class EqualsAndDoubleEqualsDemo {
         String s1 = null;
         String s2 = "hello";
 
-        // System.out.println(s1.equals(s2));  // 空指针异常！
 
         // 安全的比较方式
         System.out.println("Objects.equals(s1, s2): " + Objects.equals(s1, s2));  // false
@@ -180,8 +180,10 @@ public class EqualsAndDoubleEqualsDemo {
 
         // 常量放前面（不推荐，易出错）
         System.out.println("\"hello\".equals(s1): " + "hello".equals(s1));  // false
+        System.out.println("s2.equals(s1): " + s2.equals(s1));  // false
 
         System.out.println("\n【建议】使用 Objects.equals() 进行 null 安全的比较\n");
+        // System.out.println(s1.equals(s2));  // 空指针异常！
     }
 
     /**

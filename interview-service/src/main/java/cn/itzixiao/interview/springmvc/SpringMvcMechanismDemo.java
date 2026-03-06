@@ -249,7 +249,7 @@ class GlobalResponseAdvice implements ResponseBodyAdvice<Object> {
  * 作用：统一处理异常
  */
 @ControllerAdvice
-class GlobalExceptionHandler {
+class MvcDemoGlobalExceptionHandler {
 
     @ExceptionHandler(BusinessException.class)
     @ResponseBody
