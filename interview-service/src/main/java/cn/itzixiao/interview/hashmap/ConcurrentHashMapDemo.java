@@ -1,12 +1,14 @@
-package cn.itzixiao.interview.concurrency;
+package cn.itzixiao.interview.hashmap;
 
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
+ * =====================================================================================
  * ConcurrentHashMap 源码详解（JDK8）
- *
- * 核心设计：
+ * =====================================================================================
+ * 
+ * 一、核心设计
+ * -------------------------------------------------------------------------------------
  * ┌─────────────────────────────────────────────────────────────┐
  * │  数据结构：数组 + 链表 + 红黑树（与 HashMap 相同）              │
  * │  线程安全：CAS + synchronized（锁分段细化到桶级别）            │
@@ -14,7 +16,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * │  并发度：  默认 16（数组长度），可扩容                          │
  * └─────────────────────────────────────────────────────────────┘
  *
- * 与 Hashtable/Collections.synchronizedMap 对比：
+ * 二、与 Hashtable/Collections.synchronizedMap 对比
+ * -------------------------------------------------------------------------------------
  * ┌─────────────────┬─────────────────┬─────────────────────────┐
  * │   实现方式       │    锁机制        │       性能              │
  * ├─────────────────┼─────────────────┼─────────────────────────┤
@@ -22,6 +25,19 @@ import java.util.concurrent.atomic.AtomicInteger;
  * │  synchronizedMap│  全局锁（synchronized）│  低，单线程访问      │
  * │  ConcurrentHashMap│ 桶级别锁（CAS+synchronized）│ 高，多线程并发 │
  * └─────────────────┴─────────────────┴─────────────────────────┘
+ * 
+ * 三、JDK7 vs JDK8 实现差异
+ * -------------------------------------------------------------------------------------
+ * JDK 7：分段锁（Segment）
+ * - 默认 16 个 Segment，每个 Segment 是一个 ReentrantLock
+ * - 锁粒度较粗，并发度受限
+ * - 数据结构：Segment[] + HashEntry[][]
+ * 
+ * JDK 8：桶级别锁（synchronized + CAS）
+ * - 锁粒度细化到每个桶（Node 数组元素）
+ * - 没有冲突的桶访问不需要加锁
+ * - 使用 CAS 进行无锁的插入和更新
+ * - 数据结构：Node[] + 链表/红黑树
  */
 public class ConcurrentHashMapDemo {
 
@@ -45,6 +61,9 @@ public class ConcurrentHashMapDemo {
 
         // 6. 与 HashMap 对比
         demonstrateComparison();
+
+        // 7. 高频面试题
+        showInterviewQuestions();
     }
 
     /**
@@ -104,20 +123,6 @@ public class ConcurrentHashMapDemo {
     private static void demonstrateThreadSafety() {
         System.out.println("【2. 线程安全机制】\n");
 
-        System.out.println("锁粒度演进：");
-        System.out.println("┌─────────────────────────────────────────────────────────────┐");
-        System.out.println("│  JDK7：分段锁（Segment）                                      │");
-        System.out.println("│  - 默认 16 个 Segment，每个 Segment 是一个可重入锁            │");
-        System.out.println("│  - 锁粒度较粗，并发度受限                                     │");
-        System.out.println("│  - 数据结构：Segment[] + HashEntry[][]                        │");
-        System.out.println("├─────────────────────────────────────────────────────────────┤");
-        System.out.println("│  JDK8：桶级别锁（synchronized + CAS）                         │");
-        System.out.println("│  - 锁粒度细化到每个桶（Node 数组元素）                        │");
-        System.out.println("│  - 没有冲突的桶访问不需要加锁                                 │");
-        System.out.println("│  - 使用 CAS 进行无锁的插入和更新                              │");
-        System.out.println("│  - 数据结构：Node[] + 链表/红黑树                             │");
-        System.out.println("└─────────────────────────────────────────────────────────────┘\n");
-
         System.out.println("JDK8 同步策略：");
         System.out.println("1. 读操作：无锁，volatile 保证可见性");
         System.out.println("   - get()：不需要加锁，直接读取 volatile 变量");
@@ -140,6 +145,12 @@ public class ConcurrentHashMapDemo {
         System.out.println("│  setTabAt(Node[] tab, int i, Node v)                        │");
         System.out.println("│  → 设置 tab[i] = v，仅在扩容时使用（已加锁保证安全）          │");
         System.out.println("└─────────────────────────────────────────────────────────────┘\n");
+
+        System.out.println("为什么使用 synchronized 而不是 ReentrantLock？");
+        System.out.println("1. JDK8 对 synchronized 优化很好（偏向锁、轻量级锁）");
+        System.out.println("2. synchronized 代码更简洁，JVM 优化空间更大");
+        System.out.println("3. 锁的粒度很小（单个桶），冲突概率低，synchronized 足够");
+        System.out.println("4. 减少内存开销（ReentrantLock 需要额外对象）\n");
     }
 
     /**
@@ -185,12 +196,6 @@ public class ConcurrentHashMapDemo {
         System.out.println("├─────────────────────────────────────────────────────────────┤");
         System.out.println("│  8. 更新计数（addCount）                                     │");
         System.out.println("└─────────────────────────────────────────────────────────────┘\n");
-
-        System.out.println("为什么使用 synchronized 而不是 ReentrantLock？");
-        System.out.println("1. JDK8 对 synchronized 优化很好（偏向锁、轻量级锁）");
-        System.out.println("2. synchronized 代码更简洁，JVM 优化空间更大");
-        System.out.println("3. 锁的粒度很小（单个桶），冲突概率低，synchronized 足够");
-        System.out.println("4. 减少内存开销（ReentrantLock 需要额外对象）\n");
     }
 
     /**
@@ -242,10 +247,8 @@ public class ConcurrentHashMapDemo {
         System.out.println("- 所有 put/remove 都要修改计数器，成为热点");
         System.out.println("- AtomicInteger 是单个变量，高并发下 CAS 冲突严重\n");
 
-        System.out.println("CounterCell 分散计数：");
+        System.out.println("CounterCell 分散计数（借鉴 LongAdder）：");
         System.out.println("┌─────────────────────────────────────────────────────────────┐");
-        System.out.println("│  思想：借鉴 LongAdder，分散热点                              │");
-        System.out.println("│                                                             │");
         System.out.println("│  baseCount：基础计数器                                       │");
         System.out.println("│  └── 低并发时直接使用                                        │");
         System.out.println("│                                                             │");
@@ -255,12 +258,6 @@ public class ConcurrentHashMapDemo {
         System.out.println("│                                                             │");
         System.out.println("│  最终 size = baseCount + sum(CounterCell[])                 │");
         System.out.println("└─────────────────────────────────────────────────────────────┘\n");
-
-        System.out.println("addCount() 流程：");
-        System.out.println("1. 尝试 CAS 更新 baseCount");
-        System.out.println("2. 失败说明有竞争，使用 CounterCell");
-        System.out.println("3. 如果 counterCells 未初始化，初始化并 CAS 设置");
-        System.out.println("4. 根据线程随机数选择 Cell，CAS 更新 Cell 的值\n");
 
         System.out.println("size() 方法：");
         System.out.println("- 累加 baseCount 和所有 CounterCell 的值");
@@ -286,20 +283,6 @@ public class ConcurrentHashMapDemo {
         System.out.println("│  性能          │    最高     │     高          │     低      │");
         System.out.println("└────────────────┴─────────────┴─────────────────┴─────────────┘\n");
 
-        System.out.println("使用建议：");
-        System.out.println("1. 单线程环境：使用 HashMap");
-        System.out.println("2. 高并发读、低并发写：使用 ConcurrentHashMap");
-        System.out.println("3. 需要排序：使用 ConcurrentSkipListMap");
-        System.out.println("4. 不要在外部加锁：ConcurrentHashMap 已经处理了同步\n");
-
-        System.out.println("注意事项：");
-        System.out.println("1. size() 是估计值，不保证实时精确");
-        System.out.println("2. 复合操作（如先判断再 put）不是原子的，需要用 computeIfAbsent");
-        System.out.println("3. 不支持 null key/value（避免二义性：未找到 vs 值为null）");
-        System.out.println("4. 迭代器是弱一致性，不会抛出 ConcurrentModificationException");
-        System.out.println("5. 扩容时可能短暂阻塞写操作\n");
-
-        // 演示复合操作的原子性方法
         System.out.println("原子性复合操作：");
         System.out.println("┌─────────────────────────────────────────────────────────────┐");
         System.out.println("│  // 非原子（错误）                                           │");
@@ -317,5 +300,65 @@ public class ConcurrentHashMapDemo {
         System.out.println("│  - remove(Object key, Object value)                         │");
         System.out.println("│  - compute / computeIfPresent / merge                       │");
         System.out.println("└─────────────────────────────────────────────────────────────┘\n");
+    }
+
+    /**
+     * 7. 高频面试题
+     */
+    private static void showInterviewQuestions() {
+        System.out.println("【7. 高频面试题】\n");
+
+        System.out.println("Q1: ConcurrentHashMap 如何保证线程安全？");
+        System.out.println("答案：");
+        System.out.println("  JDK 7: 分段锁（Segment），每个 Segment 继承 ReentrantLock");
+        System.out.println("  JDK 8: CAS + synchronized，锁住链表/红黑树头节点");
+        System.out.println("  优势：锁粒度更细，并发度更高\n");
+
+        System.out.println("Q2: JDK7 和 JDK8 的 ConcurrentHashMap 有什么区别？");
+        System.out.println("答案：");
+        System.out.println("  JDK 7:");
+        System.out.println("    - 使用 Segment 分段锁");
+        System.out.println("    - Segment 数组默认 16，并发度固定");
+        System.out.println("    - Segment 继承 ReentrantLock");
+        System.out.println("  JDK 8:");
+        System.out.println("    - 取消 Segment，直接在 Node 上加锁");
+        System.out.println("    - 使用 CAS + synchronized");
+        System.out.println("    - 锁粒度更细，支持动态扩容\n");
+
+        System.out.println("Q3: ConcurrentHashMap 为什么不允许 null 键/值？");
+        System.out.println("答案：");
+        System.out.println("  二义性问题：get(key) 返回 null 时，无法区分是「不存在」还是「值为null」");
+        System.out.println("  在多线程环境下，containsKey() 和 get() 之间可能被其他线程修改");
+        System.out.println("  为了避免歧义，直接禁止 null\n");
+
+        System.out.println("Q4: ConcurrentHashMap 的迭代器有什么特点？");
+        System.out.println("答案：");
+        System.out.println("  弱一致性（Weakly Consistent）：");
+        System.out.println("    - 迭代期间修改不会抛 ConcurrentModificationException");
+        System.out.println("    - 可能反映迭代期间的修改，也可能不反映");
+        System.out.println("    - 不会导致死循环或数据不一致\n");
+
+        System.out.println("Q5: ConcurrentHashMap 如何保证扩容线程安全？");
+        System.out.println("答案：");
+        System.out.println("  JDK 8 多线程协同扩容：");
+        System.out.println("    1. 每个线程负责一部分桶的迁移");
+        System.out.println("    2. 使用 ForwardingNode 标记正在迁移的桶");
+        System.out.println("    3. 其他线程遇到 ForwardingNode 会协助扩容");
+        System.out.println("    4. 扩容期间读写操作正常进行\n");
+
+        System.out.println("Q6: ConcurrentHashMap 的 size() 如何实现？");
+        System.out.println("答案：");
+        System.out.println("  JDK 8 使用 LongAdder 思想：");
+        System.out.println("    - baseCount：基础计数");
+        System.out.println("    - counterCells：竞争时的分散计数");
+        System.out.println("    - 最终 size = baseCount + counterCells 总和");
+        System.out.println("  特点：高并发下性能好，但结果不是强一致的\n");
+
+        System.out.println("Q7: 为什么 JDK8 用 synchronized 替代 ReentrantLock？");
+        System.out.println("答案：");
+        System.out.println("  1. synchronized 在 JDK6 后优化很好（偏向锁、轻量级锁）");
+        System.out.println("  2. 锁粒度已细化到桶级别，冲突概率低");
+        System.out.println("  3. synchronized 不需要额外对象，内存开销小");
+        System.out.println("  4. JVM 对 synchronized 优化空间更大\n");
     }
 }
