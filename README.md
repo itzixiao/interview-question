@@ -50,13 +50,20 @@ interview-question/
 │       │   ├── CountDownLatchSequentialDemo.java
 │       │   └── ...
 │       ├── hashmap/           # HashMap 源码分析
-│       │   └── HashMapSourceAnalysis.java
+│       │   ├── HashMapSourceAnalysis.java
+│       │   └── ConcurrentHashMapDemo.java
 │       ├── java/              # Java 基础
 │       │   ├── basic/         # 基础数据类型、String
 │       │   ├── CollectionDeepDiveDemo.java
 │       │   ├── IODeepDiveDemo.java
 │       │   ├── ReflectionDeepDiveDemo.java
-│       │   └── ClassLoaderDeepDiveDemo.java
+│       │   ├── ClassLoaderDeepDiveDemo.java
+│       │   ├── InterfaceAndAbstractDemo.java    # 接口与抽象类
+│       │   └── DeepCopyAndShallowCopyDemo.java  # 深拷贝与浅拷贝
+│       ├── designpattern/    # 23种设计模式
+│       │   ├── creational/   # 创建型模式（5种）
+│       │   ├── structural/   # 结构型模式（7种）
+│       │   └── behavioral/   # 行为型模式（11种）
 │       ├── jvm/               # JVM 原理
 │       │   └── JVMUnderstandingDemo.java
 │       ├── mybatis/           # MyBatis 示例
@@ -72,10 +79,13 @@ interview-question/
 │       ├── springboot/        # Spring Boot 自动装配
 │       └── springmvc/         # Spring MVC 机制
 │
-├── docs/                      # 说明文档（20+ 篇）
+├── docs/                      # 说明文档（30+ 篇）
 │   ├── Java基础-数据类型.md
 │   ├── Java基础-==与equals.md
 │   ├── Java基础-String对比.md
+│   ├── Java基础-接口与抽象类.md
+│   ├── Java基础-深拷贝与浅拷贝.md
+│   ├── 设计模式详解.md
 │   ├── Java集合框架.md
 │   ├── HashMap源码分析.md
 │   ├── ConcurrentHashMap详解.md
@@ -113,7 +123,7 @@ interview-question/
 
 ```bash
 # 1. 克隆项目
-git clone https://gitee.com/yourusername/interview-question.git
+git clone https://gitee.com/itzixiao/interview-question.git
 cd interview-question
 
 # 2. 编译项目
@@ -133,10 +143,22 @@ mvn spring-boot:run -Dspring-boot.run.mainClass=cn.itzixiao.interview.concurrenc
 # Java 基础示例
 mvn spring-boot:run -Dspring-boot.run.mainClass=cn.itzixiao.interview.java.basic.EqualsAndDoubleEqualsDemo
 mvn spring-boot:run -Dspring-boot.run.mainClass=cn.itzixiao.interview.java.basic.StringComparisonDemo
+mvn spring-boot:run -Dspring-boot.run.mainClass=cn.itzixiao.interview.java.InterfaceAndAbstractDemo
+mvn spring-boot:run -Dspring-boot.run.mainClass=cn.itzixiao.interview.java.DeepCopyAndShallowCopyDemo
+
+# 设计模式示例
+mvn spring-boot:run -Dspring-boot.run.mainClass=cn.itzixiao.interview.designpattern.DesignPatternDemo
+mvn spring-boot:run -Dspring-boot.run.mainClass=cn.itzixiao.interview.designpattern.creational.singleton.SingletonDemo
+mvn spring-boot:run -Dspring-boot.run.mainClass=cn.itzixiao.interview.designpattern.structural.proxy.ProxyDemo
+mvn spring-boot:run -Dspring-boot.run.mainClass=cn.itzixiao.interview.designpattern.behavioral.strategy.StrategyDemo
 
 # 并发编程示例
 mvn spring-boot:run -Dspring-boot.run.mainClass=cn.itzixiao.interview.concurrency.ThreadPoolDemo
 mvn spring-boot:run -Dspring-boot.run.mainClass=cn.itzixiao.interview.concurrency.CountDownLatchSequentialDemo
+
+# HashMap 示例
+mvn spring-boot:run -Dspring-boot.run.mainClass=cn.itzixiao.interview.hashmap.HashMapSourceAnalysis
+mvn spring-boot:run -Dspring-boot.run.mainClass=cn.itzixiao.interview.hashmap.ConcurrentHashMapDemo
 
 # Spring 示例
 mvn spring-boot:run -Dspring-boot.run.mainClass=cn.itzixiao.interview.spring.IOCDemo
@@ -152,6 +174,8 @@ mvn spring-boot:run -Dspring-boot.run.mainClass=cn.itzixiao.interview.spring.tra
 | 数据类型 | `JavaDataTypesDemo.java` | [Java基础-数据类型.md](docs/Java基础-数据类型.md) |
 | == 与 equals | `EqualsAndDoubleEqualsDemo.java` | [Java基础-==与equals.md](docs/Java基础-==与equals.md) |
 | String 对比 | `StringComparisonDemo.java` | [Java基础-String对比.md](docs/Java基础-String对比.md) |
+| 接口与抽象类 | `InterfaceAndAbstractDemo.java` | [Java基础-接口与抽象类.md](docs/Java基础-接口与抽象类.md) |
+| 深拷贝与浅拷贝 | `DeepCopyAndShallowCopyDemo.java` | [Java基础-深拷贝与浅拷贝.md](docs/Java基础-深拷贝与浅拷贝.md) |
 
 ### 集合框架
 
@@ -159,7 +183,7 @@ mvn spring-boot:run -Dspring-boot.run.mainClass=cn.itzixiao.interview.spring.tra
 |------|----------|----------|
 | 集合深入 | `CollectionDeepDiveDemo.java` | [Java集合框架.md](docs/Java集合框架.md) |
 | HashMap 源码 | `HashMapSourceAnalysis.java` | [HashMap源码分析.md](docs/HashMap源码分析.md) |
-| ConcurrentHashMap | `ConcurrentHashMapDemo.java` | [ConcurrentHashMap详解.md](docs/ConcurrentHashMap详解.md) |
+| ConcurrentHashMap | `hashmap/ConcurrentHashMapDemo.java` | [ConcurrentHashMap详解.md](docs/ConcurrentHashMap详解.md) |
 
 ### 并发编程
 
@@ -227,6 +251,35 @@ mvn spring-boot:run -Dspring-boot.run.mainClass=cn.itzixiao.interview.spring.tra
 | 主题 | 示例代码 | 说明文档 |
 |------|----------|----------|
 | JDK/CGLIB 对比 | `ProxyComparisonDemo.java` | [JDK动态代理与CGLIB.md](docs/JDK动态代理与CGLIB.md) |
+
+### 设计模式
+
+| 主题 | 示例代码 | 说明文档 |
+|------|----------|----------|
+| 23种设计模式总览 | `DesignPatternDemo.java` | [设计模式详解.md](docs/设计模式详解.md) |
+| 单例模式 | `SingletonDemo.java` | [设计模式详解.md](docs/设计模式详解.md#一创建型模式5种) |
+| 工厂方法模式 | `FactoryMethodDemo.java` | [设计模式详解.md](docs/设计模式详解.md#一创建型模式5种) |
+| 抽象工厂模式 | `AbstractFactoryDemo.java` | [设计模式详解.md](docs/设计模式详解.md#一创建型模式5种) |
+| 建造者模式 | `BuilderDemo.java` | [设计模式详解.md](docs/设计模式详解.md#一创建型模式5种) |
+| 原型模式 | `PrototypeDemo.java` | [设计模式详解.md](docs/设计模式详解.md#一创建型模式5种) |
+| 适配器模式 | `AdapterDemo.java` | [设计模式详解.md](docs/设计模式详解.md#二结构型模式7种) |
+| 桥接模式 | `BridgeDemo.java` | [设计模式详解.md](docs/设计模式详解.md#二结构型模式7种) |
+| 组合模式 | `CompositeDemo.java` | [设计模式详解.md](docs/设计模式详解.md#二结构型模式7种) |
+| 装饰器模式 | `DecoratorDemo.java` | [设计模式详解.md](docs/设计模式详解.md#二结构型模式7种) |
+| 外观模式 | `FacadeDemo.java` | [设计模式详解.md](docs/设计模式详解.md#二结构型模式7种) |
+| 享元模式 | `FlyweightDemo.java` | [设计模式详解.md](docs/设计模式详解.md#二结构型模式7种) |
+| 代理模式 | `ProxyDemo.java` | [设计模式详解.md](docs/设计模式详解.md#二结构型模式7种) |
+| 策略模式 | `StrategyDemo.java` | [设计模式详解.md](docs/设计模式详解.md#三行为型模式11种) |
+| 模板方法模式 | `TemplateMethodDemo.java` | [设计模式详解.md](docs/设计模式详解.md#三行为型模式11种) |
+| 观察者模式 | `ObserverDemo.java` | [设计模式详解.md](docs/设计模式详解.md#三行为型模式11种) |
+| 迭代器模式 | `IteratorDemo.java` | [设计模式详解.md](docs/设计模式详解.md#三行为型模式11种) |
+| 责任链模式 | `ChainOfResponsibilityDemo.java` | [设计模式详解.md](docs/设计模式详解.md#三行为型模式11种) |
+| 命令模式 | `CommandDemo.java` | [设计模式详解.md](docs/设计模式详解.md#三行为型模式11种) |
+| 备忘录模式 | `MementoDemo.java` | [设计模式详解.md](docs/设计模式详解.md#三行为型模式11种) |
+| 状态模式 | `StateDemo.java` | [设计模式详解.md](docs/设计模式详解.md#三行为型模式11种) |
+| 访问者模式 | `VisitorDemo.java` | [设计模式详解.md](docs/设计模式详解.md#三行为型模式11种) |
+| 中介者模式 | `MediatorDemo.java` | [设计模式详解.md](docs/设计模式详解.md#三行为型模式11种) |
+| 解释器模式 | `InterpreterDemo.java` | [设计模式详解.md](docs/设计模式详解.md#三行为型模式11种) |
 
 ## 学习建议
 
