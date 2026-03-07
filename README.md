@@ -145,6 +145,7 @@ mvn spring-boot:run -Dspring-boot.run.mainClass=cn.itzixiao.interview.java.basic
 mvn spring-boot:run -Dspring-boot.run.mainClass=cn.itzixiao.interview.java.basic.StringComparisonDemo
 mvn spring-boot:run -Dspring-boot.run.mainClass=cn.itzixiao.interview.java.InterfaceAndAbstractDemo
 mvn spring-boot:run -Dspring-boot.run.mainClass=cn.itzixiao.interview.java.DeepCopyAndShallowCopyDemo
+mvn spring-boot:run -Dspring-boot.run.mainClass=cn.itzixiao.interview.java.GenericDeepDiveDemo
 
 # 设计模式示例
 mvn spring-boot:run -Dspring-boot.run.mainClass=cn.itzixiao.interview.designpattern.DesignPatternDemo
@@ -177,6 +178,7 @@ mvn spring-boot:run -Dspring-boot.run.mainClass=cn.itzixiao.interview.spring.tra
 | String 对比 | `StringComparisonDemo.java` | [Java基础-String对比.md](docs/Java基础-String对比.md) |
 | 接口与抽象类 | `InterfaceAndAbstractDemo.java` | [Java基础-接口与抽象类.md](docs/Java基础-接口与抽象类.md) |
 | 深拷贝与浅拷贝 | `DeepCopyAndShallowCopyDemo.java` | [Java基础-深拷贝与浅拷贝.md](docs/Java基础-深拷贝与浅拷贝.md) |
+| 泛型深入 | `GenericDeepDiveDemo.java` | [Java泛型深入详解.md](docs/Java泛型深入详解.md) |
 
 ### 集合框架
 
