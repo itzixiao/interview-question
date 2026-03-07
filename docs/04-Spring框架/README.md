@@ -2,27 +2,27 @@
 
 ## 📚 文档列表
 
-#### 1. [01-Spring IOC 与 AOP.md](./01-Spring-IOC%E4%B8%8EAOP.md)
+#### 1. [01-Spring IOC与 AOP.md](./01-Spring-IOC 与 AOP.md)
 - **内容：** IOC 容器、依赖注入、AOP 原理
 - **面试题：** 10+ 道
 - **重要程度：** ⭐⭐⭐⭐⭐
 
-#### 2. [02-Spring 事务传播行为.md](./02-Spring-%E4%BA%8B%E5%8A%A1%E4%BC%A0%E6%92%AD%E8%A1%8C%E4%B8%BA.md)
-- **内容：** 7 种事务传播行为、应用场景
-- **面试题：** 10+ 道
-- **重要程度：** ⭐⭐⭐⭐⭐
-
-#### 3. [03-Spring MVC 运行机制.md](./03-Spring-MVC%E8%BF%90%E8%A1%8C%E6%9C%BA%E5%88%B6.md)
-- **内容：** DispatcherServlet、处理器映射、视图解析
-- **面试题：** 8+ 道
-- **重要程度：** ⭐⭐⭐⭐
-
-#### 4. [04-Spring Bean生命周期详解.md](./04-Spring-Bean%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E8%AF%A6%E8%A7%A3.md)
+#### 2. [02-Spring Bean生命周期详解.md](./02-Spring-Bean生命周期详解.md)
 - **内容：** Bean 创建、初始化、销毁全过程
 - **面试题：** 8+ 道
 - **重要程度：** ⭐⭐⭐⭐⭐
 
-#### 5. [05-JDK动态代理与CGLIB.md](./05-JDK%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86%E4%B8%8ECGLIB.md)
+#### 3. [03-Spring MVC 运行机制.md](./03-Spring-MVC 运行机制.md)
+- **内容：** DispatcherServlet、处理器映射、视图解析
+- **面试题：** 8+ 道
+- **重要程度：** ⭐⭐⭐⭐
+
+#### 4. [04-Spring 事务传播行为.md](./04-Spring 事务传播行为.md)
+- **内容：** 7 种事务传播行为、应用场景
+- **面试题：** 10+ 道
+- **重要程度：** ⭐⭐⭐⭐⭐
+
+#### 5. [05-JDK 动态代理与 CGLIB.md](./05-JDK 动态代理与 CGLIB.md)
 - **内容：** 两种代理方式对比、Spring AOP 选择策略
 - **面试题：** 6+ 道
 - **重要程度：** ⭐⭐⭐⭐
