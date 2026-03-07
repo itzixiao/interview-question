@@ -198,6 +198,83 @@ protected final boolean tryAcquire(int acquires) {
 ## 最佳实践
 
 1. **理解 state 含义**：不同同步器 state 含义不同
+2. **线程安全**：AQS 是线程安全的
+3. **公平性选择**：根据业务需求选择公平/非公平锁
+4. **Condition 使用**：多条件等待时使用多个 Condition
+
+---
+
+## 十、高频面试题
+
+### 【问题 1】AQS 的核心原理是什么？
+答：
+- AQS(AbstractQueuedSynchronizer) 是一个抽象队列同步器
+- 核心思想：如果共享资源可以被访问，则将当前线程设置为执行状态；否则将线程加入等待队列
+- 通过 state 变量表示同步状态，通过 FIFO 队列管理等待线程
+- 基于模板方法模式，子类实现 tryAcquire/tryRelease 等方法
+
+### 【问题 2】AQS 的两种同步模式？
+答：
+- **独占模式（Exclusive）**：只有一个线程能执行，如 ReentrantLock
+- **共享模式（Shared）**：多个线程可同时执行，如 CountDownLatch、Semaphore
+
+### 【问题 3】state 在不同同步器中的含义？
+答：
+- **ReentrantLock**：0=未锁定，>0=重入次数
+- **CountDownLatch**：剩余需要等待的计数
+- **Semaphore**：剩余可用许可数
+- **ReentrantReadWriteLock**：高 16 位读锁，低 16 位写锁
+
+### 【问题 4】AQS 为什么使用双向链表？
+答：
+- 方便节点删除（唤醒时）
+- 可以从后向前传播唤醒信号
+- 支持公平锁检查前驱节点
+
+### 【问题 5】CLH 队列的作用？
+答：
+- 存储等待获取锁的线程
+- 避免自旋消耗 CPU（阻塞挂起）
+- 保证线程按序获取锁（公平锁）
+- 减少上下文切换开销
+
+### 【问题 6】AQS 的 acquire() 流程？
+答：
+1. 调用 tryAcquire() 尝试获取锁
+2. 失败则创建 Node 节点加入队列尾部
+3. 调用 park() 阻塞线程
+4. 被唤醒后再次尝试获取
+5. 成功则设为头节点
+
+### 【问题 7】Condition 的作用和使用场景？
+答：
+- Condition 用于多线程协调，替代 Object 的 wait/notify
+- 一个 Lock 可以绑定多个 Condition
+- 适用场景：生产者消费者模式、多阶段任务
+- await() 释放锁并等待，signal() 唤醒一个线程
+
+### 【问题 8】公平锁和非公平锁的区别？
+答：
+- **公平锁**：按照请求顺序分配，新请求会排队
+- **非公平锁**：插队机制，新请求可能优先获取
+- 公平锁吞吐量低但公平性好
+- 非公平锁吞吐量大但可能饥饿
+
+### 【问题 9】AQS 有哪些实现类？
+答：
+- **ReentrantLock**：可重入独占锁
+- **ReentrantReadWriteLock**：读写锁
+- **CountDownLatch**：倒计时门闩
+- **CyclicBarrier**：循环栅栏
+- **Semaphore**：信号量
+- **ThreadPoolExecutor.Worker**：线程池工作线程
+
+### 【问题 10】为什么 AQS 使用自旋 + 阻塞？
+答：
+- **自旋**：短时等待，避免上下文切换
+- **阻塞**：长时等待，避免浪费 CPU
+- 结合两者优势：先自旋，失败再阻塞
+- 现代操作系统对自旋优化较好
 2. **正确处理中断**：响应中断或忽略中断
 3. **避免长时间持有锁**：减少竞争
 4. **优先使用现有实现**：ReentrantLock、Semaphore 等
