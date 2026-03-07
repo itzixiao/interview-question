@@ -155,6 +155,7 @@ mvn spring-boot:run -Dspring-boot.run.mainClass=cn.itzixiao.interview.designpatt
 # 并发编程示例
 mvn spring-boot:run -Dspring-boot.run.mainClass=cn.itzixiao.interview.concurrency.ThreadPoolDemo
 mvn spring-boot:run -Dspring-boot.run.mainClass=cn.itzixiao.interview.concurrency.CountDownLatchSequentialDemo
+mvn spring-boot:run -Dspring-boot.run.mainClass=cn.itzixiao.interview.concurrency.ProducerConsumerDemo
 
 # HashMap 示例
 mvn spring-boot:run -Dspring-boot.run.mainClass=cn.itzixiao.interview.hashmap.HashMapSourceAnalysis
@@ -193,6 +194,7 @@ mvn spring-boot:run -Dspring-boot.run.mainClass=cn.itzixiao.interview.spring.tra
 | CAS 与原子类 | `CASAndAtomicDemo.java` | [CAS与原子类.md](docs/CAS与原子类.md) |
 | AQS | `AQSDemo.java` | [AQS详解.md](docs/AQS详解.md) |
 | CountDownLatch | `CountDownLatchSequentialDemo.java` | [CountDownLatch线程顺序执行.md](docs/CountDownLatch线程顺序执行.md) |
+| 生产者消费者 | `ProducerConsumerDemo.java` | [ReentrantLock生产者消费者.md](docs/ReentrantLock生产者消费者.md) |
 
 ### JVM
 
