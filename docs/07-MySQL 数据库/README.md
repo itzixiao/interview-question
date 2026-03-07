@@ -8,25 +8,25 @@
 
 ## 🎯 核心文档（4 篇）
 
-### 1. [MySQL 字段类型与存储引擎.md](./MySQL%20字段类型与存储引擎.md)
+#### 1. [01-MySQL 字段类型与存储引擎.md](./01-MySQL%20字段类型与存储引擎.md)
 - **知识点：** 数值类型、字符串类型、日期时间类型、InnoDB/MyISAM/Memory/Archive
 - **面试题：** 5 道
 - **难度：** ⭐⭐⭐
 - **适合人群：** 初级 ~ 中级
 
-### 2. [MySQL 索引原理详解.md](./MySQL%20索引原理详解.md)
+#### 2. [02-MySQL 索引原理详解.md](./02-MySQL%20索引原理详解.md)
 - **知识点：** B+Tree、聚簇索引、二级索引、索引失效、索引优化
 - **面试题：** 6 道
 - **难度：** ⭐⭐⭐⭐⭐
 - **适合人群：** 中级 ~ 高级
 
-### 3. [MySQL 事务与锁机制详解.md](./MySQL%20事务与锁机制详解.md)
+#### 3. [03-MySQL事务与锁机制详解.md](./03-MySQL%20事务与锁机制详解.md)
 - **知识点：** ACID、隔离级别、MVCC、行锁算法、死锁处理
 - **面试题：** 8 道
 - **难度：** ⭐⭐⭐⭐⭐
 - **适合人群：** 中级 ~ 高级
 
-### 4. [MySQL 日志与性能优化详解.md](./MySQL%20日志与性能优化详解.md)
+#### 4. [04-MySQL 日志与性能优化详解.md](./04-MySQL%20日志与性能优化详解.md)
 - **知识点：** Redo/Bin/Undo Log、两阶段提交、EXPLAIN、SQL 优化
 - **面试题：** 8 道
 - **难度：** ⭐⭐⭐⭐⭐
@@ -34,17 +34,17 @@
 
 ---
 
-## 📖 其他 MySQL 文档（3 篇）
+## 📖 其他文档（3 篇）
 
-### 5. [MySQL 索引与 MVCC.md](./MySQL 索引与 MVCC.md)
+#### 5. [05-MySQL 索引与 MVCC.md](./05-MySQL%20索引与%20MVCC.md)
 - **简介：** 早期版本的索引与 MVCC 讲解
 - **状态：** ⚠️ 内容已整合到核心文档
 
-### 6. [MySQL 事务 - 锁 - 优化详解.md](./MySQL 事务 - 锁 - 优化详解.md)
+#### 6. [06-MySQL事务 - 锁 - 优化详解.md](./06-MySQL%20事务 - 锁 - 优化详解.md)
 - **简介：** 事务、锁和优化的综合讲解
 - **状态：** ⚠️ 内容已拆分并扩充到独立文档
 
-### 7. [MySQL 技术文档导航.md](./MySQL%20技术文档导航.md)
+#### 7. [07-MySQL 技术文档导航.md](./07-MySQL%20技术文档导航.md)
 - **简介：** 总导航文档，快速了解整个 MySQL 文档体系
 - **推荐：** ✅ 新手必读
 
@@ -66,7 +66,7 @@ java cn.itzixiao.interview.mysql.MySQLCorePrincipleDemo
 
 ---
 
-## 📊 学习路线图
+## 📖 推荐学习路线图
 
 ```mermaid
 graph LR
@@ -86,6 +86,28 @@ graph LR
     J --> K
     K --> L[面试冲刺]
 ```
+
+---
+
+## 🔗 跨模块关联
+
+### 前置知识
+- ✅ **[Java基础](../01-Java基础/README.md)** - 数据类型、集合框架
+- ✅ **[Java并发编程](../02-Java并发编程/README.md)** - 线程安全、锁机制
+
+### 后续进阶
+- 📚 **[Redis](../08-Redis 缓存/README.md)** - 缓存一致性、双写策略
+- 📚 **[MyBatis](../09-中间件/README.md)** - ORM 框架使用
+- 📚 **[分布式系统](../12-分布式系统/README.md)** - 分布式事务
+
+### 知识点对应
+| MySQL | 应用场景 |
+|-------|---------|
+| 索引优化 | 慢查询优化、覆盖索引 |
+| 事务隔离 | 防止脏读、不可重复读 |
+| MVCC | 读写分离、高并发读取 |
+| 锁机制 | 库存扣减、秒杀场景 |
+| 日志系统 | 数据恢复、主从复制 |
 
 ---
 
@@ -125,6 +147,33 @@ graph LR
 2. ✅ 理解背后的原理
 3. ✅ 结合实际场景思考
 4. ✅ 模拟面试练习
+
+---
+
+## 🛠️ 实战技巧
+
+### EXPLAIN 分析 SQL
+```sql
+EXPLAIN SELECT * FROM users WHERE email = 'test@example.com';
+-- 关注：type、key、rows、Extra
+```
+
+### 创建复合索引
+```sql
+CREATE INDEX idx_name_age ON users(name, age);
+-- 遵循最左匹配原则
+```
+
+### 优化深分页
+```sql
+-- 优化前
+SELECT * FROM orders LIMIT 1000000, 10;
+
+-- 优化后
+SELECT * FROM orders o
+INNER JOIN (SELECT id FROM orders LIMIT 1000000, 10) tmp
+ON o.id = tmp.id;
+```
 
 ---
 
