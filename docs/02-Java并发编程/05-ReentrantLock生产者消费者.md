@@ -298,4 +298,4 @@ String item = queue.poll(1, TimeUnit.SECONDS);  // 超时获取
 
 ## 示例代码
 
-完整示例代码请参考：[ProducerConsumerDemo.java](../interview-service/src/main/java/cn/itzixiao/interview/concurrency/ProducerConsumerDemo.java)
+完整示例代码请参考：[ProducerConsumerDemo.java](../../interview-service/src/main/java/cn/itzixiao/interview/concurrency/ProducerConsumerDemo.java)

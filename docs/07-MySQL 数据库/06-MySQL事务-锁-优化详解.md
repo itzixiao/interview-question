@@ -376,7 +376,7 @@ DELETE FROM table WHERE condition LIMIT 10000;
 
 ## 相关代码示例
 
-- [TransactionAndLockDemo.java](../interview-service/src/main/java/cn/itzixiao/interview/mysql/TransactionAndLockDemo.java) - 事务与锁机制
-- [BigTableOptimizationDemo.java](../interview-service/src/main/java/cn/itzixiao/interview/mysql/BigTableOptimizationDemo.java) - 大表优化与批量处理
-- [IndexOptimizationDemo.java](../interview-service/src/main/java/cn/itzixiao/interview/mysql/IndexOptimizationDemo.java) - 索引优化
-- [MVCCDemo.java](../interview-service/src/main/java/cn/itzixiao/interview/mysql/MVCCDemo.java) - MVCC原理
+- [TransactionAndLockDemo.java](../../interview-service/src/main/java/cn/itzixiao/interview/mysql/TransactionAndLockDemo.java) - 事务与锁机制
+- [BigTableOptimizationDemo.java](../../interview-service/src/main/java/cn/itzixiao/interview/mysql/BigTableOptimizationDemo.java) - 大表优化与批量处理
+- [IndexOptimizationDemo.java](../../interview-service/src/main/java/cn/itzixiao/interview/mysql/IndexOptimizationDemo.java) - 索引优化
+- [MVCCDemo.java](../../interview-service/src/main/java/cn/itzixiao/interview/mysql/MVCCDemo.java) - MVCC原理

@@ -103,8 +103,8 @@
 ## 🔗 相关链接
 
 - [项目总览](../../README.md)
-- [代码索引](../../interview-service/src/main/java/cn/itzixiao/interview/代码索引.md)
-- [Redis 示例代码](../../interview-service/src/main/java/cn/itzixiao/interview/redis/)
+- [代码索引](../../../interview-service/src/main/java/cn/itzixiao/interview/代码索引.md)
+- [Redis 示例代码](../../../interview-service/src/main/java/cn/itzixiao/interview/redis/)
 
 ---
 
