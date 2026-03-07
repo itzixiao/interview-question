@@ -3,7 +3,7 @@ spring:
   application:
     name: interview-service
   profiles:
-    active: local
+    active: dev
   # Spring Boot 2.6+ 路径匹配策略兼容 Swagger
   mvc:
     pathmatch:
