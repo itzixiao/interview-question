@@ -1,0 +1,245 @@
+# 深拷贝与浅拷贝详解
+
+## 一、什么是拷贝？
+
+拷贝就是创建一个对象的副本。根据副本与原对象的关系，分为**深拷贝**和**浅拷贝**。
+
+---
+
+## 二、浅拷贝（Shallow Copy）
+
+### 定义
+- 创建一个新对象，复制基本类型属性的值
+- 对于引用类型属性，只复制引用（地址），不复制对象本身
+- 原对象和副本的引用类型属性指向同一个对象
+
+### 实现
+实现 `Cloneable` 接口，重写 `clone()` 方法：
+
+```java
+class Person implements Cloneable {
+    private String name;
+    private int age;
+    private Address address;  // 引用类型
+
+    @Override
+    public Person clone() {
+        try {
+            // Object.clone() 执行的是浅拷贝
+            return (Person) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+}
+```
+
+---
+
+## 三、深拷贝（Deep Copy）
+
+### 定义
+- 创建一个新对象，复制所有属性
+- 对于引用类型属性，也创建新对象（递归拷贝）
+- 原对象和副本完全独立，互不影响
+
+### 实现方式
+
+#### 方式一：序列化/反序列化（推荐）
+
+```java
+class Person implements Serializable {
+    private static final long serialVersionUID = 1L;
+    
+    private String name;
+    private Address address;  // 引用类型也需要实现 Serializable
+
+    public Person deepCopy() {
+        try {
+            // 序列化：对象 → 字节流
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            ObjectOutputStream oos = new ObjectOutputStream(bos);
+            oos.writeObject(this);
+
+            // 反序列化：字节流 → 新对象
+            ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
+            ObjectInputStream ois = new ObjectInputStream(bis);
+            return (Person) ois.readObject();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+}
+```
+
+#### 方式二：手动复制
+
+```java
+public Person manualCopy() {
+    Address addressCopy = new Address(this.address.getCity());
+    return new Person(this.name, addressCopy);
+}
+```
+
+#### 方式三：重写 clone() 递归拷贝
+
+```java
+@Override
+public Person clone() {
+    Person copy = (Person) super.clone();
+    copy.address = address.clone();  // 递归拷贝引用类型
+    return copy;
+}
+```
+
+---
+
+## 四、内存结构对比
+
+### 浅拷贝内存结构
+
+```
+┌──────────────┐     ┌──────────────┐
+│ 原对象       │     │ 副本对象     │
+│ ──────────── │     │ ──────────── │
+│ name: "张三" │     │ name: "张三" │ ← 基本类型：值复制
+│ age: 25      │     │ age: 25      │
+│ address ─────┼──┬──┼─→ address    │ ← 引用类型：引用复制
+└──────────────┘  │  └──────────────┘
+                  ↓
+             ┌──────────────┐
+             │ Address 对象 │ ← 同一个对象，共享！
+             │ city: "北京" │
+             └──────────────┘
+```
+
+### 深拷贝内存结构
+
+```
+┌──────────────┐     ┌──────────────┐
+│ 原对象       │     │ 副本对象     │
+│ ──────────── │     │ ──────────── │
+│ name: "张三" │     │ name: "张三" │ ← 基本类型：值复制
+│ age: 25      │     │ age: 25      │
+│ address ─────┼──┐  │ address ─────┼──┐
+└──────────────┘  │  └──────────────┘  │
+                  ↓                    ↓
+             ┌──────────────┐    ┌──────────────┐
+             │ Address 对象1│    │ Address 对象2│ ← 两个独立对象！
+             │ city: "北京" │    │ city: "北京" │
+             └──────────────┘    └──────────────┘
+```
+
+---
+
+## 五、核心区别
+
+| 特性 | 浅拷贝 | 深拷贝 |
+|------|--------|--------|
+| 基本类型 | 复制值 | 复制值 |
+| 引用类型 | 复制引用（共享） | 创建新对象（独立） |
+| 实现方式 | `Object.clone()` | 序列化/手动复制 |
+| 原对象影响 | 修改引用类型会影响副本 | 完全独立，互不影响 |
+
+---
+
+## 六、特殊情况
+
+### String 类型
+String 是不可变类，浅拷贝和深拷贝效果相同：
+
+```java
+// String 不可变，修改实际上是创建新对象
+String s1 = "hello";
+String s2 = s1;  // 浅拷贝
+s1 = "world";    // s1 指向新对象，s2 不受影响
+```
+
+### 数组拷贝
+
+```java
+// 一维数组（基本类型）- 深拷贝效果
+int[] arr1 = {1, 2, 3};
+int[] arr1Copy = arr1.clone();
+arr1[0] = 100;  // 不影响 arr1Copy
+
+// 二维数组 - 浅拷贝（只复制第一层）
+int[][] arr2 = {{1, 2}, {3, 4}};
+int[][] arr2Copy = arr2.clone();
+arr2[0][0] = 100;  // 会影响 arr2Copy
+```
+
+### 集合拷贝
+
+```java
+// 浅拷贝
+List<Person> list1 = new ArrayList<>();
+list1.add(new Person("张三"));
+List<Person> list1Copy = new ArrayList<>(list1);  // 浅拷贝
+
+// 深拷贝（手动复制每个元素）
+List<Person> list2DeepCopy = new ArrayList<>();
+for (Person p : list1) {
+    list2DeepCopy.add(p.deepCopy());
+}
+```
+
+---
+
+## 七、高频面试题
+
+### Q1: 深拷贝和浅拷贝的区别？
+
+| 维度 | 浅拷贝 | 深拷贝 |
+|------|--------|--------|
+| 基本类型 | 复制值 | 复制值 |
+| 引用类型 | 复制引用 | 创建新对象 |
+| 结果 | 共享引用对象 | 完全独立 |
+
+### Q2: 如何实现深拷贝？
+
+1. **序列化/反序列化**（推荐）- 实现 Serializable
+2. **手动复制** - 构造方法或工具方法
+3. **重写 clone()** 递归拷贝
+4. **第三方库** - Apache Commons Lang SerializationUtils
+
+### Q3: Object.clone() 是深拷贝还是浅拷贝？
+
+默认是**浅拷贝**。需要实现 `Cloneable` 接口（标记接口），重写 `clone()` 方法。
+
+### Q4: String 类型在拷贝时需要注意什么？
+
+String 是不可变类，浅拷贝和深拷贝效果相同。修改 String 实际上是创建新对象，不会影响原对象。
+
+### Q5: 为什么推荐使用序列化实现深拷贝？
+
+优点：
+1. 通用性强：不用针对每个类写拷贝逻辑
+2. 自动处理对象图：递归拷贝所有引用
+3. 代码简洁：只需要实现 Serializable
+
+缺点：
+- 性能较差
+- 需要处理 SerialVersionUID
+
+### Q6: Cloneable 接口有什么作用？
+
+Cloneable 是**标记接口**（没有方法）：
+- 如果类实现了 Cloneable，调用 `clone()` 不会抛异常
+- 如果没有实现，调用 `clone()` 会抛 `CloneNotSupportedException`
+
+### Q7: 实际开发中如何选择拷贝方式？
+
+| 场景 | 推荐方式 |
+|------|----------|
+| 没有引用类型属性 | 浅拷贝足够 |
+| 引用类型是不可变类（如 String） | 浅拷贝足够 |
+| 需要完全独立 | 深拷贝 |
+| 简单对象 | 构造方法手动复制 |
+| 复杂对象图 | 序列化方式 |
+
+---
+
+## 示例代码
+
+完整示例代码请参考：[DeepCopyAndShallowCopyDemo.java](../interview-service/src/main/java/cn/itzixiao/interview/java/DeepCopyAndShallowCopyDemo.java)
