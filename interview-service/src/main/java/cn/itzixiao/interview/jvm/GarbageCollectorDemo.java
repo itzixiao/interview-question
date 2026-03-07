@@ -216,6 +216,9 @@ public class GarbageCollectorDemo {
     private static void demonstrateMemoryLeak() throws InterruptedException {
         System.out.println("【4. 内存泄漏示例】\n");
 
+        // 设置较小的堆内存，快速触发 OOM
+        // java -Xmx100m -Xms100m -XX:+PrintGC -XX:+PrintGCDetails -cp interview-service/target/classes cn.itzixiao.interview.jvm.GarbageCollectorDemo
+
         System.out.println("常见内存泄漏场景：");
         System.out.println("1. 静态集合类持有对象引用");
         System.out.println("2. 未关闭的资源（连接、流）");
@@ -225,10 +228,11 @@ public class GarbageCollectorDemo {
 
         // 模拟内存泄漏
         System.out.println("模拟静态集合导致的内存泄漏：");
-        System.out.println("（注意观察内存增长，按 Ctrl+C 停止）\n");
+        System.out.println("（观察内存增长，当内存不足时会抛出 OOM）\n");
 
-        // 注意：实际运行时可以取消下面的注释观察
-        // staticListLeakSimulation();
+        // 放开注释运行内存泄漏模拟
+        // 运行前请设置较小的堆内存：-Xmx50m -Xms50m
+        staticListLeakSimulation();
 
         System.out.println("检测工具：");
         System.out.println("1. jmap -dump:format=b,file=heap.hprof <pid>");
@@ -248,11 +252,63 @@ public class GarbageCollectorDemo {
     private static final List<byte[]> STATIC_LIST = new ArrayList<>();
 
     private static void staticListLeakSimulation() throws InterruptedException {
-        for (int i = 0; i < 1000; i++) {
-            // 不断向静态集合添加大对象
-            STATIC_LIST.add(new byte[1024 * 1024]); // 1MB
-            System.out.println("添加第 " + (i + 1) + " 个对象，列表大小: " + STATIC_LIST.size() + " MB");
-            Thread.sleep(100);
+        System.out.println("========== 内存泄漏模拟开始 ==========");
+        System.out.println("运行参数建议：-Xmx100m -Xms100m -XX:+PrintGC -XX:+PrintGCDetails");
+        System.out.println("监控方式：");
+        System.out.println("  1. jvisualvm 或 jconsole 连接进程查看内存曲线");
+        System.out.println("  2. jstat -gcutil <pid> 1000 实时查看 GC 情况");
+        System.out.println("  3. 观察 GC 日志，Full GC 频率增加但内存无法回收");
+        System.out.println("  4. 按 Ctrl+C 可提前终止程序");
+        System.out.println("========================================\n");
+
+        // 等待用户连接 jconsole
+        System.out.println("等待 30 秒，请用 jconsole 连接此进程...");
+        System.out.println("连接后可以点击 \"内存\" 标签页观察堆内存曲线\n");
+        for (int i = 30; i > 0; i--) {
+            System.out.print("\r倒计时: " + i + " 秒...");
+            Thread.sleep(1000);
+        }
+        System.out.println("\r\n开始内存泄漏模拟！\n");
+
+        Runtime runtime = Runtime.getRuntime();
+        
+        try {
+            // 持续添加对象，直到 OOM 或手动停止
+            int count = 0;
+            while (true) {
+                // 每次添加 256KB，让程序运行更长时间便于观察
+                STATIC_LIST.add(new byte[256 * 1024]);
+                count++;
+                
+                // 每 50 个对象（约 12.5MB）打印一次内存状态
+                if (count % 50 == 0) {
+                    long maxMemory = runtime.maxMemory() / 1024 / 1024;
+                    long totalMemory = runtime.totalMemory() / 1024 / 1024;
+                    long freeMemory = runtime.freeMemory() / 1024 / 1024;
+                    long usedMemory = totalMemory - freeMemory;
+                    long listSizeMB = STATIC_LIST.size() * 256 / 1024;
+                    
+                    System.out.printf("[%04d] 列表大小: %d MB | 已用: %d MB | 空闲: %d MB | 最大: %d MB%n",
+                            count, listSizeMB, usedMemory, freeMemory, maxMemory);
+                }
+                
+                // 每 10 个对象暂停一下，控制速度
+                if (count % 10 == 0) {
+                    Thread.sleep(200);
+                }
+            }
+        } catch (OutOfMemoryError e) {
+            System.out.println("\n========== OOM 发生！==========");
+            System.out.println("原因：静态集合持有对象引用，GC 无法回收");
+            System.out.println("最终列表大小: " + STATIC_LIST.size() * 256 / 1024 + " MB");
+            System.out.println("解决方案：");
+            System.out.println("  1. 避免静态集合长期持有对象");
+            System.out.println("  2. 使用 WeakHashMap 或软引用");
+            System.out.println("  3. 定期清理不需要的数据");
+            System.out.println("================================");
+            
+            // OOM 后暂停 5 秒，方便查看结果
+            Thread.sleep(5000);
         }
     }
 }
