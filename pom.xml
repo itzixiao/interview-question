@@ -18,6 +18,7 @@
         <module>interview-gateway</module>
         <module>interview-service</module>
         <module>interview-provider</module>
+        <module>interview-algorithm</module>
     </modules>
 
     <properties>
