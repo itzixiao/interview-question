@@ -1,0 +1,17 @@
+# 开发环境配置
+
+# 服务端口（与 interview-service 8081 区分）
+server:
+  port: 8082
+
+# Nacos 配置
+spring:
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+      config:
+        server-addr: localhost:8848
+        file-extension: yml
+        namespace: dev
+        group: DEFAULT_GROUP

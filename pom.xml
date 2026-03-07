@@ -17,6 +17,7 @@
         <module>interview-common</module>
         <module>interview-gateway</module>
         <module>interview-service</module>
+        <module>interview-provider</module>
     </modules>
 
     <properties>
