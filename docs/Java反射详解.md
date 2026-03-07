@@ -1,0 +1,337 @@
+# Java 反射机制详解
+
+## 一、什么是反射？
+
+**反射**是 Java 在运行时动态获取类信息并操作类的能力。
+
+**核心能力**：
+- 运行时获取任意类的属性和方法
+- 运行时创建对象实例
+- 运行时调用对象方法
+- 运行时修改对象属性
+
+## 二、反射的核心类
+
+| 类 | 说明 |
+|---|---|
+| java.lang.Class | 类的元数据（反射入口） |
+| java.lang.reflect.Constructor | 构造器 |
+| java.lang.reflect.Method | 方法 |
+| java.lang.reflect.Field | 字段 |
+| java.lang.reflect.Modifier | 修饰符 |
+| java.lang.annotation.Annotation | 注解 |
+
+## 三、获取 Class 对象
+
+```java
+// 方式1：类名.class（编译期确定）
+Class<String> clazz1 = String.class;
+
+// 方式2：对象.getClass()（运行时获取）
+Class<?> clazz2 = "Hello".getClass();
+
+// 方式3：Class.forName()（动态加载）
+Class<?> clazz3 = Class.forName("java.lang.String");
+
+// 三种方式获取的是同一个 Class 对象
+System.out.println(clazz1 == clazz2);  // true
+System.out.println(clazz2 == clazz3);  // true
+```
+
+**基本类型的 Class**：
+```java
+int.class == Integer.TYPE;  // true
+int.class == Integer.class; // false（包装类不同）
+```
+
+## 四、构造器反射
+
+```java
+Class<Person> clazz = Person.class;
+
+// 获取所有构造器
+Constructor<?>[] constructors = clazz.getDeclaredConstructors();
+
+// 获取指定构造器
+Constructor<Person> constructor = clazz.getDeclaredConstructor(String.class, int.class);
+
+// 创建对象
+Person person = constructor.newInstance("张三", 25);
+
+// 访问私有构造器
+constructor.setAccessible(true);
+```
+
+## 五、方法反射
+
+```java
+Class<Person> clazz = Person.class;
+Person person = new Person("李四", 30);
+
+// 获取所有方法
+Method[] methods = clazz.getDeclaredMethods();
+
+// 获取指定方法
+Method method = clazz.getDeclaredMethod("setName", String.class);
+
+// 调用方法
+method.invoke(person, "王五");
+
+// 访问私有方法
+method.setAccessible(true);
+
+// 调用静态方法
+method.invoke(null, args);
+```
+
+## 六、字段反射
+
+```java
+Class<Person> clazz = Person.class;
+Person person = new Person("赵六", 40);
+
+// 获取所有字段
+Field[] fields = clazz.getDeclaredFields();
+
+// 获取指定字段
+Field field = clazz.getDeclaredField("name");
+
+// 读取字段值
+field.setAccessible(true);
+String name = (String) field.get(person);
+
+// 修改字段值
+field.set(person, "修改后的名字");
+
+// 修改静态字段
+field.set(null, value);
+```
+
+## 七、注解反射
+
+```java
+// 获取类上的注解
+MyAnnotation annotation = clazz.getAnnotation(MyAnnotation.class);
+
+// 获取方法上的注解
+Method method = clazz.getMethod("methodName");
+MyAnnotation methodAnno = method.getAnnotation(MyAnnotation.class);
+
+// 判断是否有指定注解
+boolean hasAnnotation = clazz.isAnnotationPresent(MyAnnotation.class);
+```
+
+## 八、动态代理
+
+```java
+Object proxy = Proxy.newProxyInstance(
+    target.getClass().getClassLoader(),
+    target.getClass().getInterfaces(),
+    (proxyObj, method, args) -> {
+        System.out.println("前置处理");
+        Object result = method.invoke(target, args);
+        System.out.println("后置处理");
+        return result;
+    }
+);
+```
+
+## 九、反射性能
+
+| 调用方式 | 相对性能 |
+|----------|----------|
+| 直接调用 | 1x |
+| 反射调用 | 10-20x |
+| 反射调用（setAccessible）| 5-10x |
+
+**性能优化方案**：
+1. 使用 `setAccessible(true)` 关闭安全检查
+2. 缓存 Method/Field 对象
+3. 使用 MethodHandle（Java 7+）
+4. 使用 LambdaMetafactory（Java 8+）
+
+## 十、反射的应用场景
+
+1. **框架开发**：Spring IOC、MyBatis ORM
+2. **动态代理**：AOP、RPC 远程调用
+3. **注解处理**：@Autowired、@RequestMapping
+4. **序列化/反序列化**：JSON、XML
+5. **IDE 功能**：代码提示、自动补全
+6. **单元测试**：Mock 框架
+
+---
+
+## 高频面试题
+
+### Q1：获取 Class 对象有哪几种方式？区别是什么？
+
+**三种方式**：
+| 方式 | 特点 | 适用场景 |
+|------|------|----------|
+| 类名.class | 编译期确定，不触发初始化 | 传递参数 |
+| 对象.getClass() | 需要对象实例 | 运行时判断类型 |
+| Class.forName() | 动态加载，会初始化类 | JDBC 加载驱动 |
+
+### Q2：getMethods() 与 getDeclaredMethods() 的区别？
+
+| 方法 | 范围 | 包含父类 |
+|------|------|----------|
+| getMethods() | public | ✔ |
+| getDeclaredMethods() | 所有修饰符 | ✖ |
+
+**同样适用于**：
+- getFields() vs getDeclaredFields()
+- getConstructors() vs getDeclaredConstructors()
+
+### Q3：反射的优缺点？
+
+**优点**：
+- 灵活性高：运行时动态加载类、创建对象、调用方法
+- 解耦：不需要编译时依赖具体类
+- 框架基础：Spring IOC、MyBatis ORM 的核心实现
+- 动态代理：AOP、RPC 的基础
+
+**缺点**：
+- 性能开销：比直接调用慢 10-20 倍
+- 安全性问题：可访问私有成员，破坏封装性
+- 类型安全：绕过编译检查，运行时才发现错误
+- 代码可读性差：代码冗长，难以维护
+
+### Q4：反射能调用私有方法吗？怎么调用？
+
+**可以**，通过 setAccessible(true) 关闭安全检查：
+```java
+Method privateMethod = clazz.getDeclaredMethod("privateMethod");
+privateMethod.setAccessible(true);  // 关键！
+privateMethod.invoke(person);
+```
+
+**注意事项**：
+- 必须使用 getDeclaredMethod()，不是 getMethod()
+- 必须调用 setAccessible(true)
+- Java 9+ 模块系统可能限制访问
+
+### Q5：如何提高反射性能？
+
+1. **setAccessible(true)**：关闭安全检查，提升 2-4 倍
+2. **缓存 Method/Field**：避免重复获取
+3. **MethodHandle**（Java 7+）：接近直接调用性能
+4. **LambdaMetafactory**（Java 8+）：最快方案
+
+```java
+// 不推荐：每次都获取 Method
+for (int i = 0; i < 1000; i++) {
+    Method m = clazz.getMethod("getName");
+    m.invoke(obj);
+}
+
+// 推荐：缓存 Method
+Method m = clazz.getMethod("getName");
+m.setAccessible(true);
+for (int i = 0; i < 1000; i++) {
+    m.invoke(obj);
+}
+```
+
+### Q6：Class.forName() 和 ClassLoader.loadClass() 的区别？
+
+| 方式 | 是否初始化 | 用途 |
+|------|-----------|------|
+| Class.forName(name) | ✔ | JDBC 加载驱动 |
+| Class.forName(name, false, loader) | ✖ | 延迟初始化 |
+| ClassLoader.loadClass() | ✖ | Spring 懒加载 |
+
+```java
+// JDBC 加载驱动 - 需要执行 static 块注册驱动
+Class.forName("com.mysql.cj.jdbc.Driver");
+
+// Spring 懒加载 - 不需要立即初始化
+classLoader.loadClass("com.example.MyBean");
+```
+
+### Q7：反射能破坏单例模式吗？如何防御？
+
+**可以破坏**：
+```java
+Constructor<Singleton> constructor = Singleton.class.getDeclaredConstructor();
+constructor.setAccessible(true);
+Singleton instance = constructor.newInstance(); // 新建实例！
+```
+
+**防御方案**：
+1. **枚举单例**（推荐）：JVM 保证唯一，反射无法创建
+2. **构造器检查**：第二次调用时抛异常
+3. **SecurityManager**：限制反射访问
+
+```java
+// 枚举单例 - 最佳方案
+public enum EnumSingleton {
+    INSTANCE;
+    public void doSomething() { ... }
+}
+```
+
+### Q8：反射在 Spring 中有哪些应用？
+
+1. **IOC 容器**：Bean 的创建和依赖注入
+   - 通过反射创建 Bean 实例
+   - 通过反射注入属性（@Autowired）
+
+2. **AOP**：动态代理实现
+   - JDK 动态代理（接口）
+   - CGLIB 动态代理（类）
+
+3. **注解处理**：解析各种注解
+   - @RequestMapping 路由映射
+   - @Value 配置注入
+   - @Transactional 事务管理
+
+4. **数据绑定**：请求参数绑定到对象
+   - @RequestBody JSON 转对象
+   - @PathVariable 路径参数
+
+### Q9：泛型擦除与反射的关系？
+
+Java 泛型在编译后会被擦除，但反射可以：
+- 绕过泛型检查
+- 获取泛型参数类型（通过 ParameterizedType）
+
+```java
+// 绕过泛型检查
+List<String> list = new ArrayList<>();
+Method addMethod = ArrayList.class.getMethod("add", Object.class);
+addMethod.invoke(list, 123);  // 添加 Integer！
+
+// 获取泛型参数类型
+Field field = MyClass.class.getDeclaredField("list");
+Type genericType = field.getGenericType();
+if (genericType instanceof ParameterizedType) {
+    Type[] typeArgs = ((ParameterizedType) genericType).getActualTypeArguments();
+    // typeArgs[0] 就是泛型参数类型
+}
+```
+
+### Q10：反射能修改 final 字段吗？
+
+**可以**，但有限制：
+- 基本类型和 String 的 final 字段可能被编译器内联优化
+- 修改后通过反射能看到新值，但直接访问可能还是旧值
+
+```java
+Field field = MyClass.class.getDeclaredField("finalField");
+field.setAccessible(true);
+field.set(obj, "新值");
+System.out.println(field.get(obj));  // "新值"
+System.out.println(obj.finalField);  // 可能是旧值（编译器内联）
+```
+
+---
+
+## 最佳实践
+
+1. **优先直接调用**：除非必要，否则不用反射
+2. **缓存反射对象**：Method、Field、Constructor 复用
+3. **使用 setAccessible(true)**：提升性能
+4. **处理异常**：反射异常较多，做好处理
+5. **注意安全性**：反射可访问私有成员，谨慎使用
+6. **Java 9+ 模块系统**：注意 --add-opens 参数
