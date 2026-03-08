@@ -1,0 +1,22 @@
+name: Sync Gitee Wiki
+on:
+  push:
+    branches: [main]
+    paths: ['README.md', 'docs/**/*.md']
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Strip .md suffix from links
+        uses: impresscms-dev/strip-markdown-extensions-from-links-action@v2
+        with:
+          path: ./
+      - name: Sync to Gitee Wiki
+        uses: wearerequired/git-mirror-action@master
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.GITEE_RSA_PRIVATE_KEY }}
+        with:
+          source-repo: git@github.com:itzixiao/interview-question.git
+          destination-repo: git@gitee.com:itzixiao/interview-question.wiki.git
