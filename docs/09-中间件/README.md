@@ -1,4 +1,4 @@
-﻿# 中间件知识点详解
+# 中间件知识点详解
 
 ## 📚 文档列表
 
@@ -22,18 +22,18 @@
 - **面试题：** 15+ 道
 - **重要程度：** ⭐⭐⭐⭐⭐
 
-#### 5. [05-Sentinel限流熔断详解.md](./05-Sentinel%E9%99%90%E6%B5%81%E7%86%94%E6%96%AD%E8%AF%A6%E8%A7%A3.md)
-- **内容：** 流量控制、熔断降级、系统自适应保护
-- **面试题：** 10+ 道
-- **重要程度：** ⭐⭐⭐⭐
+#### 6. [06-RPC核心原理与实战指南.md](./06-RPC核心原理与实战指南.md)
+- **内容：** RPC 架构、序列化协议、通信协议、负载均衡、容错机制
+- **面试题：** 8+ 道
+- **重要程度：** ⭐⭐⭐⭐⭐
 
 ---
 
 ## 📊 统计信息
 
-- **文档数：** 5 个
-- **面试题总数：** 51+ 道
-- **代码示例：** 配套 Java 代码在 `interview-service/mybatis/` 等目录（~2,000 行代码）
+- **文档数：** 6 个
+- **面试题总数：** 59+ 道
+- **代码示例：** 配套 Java 代码在 `interview-service/rpc/` 等目录（~2,500 行代码）
 
 ---
 
@@ -74,6 +74,22 @@
    - 异常比例、慢调用比例
    - 半开状态恢复
 
+### RPC（2-3 天）
+1. **核心原理**
+   - RPC 架构组成
+   - 动态代理机制
+   - 序列化/反序列化
+
+2. **通信协议**
+   - HTTP vs TCP
+   - 自定义协议设计
+   - 网络通信模型
+
+3. **服务治理**
+   - 服务注册与发现
+   - 负载均衡策略
+   - 容错机制
+
 ---
 
 ## 🔗 跨模块关联
@@ -88,11 +104,12 @@
 
 ### 知识点对应
 | 中间件 | 应用场景 |
-|--------|---------|
+|--------|---------||
 | MyBatis | ORM 映射、动态 SQL |
 | Nacos | 微服务注册发现、配置管理 |
 | Sentinel | 高并发限流、熔断降级 |
 | MyBatis-Plus | 快速开发、通用 CRUD |
+| **RPC** | **微服务远程调用、高性能通信** |
 
 ---
 
@@ -113,6 +130,11 @@
 13. **MyBatis 的分页插件原理？**
 14. **Nacos 支持哪些配置格式？**
 15. **Sentinel 的规则如何持久化？**
+16. **什么是 RPC？它的核心优势是什么？**
+17. **RPC 的完整工作流程是什么？**
+18. **RPC 框架需要解决哪些核心问题？**
+19. **JDK动态代理在 RPC 中是如何应用的？**
+20. **RPC 中的序列化协议有哪些？如何选择？**
 
 ---
 
@@ -147,6 +169,39 @@ public User handleBlock(Long id, BlockException ex) {
 }
 ```
 
+### RPC 动态代理示例
+```java
+public class RpcProxy {
+    @SuppressWarnings("unchecked")
+    public static <T> T createProxy(Class<T> interfaceClass, 
+                                     String host, int port) {
+        return (T) Proxy.newProxyInstance(
+            interfaceClass.getClassLoader(),
+            new Class<?>[]{interfaceClass},
+            (proxy, method, args) -> {
+                // 1. 封装 RPC 请求
+                RpcRequest request = new RpcRequest();
+                request.setMethodName(method.getName());
+                request.setParameterTypes(method.getParameterTypes());
+                request.setParameters(args);
+                
+                // 2. 发送请求到服务器
+                Socket socket = new Socket(host, port);
+                ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
+                output.writeObject(request);
+                
+                // 3. 接收服务器响应
+                ObjectInputStream input = new ObjectInputStream(socket.getInputStream());
+                RpcResponse response = (RpcResponse) input.readObject();
+                
+                socket.close();
+                return response.getResult();
+            }
+        );
+    }
+}
+```
+
 ---
 
 ## 📖 推荐学习顺序
@@ -166,12 +221,20 @@ Nacos 配置中心
    ↓
 Sentinel 限流
    ↓
+RPC 原理
+   ↓
 综合实战
 ```
 
 ---
 
 ## 📈 更新日志
+
+### v2.1 - 2026-03-08
+- ✅ 新增《RPC核心原理与实战指南》文档（8 道面试题）
+- ✅ 更新文档统计信息
+- ✅ 补充 RPC 原理、序列化协议、负载均衡等知识点
+- ✅ 添加 RPC 动态代理示例代码
 
 ### v2.0 - 2026-03-08
 - ✅ 新增跨模块关联章节
