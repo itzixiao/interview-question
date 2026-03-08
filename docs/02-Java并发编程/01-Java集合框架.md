@@ -103,7 +103,7 @@ private static class Node<E> {
 
 ### HashMap
 
-详见 [HashMap 源码分析](./HashMap源码分析.md)
+详见 [HashMap 源码分析](../10-%E7%AE%97%E6%B3%95%E4%B8%8E%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/01-HashMap%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90.md)
 
 ### LinkedHashMap
 
@@ -129,7 +129,7 @@ new LinkedHashMap<K, V>(16, 0.75f, true) {
 
 ### ConcurrentHashMap
 
-详见 [ConcurrentHashMap 详解](./ConcurrentHashMap详解.md)
+详见 [ConcurrentHashMap 详解](02-ConcurrentHashMap%E8%AF%A6%E8%A7%A3.md)
 
 ## Queue 实现
 
