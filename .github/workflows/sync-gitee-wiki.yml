@@ -1,22 +1,45 @@
 name: Sync Gitee Wiki
 on:
   push:
-    branches: [main]
+    branches: [master]
     paths: ['README.md', 'docs/**/*.md']
+  workflow_dispatch:
+
 jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      - name: Strip .md suffix from links
-        uses: impresscms-dev/strip-markdown-extensions-from-links-action@v2
-        with:
-          path: ./
-      - name: Sync to Gitee Wiki
-        uses: wearerequired/git-mirror-action@master
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.GITEE_RSA_PRIVATE_KEY }}
-        with:
-          source-repo: git@github.com:itzixiao/interview-question.git
-          destination-repo: git@gitee.com:itzixiao/interview-question.wiki.git
+
+      - name: Prepare SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.GITEE_RSA_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan gitee.com >> ~/.ssh/known_hosts
+
+      - name: Set Git config
+        run: |
+          git config --global user.name "GitHub Action"
+          git config --global user.email "action@github.com"
+          git config --global --add safe.directory /github/workspace
+
+      - name: Prepare Wiki files
+        run: |
+          mkdir -p wiki
+          cp --parents README.md wiki/
+          find docs -name "*.md" -exec cp --parents {} wiki/ \;
+          # 简化替换逻辑：直接删除所有 ) 前的 .md（兼容所有sed版本）
+          find wiki -name "*.md" -exec sed -i 's/\.md)/)/g' {} +
+          # 额外处理链接末尾的 .md（比如 [xxx](./path.md) 这种）
+          find wiki -name "*.md" -exec sed -i 's/\.md]/]/g' {} +
+
+      - name: Push to Gitee Wiki
+        run: |
+          cd wiki
+          git init
+          git add .
+          git commit -m "Sync from GitHub: $(date +'%Y-%m-%d %H:%M:%S')"
+          git remote add origin git@gitee.com:itzixiao/interview-question.wiki.git
+          git push -f origin master
