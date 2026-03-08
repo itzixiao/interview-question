@@ -42,6 +42,9 @@ public class ThreadPoolDemo {
 
         // 5. 并发工具类
         demonstrateConcurrentTools();
+
+        // 6. ThreadLocal 详解
+        demonstrateThreadLocal();
     }
 
     /**
@@ -213,7 +216,7 @@ public class ThreadPoolDemo {
     }
 
     /**
-     * 5. 并发工具类
+     * 5. 常用并发工具类
      */
     private static void demonstrateConcurrentTools() throws Exception {
         System.out.println("【5. 常用并发工具类】\n");
@@ -329,19 +332,220 @@ public class ThreadPoolDemo {
         });
 
         CompletableFuture<String> combined = task1.thenCombine(task2, (r1, r2) -> r1 + " + " + r2);
-        System.out.println("   组合结果: " + combined.get() + "\n");
+        System.out.println("   组合结果：" + combined.get() + "\n");
     }
-
+    
+    /**
+     * 6. ThreadLocal 详解
+     */
+    private static void demonstrateThreadLocal() {
+        System.out.println("【6. ThreadLocal - 线程本地变量】\n");
+    
+        System.out.println("核心概念：");
+        System.out.println("┌─────────────────────────────────────────────────────────────────┐");
+        System.out.println("│  ThreadLocal 为每个线程提供独立的变量副本                       │");
+        System.out.println("│                                                                 │");
+        System.out.println("│  特点：                                                         │");
+        System.out.println("│  1. 线程隔离：每个线程访问的都是自己线程内的变量               │");
+        System.out.println("│  2. 资源复用：避免参数重复传递                                 │");
+        System.out.println("│  3. 线程安全：无需同步，天然线程安全                           │");
+        System.out.println("│                                                                 │");
+        System.out.println("│  应用场景：                                                     │");
+        System.out.println("│  - 数据库连接管理                                              │");
+        System.out.println("│  - Session 管理                                                   │");
+        System.out.println("│  - 用户上下文信息传递（如 userId、token）                      │");
+        System.out.println("│  - SimpleDateFormat 线程安全包装                                │");
+        System.out.println("└─────────────────────────────────────────────────────────────────┘\n");
+    
+        // 示例 1：基本使用
+        System.out.println("示例 1：ThreadLocal 基本使用");
+        System.out.println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+    
+        ThreadLocal<String> threadLocal = new ThreadLocal<>();
+    
+        Thread thread1 = new Thread(() -> {
+            threadLocal.set("线程 1 的数据");
+            System.out.println("  线程 1 设置值：" + threadLocal.get());
+            try { Thread.sleep(100); } catch (InterruptedException e) {}
+            System.out.println("  线程 1 再次获取：" + threadLocal.get());
+            threadLocal.remove(); // 清理内存
+        });
+    
+        Thread thread2 = new Thread(() -> {
+            threadLocal.set("线程 2 的数据");
+            System.out.println("  线程 2 设置值：" + threadLocal.get());
+            try { Thread.sleep(100); } catch (InterruptedException e) {}
+            System.out.println("  线程 2 再次获取：" + threadLocal.get());
+            threadLocal.remove(); // 清理内存
+        });
+    
+        thread1.start();
+        thread2.start();
+        try {
+            thread1.join();
+            thread2.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        System.out.println();
+    
+        // 示例 2：ThreadLocal 内存泄漏问题
+        System.out.println("示例 2：ThreadLocal 内存泄漏与解决方案");
+        System.out.println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+        System.out.println("⚠️  内存泄漏原因：");
+        System.out.println("   ThreadLocalMap 的 Key 是弱引用，Value 是强引用");
+        System.out.println("   如果 ThreadLocal 对象被回收，但 Value 不会被回收");
+        System.out.println("   导致内存泄漏\n");
+    
+        System.out.println("✅ 解决方案：使用完必须调用 remove() 方法");
+        System.out.println("   threadLocal.set(value);\n");
+        System.out.println("   try {");
+        System.out.println("       // 业务逻辑");
+        System.out.println("   } finally {");
+        System.out.println("       threadLocal.remove();  // 必须清理！");
+        System.out.println("   }\n");
+    
+        // 示例 3：实际应用 - 用户上下文传递
+        System.out.println("示例 3：实际应用场景 - 用户上下文信息传递");
+        System.out.println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+    
+        UserContext userContext = new UserContext();
+    
+        // 模拟 Web 请求
+        Thread requestThread = new Thread(() -> {
+            try {
+                // Controller 层：设置用户信息
+                userContext.setUserId(1001L);
+                userContext.setUsername("张三");
+                System.out.println("  [Controller] 设置用户信息：userId=" + userContext.getUserId());
+    
+                // Service 层：无需传参，直接获取
+                orderService();
+    
+                // Dao 层：也无需传参
+                userDao();
+    
+            } finally {
+                // 请求结束，清理上下文
+                userContext.clear();
+                System.out.println("  [Filter] 清理用户上下文\n");
+            }
+        });
+    
+        requestThread.start();
+        try {
+            requestThread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    
+        // 示例 4：InheritableThreadLocal - 父子线程传递
+        System.out.println("示例 4：InheritableThreadLocal - 父子线程数据传递");
+        System.out.println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+        System.out.println("InheritableThreadLocal 允许子线程继承父线程的值\n");
+    
+        InheritableThreadLocal<String> inheritableThreadLocal = new InheritableThreadLocal<>();
+    
+        Thread parentThread = new Thread(() -> {
+            inheritableThreadLocal.set("父线程的数据");
+            System.out.println("  父线程设置值：" + inheritableThreadLocal.get());
+    
+            // 创建子线程
+            Thread childThread = new Thread(() -> {
+                System.out.println("  子线程获取值：" + inheritableThreadLocal.get());
+                System.out.println("  ✅ 子线程成功继承了父线程的值！\n");
+            });
+    
+            childThread.start();
+            try {
+                childThread.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
+    
+        parentThread.start();
+        try {
+            parentThread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    
+        // 示例 5：ThreadLocal 高频面试题
+        System.out.println("\n【ThreadLocal 高频面试题】");
+        System.out.println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+        System.out.println("Q1: ThreadLocal 的原理是什么？");
+        System.out.println("A1: 每个 Thread 内部维护了 ThreadLocalMap，Key 是 ThreadLocal 对象本身，");
+        System.out.println("    Value 是线程本地变量。通过 get()/set() 方法操作当前线程的 Map 条目。\n");
+    
+        System.out.println("Q2: ThreadLocal 会导致内存泄漏吗？如何避免？");
+        System.out.println("A2: 会。因为 ThreadLocalMap 的 Key 是弱引用，Value 是强引用。");
+        System.out.println("    解决：使用完必须调用 remove() 方法，建议在 finally 块中清理。\n");
+    
+        System.out.println("Q3: InheritableThreadLocal 有什么坑？");
+        System.out.println("A3: 使用线程池时，子线程会复用，导致继承的值不更新。");
+        System.out.println("    解决：使用 Alibaba TransmittableThreadLocal 或手动管理。\n");
+    
+        System.out.println("Q4: ThreadLocal 适用场景？");
+        System.out.println("A4: - 线程隔离的数据存储（如用户上下文、数据库连接）");
+        System.out.println("    - 避免参数在多层调用中重复传递");
+        System.out.println("    - 线程安全的 SimpleDateFormatter 封装\n");
+    }
+    
     // ==================== 辅助类 ====================
-
+    
     static class CustomThreadFactory implements ThreadFactory {
         private int count = 0;
-
+    
         @Override
         public Thread newThread(Runnable r) {
             Thread thread = new Thread(r, "CustomPool-Thread-" + (++count));
-            System.out.println("  创建线程: " + thread.getName());
+            System.out.println("  创建线程：" + thread.getName());
             return thread;
         }
+    }
+    
+    /**
+     * 用户上下文工具类（实际项目中的典型应用）
+     */
+    static class UserContext {
+        private static ThreadLocal<Long> userId = new ThreadLocal<>();
+        private static ThreadLocal<String> username = new ThreadLocal<>();
+    
+        public static void setUserId(Long id) {
+            userId.set(id);
+        }
+    
+        public static Long getUserId() {
+            return userId.get();
+        }
+    
+        public static void setUsername(String name) {
+            username.set(name);
+        }
+    
+        public static String getUsername() {
+            return username.get();
+        }
+    
+        public static void clear() {
+            userId.remove();
+            username.remove();
+        }
+    }
+    
+    /**
+     * 模拟 Service 层调用
+     */
+    private static void orderService() {
+        System.out.println("  [Service] 处理订单，当前用户：userId=" + UserContext.getUserId() 
+                          + ", username=" + UserContext.getUsername());
+    }
+    
+    /**
+     * 模拟 Dao 层调用
+     */
+    private static void userDao() {
+        System.out.println("  [Dao] 查询用户数据，当前用户：userId=" + UserContext.getUserId());
     }
 }
