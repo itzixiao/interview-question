@@ -462,14 +462,14 @@ map.computeIfAbsent(k, key -> createValue(key));
 
 ## 九、高频面试题
 
-### Q1: ConcurrentHashMap 如何保证线程安全？
+**问题 1:ConcurrentHashMap 如何保证线程安全？**
 
 **答案**：
 - JDK 7: 分段锁（Segment），每个 Segment 继承 ReentrantLock
 - JDK 8: CAS + synchronized，锁住链表/红黑树头节点
 - 优势：锁粒度更细，并发度更高
 
-### Q2: JDK7 和 JDK8 的 ConcurrentHashMap 有什么区别？
+**问题 2:JDK7 和 JDK8 的 ConcurrentHashMap 有什么区别？**
 
 **答案**：
 
@@ -480,7 +480,7 @@ map.computeIfAbsent(k, key -> createValue(key));
 | Segment 继承 ReentrantLock | 使用 CAS + synchronized |
 | 并发度固定 | 支持动态扩容 |
 
-### Q3: ConcurrentHashMap 的迭代器有什么特点？
+**问题 3:ConcurrentHashMap 的迭代器有什么特点？**
 
 **答案**：
 弱一致性（Weakly Consistent）：
@@ -488,7 +488,7 @@ map.computeIfAbsent(k, key -> createValue(key));
 - 可能反映迭代期间的修改，也可能不反映
 - 不会导致死循环或数据不一致
 
-### Q4: ConcurrentHashMap 如何保证扩容线程安全？
+**问题 4:ConcurrentHashMap 如何保证扩容线程安全？**
 
 **答案**：
 JDK 8 多线程协同扩容：
@@ -497,7 +497,7 @@ JDK 8 多线程协同扩容：
 3. 其他线程遇到 ForwardingNode 会协助扩容
 4. 扩容期间读写操作正常进行
 
-### Q5: ConcurrentHashMap 的 size() 如何实现？
+**问题 5:ConcurrentHashMap 的 size() 如何实现？**
 
 **答案**：
 JDK 8 使用 LongAdder 思想：
@@ -507,7 +507,7 @@ JDK 8 使用 LongAdder 思想：
 
 特点：高并发下性能好，但结果不是强一致的。
 
-### Q6: 为什么 JDK8 用 synchronized 替代 ReentrantLock？
+**问题 6：为什么 JDK8 用 synchronized 替代 ReentrantLock？**
 
 **答案**：
 1. synchronized 在 JDK6 后优化很好（偏向锁、轻量级锁）

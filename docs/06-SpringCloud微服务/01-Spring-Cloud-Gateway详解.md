@@ -379,7 +379,7 @@ spring:
 
 ## 十、高频面试题
 
-### Q1：Spring Cloud Gateway 的核心组件有哪些？
+**问题 1：Spring Cloud Gateway 的核心组件有哪些？**
 
 **答案**：
 - **Route（路由）**：由 ID、URI、断言、过滤器组成
@@ -390,7 +390,7 @@ spring:
 
 ---
 
-### Q2：Gateway 和 Zuul 的区别？
+**问题 2:Gateway 和 Zuul 的区别？**
 
 **答案**：
 - Gateway 基于 WebFlux，异步非阻塞，性能更高
@@ -400,7 +400,7 @@ spring:
 
 ---
 
-### Q3：过滤器的执行顺序？
+**问题 3：过滤器的执行顺序？**
 
 **答案**：
 - 实现 `Ordered` 接口，`getOrder()` 返回优先级
@@ -410,7 +410,7 @@ spring:
 
 ---
 
-### Q4：GlobalFilter 和 GatewayFilter 的区别？
+**问题 4:GlobalFilter 和 GatewayFilter 的区别？**
 
 **答案**：
 
@@ -421,7 +421,7 @@ spring:
 
 ---
 
-### Q5：Gateway 如何实现限流？
+**问题 5：Gateway 如何实现限流？**
 
 **答案**：
 使用 `RequestRateLimiter` 过滤器 + Redis：
@@ -432,7 +432,7 @@ spring:
 
 ---
 
-### Q6：Gateway 如何实现熔断降级？
+**问题 6:Gateway 如何实现熔断降级？**
 
 **答案**：
 集成 Resilience4j 或 Sentinel：
@@ -442,7 +442,7 @@ spring:
 
 ---
 
-### Q7：如何实现动态路由？
+**问题 7：如何实现动态路由？**
 
 **答案**：
 1. **服务发现**：`discovery.locator.enabled=true`
@@ -451,7 +451,7 @@ spring:
 
 ---
 
-### Q8：Gateway 为什么基于 WebFlux？
+**问题 8:Gateway 为什么基于 WebFlux？**
 
 **答案**：
 - **异步非阻塞**：少量线程处理大量请求
@@ -461,7 +461,7 @@ spring:
 
 ---
 
-### Q9：如何传递用户信息到下游服务？
+**问题 9：如何传递用户信息到下游服务？**
 
 **答案**：
 在 GlobalFilter 中修改请求头：
@@ -477,7 +477,7 @@ return chain.filter(exchange.mutate().request(request).build());
 
 ---
 
-### Q10：如何处理跨域（CORS）？
+**问题 10：如何处理跨域（CORS）？**
 
 **答案**：
 配置 `globalcors`：

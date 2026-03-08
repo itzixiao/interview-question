@@ -428,7 +428,7 @@ feign:
 
 ## 七、高频面试题
 
-### 面试题 1：OpenFeign 的核心原理是什么？
+**问题 1：OpenFeign 的核心原理是什么？**
 
 **参考答案：**
 
@@ -454,7 +454,7 @@ OpenFeign 基于 **JDK 动态代理**实现：
 
 ---
 
-### 面试题 2：OpenFeign 与 RestTemplate 有什么区别？
+**问题 2:OpenFeign 与 RestTemplate 有什么区别？**
 
 **参考答案：**
 
@@ -472,7 +472,7 @@ OpenFeign 基于 **JDK 动态代理**实现：
 
 ---
 
-### 面试题 3：OpenFeign 如何实现负载均衡？
+**问题 3:OpenFeign 如何实现负载均衡？**
 
 **参考答案：**
 
@@ -496,7 +496,7 @@ OpenFeign 通过 **Spring Cloud LoadBalancer** 实现负载均衡：
 
 ---
 
-### 面试题 4：OpenFeign 的超时时间如何配置？优先级是怎样的？
+**问题 4:OpenFeign 的超时时间如何配置？优先级是怎样的？**
 
 **参考答案：**
 
@@ -521,7 +521,7 @@ feign:
 
 ---
 
-### 面试题 5：OpenFeign 如何实现熔断降级？fallback 和 fallbackFactory 的区别？
+**问题 5:OpenFeign 如何实现熔断降级？fallback 和 fallbackFactory 的区别？**
 
 **参考答案：**
 
@@ -543,7 +543,7 @@ feign:
 
 ---
 
-### 面试题 6：OpenFeign 如何传递请求头？如何解决 Feign 调用丢失 Header 的问题？
+**问题 6:OpenFeign 如何传递请求头？如何解决 Feign 调用丢失 Header 的问题？**
 
 **参考答案：**
 
@@ -575,7 +575,7 @@ public class AuthInterceptor implements RequestInterceptor {
 
 ---
 
-### 面试题 7：OpenFeign 的日志级别有哪些？生产环境应该如何配置？
+**问题 7:OpenFeign 的日志级别有哪些？生产环境应该如何配置？**
 
 **参考答案：**
 
@@ -595,7 +595,7 @@ public class AuthInterceptor implements RequestInterceptor {
 
 ---
 
-### 面试题 8：OpenFeign 和 Dubbo 的区别？各适用什么场景？
+**问题 8:OpenFeign 和 Dubbo 的区别？各适用什么场景？**
 
 **参考答案：**
 
@@ -615,7 +615,7 @@ public class AuthInterceptor implements RequestInterceptor {
 
 ---
 
-### 面试题 9：OpenFeign 调用出现 "No instances available" 错误如何排查？
+**问题 9:OpenFeign 调用出现 "No instances available" 错误如何排查？**
 
 **参考答案：**
 
@@ -642,7 +642,7 @@ public class AuthInterceptor implements RequestInterceptor {
 
 ---
 
-### 面试题 10：如何优化 OpenFeign 的性能？
+**问题 10：如何优化 OpenFeign 的性能？**
 
 **参考答案：**
 

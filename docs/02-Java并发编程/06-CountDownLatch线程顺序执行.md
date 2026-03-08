@@ -217,17 +217,17 @@ try {
 
 ## 面试常见问题
 
-### Q1: CountDownLatch 和 CyclicBarrier 的区别？
+**问题 1:CountDownLatch 和 CyclicBarrier 的区别？**
 
 **A**:
 - **CountDownLatch**：一次性，一个或多个线程等待其他线程完成
 - **CyclicBarrier**：可循环，多个线程互相等待，同时到达屏障
 
-### Q2: 为什么 CountDownLatch 不能重置？
+**问题 2：为什么 CountDownLatch 不能重置？**
 
 **A**: CountDownLatch 设计为一次性使用，计数器归零后状态不可改变。如果需要重复使用，应该使用 CyclicBarrier 或重新创建 CountDownLatch 实例。
 
-### Q3: 如何实现多个线程的顺序执行？
+**问题 3：如何实现多个线程的顺序执行？**
 
 **A**: 使用多个 CountDownLatch 串联：
 ```java
@@ -239,11 +239,11 @@ for (int i = 0; i < n-1; i++) {
 // 线程 i 等待 latches[i-1]，完成后调用 latches[i].countDown()
 ```
 
-### Q4: CountDownLatch 的计数器为 0 时调用 await() 会怎样？
+**问题 4:CountDownLatch 的计数器为 0 时调用 await() 会怎样？**
 
 **A**: 立即返回，不会阻塞。
 
-### Q5: 如果某个线程没有调用 countDown() 会怎样？
+**问题 5：如果某个线程没有调用 countDown() 会怎样？**
 
 **A**: 等待的线程会一直阻塞，可能导致死锁。应该确保 countDown() 在 finally 块中调用，或使用 try-with-resources 模式。
 

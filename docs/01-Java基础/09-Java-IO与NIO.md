@@ -284,9 +284,9 @@ while (true) {
 
 ---
 
-## Java IO 常见面试题
+## 💡 高频面试题
 
-### Q1：字节流和字符流有什么区别？
+**问题 1：字节流和字符流有什么区别？**
 
 | 对比项 | 字节流 | 字符流 |
 |--------|--------|--------|
@@ -299,7 +299,7 @@ while (true) {
 - 字符流 = 字节流 + 编码表
 - InputStreamReader/OutputStreamWriter 是字节流和字符流的桥梁
 
-### Q2：BIO、NIO、AIO 有什么区别？
+**问题 2:BIO、NIO、AIO 有什么区别？**
 
 | 对比项 | BIO | NIO | AIO |
 |--------|-----|-----|-----|
@@ -311,7 +311,7 @@ while (true) {
 | 适用场景 | 连接数少且固定 | 连接数多，数据量小 | 连接数多，数据量大 |
 | 例子 | 传统 Socket | Netty | Windows IOCP |
 
-### Q3：为什么需要 BufferedInputStream/BufferedOutputStream？
+**问题 3：为什么需要 BufferedInputStream/BufferedOutputStream？**
 
 **问题：** 直接使用 FileInputStream 每次读取一个字节：
 - 每次读取都涉及系统调用（用户态→内核态切换）
@@ -326,7 +326,7 @@ while (true) {
 - 无缓冲：读取 1MB 需要 ~100万次系统调用
 - 有缓冲：读取 1MB 只需 ~128次系统调用（1MB/8KB）
 
-### Q4：serialVersionUID 有什么作用？
+**问题 4:serialVersionUID 有什么作用？**
 
 用于版本控制，反序列化时验证版本一致性：
 - 一致：正常反序列化
@@ -337,7 +337,7 @@ while (true) {
 private static final long serialVersionUID = 1L;
 ```
 
-### Q5：transient 关键字的作用？
+**问题 5:transient 关键字的作用？**
 
 transient 修饰的字段不会被序列化。
 
@@ -348,7 +348,7 @@ transient 修饰的字段不会被序列化。
 
 **注意：** 反序列化后 transient 字段为默认值（null/0/false）
 
-### Q6：什么是零拷贝？Java 如何实现？
+**问题 6：什么是零拷贝？Java 如何实现？**
 
 **定义：** 减少/避免数据在用户态和内核态之间的拷贝
 
@@ -367,7 +367,7 @@ src.transferTo(0, src.size(), dest);  // 零拷贝传输
 
 **应用场景：** Kafka、Netty 等高性能框架
 
-### Q7：Java IO 使用了什么设计模式？
+**问题 7:Java IO 使用了什么设计模式？**
 
 **装饰器模式（Decorator Pattern）：**
 - 抽象构件：InputStream/OutputStream/Reader/Writer
@@ -384,7 +384,7 @@ InputStream is = new BufferedInputStream(
 **适配器模式：**
 - InputStreamReader/OutputStreamWriter 将字节流适配为字符流
 
-### Q8：try-with-resources 的原理是什么？
+**问题 8:try-with-resources 的原理是什么？**
 
 **语法糖：** 自动关闭实现 AutoCloseable 的资源
 
@@ -405,7 +405,7 @@ try {
 }
 ```
 
-### Q9：Files.readAllLines() 为什么不适合读大文件？
+**问题 9:Files.readAllLines() 为什么不适合读大文件？**
 
 一次性将所有行加载到内存，大文件会导致 OOM。
 
@@ -425,7 +425,7 @@ try (BufferedReader br = Files.newBufferedReader(path)) {
 }
 ```
 
-### Q10：NIO 的 Buffer 为什么需要 flip()？
+**问题 10:NIO 的 Buffer 为什么需要 flip()？**
 
 **Buffer 核心属性：**
 - capacity：缓冲区容量（固定不变）
@@ -440,7 +440,7 @@ try (BufferedReader br = Files.newBufferedReader(path)) {
 - limit = position（限制 = 已写入的数据量）
 - position = 0（回到开头准备读取）
 
-### Q11：Java IO 乱码问题如何解决？
+**问题 11:Java IO 乱码问题如何解决？**
 
 **乱码原因：** 读写编码不一致
 
@@ -457,7 +457,7 @@ BufferedReader br = Files.newBufferedReader(path, StandardCharsets.UTF_8);
 List<String> lines = Files.readAllLines(path, StandardCharsets.UTF_8);
 ```
 
-### Q12：如何实现文件断点续传？
+**问题 12：如何实现文件断点续传？**
 
 **核心思路：** 记录已传输位置，从断点处继续
 
@@ -483,7 +483,7 @@ public void downloadWithResume(String url, File localFile) {
 3. 本地记录已下载位置
 4. 服务端需支持 Range 请求
 
-### Q13：节点流和处理流的区别？
+**问题 13：节点流和处理流的区别？**
 
 | 类型 | 说明 | 示例 |
 |------|------|------|
@@ -495,7 +495,7 @@ public void downloadWithResume(String url, File localFile) {
 - 提供数据类型转换功能
 - 灵活组合，增强扩展性
 
-### Q14：RandomAccessFile 有什么特点？
+**问题 14:RandomAccessFile 有什么特点？**
 
 **特点：**
 - 可读可写，支持随机访问
@@ -510,7 +510,7 @@ public void downloadWithResume(String url, File localFile) {
 | rwd | 读写，同步更新到磁盘（内容） |
 | rws | 读写，同步更新到磁盘（内容+元数据） |
 
-### Q15：NIO Selector 的作用是什么？
+**问题 15:NIO Selector 的作用是什么？**
 
 **作用：** 多路复用器，一个线程管理多个 Channel
 

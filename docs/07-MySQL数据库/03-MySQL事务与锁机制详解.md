@@ -327,7 +327,7 @@ SELECT * FROM information_schema.INNODB_LOCK_WAITS;
 
 ## 七、高频面试题
 
-### 【问题 1】MySQL 如何保证事务的 ACID？
+**问题 1:MySQL 如何保证事务的 ACID？**
 
 **答：**
 
@@ -336,7 +336,7 @@ SELECT * FROM information_schema.INNODB_LOCK_WAITS;
 - **隔离性**：锁 + MVCC 实现不同隔离级别
 - **持久性**：Redo Log 保证，提交后永久保存
 
-### 【问题 2】脏读、不可重复读、幻读的区别？
+**问题 2：脏读、不可重复读、幻读的区别？**
 
 **答：**
 
@@ -344,7 +344,7 @@ SELECT * FROM information_schema.INNODB_LOCK_WAITS;
 - **不可重复读**：同一事务内，多次读取**值不一致**（被修改）
 - **幻读**：同一事务内，多次查询**记录数不一致**（被插入/删除）
 
-### 【问题 3】MySQL 的默认隔离级别是什么？为什么？
+**问题 3:MySQL 的默认隔离级别是什么？为什么？**
 
 **答：**
 
@@ -355,7 +355,7 @@ SELECT * FROM information_schema.INNODB_LOCK_WAITS;
 2. 通过 MVCC+Next-Key Lock 基本避免幻读
 3. 性能较好（相比 SERIALIZABLE）
 
-### 【问题 4】什么是 MVCC？如何实现？
+**问题 4：什么是 MVCC？如何实现？**
 
 **答：**
 
@@ -368,7 +368,7 @@ SELECT * FROM information_schema.INNODB_LOCK_WAITS;
 
 **优势：** 读写不冲突，提升并发性能
 
-### 【问题 5】InnoDB 的行锁算法有哪些？
+**问题 5:InnoDB 的行锁算法有哪些？**
 
 **答：**
 
@@ -376,7 +376,7 @@ SELECT * FROM information_schema.INNODB_LOCK_WAITS;
 2. **Gap Lock**：锁定间隙（防止插入）
 3. **Next-Key Lock**：Record + Gap（RR 级别默认）
 
-### 【问题 6】共享锁和排他锁的区别？
+**问题 6：共享锁和排他锁的区别？**
 
 **答：**
 
@@ -387,7 +387,7 @@ SELECT * FROM information_schema.INNODB_LOCK_WAITS;
 | 获取方式 | LOCK IN SHARE MODE | FOR UPDATE / DML |
 | 权限 | 可读不可写 | 可读可写 |
 
-### 【问题 7】什么是死锁？如何解决？
+**问题 7：什么是死锁？如何解决？**
 
 **答：**
 
@@ -398,7 +398,7 @@ SELECT * FROM information_schema.INNODB_LOCK_WAITS;
 2. **主动回滚**：选择代价小的事务
 3. **预防**：按固定顺序访问资源
 
-### 【问题 8】RC 和 RR 级别的区别？
+**问题 8:RC 和 RR 级别的区别？**
 
 **答：**
 

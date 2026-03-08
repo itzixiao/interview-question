@@ -286,7 +286,7 @@ IPage<User> result = userMapper.selectPage(page, wrapper);
 
 ## 高频面试题
 
-### 【问题1】MyBatis 的 #{} 和 ${} 有什么区别？
+**问题 1:MyBatis的 #{}和 ${}有什么区别？**
 
 **答**：
 | 特性 | #{} | ${} |
@@ -298,7 +298,7 @@ IPage<User> result = userMapper.selectPage(page, wrapper);
 
 ---
 
-### 【问题2】MyBatis 如何防止 SQL 注入？
+**问题 2:MyBatis如何防止 SQL 注入？**
 
 **答**：
 1. **使用 #{}**：参数预编译，自动转义特殊字符
@@ -308,7 +308,7 @@ IPage<User> result = userMapper.selectPage(page, wrapper);
 
 ---
 
-### 【问题3】MyBatis 的一级缓存和二级缓存有什么区别？
+**问题 3:MyBatis的一级缓存和二级缓存有什么区别？**
 
 **答**：
 | 特性 | 一级缓存 | 二级缓存 |
@@ -320,7 +320,7 @@ IPage<User> result = userMapper.selectPage(page, wrapper);
 
 ---
 
-### 【问题4】MyBatis 的执行流程是怎样的？
+**问题 4:MyBatis的执行流程是怎样的？**
 
 **答**：
 1. 加载配置文件，构建 SqlSessionFactory
@@ -335,7 +335,7 @@ IPage<User> result = userMapper.selectPage(page, wrapper);
 
 ---
 
-### 【问题5】MyBatis-Plus 的 LambdaQueryWrapper 有什么优势？
+**问题 5:MyBatis-Plus的 LambdaQueryWrapper有什么优势？**
 
 **答**：
 1. **类型安全**：使用方法引用，编译期检查
@@ -345,7 +345,7 @@ IPage<User> result = userMapper.selectPage(page, wrapper);
 
 ---
 
-### 【问题6】MyBatis 如何实现批量插入？
+**问题 6:MyBatis如何实现批量插入？**
 
 **答**：
 ```xml
@@ -365,7 +365,7 @@ userService.saveBatch(userList, 1000);  // 每批1000条
 
 ---
 
-### 【问题7】MyBatis 的动态 SQL 标签有哪些？
+**问题 7:MyBatis的动态 SQL 标签有哪些？**
 
 **答**：
 - `<if>`：条件判断
@@ -378,7 +378,7 @@ userService.saveBatch(userList, 1000);  // 每批1000条
 
 ---
 
-### 【问题8】MyBatis 的 Mapper 接口是如何工作的？
+**问题 8:MyBatis的 Mapper 接口是如何工作的？**
 
 **答**：
 MyBatis 使用 JDK 动态代理：
@@ -390,7 +390,7 @@ MyBatis 使用 JDK 动态代理：
 
 ---
 
-### 【问题9】MyBatis-Plus 的乐观锁是如何实现的？
+**问题 9:MyBatis-Plus的乐观锁是如何实现的？**
 
 **答**：
 1. 实体类字段加 `@Version` 注解
@@ -404,7 +404,7 @@ MyBatis 使用 JDK 动态代理：
 
 ---
 
-### 【问题10】MyBatis 的延迟加载是怎么实现的？
+**问题 10:MyBatis的延迟加载是怎么实现的？**
 
 **答**：
 1. 配置 `lazyLoadingEnabled=true`

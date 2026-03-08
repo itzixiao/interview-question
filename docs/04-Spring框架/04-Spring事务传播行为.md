@@ -477,19 +477,19 @@ public class LongRunningService {
 
 ## 常见面试题
 
-### Q1: REQUIRED 和 REQUIRES_NEW 的区别？
+**问题 1:REQUIRED 和 REQUIRES_NEW 的区别？**
 
 **A**: 
 - **REQUIRED**：加入当前事务，同成功或同失败
 - **REQUIRES_NEW**：挂起当前事务，创建独立事务，独立提交/回滚
 
-### Q2: NESTED 和 REQUIRES_NEW 的区别？
+**问题 2:NESTED 和 REQUIRES_NEW 的区别？**
 
 **A**:
 - **NESTED**：嵌套事务，使用 savepoint，随外部事务一起提交
 - **REQUIRES_NEW**：独立事务，完全独立提交/回滚
 
-### Q3: 事务失效的常见原因？
+**问题 3：事务失效的常见原因？**
 
 **A**:
 1. 非 public 方法
@@ -498,14 +498,14 @@ public class LongRunningService {
 4. 异常类型不匹配（checked exception）
 5. 数据库引擎不支持
 
-### Q4: 如何解决同类内部调用事务失效？
+**问题 4：如何解决同类内部调用事务失效？**
 
 **A**:
 1. 注入自身代理对象调用
 2. 使用 `AopContext.currentProxy()`
 3. 拆分到另一个 Service
 
-### Q5: Spring 事务的实现原理？
+**问题 5：Spring事务的实现原理？**
 
 **A**:
 Spring 事务基于 AOP 实现：

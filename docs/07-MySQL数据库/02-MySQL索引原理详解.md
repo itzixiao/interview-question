@@ -266,7 +266,7 @@ CREATE INDEX idx_name_age ON users(name, age);
 
 ## 七、高频面试题
 
-### 【问题 1】为什么 InnoDB 使用 B+Tree 作为索引？
+**问题 1：为什么 InnoDB 使用 B+Tree 作为索引？**
 
 **答：**
 
@@ -280,7 +280,7 @@ CREATE INDEX idx_name_age ON users(name, age);
 - B-Tree：范围查询需中序遍历
 - Hash：只支持等值查询，不支持范围查询
 
-### 【问题 2】聚簇索引和二级索引的区别？
+**问题 2：聚簇索引和二级索引的区别？**
 
 **答：**
 
@@ -293,7 +293,7 @@ CREATE INDEX idx_name_age ON users(name, age);
 
 **回表：** 通过二级索引找到主键后，再到聚簇索引查询完整数据
 
-### 【问题 3】什么是最左匹配原则？
+**问题 3：什么是最左匹配原则？**
 
 **答：**
 
@@ -315,7 +315,7 @@ WHERE age = 18 AND city = 'Beijing';
 WHERE city = 'Beijing';
 ```
 
-### 【问题 4】什么是覆盖索引？有什么优势？
+**问题 4：什么是覆盖索引？有什么优势？**
 
 **答：**
 
@@ -334,7 +334,7 @@ CREATE INDEX idx_name_age ON users(name, age);
 SELECT id, name, age FROM users WHERE name = 'Tom';
 ```
 
-### 【问题 5】索引失效的常见场景有哪些？
+**问题 5：索引失效的常见场景有哪些？**
 
 **答：**
 
@@ -346,7 +346,7 @@ SELECT id, name, age FROM users WHERE name = 'Tom';
 6. **IS NULL/IS NOT NULL**：可能失效
 7. **!= 或 <>**：可能全表扫描
 
-### 【问题 6】如何优化慢查询？
+**问题 6：如何优化慢查询？**
 
 **答：**
 

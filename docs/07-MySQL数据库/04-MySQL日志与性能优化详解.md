@@ -416,7 +416,7 @@ SHOW VARIABLES LIKE 'max_connections';
 
 ## 三、高频面试题
 
-### 【问题 1】Redo Log 和 Binlog 的区别？
+**问题 1:Redo Log 和 Binlog 的区别？**
 
 **答：**
 
@@ -428,7 +428,7 @@ SHOW VARIABLES LIKE 'max_connections';
 | 主要作用 | 崩溃恢复 | 主从复制、数据恢复 |
 | 写入时机 | 事务进行中 | 事务提交后 |
 
-### 【问题 2】什么是两阶段提交？为什么需要？
+**问题 2：什么是两阶段提交？为什么需要？**
 
 **答：**
 
@@ -440,7 +440,7 @@ SHOW VARIABLES LIKE 'max_connections';
 
 **避免：** 主从复制时数据不一致
 
-### 【问题 3】如何分析一条 SQL 的性能？
+**问题 3：如何分析一条 SQL 的性能？**
 
 **答：**
 
@@ -451,7 +451,7 @@ SHOW VARIABLES LIKE 'max_connections';
 5. **查看 rows**：扫描行数（越少越好）
 6. **查看 Extra**：Using filesort 需优化
 
-### 【问题 4】SQL 优化有哪些常见手段？
+**问题 4:SQL 优化有哪些常见手段？**
 
 **答：**
 
@@ -464,7 +464,7 @@ SHOW VARIABLES LIKE 'max_connections';
 7. **垂直拆分**：大字段单独拆表
 8. **水平分区**：按时间/地区分表
 
-### 【问题 5】深分页如何优化？
+**问题 5：深分页如何优化？**
 
 **答：**
 
@@ -487,7 +487,7 @@ SELECT * FROM users WHERE id > 100000 LIMIT 10;
 
 3. **禁止跳页**：限制最大页码
 
-### 【问题 6】覆盖索引是什么？有什么优势？
+**问题 6：覆盖索引是什么？有什么优势？**
 
 **答：**
 
@@ -506,7 +506,7 @@ CREATE INDEX idx_name_age ON users(name, age);
 SELECT id, name, age FROM users WHERE name = 'Tom';
 ```
 
-### 【问题 7】索引失效的常见场景有哪些？
+**问题 7：索引失效的常见场景有哪些？**
 
 **答：**
 
@@ -518,7 +518,7 @@ SELECT id, name, age FROM users WHERE name = 'Tom';
 6. **IS NULL/IS NOT NULL**：可能失效
 7. **!= 或 <>**：可能全表扫描
 
-### 【问题 8】MySQL 性能优化有哪些方面？
+**问题 8:MySQL 性能优化有哪些方面？**
 
 **答：**
 

@@ -242,3 +242,397 @@ Collections.min(list);                     // 最小值
 3. **注意线程安全**：并发环境使用线程安全集合
 4. **优先使用接口**：List/Map/Set 作为类型
 5. **遍历优化**：entrySet() 优于 keySet()
+
+---
+
+## 💡 高频面试题
+
+**问题 1:ArrayList 和 LinkedList 的区别？**
+
+答案：
+| 特性 | ArrayList | LinkedList |
+|------|-----------|------------|
+| 底层结构 | 动态数组 | 双向链表 |
+| 随机访问 | O(1) | O(n) |
+| 插入删除 | O(n) | O(1) |
+| 内存占用 | 少 | 多（节点指针） |
+| 功能 | List 接口 | List + Deque 接口 |
+
+**源码对比：**
+```java
+// ArrayList - 数组
+transient Object[] elementData;
+private static final int DEFAULT_CAPACITY = 10;
+
+// LinkedList - 链表
+transient Node<E> first, last;
+private static class Node<E> {
+    E item;
+    Node<E> next;
+    Node<E> prev;
+}
+```
+
+**使用场景：**
+- ✅ ArrayList：查询多、增删少（90% 场景）
+- ✅ LinkedList：频繁在首尾插入删除、需要队列操作
+
+**性能测试（10 万次操作）：**
+```java
+// 随机访问
+ArrayList.get(i);    // 0.1ms
+LinkedList.get(i);   // 50ms
+
+// 尾部插入
+ArrayList.add();     // 1ms
+LinkedList.add();    // 0.5ms
+
+// 中间插入
+ArrayList.add(i, e); // 50ms
+LinkedList.add(i, e);// 0.5ms
+```
+
+**问题 2:HashMap 和 Hashtable 的区别？**
+
+答案：
+| 特性 | HashMap | Hashtable |
+|------|---------|-----------|
+| 线程安全 | ❌ 否 | ✅ 是（synchronized） |
+| null 值 | ✅ 允许 | ❌ 不允许 |
+| 性能 | 高 | 低 |
+| 扩容 | 2 倍 | 2 倍 +1 |
+| hash 计算 | 优化过 | 直接使用 |
+| 继承 | AbstractMap | Dictionary（已过时） |
+
+**HashMap 优势：**
+```java
+// 允许 null
+map.put(null, value);
+map.put(key, null);
+
+// 性能更好（无锁）
+for (int i = 0; i < 100000; i++) {
+    map.put(i, i);  // 快
+}
+```
+
+**线程安全替代方案：**
+```java
+// ❌ 不推荐 Hashtable
+Map<String, String> map = new Hashtable<>();
+
+// ✅ 推荐 ConcurrentHashMap
+Map<String, String> map = new ConcurrentHashMap<>();
+
+// ✅ 或者同步包装
+Map<String, String> syncMap = Collections.synchronizedMap(new HashMap<>());
+```
+
+**问题 3:HashSet如何保证元素不重复？**
+
+答案：
+HashSet 基于 HashMap 实现，通过 hashCode() 和 equals() 保证唯一性。
+
+**源码分析：**
+```java
+public class HashSet<E> extends AbstractSet<E> {
+    private transient HashMap<E,Object> map;
+    private static final Object PRESENT = new Object();
+    
+    public boolean add(E e) {
+        return map.put(e, PRESENT) == null;  // put 返回 null 表示不存在
+    }
+}
+```
+
+**去重流程：**
+```
+1. 计算 hashCode() 确定桶位置
+2. 如果桶为空 → 直接放入
+3. 如果桶不为空 → 遍历链表/红黑树
+4. 对每个元素：
+   - 比较 hashCode 是否相同
+   - 如果相同，调用 equals() 比较内容
+   - 如果 equals() 返回 true → 已存在，返回 false
+   - 否则 → 放入链表末尾，返回 true
+```
+
+**示例：**
+```java
+class Person {
+    String name;
+    int id;
+    
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, id);
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof Person) {
+            Person p = (Person) o;
+            return id == p.id && name.equals(p.name);
+        }
+        return false;
+    }
+}
+
+Set<Person> set = new HashSet<>();
+set.add(new Person("张三", 1));  // true
+set.add(new Person("张三", 1));  // false，重复
+```
+
+**重写要求：**
+- ✅ 必须同时重写 hashCode() 和 equals()
+- ✅ 相等对象必须有相同 hashCode
+- ✅ 只重写一个会导致去重失效
+
+**问题 4:fail-fast机制是什么？如何解决？**
+
+答案：
+fail-fast 是集合的一种错误检测机制，在迭代过程中如果集合被修改，立即抛出 ConcurrentModificationException。
+
+**原理：**
+```java
+// AbstractList 中维护 modCount
+protected transient int modCount = 0;
+
+// 添加/删除时修改 modCount
+modCount++;
+
+// 迭代器检查 expectedModCount
+final void checkForComodification() {
+    if (modCount != expectedModCount)
+        throw new ConcurrentModificationException();
+}
+```
+
+**触发场景：**
+```java
+// ❌ 错误示范
+List<String> list = new ArrayList<>();
+list.add("A");
+list.add("B");
+
+for (String s : list) {
+    list.remove(s);  // ConcurrentModificationException!
+}
+```
+
+**解决方案：**
+
+**方案 1：Iterator.remove()**
+```java
+Iterator<String> it = list.iterator();
+while (it.hasNext()) {
+    String s = it.next();
+    if (condition) {
+        it.remove();  // ✅ 安全
+    }
+}
+```
+
+**方案 2：removeIf（Java 8+）**
+```java
+list.removeIf(s -> condition);  // ✅ 最简洁
+```
+
+**方案 3：CopyOnWriteArrayList**
+```java
+CopyOnWriteArrayList<String> cowList = new CopyOnWriteArrayList<>(list);
+for (String s : cowList) {
+    cowList.remove(s);  // ✅ 安全，写时复制
+}
+```
+
+**方案 4：普通 for 循环（倒序）**
+```java
+for (int i = list.size() - 1; i >= 0; i--) {
+    if (condition) {
+        list.remove(i);  // ✅ 倒序避免索引错位
+    }
+}
+```
+
+**问题 5:ArrayBlockingQueue和 LinkedBlockingQueue的区别？**
+
+答案：
+| 特性 | ArrayBlockingQueue | LinkedBlockingQueue |
+|------|-------------------|--------------------|
+| 底层结构 | 数组 | 链表 |
+| 有界/无界 | 有界（必须指定容量） | 可选（默认 Integer.MAX_VALUE） |
+| 锁机制 | 一把锁（ReentrantLock） | 两把锁（读写分离） |
+| 公平性 | 可选公平/非公平 | 只能非公平 |
+| 内存占用 | 连续空间，较少 | 节点对象，较多 |
+| 适用场景 | 数据量固定 | 数据量不确定 |
+
+**源码对比：**
+```java
+// ArrayBlockingQueue - 一把锁
+final ReentrantLock lock;
+final Condition notEmpty;
+final Condition notFull;
+
+// LinkedBlockingQueue - 两把锁
+private final ReentrantLock takeLock;
+private final Condition notEmpty;
+private final ReentrantLock putLock;
+private final Condition notFull;
+```
+
+**性能对比：**
+```java
+// 高并发场景
+LinkedBlockingQueue 吞吐量更高（读写锁分离）
+ArrayBlockingQueue 简单高效（单锁）
+```
+
+**使用建议：**
+- ✅ 容量固定 → ArrayBlockingQueue
+- ✅ 容量不确定 → LinkedBlockingQueue（注意设置上限）
+- ✅ 高并发读 → LinkedBlockingQueue
+
+**问题 6:CopyOnWriteArrayList的原理和使用场景？**
+
+答案：
+CopyOnWriteArrayList（COW）是一种线程安全的 List，核心思想是**写时复制**。
+
+**原理：**
+```java
+public boolean add(E e) {
+    final ReentrantLock lock = this.lock;
+    lock.lock();
+    try {
+        Object[] elements = getArray();
+        int len = elements.length;
+        // 复制新数组
+        Object[] newElements = Arrays.copyOf(elements, len + 1);
+        newElements[len] = e;
+        setArray(newElements);  // 引用指向新数组
+        return true;
+    } finally {
+        lock.unlock();
+    }
+}
+```
+
+**特点：**
+- ✅ 读操作无锁，性能极高
+- ✅ 写操作加锁并复制数组
+- ✅ 迭代器不会抛出 ConcurrentModificationException
+- ❌ 内存占用大（复制数组）
+- ❌ 数据一致性弱（可能读到旧数据）
+
+**使用场景：**
+- ✅ 读多写少（如监听器列表）
+- ✅ 白名单、黑名单配置
+- ❌ 写多读少（频繁复制，性能差）
+
+**示例：**
+```java
+CopyOnWriteArrayList<String> list = new CopyOnWriteArrayList<>();
+list.add("A");
+list.add("B");
+
+// 迭代安全
+for (String s : list) {
+    list.remove(s);  // ✅ 不会抛异常
+}
+```
+
+**问题 7:LRU缓存如何用 LinkedHashMap 实现？**
+
+答案：
+LinkedHashMap 可以通过 accessOrder 参数实现 LRU（最近最少使用）缓存。
+
+**实现方式：**
+```java
+public class LRUCache<K, V> extends LinkedHashMap<K, V> {
+    private final int maxCapacity;
+    
+    public LRUCache(int capacity) {
+        super(16, 0.75f, true);  // accessOrder=true
+        this.maxCapacity = capacity;
+    }
+    
+    @Override
+    protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {
+        return size() > maxCapacity;  // 超过容量删除最老
+    }
+}
+
+// 使用
+Map<Integer, Integer> cache = new LRUCache<>(4);
+for (int i = 0; i < 10; i++) {
+    cache.put(i, i);
+}
+// 缓存中只剩：6, 7, 8, 9（删除了 0-5）
+```
+
+**核心参数：**
+```java
+public LinkedHashMap(int initialCapacity,
+                     float loadFactor,
+                     boolean accessOrder) {  // true=访问顺序，false=插入顺序
+    super(initialCapacity, loadFactor);
+    this.accessOrder = accessOrder;
+}
+```
+
+**LRU 原理：**
+```
+每次访问（get/put）→ 移动到链表尾部
+删除时 → 删除链表头部（最久未使用）
+```
+
+**问题 8:Collection和 Collections的区别？**
+
+答案：
+
+| 类名 | 类型 | 作用 |
+|------|------|------|
+| Collection | 接口 | 集合的根接口（List/Set/Queue 的父接口） |
+| Collections | 工具类 | 操作集合的静态方法 |
+
+**Collection 接口：**
+```java
+public interface Collection<E> extends Iterable<E> {
+    boolean add(E e);
+    boolean remove(Object o);
+    int size();
+    // ... 其他集合操作方法
+}
+```
+
+**Collections 工具类：**
+```java
+// 排序
+Collections.sort(list);
+
+// 同步包装
+List<T> syncList = Collections.synchronizedList(new ArrayList<>());
+
+// 不可修改
+List<T> unmodifiableList = Collections.unmodifiableList(list);
+
+// 空集合
+List<T> emptyList = Collections.emptyList();
+
+// 二分查找
+int index = Collections.binarySearch(list, key);
+
+// 最大值/最小值
+Object max = Collections.max(list);
+Object min = Collections.min(list);
+```
+
+**记忆技巧：**
+- Collection → 集合（单数，接口）
+- Collections → 集合工具（复数，工具类）
+
+---
+
+## 💡 高频面试题
+
+**问题 1：ArrayList 和 LinkedList 的区别？**

@@ -485,7 +485,7 @@ public class MyAutoConfiguration {
 
 ## 九、高频面试题
 
-### Q1：Spring Boot 自动装配的原理是什么？
+**问题 1：Spring Boot自动装配的原理是什么？**
 
 **答案**：
 1. `@SpringBootApplication` 包含 `@EnableAutoConfiguration`
@@ -496,7 +496,7 @@ public class MyAutoConfiguration {
 
 ---
 
-### Q2：如何自定义一个 Spring Boot Starter？
+**问题 2：如何自定义一个 Spring Boot Starter？**
 
 **答案**：
 1. 创建项目，命名为 `xxx-spring-boot-starter`
@@ -507,7 +507,7 @@ public class MyAutoConfiguration {
 
 ---
 
-### Q3：@ConditionalOnClass 和 @ConditionalOnBean 的区别？
+**问题 3：@ConditionalOnClass 和 @ConditionalOnBean 的区别？**
 
 **答案**：
 
@@ -518,7 +518,7 @@ public class MyAutoConfiguration {
 
 ---
 
-### Q4：@ConditionalOnMissingBean 的作用？
+**问题 4：@ConditionalOnMissingBean 的作用？**
 
 **答案**：
 - 容器中不存在指定 Bean 时，才创建当前 Bean
@@ -527,7 +527,7 @@ public class MyAutoConfiguration {
 
 ---
 
-### Q5：Spring Boot 2.7 和之前版本的自动配置有什么区别？
+**问题 5：Spring Boot 2.7 和之前版本的自动配置有什么区别？**
 
 **答案**：
 - **2.6 及以前**：使用 `META-INF/spring.factories`
@@ -535,7 +535,7 @@ public class MyAutoConfiguration {
 
 ---
 
-### Q6：proxyBeanMethods = false 的作用是什么？
+**问题 6：proxyBeanMethods = false 的作用是什么？**
 
 **答案**：
 - 禁用 CGLIB 代理，提高启动性能
@@ -544,7 +544,7 @@ public class MyAutoConfiguration {
 
 ---
 
-### Q7：如何排除某个自动配置类？
+**问题 7：如何排除某个自动配置类？**
 
 **答案**：
 ```java
@@ -560,7 +560,7 @@ spring:
 
 ---
 
-### Q8：SpringFactoriesLoader 的工作原理？
+**问题 8：SpringFactoriesLoader 的工作原理？**
 
 **答案**：
 1. 扫描 classpath 下所有 jar 包的 `META-INF/spring.factories`
@@ -570,7 +570,7 @@ spring:
 
 ---
 
-### Q9：如何调试自动配置？
+**问题 9：如何调试自动配置？**
 
 **答案**：
 ```bash
@@ -588,7 +588,7 @@ GET /actuator/conditions
 
 ---
 
-### Q10：@EnableConfigurationProperties 的作用？
+**问题 10：@EnableConfigurationProperties 的作用？**
 
 **答案**：
 - 使 `@ConfigurationProperties` 注解的类生效

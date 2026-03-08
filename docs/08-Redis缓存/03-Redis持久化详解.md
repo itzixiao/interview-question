@@ -303,7 +303,7 @@ repl-diskless-sync no
 
 ## 七、高频面试题
 
-### 面试题 1：RDB 和 AOF 的区别是什么？如何选择？
+**问题 1:RDB 和 AOF 的区别是什么？如何选择？**
 
 **参考答案：**
 
@@ -322,7 +322,7 @@ repl-diskless-sync no
 
 ---
 
-### 面试题 2：RDB 的 fork 操作会阻塞主进程吗？Copy-On-Write 是什么？
+**问题 2:RDB 的 fork 操作会阻塞主进程吗？Copy-On-Write 是什么？**
 
 **参考答案：**
 
@@ -339,7 +339,7 @@ repl-diskless-sync no
 
 ---
 
-### 面试题 3：AOF 重写的原理是什么？会阻塞 Redis 吗？
+**问题 3:AOF 重写的原理是什么？会阻塞 Redis 吗？**
 
 **参考答案：**
 
@@ -359,7 +359,7 @@ repl-diskless-sync no
 
 ---
 
-### 面试题 4：Redis 宕机后如何恢复数据？恢复的优先级是什么？
+**问题 4:Redis 宕机后如何恢复数据？恢复的优先级是什么？**
 
 **参考答案：**
 
@@ -389,7 +389,7 @@ redis-check-aof --fix appendonly.aof
 
 ---
 
-### 面试题 5：混合持久化的原理是什么？为什么推荐使用？
+**问题 5：混合持久化的原理是什么？为什么推荐使用？**
 
 **参考答案：**
 
@@ -410,7 +410,7 @@ aof-use-rdb-preamble yes
 
 ---
 
-### 面试题 6：Redis 持久化会影响性能吗？如何优化？
+**问题 6:Redis持久化会影响性能吗？如何优化？**
 
 **参考答案：**
 
@@ -428,7 +428,7 @@ aof-use-rdb-preamble yes
 
 ---
 
-### 面试题 7：什么是 Redis 的无磁盘复制？有什么优缺点？
+**问题 7：什么是 Redis 的无磁盘复制？有什么优缺点？**
 
 **参考答案：**
 
@@ -452,7 +452,7 @@ repl-diskless-sync-delay 5  # 等待5秒让更多从节点连接
 
 ---
 
-### 面试题 8：如何保证 Redis 主从数据一致性？
+**问题 8：如何保证 Redis 主从数据一致性？**
 
 **参考答案：**
 
@@ -479,7 +479,7 @@ repl-diskless-sync-delay 5  # 等待5秒让更多从节点连接
 
 ---
 
-### 面试题 9：Redis Sentinel 如何实现高可用？故障转移流程是怎样的？
+**问题 9:Redis Sentinel 如何实现高可用？故障转移流程是怎样的？**
 
 **参考答案：**
 
@@ -504,7 +504,7 @@ sentinel down-after-milliseconds mymaster 5000
 
 ---
 
-### 面试题 10：RDB 和 AOF 可以同时开启吗？Redis 如何处理？
+**问题 10:RDB 和 AOF 可以同时开启吗？Redis 如何处理？**
 
 **参考答案：**
 

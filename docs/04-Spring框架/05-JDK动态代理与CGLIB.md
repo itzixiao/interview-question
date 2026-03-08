@@ -159,10 +159,11 @@ public class Target {
 
 ---
 
-## 八、高频面试题
+## 💡 高频面试题
 
-### 【问题 1】JDK动态代理和 CGLIB 的区别？
-答：
+**问题 1:JDK动态代理和 CGLIB 的区别？**
+
+答案：
 | 特性 | JDK动态代理 | CGLIB |
 |------|-------------|-------|
 | 实现方式 | 实现接口 | 继承目标类 |
@@ -171,26 +172,30 @@ public class Target {
 | 性能 | 较慢 | 更快（首次生成慢）|
 | 依赖 | JDK 内置 | 需引入 CGLIB 库 |
 
-### 【问题 2】Spring AOP 默认使用哪种代理？
-答：
+**问题 2：Spring AOP 默认使用哪种代理？**
+
+答案：
 - **有接口**：默认 JDK动态代理
 - **无接口**：使用 CGLIB 代理
 - **强制 CGLIB**：设置 `proxyTargetClass = true`
 
-### 【问题 3】为什么 JDK 代理只能代理接口？
-答：
+**问题 3：为什么 JDK 代理只能代理接口？**
+
+答案：
 - JDK动态代理生成的类继承自 Proxy
 - Java 不支持多继承
 - 所以只能实现接口，不能继承类
 
-### 【问题 4】CGLIB 为什么不能代理 final 方法？
-答：
+**问题 4:CGLIB 为什么不能代理 final 方法？**
+
+答案：
 - CGLIB 通过继承目标类实现
 - final 方法不能被子类重写
 - 所以无法拦截和增强 final 方法
 
-### 【问题 5】自调用问题的解决方案？
-答：
+**问题 5：自调用问题的解决方案？**
+
+答案：
 ```java
 // 问题：this.methodB() 不经过代理
 public void methodA() {
@@ -206,8 +211,9 @@ public void methodA() {
 }
 ```
 
-### 【问题 6】Proxy.newProxyInstance() 的参数含义？
-答：
+**问题 6:Proxy.newProxyInstance() 的参数含义？**
+
+答案：
 ```java
 Proxy.newProxyInstance(
     target.getClass().getClassLoader(),  // 类加载器
@@ -216,8 +222,9 @@ Proxy.newProxyInstance(
 )
 ```
 
-### 【问题 7】CGLIB 的性能优势？
-答：
+**问题 7:CGLIB 的性能优势？**
+
+答案：
 - 使用 FastClass 机制，避免反射
 - 直接通过索引调用方法
 - 适合频繁调用的场景

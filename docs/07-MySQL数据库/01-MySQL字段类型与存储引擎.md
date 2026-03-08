@@ -111,7 +111,7 @@
 
 ## 三、高频面试题
 
-### 【问题 1】VARCHAR(50) 的 50 表示什么？
+**问题 1:VARCHAR(50) 的 50 表示什么？**
 
 **答：**
 - 表示最多存储 **50 个字符**
@@ -119,7 +119,7 @@
 - UTF8 编码下，一个汉字占 3 个字节
 - 例如：`VARCHAR(50)` 存储"你好"占用 6 字节（2 个汉字 × 3）+ 1 字节长度标识
 
-### 【问题 2】CHAR 和 VARCHAR 的区别？
+**问题 2:CHAR 和 VARCHAR 的区别？**
 
 **答：**
 
@@ -139,7 +139,7 @@ CREATE TABLE users (
 );
 ```
 
-### 【问题 3】InnoDB 和 MyISAM 的区别？
+**问题 3:InnoDB 和 MyISAM 的区别？**
 
 **答：**
 
@@ -151,7 +151,7 @@ CREATE TABLE users (
 6. **COUNT(*)**：MyISAM 内部维护计数器，InnoDB 需要全表扫描
 7. **崩溃恢复**：InnoDB 强（有 Redo Log），MyISAM 弱
 
-### 【问题 4】为什么金额要用 DECIMAL？
+**问题 4：为什么金额要用 DECIMAL？**
 
 **答：**
 - `FLOAT/DOUBLE` 是浮点数，存在精度丢失问题
@@ -171,7 +171,7 @@ CREATE TABLE orders (
 );
 ```
 
-### 【问题 5】DATETIME 和 TIMESTAMP 的区别？
+**问题 5:DATETIME 和 TIMESTAMP 的区别？**
 
 **答：**
 

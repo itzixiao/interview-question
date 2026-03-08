@@ -471,7 +471,7 @@ protected Object initializeBean(String beanName, Object bean, RootBeanDefinition
 
 ## 八、高频面试题
 
-### Q1：Spring Bean 的生命周期有哪些阶段？
+**问题 1：Spring Bean 的生命周期有哪些阶段？**
 
 **答案**：
 
@@ -483,7 +483,7 @@ protected Object initializeBean(String beanName, Object bean, RootBeanDefinition
 
 ---
 
-### Q2：@PostConstruct、InitializingBean、init-method 的执行顺序？
+**问题 2：@PostConstruct、InitializingBean、init-method 的执行顺序？**
 
 **答案**：
 
@@ -498,7 +498,7 @@ protected Object initializeBean(String beanName, Object bean, RootBeanDefinition
 
 ---
 
-### Q3：BeanPostProcessor 和 BeanFactoryPostProcessor 的区别？
+**问题 3：BeanPostProcessor 和 BeanFactoryPostProcessor 的区别？**
 
 **答案**：
 
@@ -511,7 +511,7 @@ protected Object initializeBean(String beanName, Object bean, RootBeanDefinition
 
 ---
 
-### Q4：Spring 如何解决循环依赖？
+**问题 4：Spring 如何解决循环依赖？**
 
 **答案**：
 
@@ -527,7 +527,7 @@ protected Object initializeBean(String beanName, Object bean, RootBeanDefinition
 
 ---
 
-### Q5：AOP 代理是在 Bean 生命周期的哪个阶段创建的？
+**问题 5：AOP 代理是在 Bean生命周期的哪个阶段创建的？**
 
 **答案**：
 
@@ -537,7 +537,7 @@ protected Object initializeBean(String beanName, Object bean, RootBeanDefinition
 
 ---
 
-### Q6：为什么构造器注入的循环依赖无法解决？
+**问题 6：为什么构造器注入的循环依赖无法解决？**
 
 **答案**：
 
@@ -552,7 +552,7 @@ protected Object initializeBean(String beanName, Object bean, RootBeanDefinition
 
 ---
 
-### Q7：Prototype 作用域的 Bean 会调用销毁方法吗？
+**问题 7：Prototype 作用域的 Bean 会调用销毁方法吗？**
 
 **答案**：
 
@@ -566,7 +566,7 @@ Spring 不管理 Prototype Bean 的完整生命周期，只负责创建，不负
 
 ---
 
-### Q8：@Autowired 是在生命周期的哪个阶段处理的？
+**问题 8：@Autowired 是在生命周期的哪个阶段处理的？**
 
 **答案**：
 
@@ -576,7 +576,7 @@ Spring 不管理 Prototype Bean 的完整生命周期，只负责创建，不负
 
 ---
 
-### Q9：如何在 Bean 初始化完成后执行自定义逻辑？
+**问题 9：如何在 Bean 初始化完成后执行自定义逻辑？**
 
 **答案**：
 
@@ -603,7 +603,7 @@ Spring 不管理 Prototype Bean 的完整生命周期，只负责创建，不负
 
 ---
 
-### Q10：Spring 容器启动时，Bean 的加载顺序是怎样的？
+**问题 10：Spring 容器启动时，Bean 的加载顺序是怎样的？**
 
 **答案**：
 
