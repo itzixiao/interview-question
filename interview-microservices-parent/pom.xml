@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                             http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>cn.itzixiao</groupId>
+        <artifactId>interview-microservices</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>interview-microservices-parent</artifactId>
+    <name>interview-microservices-parent</name>
+    <description>微服务模块集合 - 包含业务服务、算法模块等</description>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>interview-algorithm</module>
+        <module>interview-provider</module>
+        <module>interview-service</module>
+    </modules>
+</project>

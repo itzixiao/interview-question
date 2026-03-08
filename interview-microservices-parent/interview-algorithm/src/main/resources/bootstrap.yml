@@ -1,0 +1,6 @@
+# 引导配置文件
+# 注意：实际配置已迁移至 application-dev.yml，符合项目配置管理规范
+
+spring:
+  application:
+    name: interview-algorithm

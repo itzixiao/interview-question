@@ -1,0 +1,27 @@
+server:
+  port: 8083  # 算法服务端口
+
+spring:
+  application:
+    name: interview-algorithm  # 服务名称
+    
+  profiles:
+    active: dev
+
+# Actuator 监控端点配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics  # 暴露的端点
+  endpoint:
+    health:
+      show-details: always  # 显示健康详情
+
+# 日志配置
+logging:
+  level:
+    root: INFO
+    cn.itzixiao.interview.algorithm: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"

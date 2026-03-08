@@ -1,4 +1,87 @@
-﻿## 📖 目录结构
+# 🎯 面试题库微服务项目
+
+> **一站式 Java 面试准备平台** - 48 篇文档 · 368+ 道面试题 · 配套 ~30,000 行示例代码
+
+---
+
+## 📁 项目架构
+
+### 完整层级结构
+
+```
+interview-question/                              # 根目录
+│
+├── interview-common/                            # 公共模块
+│   ├── exception/                               # 业务异常类
+│   ├── handler/                                 # 全局异常处理器
+│   └── result/                                  # 统一返回结果
+│
+├── interview-gateway/                           # API 网关服务
+│   ├── config/                                  # 网关配置
+│   ├── filter/                                  # 自定义过滤器
+│   └── handler/                                 # 异常处理器
+│
+├── interview-microservices/                     # 微服务模块集合（父模块）
+│   ├── interview-algorithm/                     # 算法面试题库
+│   ├── interview-provider/                      # 服务提供者
+│   └── interview-service/                       # 业务服务
+│
+├── interview-starters/                          # Starter 模块集合（父模块）
+│   └── interview-threadpool-starter/            # 线程池Starter
+│
+└── docs/                                        # 面试知识点文档（13 个分类）
+    ├── 01-Java基础/
+    ├── 02-Java并发编程/
+    ├── 03-JVM/
+    ├── 04-Spring框架/
+    ├── 05-SpringBoot与自动装配/
+    ├── 06-SpringCloud微服务/
+    ├── 07-MySQL数据库/
+    ├── 08-Redis缓存/
+    ├── 09-中间件/
+    ├── 10-算法与数据结构/
+    ├── 11-设计模式/
+    ├── 12-分布式系统/
+    └── 13-DevOps/
+```
+
+### 模块职责说明
+
+| 模块 | 职责 | 说明 |
+|------|------|------|
+| **interview-common** | 公共模块 | 提供统一的异常处理、返回结果等公共组件 |
+| **interview-gateway** | API 网关 | 基于 Spring Cloud Gateway，负责路由、过滤、限流等 |
+| **interview-microservices** | 微服务集合（父模块） | 包含所有业务微服务模块 |
+| **interview-starters** | Starter 集合（父模块） | 包含自定义的 Spring Boot Starter |
+| **interview-algorithm** | 算法题库 | 包含常见算法面试题及实现 |
+| **interview-provider** | 服务提供者 | 提供 RESTful API 服务，演示 OpenFeign 调用 |
+| **interview-service** | 业务服务 | 包含所有业务逻辑和技术点示例代码 |
+| **interview-threadpool-starter** | 线程池Starter | 自定义线程池自动配置 Starter |
+
+### 技术栈
+
+- **Java 8** + **Spring Boot 2.7.18** + **Spring Cloud 2021.0.8**
+- **Spring Cloud Alibaba 2021.0.5.0** (Nacos, Sentinel, Gateway, OpenFeign)
+- **MySQL 8.0** + **Redis**
+- **Maven** 多模块项目管理
+
+### 快速开始
+
+```bash
+# 编译整个项目
+mvn clean compile -DskipTests
+
+# 安装到本地仓库
+mvn clean install -DskipTests
+
+# 启动服务
+cd interview-microservices/interview-provider
+mvn spring-boot:run
+```
+
+---
+
+## 📖 文档导航
 
 ### 完整模块导航
 
@@ -22,143 +105,49 @@
 
 ---
 
-### 详细文件结构
-
-```
-docs/
-├── 01-Java基础/ (9 篇文档)
-│   ├── README.md ← 模块导航
-│   ├── 01-等于与 equals.md
-│   ├── 02-String 详解.md
-│   ├── 03-数据类型详解.md
-│   ├── 04-接口与抽象类.md
-│   ├── 05-深拷贝与浅拷贝.md
-│   ├── 06-Java 反射详解.md
-│   ├── 07-Java 泛型详解.md
-│   ├── 08-Java 集合框架详解.md
-│   └── 09-Java IO 与 NIO.md
-│
-├── 02-Java并发编程/ (8 篇文档)
-│   ├── README.md ← 模块导航
-│   ├── 01-Java 集合框架.md
-│   ├── 02-ConcurrentHashMap 详解.md
-│   ├── 03-AQS详解.md
-│   ├── 04-CAS与原子类.md
-│   ├── 05-ReentrantLock 生产者消费者.md
-│   ├── 06-CountDownLatch 线程顺序执行.md
-│   ├── 07-线程池详解.md
-│   └── 08-高并发线程安全详解.md
-│
-├── 03-JVM/ (1 篇文档)
-│   ├── README.md ← 模块导航
-│   └── 01-JVM 内存模型与垃圾回收.md
-│
-├── 04-Spring框架/ (5 篇文档)
-│   ├── README.md ← 模块导航
-│   ├── 01-Spring IOC 与 AOP.md
-│   ├── 02-Spring 事务传播行为.md
-│   ├── 03-Spring MVC 运行机制.md
-│   ├── 04-Spring Bean生命周期详解.md
-│   └── 05-JDK动态代理与CGLIB.md
-│
-├── 05-SpringBoot与自动装配/ (1 篇文档)
-│   ├── README.md ← 模块导航
-│   └── 01-Spring-Boot 自动装配.md
-│
-├── 06-SpringCloud微服务/ (2 篇文档)
-│   ├── README.md ← 模块导航
-│   ├── 01-Spring-Cloud-Gateway详解.md
-│   └── 02-Spring-Cloud-OpenFeign详解.md
-│
-├── 07-MySQL数据库/ (7 篇文档)
-│   ├── README.md ← 模块导航
-│   ├── 01-MySQL 字段类型与存储引擎.md
-│   ├── 02-MySQL 索引原理详解.md
-│   ├── 03-MVCC 详解.md
-│   ├── 04-SQL 注入与防护.md
-│   ├── 05-MyBatis-Plus快速入门.md
-│   ├── 06-MyBatis动态 SQL 与 SQL 注入防护.md
-│   └── 07-MyBatis 核心原理与面试题.md
-│
-├── 08-Redis缓存/ (4 篇文档)
-│   ├── README.md ← 模块导航
-│   ├── 01-Redis缓存与分布式锁.md
-│   ├── 02-Redis-Sentinel与 Cluster.md
-│   ├── 03-Redis 高级应用 - 延时队列与幂等.md
-│   └── 04-Redis 高级应用 - 分布式锁与限流.md
-│
-├── 09-中间件/ (5 篇文档)
-│   ├── README.md ← 模块导航
-│   ├── 01-MyBatis-Plus快速入门.md
-│   ├── 02-MyBatis动态 SQL 与 SQL 注入防护.md
-│   ├── 03-MyBatis 核心原理与面试题.md
-│   ├── 04-Nacos 核心知识点详解.md
-│   └── 05-Sentinel限流熔断详解.md
-│
-├── 10-算法与数据结构/ (3 篇文档)
-│   ├── README.md ← 模块导航
-│   ├── 01-HashMap源码分析.md
-│   ├── 02-树形数据结构详解.md
-│   └── 03-算法面试题详解.md
-│
-├── 11-设计模式/ (1 篇文档)
-│   ├── README.md ← 模块导航
-│   └── 01-设计模式详解.md
-│
-├── 12-分布式系统/ (1 篇文档)
-│   ├── README.md ← 模块导航
-│   └── 01-分布式幂等 - 防重放 - 加密详解.md
-│
-└── 13-DevOps/ (1 篇文档)
-    ├── README.md ← 模块导航
-    └── 01-DevOps核心知识点详解.md
-```
-
----
-
 ## 🔥 高频面试题分类（链接直达）
 
 ### Java基础（45+ 道）
-- [`==` 和 `equals` 的区别？](./docs/01-Java基础/01-等于与 equals.md)
-- [String、StringBuilder、StringBuffer 区别？](./docs/01-Java基础/02-String 详解.md)
+- [`==` 和 equals 的区别？](./docs/01-Java基础/01-==与equals.md)
+- [String、StringBuilder、StringBuffer 区别？](./docs/01-Java基础/02-String详解.md)
 - [接口和抽象类的区别？](./docs/01-Java基础/04-接口与抽象类.md)
-- [什么是反射？应用场景？](./docs/01-Java基础/06-Java 反射详解.md)
-- [Java 泛型详解？](./docs/01-Java基础/07-Java 泛型详解.md)
-- [Java 集合框架体系？](./docs/01-Java基础/08-Java 集合框架详解.md)
-- [IO 和 NIO 的区别？](./docs/01-Java基础/09-Java-IO 与 NIO.md)
+- [什么是反射？应用场景？](./docs/01-Java基础/07-反射机制详解.md)
+- [Java 泛型详解？](./docs/01-Java基础/06-泛型深入详解.md)
+- [Java 集合框架体系？](./docs/01-Java基础/08-类加载机制详解.md)
+- [IO 和 NIO 的区别？](./docs/01-Java基础/09-Java-IO与NIO.md)
 
 ### Java并发编程（50+ 道）
-- [HashMap 和 ConcurrentHashMap 区别？](./docs/02-Java并发编程/02-ConcurrentHashMap 详解.md)
+- [HashMap 和 ConcurrentHashMap 区别？](./docs/02-Java并发编程/01-HashMap源码分析.md)
 - [AQS 的核心原理？](./docs/02-Java并发编程/03-AQS详解.md)
 - [CAS 原理和 ABA 问题？](./docs/02-Java并发编程/04-CAS与原子类.md)
-- [synchronized 和 ReentrantLock 区别？](./docs/02-Java并发编程/05-ReentrantLock 生产者消费者.md)
+- [synchronized 和 ReentrantLock 区别？](./docs/02-Java并发编程/05-ReentrantLock生产者消费者.md)
 - [线程池的 7 大参数？](./docs/02-Java并发编程/07-线程池详解.md)
-- [CountDownLatch 如何使用？](./docs/02-Java并发编程/06-CountDownLatch 线程顺序执行.md)
+- [CountDownLatch 如何使用？](./docs/02-Java并发编程/06-CountDownLatch线程顺序执行.md)
 
 ### Spring（35+ 道）
-- [Spring IOC 和 AOP 原理？](./docs/04-Spring框架/01-Spring-IOC 与 AOP.md)
-- [Spring Bean 的生命周期？](./docs/04-Spring框架/04-Spring-Bean生命周期详解.md)
-- [Spring 事务传播行为？](./docs/04-Spring框架/02-Spring 事务传播行为.md)
-- [Spring Boot 自动装配原理？](./docs/05-SpringBoot与自动装配/01-Spring-Boot 自动装配.md)
+- [Spring IOC 和 AOP 原理？](./docs/04-Spring框架/01-Spring-IOC与AOP.md)
+- [Spring Bean 的生命周期？](./docs/04-Spring框架/04-Spring事务传播行为.md)
+- [Spring事务传播行为？](./docs/04-Spring框架/02-Spring事务传播行为.md)
+- [Spring Boot 自动装配原理？](./docs/05-SpringBoot与自动装配/01-Spring-Boot自动装配.md)
 - [Spring Cloud Gateway 原理？](./docs/06-SpringCloud微服务/01-Spring-Cloud-Gateway详解.md)
 - [OpenFeign 工作原理？](./docs/06-SpringCloud微服务/02-Spring-Cloud-OpenFeign详解.md)
 
 ### MySQL（40+ 道）
-- [InnoDB 和 MyISAM 区别？](./docs/07-MySQL数据库/01-MySQL 字段类型与存储引擎.md)
-- [为什么使用 B+Tree 索引？](./docs/07-MySQL数据库/02-MySQL 索引原理详解.md)
-- [MVCC 是什么？](./docs/07-MySQL数据库/03-MVCC 详解.md)
-- [如何防止 SQL 注入？](./docs/07-MySQL数据库/04-SQL 注入与防护.md)
-- [MyBatis 核心原理？](./docs/07-MySQL数据库/07-MyBatis 核心原理与面试题.md)
+- [InnoDB 和 MyISAM 区别？](./docs/07-MySQL数据库/01-MySQL字段类型与存储引擎.md)
+- [为什么使用 B+Tree 索引？](./docs/07-MySQL数据库/02-MySQL索引原理详解.md)
+- [MySQL索引与MVCC.md](docs/07-MySQL%E6%95%B0%E6%8D%AE%E5%BA%93/05-MySQL%E7%B4%A2%E5%BC%95%E4%B8%8EMVCC.md)
+- [如何防止 SQL 注入？](./docs/07-MySQL数据库/04-MySQL日志与性能优化详解.md)
+- [MyBatis 核心原理？](./docs/09-中间件/03-MyBatis核心原理与面试题.md)
 
 ### Redis（30+ 道）
 - [Redis 支持的数据类型？](./docs/08-Redis缓存/01-Redis缓存与分布式锁.md)
-- [Redis 哨兵和集群机制？](./docs/08-Redis缓存/02-Redis-Sentinel与 Cluster.md)
+- [Redis 哨兵和集群机制？](./docs/08-Redis缓存/02-Redis-Sentinel与Cluster.md)
 - [如何实现分布式锁？](./docs/08-Redis缓存/01-Redis缓存与分布式锁.md)
-- [Redis 延时队列实现？](./docs/08-Redis缓存/03-Redis 高级应用 - 延时队列与幂等.md)
+- [Redis 延时队列实现？](./docs/08-Redis缓存/03-Redis持久化详解.md)
 
 ### 中间件（35+ 道）
-- [Nacos 的核心功能？](./docs/09-中间件/04-Nacos 核心知识点详解.md)
-- [MyBatis 的#{}和${}区别？](./docs/09-中间件/02-MyBatis动态 SQL 与 SQL 注入防护.md)
+- [Nacos 的核心功能？](./docs/09-中间件/04-Nacos核心知识点详解.md)
+- [MyBatis 的#{}和${}区别？](./docs/09-中间件/02-MyBatis动态SQL与SQL注入防护.md)
 - [Sentinel限流熔断原理？](./docs/09-中间件/05-Sentinel限流熔断详解.md)
 - [MyBatis-Plus 优势？](./docs/09-中间件/01-MyBatis-Plus快速入门.md)
 
@@ -174,14 +163,12 @@ docs/
 - [Spring 中用到了哪些设计模式？](./docs/11-设计模式/01-设计模式详解.md)
 
 ### 分布式系统（15+ 道）
-- [如何保证接口幂等性？](./docs/12-分布式系统/01-分布式幂等 - 防重放 - 加密详解.md)
-- [如何防止接口重放攻击？](./docs/12-分布式系统/01-分布式幂等 - 防重放 - 加密详解.md)
-- [分布式锁实现方案？](./docs/12-分布式系统/01-分布式幂等 - 防重放 - 加密详解.md)
+- [分布式幂等-防重放-加密详解.md](docs/12-%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/01-%E5%88%86%E5%B8%83%E5%BC%8F%E5%B9%82%E7%AD%89-%E9%98%B2%E9%87%8D%E6%94%BE-%E5%8A%A0%E5%AF%86%E8%AF%A6%E8%A7%A3.md)
 
 ### DevOps（20+ 道）
-- [Docker 的优势？](./docs/13-DevOps/01-DevOps核心知识点详解.md)
-- [Nginx 负载均衡策略？](./docs/13-DevOps/01-DevOps核心知识点详解.md)
-- [CI/CD流程？](./docs/13-DevOps/01-DevOps核心知识点详解.md)
+- [Docker 的优势？](./docs/13-DevOps/01-DevOps%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%86%E7%82%B9%E8%AF%A6%E8%A7%A3.md)
+- [Nginx 负载均衡策略？](./docs/13-DevOps/01-DevOps%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%86%E7%82%B9%E8%AF%A6%E8%A7%A3.md)
+- [CI/CD流程？](./docs/13-DevOps/01-DevOps%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%86%E7%82%B9%E8%AF%A6%E8%A7%A3.md)
 
 ---
 

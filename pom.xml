@@ -14,12 +14,17 @@
     <description>面试题微服务项目</description>
 
     <modules>
+        <!-- 公共模块 -->
         <module>interview-common</module>
+        
+        <!-- 网关服务 -->
         <module>interview-gateway</module>
-        <module>interview-service</module>
-        <module>interview-provider</module>
-        <module>interview-algorithm</module>
-        <module>interview-threadpool-starter</module>
+        
+        <!-- 微服务模块集合 -->
+        <module>interview-microservices-parent</module>
+        
+        <!-- Starter 模块集合 -->
+        <module>interview-starters-parent</module>
     </modules>
 
     <properties>
