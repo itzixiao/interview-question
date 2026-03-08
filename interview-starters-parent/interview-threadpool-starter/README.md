@@ -122,7 +122,9 @@ interview-threadpool-starter/
 │   └── ThreadPoolAutoConfiguration.java    # 自动配置类
 ├── src/main/resources/
 │   └── META-INF/
-│       └── spring.factories                # 自动装配入口文件
+│       ├── spring/                                           # Spring Boot 2.7+ 新规范
+│       │   └── org.springframework.boot.autoconfigure.AutoConfiguration.imports
+│       └── spring.factories                                  # 兼容旧版本（可选）
 └── pom.xml                                 # Maven 配置
 
 interview-provider/                         # 使用示例项目
@@ -173,14 +175,15 @@ public class CustomThreadPoolExecutor extends ThreadPoolExecutor {
 ```
 
 **绑定的配置项：**
+
 | 配置项 | Java 字段 | 默认值 | 说明 |
-|--------|---------|--------|------|
-| core-pool-size | corePoolSize | 5 | 核心线程数 |
-| max-pool-size | maxPoolSize | 10 | 最大线程数 |
-| queue-capacity | queueCapacity | 100 | 队列容量 |
-| keep-alive-time | keepAliveTime | 60 | 空闲存活时间（秒） |
-| name-prefix | namePrefix | custom-pool | 线程名前缀 |
-| rejected-policy | rejectedPolicy | ABORT | 拒绝策略 |
+| :--- | :--- | :---: | :--- |
+| `core-pool-size` | `corePoolSize` | `5` | 核心线程数 |
+| `max-pool-size` | `maxPoolSize` | `10` | 最大线程数 |
+| `queue-capacity` | `queueCapacity` | `100` | 队列容量 |
+| `keep-alive-time` | `keepAliveTime` | `60` | 空闲存活时间（秒） |
+| `name-prefix` | `namePrefix` | `custom-pool` | 线程名前缀 |
+| `rejected-policy` | `rejectedPolicy` | `ABORT` | 拒绝策略 |
 
 ---
 
@@ -212,7 +215,26 @@ public class ThreadPoolAutoConfiguration {
 
 ---
 
-### 4️⃣ spring.factories
+### 4️⃣ AutoConfiguration.imports（推荐）
+
+**位置：** `src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports`
+
+**内容：**
+```properties
+cn.itxiao.starter.ThreadPoolAutoConfiguration
+```
+
+**优势：**
+- ✅ Spring Boot 2.7+ 官方推荐的新标准
+- ✅ 文件结构更清晰，按功能分类组织
+- ✅ 支持 `@AutoConfiguration` 注解的完整特性
+- ✅ 更好的 IDE 支持和自动补全
+
+**说明：** Spring Boot 2.7.x 同时支持 `spring.factories` 和 `AutoConfiguration.imports`，但推荐使用新的 `imports` 文件。
+
+---
+
+### 5️⃣ spring.factories（已废弃）
 
 **位置：** `src/main/resources/META-INF/spring.factories`
 
@@ -222,7 +244,7 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
 cn.itxiao.starter.ThreadPoolAutoConfiguration
 ```
 
-**作用：** Spring Boot 启动时扫描并加载自动配置类
+**说明：** 虽然仍被支持，但官方已不推荐使用。建议升级到 `AutoConfiguration.imports`。
 
 ---
 
@@ -234,7 +256,9 @@ cn.itxiao.starter.ThreadPoolAutoConfiguration
 └─────────────────────────────────────────────────────────────┘
                             ↓
 ┌─────────────────────────────────────────────────────────────┐
-│  2. 扫描 classpath 下所有 jar 包的 META-INF/spring.factories   │
+│  2. 扫描 classpath 下所有 jar 包的自动配置文件                 │
+│     - META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports
+│     - META-INF/spring.factories (兼容旧版)                   │
 │     - interview-threadpool-starter.jar                      │
 └─────────────────────────────────────────────────────────────┘
                             ↓
