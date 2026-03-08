@@ -19,6 +19,7 @@
         <module>interview-service</module>
         <module>interview-provider</module>
         <module>interview-algorithm</module>
+        <module>interview-threadpool-starter</module>
     </modules>
 
     <properties>

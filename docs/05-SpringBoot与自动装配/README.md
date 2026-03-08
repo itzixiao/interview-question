@@ -2,19 +2,29 @@
 
 ## 📚 文档列表
 
-#### 1. [01-Spring-Boot自动装配.md](./01-Spring-Boot%E8%87%AA%E5%8A%A8%E8%A3%85%E9%85%8D.md)
+#### 1. [01-Spring-Boot 自动装配.md](./01-Spring-Boot%E8%87%AA%E5%8A%A8%E8%A3%85%E9%85%8D.md)
 - **内容：** @EnableAutoConfiguration、spring.factories、条件注解、自动配置原理
 - **面试题：** 10+ 道
 - **重要程度：** ⭐⭐⭐⭐⭐
 - **难度：** 中级 ~ 高级
 
+#### 2. [02-自定义线程池Starter详解.md](./02-自定义线程池Starter详解.md) ⭐新增
+- **内容：** 完整实现自定义线程池Starter，包括自动配置类、属性绑定、spring.factories
+- **面试题：** 5+ 道
+- **重要程度：** ⭐⭐⭐⭐⭐
+- **特色：** 
+  - 从零开发完整的 Starter 项目
+  - 图解自动装配流程
+  - 配套可运行的示例代码
+  - 实战高频面试题解析
+
 ---
 
 ## 📊 统计信息
 
-- **文档数：** 1 个
-- **面试题总数：** 10+ 道
-- **代码示例：** 配套 Java 代码在 `interview-service/springboot/` 目录（6 个文件）
+- **文档数：** 2 个
+- **面试题总数：** 15+ 道
+- **代码示例：** 配套 Java 代码在 `interview-service/springboot/` 目录（6 个文件）和 `interview-threadpool-starter/` 目录（4 个核心文件）
 
 ---
 
@@ -36,8 +46,8 @@
 
 4. **自定义 Starter 开发**
    - 命名规范：`xxx-spring-boot-starter`
-   - 配置文件设计
-   - 自动配置类编写
+   - 三步走：Properties + AutoConfiguration + spring.factories
+   - 实战案例：自定义线程池Starter（interview-threadpool-starter）
 
 ---
 

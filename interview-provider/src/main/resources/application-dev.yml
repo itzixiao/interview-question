@@ -4,14 +4,29 @@
 server:
   port: 8082
 
-# Nacos 配置
+# Spring Cloud Nacos 配置
 spring:
   cloud:
     nacos:
       discovery:
+        enabled: false
         server-addr: localhost:8848
       config:
+        enabled: false
         server-addr: localhost:8848
         file-extension: yml
         namespace: dev
         group: DEFAULT_GROUP
+        import-check:
+          enabled: false
+
+# 自定义线程池配置（演示 Starter 使用）
+custom:
+  thread-pool:
+    enabled: true                    # 是否启用（默认 true）
+    core-pool-size: 10               # 核心线程数
+    max-pool-size: 20                # 最大线程数
+    queue-capacity: 200              # 队列容量
+    keep-alive-time: 120             # 空闲线程存活时间（秒）
+    name-prefix: "provider-pool"     # 线程名前缀
+    rejected-policy: "CALLER_RUNS"   # 拒绝策略：ABORT/CALLER_RUNS/DISCARD/DISCARD_OLDEST

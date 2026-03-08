@@ -41,6 +41,13 @@
             <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
         </dependency>
 
+        <!-- 自定义线程池Starter -->
+        <dependency>
+            <groupId>cn.itxiao</groupId>
+            <artifactId>interview-threadpool-starter</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+
         <!-- Lombok -->
         <dependency>
             <groupId>org.projectlombok</groupId>

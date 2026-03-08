@@ -1,0 +1,3 @@
+# 自动配置类
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+cn.itxiao.starter.ThreadPoolAutoConfiguration
