@@ -1,0 +1,65 @@
+# ==========================================
+# JWT 认证接口测试
+# 模块：interview-provider
+# 说明：测试 JWT token 的生成、验证和用户信息获取
+# ==========================================
+
+### 1. 登录接口 - 获取 JWT Token
+# 作用：模拟用户登录，返回 JWT token
+# 参数：username（用户名）、password（密码）
+POST http://localhost:8082/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "password"
+}
+
+### 2. 验证 Token 有效性
+# 作用：验证给定的 JWT token 是否有效（未过期且签名正确）
+# 参数：token（JWT token 字符串）
+# 响应：valid=true 表示有效，valid=false 表示无效或已过期
+GET http://localhost:8082/api/auth/verify?token=eyJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6eyJyb2xlIjoiQURNSU4iLCJwZXJtaXNzaW9ucyI6WyJyZWFkZCIsIndyaXRlIiwiZGVsZXRlIl19LCJzdWIiOiJhZG1pbiIsImlzcyI6ImludGVydmlldy1wcm92aWRlciIsImlhdCI6MTc3MzA1NTE1MiwiZXhwIjoxNzczMTQxNTUyfQ.k3CMS3__t5L-xC17ePaNtY2kWxEAjoIr6jOL0FftU2w
+
+### 3. 获取当前用户信息
+# 作用：从 Authorization header 中的 token 解析用户信息
+# 参数：Authorization header（格式：Bearer {token}）
+# 响应：包含用户名、角色、权限等信息
+GET http://localhost:8082/api/auth/info
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6eyJyb2xlIjoiQURNSU4iLCJwZXJtaXNzaW9ucyI6WyJyZWFkZCIsIndyaXRlIiwiZGVsZXRlIl19LCJzdWIiOiJhZG1pbiIsImlzcyI6ImludGVydmlldy1wcm92aWRlciIsImlhdCI6MTc3MzA1NTE1MiwiZXhwIjoxNzczMTQxNTUyfQ.k3CMS3__t5L-xC17ePaNtY2kWxEAjoIr6jOL0FftU2w
+
+### 4. 测试不同用户登录 - zhangsan
+# 场景：测试普通用户登录
+POST http://localhost:8082/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "zhangsan",
+  "password": "123456"
+}
+
+### 5. 测试不同用户登录 - lisi
+# 场景：测试另一个用户登录
+POST http://localhost:8082/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "lisi",
+  "password": "password123"
+}
+
+### 6. 测试无效 Token
+# 场景：使用伪造或篡改的 token，应该返回验证失败
+GET http://localhost:8082/api/auth/verify?token=invalid.token.here
+
+### 7. 测试缺失 Authorization Header
+# 场景：不传 Authorization header，应该返回错误提示
+GET http://localhost:8082/api/auth/info
+
+### 8. 测试错误的 Bearer 格式
+# 场景：Bearer 前缀格式错误，应该返回错误提示
+GET http://localhost:8082/api/auth/info
+Authorization: Basic eyJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6eyJyb2xlIjoiQURNSU4iLCJwZXJtaXNzaW9ucyI6WyJyZWFkZCIsIndyaXRlIiwiZGVsZXRlIl19LCJzdWIiOiJhZG1pbiIsImlzcyI6ImludGVydmlldy1wcm92aWRlciIsImlhdCI6MTc3MzA1NTE1MiwiZXhwIjoxNzczMTQxNTUyfQ.k3CMS3__t5L-xC17ePaNtY2kWxEAjoIr6jOL0FftU2w
+
+###
+
