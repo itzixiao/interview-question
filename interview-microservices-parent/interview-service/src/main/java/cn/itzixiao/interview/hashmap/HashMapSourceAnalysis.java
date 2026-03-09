@@ -36,26 +36,68 @@ public class HashMapSourceAnalysis {
      * 默认初始容量：16
      * 负载因子：0.75
      * 扩容阈值：16 * 0.75 = 12
+     * 
+     * 关键问题：先插入再扩容，还是先扩容再插入？
+     * 答案：先判断是否需要扩容 -> 如果需要，先扩容 -> 然后再插入新元素
      */
     private static void demonstrateBasicStructure() throws Exception {
         System.out.println("【1. 基本结构与扩容演示】");
-        
-        // 创建指定初始容量的HashMap
+        System.out.println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+        System.out.println("核心问题：扩容是【先插入再扩容】还是【先扩容再插入】？");
+        System.out.println("答案：在 put() 方法内部，先检查 size >= threshold，如果是，先调用 resize() 扩容，然后再插入元素");
+        System.out.println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
+            
+        // 创建指定初始容量的 HashMap
         HashMap<Integer, String> map = new HashMap<>(16, 0.75f);
-        
-        System.out.println("初始容量: 16, 负载因子: 0.75, 扩容阈值: 12");
+            
+        System.out.println("【初始化状态】");
+        System.out.println("  初始容量：16, 负载因子：0.75, 扩容阈值：12");
         printMapInternalStructure(map);
-        
+            
         // 添加元素，观察扩容
-        System.out.println("\n添加元素过程：");
+        System.out.println("\n【开始逐个插入元素，观察扩容时机】");
+        System.out.println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
         for (int i = 0; i < 15; i++) {
+            // 插入前状态
+            int sizeBefore = getSize(map);
+            int thresholdBefore = getThreshold(map);
+                
+            System.out.println("\n>>> 准备插入元素 [" + i + ", value" + i + "]");
+            System.out.println("    插入前：size=" + sizeBefore + ", threshold=" + thresholdBefore);
+                
+            // 执行插入
             map.put(i, "value" + i);
-            if (i == 11 || i == 12 || i == 14) {
-                System.out.println("添加第 " + (i + 1) + " 个元素后：");
+                
+            // 插入后状态
+            int sizeAfter = getSize(map);
+            int capacityAfter = getCapacity(map);
+            int thresholdAfter = getThreshold(map);
+                
+            System.out.println("    插入后：size=" + sizeAfter + ", capacity=" + capacityAfter + ", threshold=" + thresholdAfter);
+                
+            // 关键节点详细分析
+            if (i == 11) {
+                System.out.println("    ⚠️  注意：size(12) == threshold(12)，但还没扩容！");
+                System.out.println("    原因：HashMap 在 size > threshold 时才扩容，不是 >=");
+                printMapInternalStructure(map);
+            } else if (i == 12) {
+                System.out.println("    🔥 关键：插入第 13 个元素时！");
+                System.out.println("    流程：检测到 size(12) >= threshold(12) → 先调用 resize() 扩容到 32 → 然后插入新元素");
+                System.out.println("    结论：【先扩容，再插入】");
+                printMapInternalStructure(map);
+                System.out.println("    ✅ 验证：容量从 16 变为 32，threshold 从 12 变为 24");
+            } else if (i == 14) {
+                System.out.println("    当前状态稳定，下次扩容要等 size > 24");
                 printMapInternalStructure(map);
             }
         }
-        System.out.println();
+            
+        System.out.println("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+        System.out.println("【扩容机制总结】");
+        System.out.println("1. 扩容时机：在 put() 方法中，插入前先检查 size >= threshold");
+        System.out.println("2. 扩容流程：if (size >= threshold) resize(); → 然后才执行插入逻辑");
+        System.out.println("3. 扩容细节：创建新数组（容量×2）→ 重新计算哈希 → 元素迁移到新位置");
+        System.out.println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
     }
     
     /**
@@ -90,24 +132,77 @@ public class HashMapSourceAnalysis {
     
     /**
      * 3. 链表转红黑树演示
-     * 当链表长度>=8且数组长度>=64时，链表转为红黑树
+     * 当链表长度>=8 且数组长度>=64 时，链表转为红黑树
+     * 
+     * 关键问题：先插入再转树，还是先转树再插入？
+     * 答案：在 putVal() 方法中，先插入新节点到链表尾部 → 然后检查链表长度 → 如果>=TREEIFY_THRESHOLD 且容量>=MIN_TREEIFY_CAPACITY，则调用 treeifyBin() 转树
      */
     private static void demonstrateTreeify() throws Exception {
-        System.out.println("【3. 链表转红黑树演示】");
-        System.out.println("树化条件：链表长度 >= 8 且 数组长度 >= 64");
+        System.out.println("\n【3. 链表转红黑树演示】");
+        System.out.println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+        System.out.println("核心问题：树化是【先插入再转树】还是【先转树再插入】？");
+        System.out.println("答案：在 putVal() 方法中，先将新元素插入链表尾部 → 然后检查链表长度 → 如果达到阈值且容量足够，则调用 treeifyBin() 转树");
+        System.out.println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
         
-        HashMap<CollisionKey, String> map = new HashMap<>();
+        // 场景 1：数组容量<64，即使链表长度>=8，也会先扩容而不是树化
+        System.out.println("【场景 1：小容量数组 - 优先扩容而非树化】");
+        System.out.println("  条件：链表长度>=8，但数组容量<64");
+        System.out.println("  行为：调用 resize() 扩容，而不是 treeifyBin() 树化");
+        System.out.println("  原因：通过扩容分散哈希冲突，避免过早树化浪费空间\n");
         
-        // 添加8个hashCode相同的key，触发链表转红黑树
-        System.out.println("\n添加8个hashCode相同的元素：");
-        for (int i = 0; i < 8; i++) {
-            CollisionKey key = new CollisionKey("key" + i, 200);
-            map.put(key, "value" + i);
-            System.out.println("添加第 " + (i + 1) + " 个元素");
+        HashMap<CollisionKey, String> smallMap = new HashMap<>(16);
+        System.out.println("初始状态：capacity=16, threshold=12");
+        
+        for (int i = 0; i < 10; i++) {
+            CollisionKey key = new CollisionKey("small" + i, 300); // 所有 key 的 hashCode 相同
+            smallMap.put(key, "value" + i);
+            
+            int capacity = getCapacity(smallMap);
+            int size = getSize(smallMap);
+            
+            System.out.println("  插入第 " + (i + 1) + " 个元素后：size=" + size + ", capacity=" + capacity);
+            
+            if (i == 7) {
+                System.out.println("    ⚠️  链表长度达到 8，但 capacity=16<64，不会树化");
+            } else if (i == 9) {
+                System.out.println("    🔥 注意：此时发生了扩容（从 16→32），但仍然没有树化！");
+                System.out.println("    原因：虽然链表长度>=8，但容量 32 仍然<64，继续扩容优先");
+            }
         }
         
-        System.out.println("\n注意：JDK8中，当链表长度>=8时，如果数组长度<64，会先扩容而不是树化");
-        System.out.println("这是为了避免在较小数组上过早树化，因为扩容可以分散哈希冲突\n");
+        // 场景 2：数组容量>=64，链表长度>=8 时触发树化
+        System.out.println("\n【场景 2：大容量数组 - 触发树化】");
+        System.out.println("  条件：链表长度>=8 且 数组容量>=64");
+        System.out.println("  行为：调用 treeifyBin() 将链表转为红黑树");
+        
+        // 直接创建大容量 HashMap
+        HashMap<CollisionKey, String> largeMap = new HashMap<>(64);
+        System.out.println("\n初始状态：capacity=64 (已达到树化最小容量要求)");
+        
+        System.out.println("\n开始插入 hashCode 相同的元素（强制产生冲突）：");
+        for (int i = 0; i < 10; i++) {
+            CollisionKey key = new CollisionKey("large" + i, 500);
+            largeMap.put(key, "value" + i);
+            
+            int size = getSize(largeMap);
+            System.out.println("  插入第 " + (i + 1) + " 个元素：size=" + size);
+            
+            if (i == 7) {
+                System.out.println("    ⚠️  链表长度达到 8，capacity=64，满足树化条件！");
+                System.out.println("    流程：插入新节点 → binCount=8 → treeifyBin() → 链表转红黑树");
+                System.out.println("    ✅ 结论：【先插入，再转树】");
+            } else if (i == 9) {
+                System.out.println("    当前桶中已经是红黑树结构，后续插入走树的平衡逻辑");
+            }
+        }
+        
+        System.out.println("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+        System.out.println("【树化机制总结】");
+        System.out.println("1. 树化时机：在 putVal() 中，插入新节点后检查链表长度 binCount");
+        System.out.println("2. 树化条件：binCount >= TREEIFY_THRESHOLD(8) && capacity >= MIN_TREEIFY_CAPACITY(64)");
+        System.out.println("3. 树化流程：插入新节点 → if (binCount >= 8) treeifyBin() → 遍历链表转红黑树");
+        System.out.println("4. 特殊情况：如果 capacity < 64，优先调用 resize() 扩容而非树化");
+        System.out.println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
     }
     
     /**
@@ -170,25 +265,53 @@ public class HashMapSourceAnalysis {
     }
     
     /**
-     * 通过反射打印HashMap内部结构
+     * 通过反射打印 HashMap 内部结构
      */
     private static void printMapInternalStructure(HashMap<?, ?> map) throws Exception {
         Field tableField = HashMap.class.getDeclaredField("table");
         tableField.setAccessible(true);
         Object[] table = (Object[]) tableField.get(map);
-        
+            
         Field sizeField = HashMap.class.getDeclaredField("size");
         sizeField.setAccessible(true);
         int size = (int) sizeField.get(map);
-        
+            
         Field thresholdField = HashMap.class.getDeclaredField("threshold");
         thresholdField.setAccessible(true);
         int threshold = (int) thresholdField.get(map);
-        
+            
         int capacity = table == null ? 0 : table.length;
-        System.out.println("  当前容量: " + capacity + 
-                          ", 元素个数: " + size + 
-                          ", 扩容阈值: " + threshold);
+        System.out.println("  当前容量：" + capacity + 
+                          ", 元素个数：" + size + 
+                          ", 扩容阈值：" + threshold);
+    }
+        
+    /**
+     * 通过反射获取 HashMap 容量
+     */
+    private static int getCapacity(HashMap<?, ?> map) throws Exception {
+        Field tableField = HashMap.class.getDeclaredField("table");
+        tableField.setAccessible(true);
+        Object[] table = (Object[]) tableField.get(map);
+        return table == null ? 0 : table.length;
+    }
+        
+    /**
+     * 通过反射获取 HashMap 元素个数
+     */
+    private static int getSize(HashMap<?, ?> map) throws Exception {
+        Field sizeField = HashMap.class.getDeclaredField("size");
+        sizeField.setAccessible(true);
+        return (int) sizeField.get(map);
+    }
+        
+    /**
+     * 通过反射获取 HashMap 扩容阈值
+     */
+    private static int getThreshold(HashMap<?, ?> map) throws Exception {
+        Field thresholdField = HashMap.class.getDeclaredField("threshold");
+        thresholdField.setAccessible(true);
+        return (int) thresholdField.get(map);
     }
     
     /**
