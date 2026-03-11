@@ -416,6 +416,6 @@ MyBatis 使用 JDK 动态代理：
 
 ## 相关代码示例
 
-- [MyBatisDynamicSqlDemo.java](../../interview-service/src/main/java/cn/itzixiao/interview/mybatis/MyBatisDynamicSqlDemo.java) - 动态 SQL 示例
-- [MyBatisPlusDemo.java](../../interview-service/src/main/java/cn/itzixiao/interview/mybatis/MyBatisPlusDemo.java) - MyBatis-Plus 示例
-- [SqlInjectionPreventionDemo.java](../../interview-service/src/main/java/cn/itzixiao/interview/mybatis/SqlInjectionPreventionDemo.java) - SQL 注入防护
+- [MyBatisDynamicSqlDemo.java](../../interview-microservices-parent/interview-service/src/main/java/cn/itzixiao/interview/mybatis/MyBatisDynamicSqlDemo.java) - 动态 SQL 示例
+- [MyBatisPlusDemo.java](../../interview-microservices-parent/interview-service/src/main/java/cn/itzixiao/interview/mybatis/MyBatisPlusDemo.java) - MyBatis-Plus 示例
+- [SqlInjectionPreventionDemo.java](../../interview-microservices-parent/interview-service/src/main/java/cn/itzixiao/interview/mybatis/SqlInjectionPreventionDemo.java) - SQL 注入防护

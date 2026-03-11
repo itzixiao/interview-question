@@ -528,4 +528,4 @@ JDK 8 使用 LongAdder 思想：
 
 ## 示例代码
 
-完整示例代码请参考：[ConcurrentHashMapDemo.java](../../interview-service/src/main/java/cn/itzixiao/interview/hashmap/ConcurrentHashMapDemo.java)
+完整示例代码请参考：[ConcurrentHashMapDemo.java](../../interview-microservices-parent/interview-service/src/main/java/cn/itzixiao/interview/hashmap/ConcurrentHashMapDemo.java)
