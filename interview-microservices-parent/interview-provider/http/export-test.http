@@ -1,0 +1,111 @@
+### =============================================
+### Excel 导出测试接口 - HTTP 请求测试文件
+### 使用说明：
+### 1. 在 IDEA 中打开此文件（需要 Http Client 插件）
+### 2. 点击每个请求上方的 "Send" 按钮发送请求
+### 3. 或在 Postman 中导入这些请求
+### =============================================
+
+# 设置基础 URL
+@base_url = http://localhost:8082
+@api_export = {{base_url}}/api/export
+
+### ============================================
+### 准备工作：查看当前数据统计
+### ============================================
+### 请求说明：获取设备日志表的总记录数
+### 预期结果：返回 totalCount 字段
+
+GET {{api_export}}/stats
+Accept: application/json
+
+### ============================================
+### 测试场景 1：全表导出（⚠️ OOM 风险）
+### ============================================
+### 请求说明：一次性导出全表所有数据
+### 风险提示：数据量大会导致内存溢出
+### 适用场景：小数据量测试（< 10 万条）
+### 操作方式：点击链接下载 Excel 文件
+
+# @name export_all
+### 方式 1：普通全表导出（⚠️ 数据量 > 1048576 会报错）
+GET {{api_export}}/all
+Accept: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+
+---
+
+# @name export_all_multi_sheet
+### 方式 2：多 Sheet 自动拆分模式（🌟 推荐用于大数据量）
+### 说明：每个 Sheet 包含 10 万行数据，自动创建多个 Sheet
+### 示例：110 万条数据将生成 11 个 Sheet
+GET {{api_export}}/all-multi-sheet
+Accept: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+
+### ============================================
+### 测试场景 2：按时间范围导出（✅ 索引优化）
+### ============================================
+### 请求说明：导出指定时间之后的数据
+### 索引验证：应该使用 idx_operation_time 索引
+### 参数说明：startTime - 开始时间（ISO-8601 格式）
+
+# @name export_by_time_7days
+### 示例 1：导出过去 7 天的数据
+GET {{api_export}}/by-time?startTime=2025-03-04T00:00:00
+Accept: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+
+---
+
+# @name export_by_time_30days
+### 示例 2：导出过去 30 天的数据
+GET {{api_export}}/by-time?startTime=2025-02-09T00:00:00
+Accept: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+
+---
+
+# @name export_by_time_custom
+### 示例 3：自定义时间范围
+GET {{api_export}}/by-time?startTime=2025-01-01T00:00:00
+Accept: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+
+### ============================================
+### 测试场景 3：分页导出（🌟 推荐方案）
+### ============================================
+### 请求说明：分批查询并导出，内存友好
+### 默认配置：每页 1000 条记录
+### 适用场景：大数据量导出（百万级）
+
+# @name export_page_default
+### 示例 1：默认分页（每页 1000 条）
+GET {{api_export}}/page
+Accept: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+
+---
+
+# @name export_page_500
+### 示例 2：自定义每页 500 条
+GET {{api_export}}/page?pageSize=500
+Accept: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+
+---
+
+# @name export_page_2000
+### 示例 3：自定义每页 2000 条
+GET {{api_export}}/page?pageSize=2000
+Accept: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+
+### ============================================
+### 性能对比测试
+### ============================================
+### 测试建议：
+### 1. 先执行 /stats 查看数据总量
+### 2. 依次测试三种导出方式
+### 3. 观察控制台日志的耗时统计
+### 4. 监控 JVM 内存使用情况
+### 
+### 监控命令：
+### jstat -gc <pid> 1000
+### 
+### SQL 验证索引：
+### EXPLAIN SELECT * FROM device_operation_log 
+### WHERE operation_time > '2025-01-01';
+### ============================================

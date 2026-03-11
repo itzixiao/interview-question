@@ -6,6 +6,20 @@ server:
 
 # Spring Cloud Nacos 配置
 spring:
+  datasource:
+    # MySQL 数据源配置（设备日志导出测试用）
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/interview?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: root
+    password: ${MYSQL_PASSWORD:}
+    # HikariCP 连接池配置（可根据实际情况调整）
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 20
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+
   cloud:
     nacos:
       discovery:
