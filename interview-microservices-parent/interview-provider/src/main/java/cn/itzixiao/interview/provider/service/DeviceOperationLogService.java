@@ -1,15 +1,21 @@
 package cn.itzixiao.interview.provider.service;
 
+import cn.itzixiao.interview.provider.dto.ExportTaskDTO;
 import cn.itzixiao.interview.provider.entity.DeviceOperationLog;
+import cn.itzixiao.interview.provider.enums.ExportTaskStatus;
 import cn.itzixiao.interview.provider.mapper.DeviceOperationLogMapper;
 import com.alibaba.excel.EasyExcel;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -27,8 +33,12 @@ public class DeviceOperationLogService {
 
     private final DeviceOperationLogMapper deviceOperationLogMapper;
 
-    public DeviceOperationLogService(DeviceOperationLogMapper deviceOperationLogMapper) {
+    private final ExportTaskManager exportTaskManager;
+
+    public DeviceOperationLogService(DeviceOperationLogMapper deviceOperationLogMapper,
+                                     @Autowired(required = false) ExportTaskManager exportTaskManager) {
         this.deviceOperationLogMapper = deviceOperationLogMapper;
+        this.exportTaskManager = exportTaskManager;
     }
 
     /**
@@ -375,5 +385,130 @@ public class DeviceOperationLogService {
      */
     public Long getCountByTimeRange(LocalDateTime startTime) {
         return deviceOperationLogMapper.selectCount(null); // 简化实现，实际应该加条件
+    }
+
+    // ==================== 异步导出方法 ====================
+
+    /**
+     * 异步导出全表数据（多 Sheet 模式）- 内存优化版
+     * 
+     * @param taskId 任务 ID
+     */
+    @Async("exportTaskExecutor")
+    public void asyncExportAllWithMultiSheet(String taskId) {
+        log.info("【异步导出】开始执行异步导出任务：taskId={}", taskId);
+        
+        if (exportTaskManager == null) {
+            log.error("【异步导出】ExportTaskManager 未启用，无法执行异步任务");
+            return;
+        }
+        
+        java.util.concurrent.ExecutorService executor = null;
+        try {
+            // 更新状态为处理中
+            exportTaskManager.updateTaskProcessing(taskId, 10);
+            
+            // 创建临时目录
+            String tempDir = System.getProperty("java.io.tmpdir") + File.separator + "excel-export";
+            File dir = new File(tempDir);
+            if (!dir.exists()) {
+                dir.mkdirs();
+            }
+            
+            // 生成文件名
+            String fileName = "device_log_async_" + taskId + ".xlsx";
+            String filePath = tempDir + File.separator + fileName;
+            
+            // Excel 参数
+            final int MAX_ROWS_PER_SHEET = 100000;
+            
+            // 先查询总记录数（不加载数据）
+            Long totalCount = deviceOperationLogMapper.selectCount(null);
+            int totalSheets = (totalCount.intValue() + MAX_ROWS_PER_SHEET - 1) / MAX_ROWS_PER_SHEET;
+            
+            log.info("【异步导出】数据量 {} 条，将拆分为 {} 个 Sheet", totalCount, totalSheets);
+            exportTaskManager.updateTaskProcessing(taskId, 30);
+            
+            // 创建 ExcelWriter（流式写入，不占用大量内存）
+            com.alibaba.excel.ExcelWriter excelWriter = EasyExcel.write(new File(filePath), DeviceOperationLog.class).build();
+            
+            try {
+                // 多线程准备数据
+                int threadCount = Math.min(Runtime.getRuntime().availableProcessors() + 1, totalSheets);
+                executor = java.util.concurrent.Executors.newFixedThreadPool(threadCount);
+                
+                // ✅ 优化：分批处理，每批处理完立即释放内存
+                int batchSize = Math.min(5, totalSheets); // 每批处理 5 个 Sheet
+                
+                for (int batchStart = 0; batchStart < totalSheets; batchStart += batchSize) {
+                    int batchEnd = Math.min(batchStart + batchSize, totalSheets);
+                    log.info("【异步导出】处理批次：{}-{}", batchStart + 1, batchEnd);
+                    
+                    // 当前批次的 Future 列表（批次结束后清空）
+                    java.util.List<java.util.concurrent.Future<SheetData>> futures = new java.util.ArrayList<>();
+                    
+                    try {
+                        // 并行准备当前批次的 Sheet 数据
+                        for (int i = batchStart; i < batchEnd; i++) {
+                            final int sheetIndex = i;
+                            final int startRow = i * MAX_ROWS_PER_SHEET;
+                            final int endRow = Math.min(startRow + MAX_ROWS_PER_SHEET, totalCount.intValue());
+                            final int progress = 30 + ((i * 60) / totalSheets); // 进度 30%-90%
+                            
+                            futures.add(executor.submit(() -> {
+                                // ✅ 优化：分页查询，避免一次性加载
+                                List<DeviceOperationLog> subList = deviceOperationLogMapper.selectPage(startRow, endRow - startRow);
+                                exportTaskManager.updateTaskProcessing(taskId, progress);
+                                return new SheetData(sheetIndex, subList, startRow, endRow);
+                            }));
+                        }
+                        
+                        // 等待当前批次所有任务完成
+                        for (java.util.concurrent.Future<SheetData> future : futures) {
+                            SheetData sheetData = future.get();
+                            
+                            // 创建 Sheet
+                            com.alibaba.excel.write.metadata.WriteSheet writeSheet = EasyExcel
+                                    .writerSheet(sheetData.sheetIndex, "数据" + (sheetData.sheetIndex + 1))
+                                    .head(DeviceOperationLog.class)
+                                    .build();
+                            
+                            // 写入当前 Sheet 的数据
+                            excelWriter.write(sheetData.data, writeSheet);
+                            
+                            log.info("【异步导出】Sheet {} 写入完成 ({}-{} 行)", 
+                                    sheetData.sheetIndex + 1, sheetData.startRow + 1, sheetData.endRow);
+                        }
+                        
+                    } finally {
+                        // ✅ 关键：清空当前批次的 Future，释放引用
+                        futures.clear();
+                        System.gc(); // 提示 JVM 进行 GC
+                    }
+                }
+                
+                // 标记任务完成
+                exportTaskManager.completeTask(taskId, filePath, fileName, totalCount.intValue());
+                log.info("【异步导出】任务完成：taskId={}, filePath={}, 总记录数={}", taskId, filePath, totalCount);
+                
+            } catch (Exception e) {
+                log.error("【异步导出】Excel 写入失败", e);
+                throw e;
+            } finally {
+                // 务必关闭 ExcelWriter
+                if (excelWriter != null) {
+                    excelWriter.finish();
+                }
+            }
+            
+        } catch (Exception e) {
+            log.error("【异步导出】任务失败：taskId={}", taskId, e);
+            exportTaskManager.failTask(taskId, "导出失败：" + e.getMessage());
+        } finally {
+            // ✅ 确保线程池被关闭
+            if (executor != null && !executor.isShutdown()) {
+                executor.shutdownNow();
+            }
+        }
     }
 }
