@@ -4,6 +4,11 @@
 ### 1. 在 IDEA 中打开此文件（需要 Http Client 插件）
 ### 2. 点击每个请求上方的 "Send" 按钮发送请求
 ### 3. 或在 Postman 中导入这些请求
+### 
+### 超时配置说明：
+### - @timeout: <毫秒数> 设置单个请求的超时时间
+### - 大数据量导出建议设置较长的超时时间（如 120000ms = 2 分钟）
+### - 异步导出接口无需设置超时（立即返回）
 ### =============================================
 
 # 设置基础 URL
@@ -29,6 +34,7 @@ Accept: application/json
 
 # @name export_all
 ### 方式 1：普通全表导出（⚠️ 数据量 > 1048576 会报错）
+### @timeout: 60000
 GET {{api_export}}/all
 Accept: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
 
@@ -38,6 +44,7 @@ Accept: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
 ### 方式 2：多 Sheet 自动拆分模式（🌟 推荐用于大数据量）
 ### 说明：每个 Sheet 包含 10 万行数据，自动创建多个 Sheet
 ### 示例：110 万条数据将生成 11 个 Sheet
+@timeout = 120000
 GET {{api_export}}/all-multi-sheet
 Accept: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
 
@@ -50,6 +57,7 @@ Accept: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
 
 # @name export_by_time_7days
 ### 示例 1：导出过去 7 天的数据
+### @timeout: 30000
 GET {{api_export}}/by-time?startTime=2025-03-04T00:00:00
 Accept: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
 
@@ -57,6 +65,7 @@ Accept: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
 
 # @name export_by_time_30days
 ### 示例 2：导出过去 30 天的数据
+### @timeout: 60000
 GET {{api_export}}/by-time?startTime=2025-02-09T00:00:00
 Accept: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
 
@@ -64,6 +73,7 @@ Accept: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
 
 # @name export_by_time_custom
 ### 示例 3：自定义时间范围
+### @timeout: 90000
 GET {{api_export}}/by-time?startTime=2025-01-01T00:00:00
 Accept: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
 
@@ -76,6 +86,7 @@ Accept: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
 
 # @name export_page_default
 ### 示例 1：默认分页（每页 1000 条）
+### @timeout: 120000
 GET {{api_export}}/page
 Accept: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
 
@@ -83,6 +94,7 @@ Accept: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
 
 # @name export_page_500
 ### 示例 2：自定义每页 500 条
+### @timeout: 120000
 GET {{api_export}}/page?pageSize=500
 Accept: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
 
@@ -90,7 +102,55 @@ Accept: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
 
 # @name export_page_2000
 ### 示例 3：自定义每页 2000 条
+### @timeout: 120000
 GET {{api_export}}/page?pageSize=2000
+Accept: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+
+### ============================================
+### 测试场景 4：异步导出（🌟 推荐用于大数据量）
+### ============================================
+### 请求说明：提交异步导出任务，立即返回任务 ID
+### 优势：不阻塞接口，支持后台排队处理
+### 适用场景：百万级数据导出
+### 操作流程：
+###   1. 调用此接口获取 taskId
+###   2. 使用 GET /async/status/{taskId} 查询进度
+###   3. 完成后使用 GET /download/{taskId} 下载文件
+
+# @name async_export_all
+### 示例 1：提交异步导出任务（全表数据）
+### 响应示例：
+### {
+###   "code": 200,
+###   "data": {
+###     "taskId": "abc123def456",
+###     "status": "PENDING",
+###     "message": "任务已提交，请使用 taskId 查询进度"
+###   }
+### }
+POST {{api_export}}/async/all
+Content-Type: application/json
+
+---
+
+# @name async_status_check
+### 示例 2：查询异步任务状态
+### 使用说明：将 {taskId} 替换为实际的任务 ID
+### 响应说明：
+###   - status: PENDING（等待处理）
+###   - status: PROCESSING（处理中，progress 显示进度）
+###   - status: COMPLETED（已完成，可下载）
+###   - status: FAILED（失败，查看 errorMessage）
+GET {{api_export}}/async/status/abc123def456
+Accept: application/json
+
+---
+
+# @name async_download
+### 示例 3：下载已完成的 Excel 文件
+### 使用说明：将 {taskId} 替换为已完成的任务 ID
+### 注意事项：文件仅保留 24 小时，超时自动删除
+GET {{api_export}}/download/abc123def456
 Accept: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
 
 ### ============================================
@@ -108,4 +168,53 @@ Accept: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
 ### SQL 验证索引：
 ### EXPLAIN SELECT * FROM device_operation_log 
 ### WHERE operation_time > '2025-01-01';
+
+### ============================================
+### 异步导出完整测试流程（推荐）
+### ============================================
+### 步骤 1：提交异步导出任务
+### 预期响应：立即返回 taskId（< 100ms）
+
+POST {{api_export}}/async/all
+Content-Type: application/json
+
+### ============================================
+### 步骤 2：等待 3-5 秒后查询任务状态
+### 将 taskId 替换为上一步返回的实际值
+### 观察 progress 字段（0-100）
+
+GET {{api_export}}/async/status/33edb94da4d64f7db7989e53530a8e35
+Accept: application/json
+
+### ============================================
+### 步骤 3：当 status=COMPLETED 时下载文件
+### 浏览器将自动下载 Excel 文件
+### 文件位置：系统临时目录/excel-export/
+
+GET {{api_export}}/download/33edb94da4d64f7db7989e53530a8e35
+Accept: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+
+### ============================================
+### JConsole 内存监控指南
+### ============================================
+### 监控目标：验证内存泄漏修复效果
+### 
+### 操作步骤：
+### 1. 启动应用后打开 JConsole
+### 2. 连接到 interview-provider 进程
+### 3. 选择"内存"标签页
+### 4. 点击"执行 GC"观察初始内存
+### 5. 执行异步导出任务
+### 6. 观察内存变化曲线
+### 
+### 预期结果：
+### ✅ 锯齿状上升（分批处理）
+### ✅ 峰值内存 < 1GB
+### ✅ 完成后内存明显下降
+### ✅ GC 后回到接近初始水平
+### 
+### 告警信号：
+### ❌ 内存持续上升不下降
+### ❌ GC 后内存仍远高于初始值
+### ❌ Full GC 频繁（> 1 次/分钟）
 ### ============================================

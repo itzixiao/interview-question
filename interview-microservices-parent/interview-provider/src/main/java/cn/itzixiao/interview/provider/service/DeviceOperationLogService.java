@@ -204,13 +204,28 @@ public class DeviceOperationLogService {
                 
                 log.info("【测试场景 1-增强版】全部导出完成，总计 {}ms", 
                         System.currentTimeMillis() - startTime);
-            } catch (Exception e) {
-                log.error("【测试场景 1-增强版】Excel 写入失败", e);
-                throw e;
+            } catch (Throwable t) {
+                // ✅ 优化：客户端主动断开连接（用户取消下载、浏览器关闭等）
+                if (t.getCause() instanceof org.apache.catalina.connector.ClientAbortException) {
+                    log.warn("【测试场景 1-增强版】客户端主动断开连接：{}", t.getMessage());
+                    log.warn("【提示】这通常是因为：\n" +
+                            "  1. 用户点击了浏览器的取消按钮\n" +
+                            "  2. HTTP 客户端超时（IDEA/Postman 默认超时时间）\n" +
+                            "  3. 网络波动导致连接中断\n" +
+                            "建议：使用异步导出接口 /api/export/async/all");
+                    return; // 不抛异常，正常结束
+                }
+                log.error("【测试场景 1-增强版】Excel 写入失败", t);
+                throw t;
             } finally {
                 // 务必关闭 ExcelWriter
                 if (excelWriter != null) {
-                    excelWriter.finish();
+                    try {
+                        excelWriter.finish();
+                    } catch (Throwable t) {
+                        // ✅ 忽略客户端已断开的情况
+                        log.debug("关闭 ExcelWriter 时发生异常：{}", t.getMessage());
+                    }
                 }
             }
         } catch (InterruptedException e) {
@@ -270,11 +285,21 @@ public class DeviceOperationLogService {
         setResponseHeaders(response, fileName);
         
         // 导出
-        EasyExcel.write(response.getOutputStream(), DeviceOperationLog.class)
-                .sheet("设备运行日志（按时间）")
-                .doWrite(timeRangeData);
-        
-        log.info("【测试场景 2】导出完成，总耗时 {}ms", System.currentTimeMillis() - queryStart);
+        try {
+            EasyExcel.write(response.getOutputStream(), DeviceOperationLog.class)
+                    .sheet("设备运行日志（按时间）")
+                    .doWrite(timeRangeData);
+            
+            log.info("【测试场景 2】导出完成，总耗时 {}ms", System.currentTimeMillis() - queryStart);
+        } catch (Throwable t) {
+            if (t.getCause() instanceof org.apache.catalina.connector.ClientAbortException) {
+                log.warn("【测试场景 2】客户端主动断开连接：{}", t.getMessage());
+                log.warn("【提示】建议使用异步导出接口 /api/export/async/all");
+            } else {
+                log.error("【测试场景 2】Excel 写入失败", t);
+                throw t;
+            }
+        }
     }
 
     /**
@@ -338,15 +363,27 @@ public class DeviceOperationLogService {
                     break;
                 }
             }
+            
+            log.info("【测试场景 3】分页导出完成，总计 {}ms，导出 {} 条记录",
+                    System.currentTimeMillis() - startTotal, totalExported);
+        } catch (Throwable t) {
+            if (t.getCause() instanceof org.apache.catalina.connector.ClientAbortException) {
+                log.warn("【测试场景 3】客户端主动断开连接：{}", t.getMessage());
+                log.warn("【提示】建议使用异步导出接口 /api/export/async/all");
+            } else {
+                log.error("【测试场景 3】Excel 写入失败", t);
+                throw t;
+            }
         } finally {
             // 务必关闭 ExcelWriter
             if (excelWriter != null) {
-                excelWriter.finish();
+                try {
+                    excelWriter.finish();
+                } catch (Throwable t) {
+                    log.debug("关闭 ExcelWriter 时发生异常：{}", t.getMessage());
+                }
             }
         }
-        
-        log.info("【测试场景 3】分页导出完成，总计 {}ms，导出 {} 条记录",
-                System.currentTimeMillis() - startTotal, totalExported);
     }
 
     /**

@@ -40,9 +40,11 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,env,beans,threaddump,httpexchanges,prometheus
+        include: health,info,metrics,env,beans,threaddump,httpexchanges,prometheus,gc,heapdump
   # 健康检查端点配置
   endpoint:
+    gc:
+      enabled: true  # 开启GC监控
     env:
       # 全局关闭脱敏（所有配置都显示明文）
       sanitize: false
