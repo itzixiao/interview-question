@@ -33,6 +33,9 @@
         <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
+        <!-- 项目模块版本 -->
+        <project.version>1.0.0-SNAPSHOT</project.version>
+
         <!-- Spring 全家桶版本 -->
         <spring-boot.version>2.7.18</spring-boot.version>
         <spring-cloud.version>2021.0.8</spring-cloud.version>
@@ -95,6 +98,20 @@
                 <scope>import</scope>
             </dependency>
 
+            <!-- 公共模块 -->
+            <dependency>
+                <groupId>cn.itzixiao</groupId>
+                <artifactId>interview-common</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            
+            <!-- 自定义 Starter -->
+            <dependency>
+                <groupId>cn.itzixiao</groupId>
+                <artifactId>interview-threadpool-starter</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            
             <!-- MySQL 驱动 -->
             <dependency>
                 <groupId>com.mysql</groupId>
