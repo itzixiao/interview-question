@@ -6,19 +6,56 @@ server:
 
 # Spring Cloud Nacos 配置
 spring:
-  datasource:
-    # MySQL 数据源配置（设备日志导出测试用）
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/interview?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
-    username: root
-    password: ${MYSQL_PASSWORD:}
-    # HikariCP 连接池配置（可根据实际情况调整）
-    hikari:
-      minimum-idle: 5
-      maximum-pool-size: 20
-      connection-timeout: 30000
-      idle-timeout: 600000
-      max-lifetime: 1800000
+  # ShardingSphere 分库分表配置（4.1.1 版本）
+  shardingsphere:
+    # 开启 SQL 显示（便于调试）
+    props:
+      sql:
+        show: true
+    
+    # 数据源配置
+    datasource:
+      names: ds0
+      ds0:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        jdbc-url: jdbc:mysql://localhost:3306/interview?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+        username: root
+        password: ${MYSQL_PASSWORD:}
+        hikari:
+          minimum-idle: 5
+          maximum-pool-size: 20
+          connection-timeout: 30000
+          idle-timeout: 600000
+          max-lifetime: 1800000
+    
+    # 分库分表规则
+    sharding:
+      # 默认数据库策略
+      default-database-strategy:
+        none: true
+      
+      # 表分片规则
+      tables:
+        device_operation_log:
+          # 实际数据节点：ds0.device_operation_log_202601 ~ ds0.device_operation_log_202612
+          actual-data-nodes: ds0.device_operation_log_2026$->{1..12}
+          # 表分片策略
+          table-strategy:
+            standard:
+              # 分片列（必须是实体类中的字段，使用下划线命名）
+              sharding-column: operation_time
+              # 分片算法名称
+              sharding-algorithm-name: device-operation-log-month-sharding
+      
+      # 分片算法配置
+      sharding-algorithms:
+        # 按月分片算法
+        device-operation-log-month-sharding:
+          type: CLASS_BASED
+          props:
+            strategy: STANDARD
+            algorithm-class: cn.itzixiao.interview.provider.config.sharding.DeviceOperationLogMonthShardingAlgorithm
   
   cloud:
     nacos:
