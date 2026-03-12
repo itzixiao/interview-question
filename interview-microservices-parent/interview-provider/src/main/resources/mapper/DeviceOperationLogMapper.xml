@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.itzixiao.interview.provider.mapper.DeviceOperationLogMapper">
+
+    <!-- 按时间范围查询（测试分片路由） -->
+    <select id="selectByTimeRange" resultType="cn.itzixiao.interview.provider.entity.DeviceOperationLog">
+        SELECT * FROM device_operation_log 
+        WHERE operation_time >= #{startTime,typeHandler=cn.itzixiao.interview.provider.config.handler.CustomLocalDateTimeTypeHandler} 
+          AND operation_time &lt;= #{endTime,typeHandler=cn.itzixiao.interview.provider.config.handler.CustomLocalDateTimeTypeHandler} 
+        ORDER BY operation_time ASC
+    </select>
+
+    <!-- 按设备编号和时间范围查询（测试多条件分片） -->
+    <select id="selectByDeviceAndTimeRange" resultType="cn.itzixiao.interview.provider.entity.DeviceOperationLog">
+        SELECT * FROM device_operation_log 
+        WHERE device_code = #{deviceCode} 
+          AND operation_time >= #{startTime,typeHandler=cn.itzixiao.interview.provider.config.handler.CustomLocalDateTimeTypeHandler} 
+          AND operation_time &lt;= #{endTime,typeHandler=cn.itzixiao.interview.provider.config.handler.CustomLocalDateTimeTypeHandler} 
+        ORDER BY operation_time ASC
+    </select>
+
+</mapper>

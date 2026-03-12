@@ -39,7 +39,7 @@ spring:
       tables:
         device_operation_log:
           # 实际数据节点：ds0.device_operation_log_202601 ~ ds0.device_operation_log_202612
-          actual-data-nodes: ds0.device_operation_log_2026$->{1..12}
+          actual-data-nodes: ds0.device_operation_log_202601,ds0.device_operation_log_202602,ds0.device_operation_log_202603,ds0.device_operation_log_202604,ds0.device_operation_log_202605,ds0.device_operation_log_202606,ds0.device_operation_log_202607,ds0.device_operation_log_202608,ds0.device_operation_log_202609,ds0.device_operation_log_202610,ds0.device_operation_log_202611,ds0.device_operation_log_202612
           # 表分片策略
           table-strategy:
             standard:

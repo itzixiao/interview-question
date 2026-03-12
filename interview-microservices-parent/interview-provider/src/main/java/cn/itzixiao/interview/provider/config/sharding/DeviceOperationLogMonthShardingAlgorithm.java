@@ -109,6 +109,9 @@ public class DeviceOperationLogMonthShardingAlgorithm implements PreciseSharding
             LocalDateTime startTime, 
             LocalDateTime endTime) {
         
+        log.info("[DEBUG] availableTargetNames: {}", availableTargetNames);
+        log.info("[DEBUG] startTime: {}, endTime: {}", startTime, endTime);
+        
         // 生成所有可能的月份表（2026 年 1-12 月）
         Collection<String> targetTables = IntStream.rangeClosed(1, 12)
                 .mapToObj(i -> {
@@ -117,8 +120,10 @@ public class DeviceOperationLogMonthShardingAlgorithm implements PreciseSharding
                 })
                 .collect(Collectors.toList());
         
+        log.info("[DEBUG] generated targetTables: {}", targetTables);
+        
         // 过滤出在范围内的表
-        return targetTables.stream()
+        Collection<String> result = targetTables.stream()
                 .filter(availableTargetNames::contains)
                 .filter(tableName -> {
                     // 提取表名中的月份
@@ -128,13 +133,18 @@ public class DeviceOperationLogMonthShardingAlgorithm implements PreciseSharding
                                 DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
                         
                         // 检查下界（startTime 为 null 表示无下界限制）
+                        LocalDateTime lowerBound = startTime.withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0);
                         boolean meetsLowerBound = (startTime == null) || 
-                            !tableTime.isBefore(startTime.withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0));
+                            !tableTime.isBefore(lowerBound);
                         
                         // 检查上界（endTime 为 null 表示无上界限制）
+                        LocalDateTime upperBound = endTime.withDayOfMonth(
+                                endTime.toLocalDate().lengthOfMonth()).withHour(23).withMinute(59).withSecond(59);
                         boolean meetsUpperBound = (endTime == null) || 
-                            !tableTime.isAfter(endTime.withDayOfMonth(
-                                    endTime.toLocalDate().lengthOfMonth()).withHour(23).withMinute(59).withSecond(59));
+                            !tableTime.isAfter(upperBound);
+                        
+                        log.info("[DEBUG] table: {}, tableTime: {}, meetsLowerBound: {}, meetsUpperBound: {}", 
+                                tableName, tableTime, meetsLowerBound, meetsUpperBound);
                         
                         // 判断该月是否在查询范围内
                         return meetsLowerBound && meetsUpperBound;
@@ -144,5 +154,8 @@ public class DeviceOperationLogMonthShardingAlgorithm implements PreciseSharding
                     }
                 })
                 .collect(Collectors.toList());
+        
+        log.info("[DEBUG] final result: {}", result);
+        return result;
     }
 }
