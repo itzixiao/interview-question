@@ -4,7 +4,7 @@
 POST http://localhost:8082/sharding/test/insert
 Content-Type: application/x-www-form-urlencoded
 
-deviceCode=DEV006&deviceName=数控机床 F&operationType=1&operationTime=2026-01-15T09:30:00&operationValue=380.5&operator=刘八&remark=新设备投入使用
+deviceCode=DEV006&deviceName=数控机床 F&operationType=1&operationTime=2026-10-15T09:30:00&operationValue=380.5&operator=刘八&remark=新设备投入使用
 
 ###
 

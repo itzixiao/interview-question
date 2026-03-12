@@ -2,8 +2,11 @@ package cn.itzixiao.interview.provider.controller;
 
 import cn.itzixiao.interview.common.result.Result;
 import cn.itzixiao.interview.provider.entity.DeviceOperationLog;
+import cn.itzixiao.interview.provider.entity.es.DeviceOperationLogES;
 import cn.itzixiao.interview.provider.mapper.DeviceOperationLogMapper;
+import cn.itzixiao.interview.provider.repository.DeviceOperationLogESRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -22,6 +25,9 @@ public class ShardingTestController {
     
     @Resource
     private DeviceOperationLogMapper deviceOperationLogMapper;
+    
+    @Resource
+    private DeviceOperationLogESRepository esRepository;
     
     /**
      * 测试精确查询 - 根据单个时间点查询
@@ -122,7 +128,23 @@ public class ShardingTestController {
             // 插入数据库（ShardingSphere 会自动路由）
             int rows = deviceOperationLogMapper.insert(logEntity);
             
-            log.info("【分片测试】插入成功，影响行数：{}, 生成的 ID: {}", rows, logEntity.getId());
+            log.info("【分片测试】插入 MySQL 成功，影响行数：{}, 生成的 ID: {}", rows, logEntity.getId());
+            
+            // 同步到 Elasticsearch
+            try {
+                DeviceOperationLogES esEntity = new DeviceOperationLogES();
+                BeanUtils.copyProperties(logEntity, esEntity);
+                // 使用复合唯一 ID 避免重复覆盖
+                String uniqueId = logEntity.getDeviceCode() + "_" + 
+                                 logEntity.getOperationTime().toString()
+                                     .replace("-", "").replace(" ", "").replace(":", "");
+                esEntity.setId(java.lang.Long.parseLong(uniqueId.replaceAll("[^0-9]", "").substring(0, Math.min(18, uniqueId.replaceAll("[^0-9]", "").length()))));
+                esRepository.save(esEntity);
+                log.info("【分片测试】同步到 ES 成功，ID: {}", uniqueId);
+            } catch (Exception e) {
+                log.error("【分片测试】同步到 ES 失败", e);
+                // ES 失败不影响主流程，仅记录日志
+            }
             
             // 返回结果
             Map<String, Object> result = new HashMap<>();
