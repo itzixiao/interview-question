@@ -14,13 +14,13 @@
     <artifactId>interview-provider</artifactId>
     <name>interview-provider</name>
     <description>服务提供者 - 用于演示 OpenFeign 微服务调用</description>
+    <packaging>jar</packaging>
 
     <dependencies>
         <!-- 公共模块 -->
         <dependency>
             <groupId>cn.itzixiao</groupId>
             <artifactId>interview-common</artifactId>
-            <version>${project.version}</version>
         </dependency>
     
         <!-- Spring Boot Web -->
@@ -73,7 +73,6 @@
         <dependency>
             <groupId>cn.itxiao</groupId>
             <artifactId>interview-threadpool-starter</artifactId>
-            <version>1.0.0</version>
         </dependency>
     
         <!-- MyBatis-Plus -->

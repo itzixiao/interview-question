@@ -14,16 +14,7 @@
     <artifactId>interview-service</artifactId>
     <name>interview-service</name>
     <description>面试题服务</description>
-
-    <properties>
-        <!-- 依赖版本定义（从父 POM 继承） -->
-        <redisson.version>3.17.6</redisson.version>
-        <guava.version>31.1-jre</guava.version>
-        <mybatis-spring-boot.version>2.3.1</mybatis-spring-boot.version>
-        <mybatis-plus.version>3.5.3.1</mybatis-plus.version>
-        <knife4j.version>3.0.3</knife4j.version>
-        <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
-    </properties>
+    <packaging>jar</packaging>
 
     <dependencies>
         <!-- 公共模块 -->
@@ -91,7 +82,6 @@
         <dependency>
             <groupId>org.redisson</groupId>
             <artifactId>redisson-spring-boot-starter</artifactId>
-            <version>${redisson.version}</version>
         </dependency>
 
         <!-- Caffeine -->
@@ -104,7 +94,6 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>${guava.version}</version>
         </dependency>
 
         <!-- Validation API -->
@@ -151,7 +140,6 @@
         <dependency>
             <groupId>com.github.xiaoymin</groupId>
             <artifactId>knife4j-spring-boot-starter</artifactId>
-            <version>${knife4j.version}</version>
         </dependency>
 
         <!-- Spring Boot Actuator (解决 Knife4j 兼容性问题需要) -->
@@ -173,25 +161,6 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-            
-            <!-- Maven 编译器插件配置 -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>${maven-compiler-plugin.version}</version>
-                <configuration>
-                    <source>${java.version}</source>
-                    <target>${java.version}</target>
-                    <encoding>${project.build.sourceEncoding}</encoding>
-                    <annotationProcessorPaths>
-                        <path>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                            <version>${lombok.version}</version>
-                        </path>
-                    </annotationProcessorPaths>
-                </configuration>
             </plugin>
         </plugins>
     </build>
