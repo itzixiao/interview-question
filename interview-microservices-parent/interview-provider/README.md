@@ -425,7 +425,7 @@ public class JwtService {
 package cn.itzixiao.interview.provider.controller;
 
 import cn.itzixiao.interview.common.result.Result;
-import cn.itzixiao.interview.provider.service.JwtService;
+import cn.itzixiao.interview.provider.service.business.JwtService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -434,13 +434,13 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/auth")
 public class JwtController {
-    
+
     private final JwtService jwtService;
-    
+
     public JwtController(JwtService jwtService) {
         this.jwtService = jwtService;
     }
-    
+
     /**
      * 模拟登录接口 - 获取 JWT token
      */
@@ -448,38 +448,38 @@ public class JwtController {
     public Result<Map<String, Object>> login(@RequestBody Map<String, String> loginRequest) {
         String username = loginRequest.get("username");
         String password = loginRequest.get("password");
-        
+
         // 模拟验证成功
         System.out.println("【登录请求】用户名：" + username + ", 密码：" + password);
-        
+
         // 构建角色信息（自定义 claims）
         Map<String, Object> roles = new HashMap<>();
         roles.put("role", "ADMIN");
         roles.put("permissions", new String[]{"read", "write", "delete"});
-        
+
         // 生成 token
         String token = jwtService.generateToken(username, roles);
-        
+
         // 返回 token
         Map<String, Object> response = new HashMap<>();
         response.put("token", token);
         response.put("tokenType", "Bearer");
         response.put("expiresIn", 86400);
         response.put("username", username);
-        
+
         return Result.success(response);
     }
-    
+
     /**
      * 验证 token 有效性
      */
     @GetMapping("/verify")
     public Result<Map<String, Object>> verifyToken(@RequestParam String token) {
         boolean isValid = jwtService.validateToken(token);
-        
+
         Map<String, Object> response = new HashMap<>();
         response.put("valid", isValid);
-        
+
         if (isValid) {
             try {
                 io.jsonwebtoken.Claims claims = jwtService.parseToken(token);
@@ -494,36 +494,36 @@ public class JwtController {
         } else {
             response.put("error", "Token 无效或已过期");
         }
-        
+
         return Result.success(response);
     }
-    
+
     /**
      * 从 token 中获取用户信息
      */
     @GetMapping("/info")
     public Result<Map<String, Object>> getUserInfo(
             @RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
-        
+
         if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
             return Result.error("缺少 Authorization header 或格式不正确");
         }
-        
+
         String token = authorizationHeader.substring(7);
-        
+
         if (!jwtService.validateToken(token)) {
             return Result.error("Token 无效或已过期");
         }
-        
+
         io.jsonwebtoken.Claims claims = jwtService.parseToken(token);
-        
+
         Map<String, Object> userInfo = new HashMap<>();
         userInfo.put("username", claims.getSubject());
         userInfo.put("issuer", claims.getIssuer());
         userInfo.put("roles", claims.get("roles"));
         userInfo.put("issuedAt", claims.getIssuedAt());
         userInfo.put("expiration", claims.getExpiration());
-        
+
         return Result.success(userInfo);
     }
 }

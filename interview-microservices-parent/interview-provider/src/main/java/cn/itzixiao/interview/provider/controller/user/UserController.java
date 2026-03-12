@@ -1,4 +1,4 @@
-package cn.itzixiao.interview.provider.controller;
+package cn.itzixiao.interview.provider.controller.user;
 
 import cn.itzixiao.interview.common.result.Result;
 import lombok.AllArgsConstructor;

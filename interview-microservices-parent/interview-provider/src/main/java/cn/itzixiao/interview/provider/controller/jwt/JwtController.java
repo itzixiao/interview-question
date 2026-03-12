@@ -1,7 +1,7 @@
-package cn.itzixiao.interview.provider.controller;
+package cn.itzixiao.interview.provider.controller.jwt;
 
 import cn.itzixiao.interview.common.result.Result;
-import cn.itzixiao.interview.provider.service.JwtService;
+import cn.itzixiao.interview.provider.service.business.JwtService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;

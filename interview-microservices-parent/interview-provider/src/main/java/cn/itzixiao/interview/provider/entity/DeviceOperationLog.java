@@ -1,9 +1,9 @@
 package cn.itzixiao.interview.provider.entity;
 
+import com.alibaba.excel.annotation.ExcelProperty;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.alibaba.excel.annotation.ExcelProperty;
 import lombok.Data;
 
 import java.math.BigDecimal;

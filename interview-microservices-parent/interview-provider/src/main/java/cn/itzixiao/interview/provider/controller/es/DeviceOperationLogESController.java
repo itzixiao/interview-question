@@ -1,8 +1,8 @@
-package cn.itzixiao.interview.provider.controller;
+package cn.itzixiao.interview.provider.controller.es;
 
 import cn.itzixiao.interview.common.result.Result;
 import cn.itzixiao.interview.provider.entity.es.DeviceOperationLogES;
-import cn.itzixiao.interview.provider.service.DeviceOperationLogESService;
+import cn.itzixiao.interview.provider.service.sharding.DeviceOperationLogESService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

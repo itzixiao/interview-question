@@ -1,4 +1,4 @@
-package cn.itzixiao.interview.provider.service;
+package cn.itzixiao.interview.provider.service.sharding;
 
 import cn.itzixiao.interview.provider.entity.DeviceOperationLog;
 import cn.itzixiao.interview.provider.entity.es.DeviceOperationLogES;
@@ -10,7 +10,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
 import org.springframework.data.elasticsearch.core.IndexOperations;
-import org.springframework.data.elasticsearch.core.document.Document;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.data.elasticsearch.core.query.IndexQuery;
 import org.springframework.data.elasticsearch.core.query.IndexQueryBuilder;

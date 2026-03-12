@@ -1,12 +1,10 @@
 package cn.itzixiao.interview.provider.mapper;
 
-import cn.itzixiao.interview.provider.config.handler.CustomLocalDateTimeTypeHandler;
 import cn.itzixiao.interview.provider.entity.DeviceOperationLog;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.type.LocalDateTimeTypeHandler;
 
 import java.time.LocalDateTime;
 import java.util.List;

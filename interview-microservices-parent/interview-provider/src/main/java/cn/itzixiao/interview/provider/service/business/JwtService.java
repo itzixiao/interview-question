@@ -1,4 +1,4 @@
-package cn.itzixiao.interview.provider.service;
+package cn.itzixiao.interview.provider.service.business;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
