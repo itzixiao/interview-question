@@ -7,6 +7,7 @@ import cn.itzixiao.interview.provider.mapper.DeviceOperationLogMapper;
 import cn.itzixiao.interview.provider.repository.DeviceOperationLogESRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -14,6 +15,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * ShardingSphere 分片测试控制器
@@ -28,6 +30,9 @@ public class ShardingTestController {
     
     @Resource
     private DeviceOperationLogESRepository esRepository;
+    
+    @Resource
+    private RedisTemplate<String, Object> redisTemplate;
     
     /**
      * 测试精确查询 - 根据单个时间点查询
@@ -112,8 +117,14 @@ public class ShardingTestController {
                 deviceCode, deviceName, operationType, operationTime);
         
         try {
+            // 从 Redis 获取全局唯一 ID
+            String redisKey = "global:id:device_operation_log";
+            long uniqueId = redisTemplate.opsForValue().increment(redisKey);
+            log.info("【分片测试】从 Redis 获取唯一 ID: {}", uniqueId);
+            
             // 创建实体对象
             DeviceOperationLog logEntity = new DeviceOperationLog();
+            logEntity.setId(uniqueId);  // 设置全局唯一 ID
             logEntity.setDeviceCode(deviceCode);
             logEntity.setDeviceName(deviceName);
             logEntity.setOperationType(operationType);
@@ -134,11 +145,8 @@ public class ShardingTestController {
             try {
                 DeviceOperationLogES esEntity = new DeviceOperationLogES();
                 BeanUtils.copyProperties(logEntity, esEntity);
-                // 使用复合唯一 ID 避免重复覆盖
-                String uniqueId = logEntity.getDeviceCode() + "_" + 
-                                 logEntity.getOperationTime().toString()
-                                     .replace("-", "").replace(" ", "").replace(":", "");
-                esEntity.setId(java.lang.Long.parseLong(uniqueId.replaceAll("[^0-9]", "").substring(0, Math.min(18, uniqueId.replaceAll("[^0-9]", "").length()))));
+                // ES 也使用相同的全局唯一 ID
+                esEntity.setId(uniqueId);
                 esRepository.save(esEntity);
                 log.info("【分片测试】同步到 ES 成功，ID: {}", uniqueId);
             } catch (Exception e) {

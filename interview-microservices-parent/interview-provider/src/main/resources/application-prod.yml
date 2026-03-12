@@ -70,6 +70,20 @@ spring:
     username: elastic
     password: ${ES_PASSWORD:}
 
+  # Redis 配置
+  redis:
+    host: localhost
+    port: 6379
+    password: ${REDIS_PASSWORD:}  # 如果有密码请设置环境变量
+    database: 10
+    timeout: 5000ms
+    lettuce:
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 0
+        max-wait: -1ms
+
 # Spring Boot Actuator 配置 - 生产环境安全加固
 management:
   # 端点暴露配置 - 最小化原则
