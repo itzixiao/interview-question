@@ -72,6 +72,12 @@ spring:
 
 # Spring Boot Actuator 配置
 management:
+  # 健康检查配置
+  health:
+    db:
+      enabled: false  # 禁用数据库健康检查（ShardingSphere 不支持 isValid 方法）
+    datasource:
+      enabled: false  # 禁用 DataSource 健康检查（双重保险）
   # 端点暴露配置
   endpoints:
     web:
@@ -88,8 +94,6 @@ management:
       show-details: always  # 始终显示健康详情
       probes:
         enabled: true  # 启用 K8s 探针支持
-    datasource:
-      enabled: false  # 禁用 DataSource 健康检查（ShardingSphere 不支持 isValid 方法）
   # 信息端点配置
   info:
     env:

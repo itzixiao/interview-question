@@ -1,0 +1,15 @@
+### 检查 ES 集群健康状态
+GET http://localhost:19200/_cluster/health?pretty
+Authorization: Basic ZWxhc3RpYzppdHppeGlhb0AxMjM=
+
+### 查看索引状态
+GET http://localhost:19200/device_operation_log/_settings?pretty
+Authorization: Basic ZWxhc3RpYzppdHppeGlhb0AxMjM=
+
+### 查看所有索引
+GET http://localhost:19200/_cat/indices?v
+Authorization: Basic ZWxhc3RpYzppdHppeGlhb0AxMjM=
+
+### 查看分片状态
+GET http://localhost:19200/_cat/shards/device_operation_log?v
+Authorization: Basic ZWxhc3RpYzppdHppeGlhb0AxMjM=
