@@ -64,6 +64,12 @@ spring:
         import-check:
           enabled: false
 
+  # Elasticsearch 配置
+  elasticsearch:
+    uris: http://localhost:19200
+    username: elastic
+    password: ${ES_PASSWORD:}
+
 # Spring Boot Actuator 配置
 management:
   # 端点暴露配置

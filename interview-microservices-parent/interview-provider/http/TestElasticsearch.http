@@ -1,0 +1,48 @@
+### Elasticsearch 接口测试
+
+# 1. 加载 MySQL 数据到 ES
+POST http://localhost:8082/api/es/load
+Content-Type: application/json
+
+###
+
+# 2. 创建索引
+POST http://localhost:8082/api/es/index/create
+Content-Type: application/json
+
+###
+
+# 3. 删除索引
+DELETE http://localhost:8082/api/es/index/delete
+
+###
+
+# 4. 获取索引统计信息
+GET http://localhost:8082/api/es/stats
+
+###
+
+# 5. 根据设备编号搜索（分页）
+GET http://localhost:8082/api/es/search/device-code?deviceCode=DEVICE001&page=0&size=10
+
+###
+
+# 6. 根据操作类型搜索（分页）
+GET http://localhost:8082/api/es/search/operation-type?operationType=1&page=0&size=10
+
+###
+
+# 7. 根据操作人搜索（分页）
+GET http://localhost:8082/api/es/search/operator?operator=张三&page=0&size=10
+
+###
+
+# 8. 根据设备名称全文检索（分页）
+GET http://localhost:8082/api/es/search/device-name?deviceName=设备&page=0&size=10
+
+###
+
+# 9. 组合查询 - 设备名称 + 操作类型
+GET http://localhost:8082/api/es/search/combined?deviceName=设备&operationType=1&page=0&size=10
+
+###

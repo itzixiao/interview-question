@@ -53,6 +53,9 @@
         <shardingsphere.version>4.1.1</shardingsphere.version>
         <easyexcel.version>3.3.2</easyexcel.version>
         
+        <!-- Elasticsearch 版本 -->
+        <elasticsearch.version>7.17.9</elasticsearch.version>
+        
         <!-- JWT 版本 -->
         <jjwt.version>0.11.5</jjwt.version>
         
@@ -193,6 +196,13 @@
                 <groupId>com.alibaba</groupId>
                 <artifactId>easyexcel</artifactId>
                 <version>${easyexcel.version}</version>
+            </dependency>
+            
+            <!-- Elasticsearch -->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-data-elasticsearch</artifactId>
+                <version>${spring-boot.version}</version>
             </dependency>
             
             <!-- Knife4j API 文档 -->
