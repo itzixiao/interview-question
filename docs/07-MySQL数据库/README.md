@@ -40,7 +40,7 @@
 - **简介：** 早期版本的索引与MVCC 讲解
 - **状态：** ⚠️ 内容已整合到核心文档
 
-#### 6. [06-MySQL事务 - 锁 - 优化详解.md](./06-MySQL事务 - 锁 - 优化详解.md)
+#### 6. [06-MySQL事务-锁-优化详解.md](./06-MySQL事务-锁-优化详解.md)
 - **简介：** 事务、锁和优化的综合讲解
 - **状态：** ⚠️ 内容已拆分并扩充到独立文档
 
@@ -55,10 +55,17 @@
 - **推荐：** ✅ 面试冲刺必读
 
 #### 9. [08-MySQL事务隔离级别实战演示.sql](./08-MySQL事务隔离级别实战演示.sql) ⭐ NEW
-- **简介：** 配套的可执行 SQL 脚本，在 MySQL 8 中实际体验各种隔离级别
+- **简介：** 配套的可执行 SQL 脚本，在 MySQL 8 中实际体验四种隔离级别
 - **内容：** 脏读、不可重复读、幻读、Next-Key Lock 等完整演示
 - **使用方式：** 在 MySQL 客户端打开两个会话，按注释步骤执行
 - **推荐：** ✅ 动手实践必备
+
+#### 10. [09-ShardingSphere整合实战指南.md](./09-ShardingSphere整合实战指南.md) ⭐ NEW
+- **简介：** ShardingSphere-JDBC 分库分表完整实战指南
+- **内容：** 环境搭建、自定义分片算法、MyBatis 集成、常见问题排查
+- **特色：** ✅ 完整配置示例 + ✅ 可运行代码 + ✅ 调试技巧 + ✅ 最佳实践
+- **技术栈：** ShardingSphere 4.1.1 + Spring Boot 2.7.18 + MyBatis
+- **推荐：** ✅ 分库分表面试必读
 
 ---
 
@@ -98,6 +105,29 @@ java cn.itzixiao.interview.mysql.MVCCDemo
   source docs/07-MySQL数据库/08-MySQL事务隔离级别实战演示.sql;
   -- 或复制 SQL 到两个会话窗口按步骤执行
   ```
+
+### 09-ShardingSphere 整合实战指南.md ⭐ NEW
+- **路径：** `docs/07-MySQL数据库/09-ShardingSphere 整合实战指南.md`
+- **功能：** ShardingSphere-JDBC 分库分表完整整合教程
+- **内容：** 555 行详细文档，包含环境准备、核心配置、分片算法实现、测试验证、常见问题
+- **配套代码：**
+  - `DeviceOperationLogMonthShardingAlgorithm.java` - 自定义分片算法（精确 + 范围）
+  - `DeviceOperationLogMapper.java` - MyBatis Mapper 接口
+  - `DeviceOperationLogMapper.xml` - MyBatis XML 映射文件
+  - `application-dev.yml` - ShardingSphere 分片配置
+- **使用方式：**
+  ```bash
+  # 编译项目
+  mvn clean package -pl interview-microservices-parent/interview-provider -am -DskipTests
+  
+  # 启动服务
+  java -jar interview-provider/target/interview-provider-1.0.0-SNAPSHOT.jar --spring.profiles.active=dev
+  
+  # 测试接口
+  curl "http://localhost:8082/sharding/test/precise?time=2026-03-15T10:30"
+  curl "http://localhost:8082/sharding/test/range?startTime=2026-01-01T00:00&endTime=2026-06-30T23:59"
+  ```
+- **推荐：** ✅ 分库分表实战必备
 
 ---
 
@@ -177,15 +207,24 @@ graph LR
 5. ✅ 掌握 SQL 优化技巧
 6. ✅ 完成 8 道性能优化面试题
 
-### 第五阶段：实战演练（1-2 天）⭐ NEW
+### 第六阶段：实战演练（1-2 天）⭐ NEW
 1. ✅ 阅读《MySQL事务隔离级别实战指南》
 2. ✅ 执行 SQL 脚本体验四种隔离级别
 3. ✅ 观察脏读、不可重复读、幻读现象
 4. ✅ 理解 MVCC 和 Next-Key Lock 的作用
 5. ✅ 完成业务场景模拟实验
 
-### 第六阶段：面试冲刺（1-2 天）
-1. ✅ 复习 27 道高频面试题
+### 第七阶段：分库分表实战（2-3 天）⭐ NEW
+1. ✅ 阅读《ShardingSphere 整合实战指南》
+2. ✅ 理解分库分表的基本概念和应用场景
+3. ✅ 掌握 ShardingSphere-JDBC 的配置方法
+4. ✅ 实现自定义分片算法（精确 + 范围）
+5. ✅ 集成 MyBatis 进行数据访问
+6. ✅ 学习分片路由调试技巧
+7. ✅ 掌握常见问题排查方法
+
+### 第八阶段：面试冲刺（1-2 天）
+1. ✅ 复习 27+ 道高频面试题
 2. ✅ 理解背后的原理
 3. ✅ 结合实际场景思考
 4. ✅ 模拟面试练习
@@ -278,6 +317,7 @@ ON o.id = tmp.id;
 | 性能优化 | [日志与性能优化详解](./MySQL日志与性能优化详解.md) | EXPLAIN、SQL 优化、表优化 | 8 |
 | 事务隔离级别 | [事务隔离级别实战指南](./08-MySQL事务隔离级别实战指南.md) | 四种隔离级别、并发问题、MVCC | ⭐ NEW |
 | 实战演示 | [事务隔离级别实战演示](./08-MySQL事务隔离级别实战演示.sql) | 可执行 SQL、对比实验 | ⭐ NEW |
+| 分库分表 | [ShardingSphere 整合实战指南](./09-ShardingSphere 整合实战指南.md) | ShardingSphere-JDBC、自定义分片算法、actual-data-nodes 配置 | ⭐ NEW |
 
 ---
 
@@ -293,6 +333,16 @@ ON o.id = tmp.id;
 ---
 
 ## 📈 更新日志
+
+### v2.2 -2026-03-12 ⭐ NEW
+- ✅ 新增《ShardingSphere 整合实战指南》文档（555 行）
+- ✅ 新增 ShardingSphere-JDBC 分库分表完整实战教程
+- ✅ 新增自定义分片算法实现（精确分片 + 范围分片）
+- ✅ 新增 MyBatis XML 映射文件集成示例
+- ✅ 新增 actual-data-nodes 配置规范（解决表名格式不匹配问题）
+- ✅ 新增分片路由调试技巧（DEBUG 日志跟踪）
+- ✅ 新增常见问题解决方案（no table route info 等）
+- ✅ 新增生产环境最佳实践（索引优化、连接池配置、SQL 监控）
 
 ### v2.1 -2026-03-11 ⭐ NEW
 - ✅ 新增《MySQL事务隔离级别实战指南》文档（662 行）
@@ -321,7 +371,7 @@ ON o.id = tmp.id;
 
 - [ ] 增加 SQL 实战案例
 - [ ] 补充主从复制详解
-- [ ] 添加分库分表方案
+- [ ] 添加分库分表方案 ✅ 已完成
 - [ ] 完善性能监控体系
 - [ ] 故障排查手册
 

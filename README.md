@@ -93,7 +93,7 @@ mvn spring-boot:run
 | 🔹 **04-Spring框架** | 5 篇 | 35+ 道 | [详细文档](./docs/04-Spring框架/README.md) |
 | 🔹 **05-SpringBoot与自动装配** | 1 篇 | 8+ 道 | [详细文档](./docs/05-SpringBoot与自动装配/README.md) |
 | 🔹 **06-SpringCloud微服务** | 2 篇 | 25+ 道 | [详细文档](./docs/06-SpringCloud微服务/README.md) |
-| 🔹 **07-MySQL数据库** | 7 篇 | 40+ 道 | [详细文档](./docs/07-MySQL数据库/README.md) |
+| 🔹 **07-MySQL数据库** | 8 篇 | 40+ 道 | [详细文档](./docs/07-MySQL数据库/README.md) |
 | 🔹 **08-Redis缓存** | 4 篇 | 30+ 道 | [详细文档](./docs/08-Redis缓存/README.md) |
 | 🔹 **09-中间件** | 5 篇 | 35+ 道 | [详细文档](./docs/09-中间件/README.md) |
 | 🔹 **10-算法与数据结构** | 3 篇 | 35+ 道 | [详细文档](./docs/10-算法与数据结构/README.md) |
@@ -101,7 +101,7 @@ mvn spring-boot:run
 | 🔹 **12-分布式系统** | 1 篇 | 15+ 道 | [详细文档](./docs/12-分布式系统/README.md) |
 | 🔹 **13-DevOps** | 1 篇 | 20+ 道 | [详细文档](./docs/13-DevOps/README.md) |
 
-**总计：** 48 篇文档 · 368+ 道面试题 · 配套 ~30,000 行示例代码
+**总计：** 49 篇文档 · 368+ 道面试题 · 配套 ~30,000 行示例代码
 
 ---
 
@@ -135,9 +135,10 @@ mvn spring-boot:run
 ### MySQL（40+ 道）
 - [InnoDB 和 MyISAM 区别？](./docs/07-MySQL数据库/01-MySQL字段类型与存储引擎.md)
 - [为什么使用 B+Tree 索引？](./docs/07-MySQL数据库/02-MySQL索引原理详解.md)
-- [MySQL索引与MVCC.md](docs/07-MySQL%E6%95%B0%E6%8D%AE%E5%BA%93/05-MySQL%E7%B4%A2%E5%BC%95%E4%B8%8EMVCC.md)
-- [如何防止 SQL 注入？](./docs/07-MySQL数据库/04-MySQL日志与性能优化详解.md)
-- [MyBatis 核心原理？](./docs/09-中间件/03-MyBatis核心原理与面试题.md)
+- [MySQL索引与MVCC](docs/07-MySQL数据库/05-MySQL索引与MVCC.md)
+- [如何防止 SQL注入？](./docs/07-MySQL数据库/04-MySQL日志与性能优化详解.md)
+- [ShardingSphere 分库分表实战](./docs/07-MySQL数据库/09-ShardingSphere 整合实战指南.md)
+- [MyBatis核心原理？](./docs/09-中间件/03-MyBatis核心原理与面试题.md)
 
 ### Redis（30+ 道）
 - [Redis 支持的数据类型？](./docs/08-Redis缓存/01-Redis缓存与分布式锁.md)
@@ -182,14 +183,14 @@ mvn spring-boot:run
 | Spring框架 | 5 | 35+ | ⭐⭐⭐⭐⭐ |
 | SpringBoot与自动装配 | 1 | 8+ | ⭐⭐⭐⭐ |
 | SpringCloud微服务 | 2 | 25+ | ⭐⭐⭐⭐ |
-| MySQL数据库 | 7 | 40+ | ⭐⭐⭐⭐⭐ |
+| MySQL数据库 | 8 | 40+ | ⭐⭐⭐⭐⭐ |
 | Redis缓存 | 4 | 30+ | ⭐⭐⭐⭐⭐ |
 | 中间件 | 5 | 35+ | ⭐⭐⭐⭐ |
 | 算法与数据结构 | 3 | 35+ | ⭐⭐⭐⭐ |
 | 设计模式 | 1 | 20+ | ⭐⭐⭐ |
 | 分布式系统 | 1 | 15+ | ⭐⭐⭐⭐ |
 | DevOps | 1 | 20+ | ⭐⭐⭐ |
-| **总计** | **48** | **368+** | - |
+| **总计** | **49** | **368+** | - |
 
 ---
 
