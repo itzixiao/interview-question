@@ -21,6 +21,7 @@
         <dependency>
             <groupId>cn.itzixiao</groupId>
             <artifactId>interview-common</artifactId>
+            <version>${project.version}</version>
         </dependency>
     
         <!-- Spring Boot Web -->
@@ -71,8 +72,9 @@
     
         <!-- 自定义线程池 Starter -->
         <dependency>
-            <groupId>cn.itxiao</groupId>
+            <groupId>cn.itzixiao</groupId>
             <artifactId>interview-threadpool-starter</artifactId>
+            <version>${project.version}</version>
         </dependency>
     
         <!-- MyBatis-Plus -->
