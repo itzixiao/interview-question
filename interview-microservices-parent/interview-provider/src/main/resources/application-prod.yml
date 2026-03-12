@@ -6,19 +6,49 @@ server:
 
 # Spring Cloud Nacos 配置
 spring:
-  datasource:
-    # MySQL 数据源配置（设备日志导出测试用）
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/interview?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
-    username: root
-    password: ${MYSQL_PASSWORD:}
-    # HikariCP 连接池配置（可根据实际情况调整）
-    hikari:
-      minimum-idle: 5
-      maximum-pool-size: 20
-      connection-timeout: 30000
-      idle-timeout: 600000
-      max-lifetime: 1800000
+  # ShardingSphere 分库分表配置（4.1.1 版本）
+  shardingsphere:
+    # 开启 SQL 显示（生产环境建议关闭）
+    props:
+      sql:
+        show: false
+    
+    # 数据源配置
+    datasource:
+      names: ds0
+      ds0:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        jdbc-url: jdbc:mysql://localhost:3306/interview?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+        username: root
+        password: ${MYSQL_PASSWORD:}
+        hikari:
+          minimum-idle: 10             # 生产环境调大最小空闲连接
+          maximum-pool-size: 50        # 生产环境调大最大连接数
+          connection-timeout: 30000
+          idle-timeout: 600000
+          max-lifetime: 1800000
+    
+    # 分库分表规则
+    sharding:
+      # 默认数据库策略（不分片）
+      default-database-strategy:
+        none:
+      
+      # 表分片规则
+      tables:
+        device_operation_log:
+          # 实际数据节点：ds0.device_operation_log_202601 ~ ds0.device_operation_log_202612
+          actual-data-nodes: ds0.device_operation_log_2026$->{1..12}
+          # 表分片策略
+          table-strategy:
+            standard:
+              # 分片列（必须是数据库字段名）
+              sharding-column: operation_time
+              # 精确分片算法
+              precise-algorithm-class-name: cn.itzixiao.interview.provider.config.sharding.DeviceOperationLogMonthShardingAlgorithm
+              # 范围分片算法
+              range-algorithm-class-name: cn.itzixiao.interview.provider.config.sharding.DeviceOperationLogMonthShardingAlgorithm
 
   cloud:
     nacos:
@@ -47,6 +77,8 @@ management:
       show-details: never  # 生产环境不显示详情
       probes:
         enabled: true  # 启用 K8s 探针支持
+    datasource:
+      enabled: false  # 禁用 DataSource 健康检查（ShardingSphere 不支持 isValid 方法）
   # 信息端点配置
   info:
     env:

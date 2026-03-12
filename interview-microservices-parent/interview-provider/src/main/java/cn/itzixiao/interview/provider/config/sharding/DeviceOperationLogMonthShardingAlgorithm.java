@@ -1,5 +1,6 @@
 package cn.itzixiao.interview.provider.config.sharding;
 
+import com.google.common.collect.Range;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shardingsphere.api.sharding.standard.PreciseShardingAlgorithm;
 import org.apache.shardingsphere.api.sharding.standard.RangeShardingAlgorithm;
@@ -57,9 +58,19 @@ public class DeviceOperationLogMonthShardingAlgorithm implements PreciseSharding
      */
     @Override
     public Collection<String> doSharding(Collection<String> availableTargetNames, RangeShardingValue<Comparable<?>> shardingValue) {
-        // 获取时间范围的下界和上界
-        LocalDateTime lowerBound = (LocalDateTime) shardingValue.getValueRange().lowerEndpoint();
-        LocalDateTime upperBound = (LocalDateTime) shardingValue.getValueRange().upperEndpoint();
+        Range<Comparable<?>> valueRange = shardingValue.getValueRange();
+        
+        // 处理无界范围的情况
+        LocalDateTime lowerBound = null;
+        LocalDateTime upperBound = null;
+        
+        if (valueRange.hasLowerBound()) {
+            lowerBound = (LocalDateTime) valueRange.lowerEndpoint();
+        }
+        
+        if (valueRange.hasUpperBound()) {
+            upperBound = (LocalDateTime) valueRange.upperEndpoint();
+        }
         
         log.info("范围分片：startTime={}, endTime={}", lowerBound, upperBound);
         
@@ -89,8 +100,8 @@ public class DeviceOperationLogMonthShardingAlgorithm implements PreciseSharding
      * 计算范围查询涉及的所有表
      * 
      * @param availableTargetNames 所有可用的表名
-     * @param startTime 开始时间
-     * @param endTime 结束时间
+     * @param startTime 开始时间（null 表示无下界）
+     * @param endTime 结束时间（null 表示无上界）
      * @return 匹配的表名集合
      */
     private Collection<String> calculateRangeTables(
@@ -98,7 +109,7 @@ public class DeviceOperationLogMonthShardingAlgorithm implements PreciseSharding
             LocalDateTime startTime, 
             LocalDateTime endTime) {
         
-        // 生成所有可能的月份表
+        // 生成所有可能的月份表（2026 年 1-12 月）
         Collection<String> targetTables = IntStream.rangeClosed(1, 12)
                 .mapToObj(i -> {
                     String month = String.format("%02d", i);
@@ -115,10 +126,18 @@ public class DeviceOperationLogMonthShardingAlgorithm implements PreciseSharding
                     try {
                         LocalDateTime tableTime = LocalDateTime.parse(monthStr + "01000000", 
                                 DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
-                        // 判断该月是否在查询范围内
-                        return !tableTime.isBefore(startTime.withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0))
-                            && !tableTime.isAfter(endTime.withDayOfMonth(
+                        
+                        // 检查下界（startTime 为 null 表示无下界限制）
+                        boolean meetsLowerBound = (startTime == null) || 
+                            !tableTime.isBefore(startTime.withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0));
+                        
+                        // 检查上界（endTime 为 null 表示无上界限制）
+                        boolean meetsUpperBound = (endTime == null) || 
+                            !tableTime.isAfter(endTime.withDayOfMonth(
                                     endTime.toLocalDate().lengthOfMonth()).withHour(23).withMinute(59).withSecond(59));
+                        
+                        // 判断该月是否在查询范围内
+                        return meetsLowerBound && meetsUpperBound;
                     } catch (Exception e) {
                         log.warn("解析表名失败：{}, error={}", tableName, e.getMessage());
                         return false;

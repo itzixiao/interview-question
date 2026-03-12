@@ -27,6 +27,9 @@ public class ShardingTestController {
     /**
      * 测试精确查询 - 根据单个时间点查询
      * 应该只路由到单个月份表
+     * 
+     * 注意：ShardingSphere 4.1.1 不支持 ResultSet.getObject() with type，
+     * 因此需要在 Controller 层进行结果转换
      */
     @GetMapping("/precise")
     public Result<List<DeviceOperationLog>> testPreciseQuery(
@@ -34,6 +37,7 @@ public class ShardingTestController {
         LocalDateTime operationTime = LocalDateTime.parse(time);
         log.info("精确查询测试，operationTime={}", operationTime);
         
+        // 查询指定时间范围的数据（ShardingSphere 会根据 operation_time 路由到对应的月份表）
         List<DeviceOperationLog> result = deviceOperationLogMapper.selectByTimeRange(operationTime, operationTime.plusHours(23).plusMinutes(59).plusSeconds(59));
         return Result.success(result);
     }

@@ -31,9 +31,9 @@ spring:
     
     # 分库分表规则
     sharding:
-      # 默认数据库策略
+      # 默认数据库策略（不分片）
       default-database-strategy:
-        none: true
+        none:
       
       # 表分片规则
       tables:
@@ -43,19 +43,12 @@ spring:
           # 表分片策略
           table-strategy:
             standard:
-              # 分片列（必须是实体类中的字段，使用下划线命名）
+              # 分片列（必须是数据库字段名）
               sharding-column: operation_time
-              # 分片算法名称
-              sharding-algorithm-name: device-operation-log-month-sharding
-      
-      # 分片算法配置
-      sharding-algorithms:
-        # 按月分片算法
-        device-operation-log-month-sharding:
-          type: CLASS_BASED
-          props:
-            strategy: STANDARD
-            algorithm-class: cn.itzixiao.interview.provider.config.sharding.DeviceOperationLogMonthShardingAlgorithm
+              # 精确分片算法
+              precise-algorithm-class-name: cn.itzixiao.interview.provider.config.sharding.DeviceOperationLogMonthShardingAlgorithm
+              # 范围分片算法
+              range-algorithm-class-name: cn.itzixiao.interview.provider.config.sharding.DeviceOperationLogMonthShardingAlgorithm
   
   cloud:
     nacos:
@@ -81,7 +74,7 @@ management:
   # 健康检查端点配置
   endpoint:
     gc:
-      enabled: true  # 开启GC监控
+      enabled: true  # 开启 GC 监控
     env:
       # 全局关闭脱敏（所有配置都显示明文）
       sanitize: false
@@ -89,6 +82,8 @@ management:
       show-details: always  # 始终显示健康详情
       probes:
         enabled: true  # 启用 K8s 探针支持
+    datasource:
+      enabled: false  # 禁用 DataSource 健康检查（ShardingSphere 不支持 isValid 方法）
   # 信息端点配置
   info:
     env:

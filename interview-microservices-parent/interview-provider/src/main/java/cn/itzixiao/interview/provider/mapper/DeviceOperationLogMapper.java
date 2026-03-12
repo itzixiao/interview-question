@@ -1,10 +1,12 @@
 package cn.itzixiao.interview.provider.mapper;
 
+import cn.itzixiao.interview.provider.config.handler.CustomLocalDateTimeTypeHandler;
 import cn.itzixiao.interview.provider.entity.DeviceOperationLog;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.type.LocalDateTimeTypeHandler;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -29,7 +31,7 @@ public interface DeviceOperationLogMapper extends BaseMapper<DeviceOperationLog>
      * @param startTime 开始时间
      * @return 指定时间后的日志记录
      */
-    @Select("SELECT * FROM device_operation_log WHERE operation_time > #{startTime} ORDER BY operation_time ASC")
+    @Select("SELECT * FROM device_operation_log WHERE operation_time > #{startTime,typeHandler=cn.itzixiao.interview.provider.config.handler.CustomLocalDateTimeTypeHandler} ORDER BY operation_time ASC")
     List<DeviceOperationLog> selectByTimeRange(LocalDateTime startTime);
 
     /**
@@ -51,7 +53,7 @@ public interface DeviceOperationLogMapper extends BaseMapper<DeviceOperationLog>
      * @param endTime 结束时间
      * @return 指定时间范围内的日志记录
      */
-    @Select("SELECT * FROM device_operation_log WHERE operation_time BETWEEN #{startTime} AND #{endTime} ORDER BY operation_time ASC")
+    @Select("SELECT * FROM device_operation_log WHERE operation_time BETWEEN #{startTime,typeHandler=cn.itzixiao.interview.provider.config.handler.CustomLocalDateTimeTypeHandler} AND #{endTime,typeHandler=cn.itzixiao.interview.provider.config.handler.CustomLocalDateTimeTypeHandler} ORDER BY operation_time ASC")
     List<DeviceOperationLog> selectByTimeRange(@Param("startTime") LocalDateTime startTime, 
                                                @Param("endTime") LocalDateTime endTime);
 
@@ -63,7 +65,7 @@ public interface DeviceOperationLogMapper extends BaseMapper<DeviceOperationLog>
      * @param endTime 结束时间
      * @return 指定设备和时间范围内的日志记录
      */
-    @Select("SELECT * FROM device_operation_log WHERE device_code = #{deviceCode} AND operation_time BETWEEN #{startTime} AND #{endTime} ORDER BY operation_time ASC")
+    @Select("SELECT * FROM device_operation_log WHERE device_code = #{deviceCode} AND operation_time BETWEEN #{startTime,typeHandler=cn.itzixiao.interview.provider.config.handler.CustomLocalDateTimeTypeHandler} AND #{endTime,typeHandler=cn.itzixiao.interview.provider.config.handler.CustomLocalDateTimeTypeHandler} ORDER BY operation_time ASC")
     List<DeviceOperationLog> selectByDeviceAndTimeRange(@Param("deviceCode") String deviceCode,
                                                         @Param("startTime") LocalDateTime startTime,
                                                         @Param("endTime") LocalDateTime endTime);
