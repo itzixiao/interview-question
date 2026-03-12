@@ -16,20 +16,31 @@
 - **内容:** Actuator 监控端点、健康检查、性能指标、自定义端点、安全配置
 - **面试题：** 10+ 道
 - **重要程度：** ⭐⭐⭐⭐⭐
-- **特色:**
+- **特色**:
     - ✅ 完整的 Actuator 知识体系
     - ✅ 可运行的示例代码（含自定义端点）
     - ✅ 生产环境安全配置方案
     - ✅ K8s、Prometheus 集成实战
     - ✅ 高频面试题与参考答案
 
+#### 4. [04-SpringBoot整合Elasticsearch完全指南.md](./04-SpringBoot%E6%95%B4%E5%90%88Elasticsearch%E5%AE%8C%E5%85%A8%E6%8C%87%E5%8D%97.md) ⭐新增
+- **内容**: Spring Boot整合 ES、倒排索引、全文检索、批量索引优化、数据同步策略
+- **面试题**: 7+ 道
+- **重要程度**: ⭐⭐⭐⭐⭐
+- **特色**:
+    - ✅ 完整的 ES 整合实战案例（从 0 到 1）
+    - ✅ 可运行的示例代码（配置 + 实体 +Repository+Service+Controller）
+    - ✅ 性能优化方案（批量索引、深度分页、字段映射）
+    - ✅ MySQL 与 ES 数据一致性解决方案
+    - ✅ 生产环境最佳实践（ILM、监控告警）
+
 ---
 
 ## 📊 统计信息
 
-- **文档数：** 3 个核心文档
-- **面试题总数：** 33+ 道
-- **代码示例：** 配套 Java 代码在 `interview-starters-parent/interview-threadpool-starter/`、`interview-service/actuator/` 目录
+- **文档数：** 4 个核心文档
+- **面试题总数：** 40+ 道
+- **代码示例：** 配套 Java 代码在 `interview-starters-parent/interview-threadpool-starter/`、`interview-service/actuator/`、`interview-microservices-parent/interview-provider/`（ES 整合）目录
 
 ---
 

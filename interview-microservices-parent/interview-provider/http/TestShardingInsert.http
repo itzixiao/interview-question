@@ -1,0 +1,75 @@
+### ShardingSphere 分片测试 - 新增数据接口
+
+# 1. 新增 2026 年 1 月的数据（应该路由到 device_operation_log_202601 表）
+POST http://localhost:8082/sharding/test/insert
+Content-Type: application/x-www-form-urlencoded
+
+deviceCode=DEV006&deviceName=数控机床 F&operationType=1&operationTime=2026-01-15T09:30:00&operationValue=380.5&operator=刘八&remark=新设备投入使用
+
+###
+
+# 2. 新增 2026 年 2 月的数据（应该路由到 device_operation_log_202602 表）
+POST http://localhost:8082/sharding/test/insert
+Content-Type: application/x-www-form-urlencoded
+
+deviceCode=DEV007&deviceName=包装机 G&operationType=1&operationTime=2026-02-20T14:15:00&operationValue=220.0&operator=周九&remark=春节后开机
+
+###
+
+# 3. 新增 2026 年 3 月的数据（应该路由到 device_operation_log_202603 表）
+POST http://localhost:8082/sharding/test/insert
+Content-Type: application/x-www-form-urlencoded
+
+deviceCode=DEV006&deviceName=数控机床 F&operationType=2&operationTime=2026-03-10T17:45:00&operationValue=380.0&operator=刘八&remark=正常关机
+
+###
+
+# 4. 新增 2026 年 6 月的数据（应该路由到 device_operation_log_202606 表）
+POST http://localhost:8082/sharding/test/insert
+Content-Type: application/x-www-form-urlencoded
+
+deviceCode=DEV008&deviceName=机器人 H&operationType=3&operationTime=2026-06-18T10:20:00&operationValue=450.2&operator=系统&remark=电压异常告警
+
+###
+
+# 5. 新增 2026 年 12 月的数据（应该路由到 device_operation_log_202612 表）
+POST http://localhost:8082/sharding/test/insert
+Content-Type: application/x-www-form-urlencoded
+
+deviceCode=DEV007&deviceName=包装机 G&operationType=4&operationTime=2026-12-25T11:00:00&operator=周九&remark=圣诞节保养
+
+###
+
+# 6. 新增数据 - 不带可选参数
+POST http://localhost:8082/sharding/test/insert
+Content-Type: application/x-www-form-urlencoded
+
+deviceCode=DEV009&deviceName=测试设备&operationType=1&operationTime=2026-05-01T08:00:00
+
+###
+
+# 7. 验证插入 - 查询 1 月份的数据
+GET http://localhost:8082/sharding/test/precise?time=2026-01-15T09:30:00
+
+###
+
+# 8. 验证插入 - 查询全年数据（应该包含新插入的记录）
+GET http://localhost:8082/sharding/test/all-year
+
+###
+
+# 9. 测试异常场景 - 缺少必填参数（应该返回错误）
+POST http://localhost:8082/sharding/test/insert
+Content-Type: application/x-www-form-urlencoded
+
+deviceCode=DEV010&deviceName=测试设备
+
+###
+
+# 10. 测试异常场景 - 时间格式错误（应该返回错误）
+POST http://localhost:8082/sharding/test/insert
+Content-Type: application/x-www-form-urlencoded
+
+deviceCode=DEV010&deviceName=测试设备&operationType=1&operationTime=invalid-time
+
+###

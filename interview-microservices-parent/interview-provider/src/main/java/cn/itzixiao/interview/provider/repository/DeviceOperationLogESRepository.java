@@ -32,8 +32,8 @@ public interface DeviceOperationLogESRepository extends ElasticsearchRepository<
 
     /**
      * 根据设备名称模糊查询（全文检索）
+     * 使用方法命名查询，Spring Data 会自动生成 match 查询
      */
-    @Query("{\"match\": {\"deviceName\": {\"query\": \"?0\", \"analyzer\": \"ik_max_word\"}}}")
     Page<DeviceOperationLogES> searchByDeviceName(String deviceName, Pageable pageable);
 
     /**

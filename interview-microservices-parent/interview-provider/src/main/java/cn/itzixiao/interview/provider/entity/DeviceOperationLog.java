@@ -7,14 +7,12 @@ import com.alibaba.excel.annotation.ExcelProperty;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 /**
  * 设备运行日志实体类
  * 
  * 用于 Excel 导出测试
- * 
- * 注意：operationTime 和 createTime 使用 String 类型而非 LocalDateTime，
- * 是为了规避 ShardingSphere 4.1.1 不支持 ResultSet.getObject() with type 的问题
  */
 @Data
 @TableName("device_operation_log")
@@ -56,7 +54,7 @@ public class DeviceOperationLog {
      * 格式：yyyy-MM-dd HH:mm:ss
      */
     @ExcelProperty("操作时间")
-    private String operationTime;
+    private LocalDateTime operationTime;
 
     /**
      * 操作人
@@ -75,5 +73,5 @@ public class DeviceOperationLog {
      * 格式：yyyy-MM-dd HH:mm:ss
      */
     @ExcelProperty("创建时间")
-    private String createTime;
+    private LocalDateTime createTime;
 }

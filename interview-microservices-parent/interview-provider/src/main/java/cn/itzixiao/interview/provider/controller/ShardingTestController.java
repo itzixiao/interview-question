@@ -4,14 +4,13 @@ import cn.itzixiao.interview.common.result.Result;
 import cn.itzixiao.interview.provider.entity.DeviceOperationLog;
 import cn.itzixiao.interview.provider.mapper.DeviceOperationLogMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * ShardingSphere 分片测试控制器
@@ -87,5 +86,67 @@ public class ShardingTestController {
         
         List<DeviceOperationLog> result = deviceOperationLogMapper.selectByTimeRange(start, end);
         return Result.success(result);
+    }
+
+    /**
+     * 测试新增数据
+     * ShardingSphere 会根据 operation_time 自动路由到对应的月份表
+     */
+    @PostMapping("/insert")
+    public Result<Map<String, Object>> testInsert(
+            @RequestParam String deviceCode,
+            @RequestParam String deviceName,
+            @RequestParam Integer operationType,
+            @RequestParam String operationTime,
+            @RequestParam(required = false) Double operationValue,
+            @RequestParam(required = false) String operator,
+            @RequestParam(required = false) String remark) {
+        
+        log.info("【分片测试】接收到新增请求：deviceCode={}, deviceName={}, operationType={}, operationTime={}",
+                deviceCode, deviceName, operationType, operationTime);
+        
+        try {
+            // 创建实体对象
+            DeviceOperationLog logEntity = new DeviceOperationLog();
+            logEntity.setDeviceCode(deviceCode);
+            logEntity.setDeviceName(deviceName);
+            logEntity.setOperationType(operationType);
+            // 将 ISO 8601 字符串转换为 LocalDateTime
+            logEntity.setOperationTime(LocalDateTime.parse(operationTime));
+            if (operationValue != null) {
+                logEntity.setOperationValue(java.math.BigDecimal.valueOf(operationValue));
+            }
+            logEntity.setOperator(operator);
+            logEntity.setRemark(remark);
+            
+            // 插入数据库（ShardingSphere 会自动路由）
+            int rows = deviceOperationLogMapper.insert(logEntity);
+            
+            log.info("【分片测试】插入成功，影响行数：{}, 生成的 ID: {}", rows, logEntity.getId());
+            
+            // 返回结果
+            Map<String, Object> result = new HashMap<>();
+            result.put("message", "插入成功");
+            result.put("id", logEntity.getId());
+            result.put("targetTable", getTargetTableName(logEntity.getOperationTime()));
+            result.put("rows", rows);
+            
+            return Result.success(result);
+        } catch (Exception e) {
+            log.error("【分片测试】插入失败", e);
+            return Result.error("插入失败：" + e.getMessage());
+        }
+    }
+
+    /**
+     * 根据操作时间计算目标表名
+     */
+    private String getTargetTableName(LocalDateTime operationTime) {
+        if (operationTime == null) {
+            return "unknown";
+        }
+        int year = operationTime.getYear();
+        int month = operationTime.getMonthValue();
+        return String.format("device_operation_log_%04d%02d", year, month);
     }
 }

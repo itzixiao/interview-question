@@ -88,50 +88,52 @@ public class DeviceOperationLogESService {
         createIndex();
         
         // 分批查询 MySQL 数据，避免一次性加载过多数据
-        int batchSize = 1000;
-        int current = 0;
-        int totalLoaded = 0;
+        // ⚠️ 注意：在 ShardingSphere 环境下，使用 selectAll() 代替 selectPage()
+        // 原因：ShardingSphere 的分页查询在分表环境下可能行为异常
+        List<DeviceOperationLog> allData = deviceOperationLogMapper.selectAll();
         
-        while (true) {
-            long batchStart = System.currentTimeMillis();
-            
-            // 分页查询 MySQL 数据
-            List<DeviceOperationLog> pageData = deviceOperationLogMapper.selectPage(current, batchSize);
-            
-            if (pageData == null || pageData.isEmpty()) {
-                log.info("【ES 数据加载】所有数据已加载完毕");
-                break;
-            }
-            
-            // 转换为 ES 实体
-            List<DeviceOperationLogES> esEntities = convertToESEntities(pageData);
-            
-            // 批量保存到 ES
-            List<IndexQuery> indexQueries = new ArrayList<>();
-            for (DeviceOperationLogES entity : esEntities) {
-                IndexQuery indexQuery = new IndexQueryBuilder()
-                        .withId(entity.getId().toString())
-                        .withObject(entity)
-                        .build();
-                indexQueries.add(indexQuery);
-            }
-            
-            // 批量索引
-            elasticsearchRestTemplate.bulkIndex(indexQueries, 
-                    IndexCoordinates.of("device_operation_log"));
-            
-            totalLoaded += pageData.size();
-            
-            log.info("【ES 数据加载】批次完成：当前页 {} 条，累计 {} 条，耗时 {}ms",
-                    pageData.size(), totalLoaded, System.currentTimeMillis() - batchStart);
-            
-            current += batchSize;
+        if (allData == null || allData.isEmpty()) {
+            log.warn("【ES 数据加载】MySQL 中没有数据");
+            return 0;
         }
         
-        log.info("【ES 数据加载】全部完成，总计 {}ms，加载 {} 条记录",
-                System.currentTimeMillis() - startTime, totalLoaded);
+        // 转换为 ES 实体
+        List<DeviceOperationLogES> esEntities = convertToESEntities(allData);
         
-        return totalLoaded;
+        // 批量保存到 ES
+        List<IndexQuery> indexQueries = new ArrayList<>();
+        for (DeviceOperationLogES entity : esEntities) {
+            // ⚠️ 关键修复：使用 deviceCode + operationTime 作为 ES 的唯一 ID
+            // 原因：ShardingSphere 分表的自增 ID 会重复，直接使用会导致 ES 文档被覆盖
+            String uniqueId = entity.getDeviceCode() + "_" + 
+                             entity.getOperationTime().replace("-", "").replace(" ", "").replace(":", "");
+            
+            IndexQuery indexQuery = new IndexQueryBuilder()
+                    .withId(uniqueId)
+                    .withObject(entity)
+                    .build();
+            indexQueries.add(indexQuery);
+        }
+        
+        // 批量索引
+        elasticsearchRestTemplate.bulkIndex(indexQueries, 
+                IndexCoordinates.of("device_operation_log"));
+        
+        log.info("【ES 数据加载】批次完成：共 {} 条，耗时 {}ms",
+                allData.size(), System.currentTimeMillis() - startTime);
+        
+        log.info("【ES 数据加载】全部完成，总计 {}ms，加载 {} 条记录",
+                System.currentTimeMillis() - startTime, allData.size());
+        
+        // 手动刷新索引，确保数据立即可搜索
+        try {
+            elasticsearchRestTemplate.indexOps(DeviceOperationLogES.class).refresh();
+            log.info("【ES 数据加载】索引已刷新，数据立即可搜索");
+        } catch (Exception e) {
+            log.error("【ES 数据加载】刷新索引失败", e);
+        }
+        
+        return allData.size();
     }
 
     /**
