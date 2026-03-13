@@ -20,5 +20,6 @@
         <module>interview-algorithm</module>
         <module>interview-provider</module>
         <module>interview-service</module>
+        <module>interview-transaction-demo</module>
     </modules>
 </project>

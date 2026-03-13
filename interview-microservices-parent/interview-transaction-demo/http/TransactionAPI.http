@@ -1,0 +1,205 @@
+### Spring事务传播机制演示 - HTTP 接口测试文件
+### 使用 IDEA 的 HTTP Client 插件或 curl 进行测试
+
+### ============================================
+### 基础查询接口
+### ============================================
+
+# 1. 查询账户余额（userId=1）
+GET http://localhost:8084/api/transaction/account?userId=1
+Content-Type: application/json
+
+### 
+
+# 2. 查询账户余额（userId=2）
+GET http://localhost:8084/api/transaction/account?userId=2
+Content-Type: application/json
+
+### 
+
+# 3. 查询账户余额（userId=3）
+GET http://localhost:8084/api/transaction/account?userId=3
+Content-Type: application/json
+
+### ============================================
+### REQUIRED 传播行为测试
+### ============================================
+
+# 4. REQUIRED - 正常创建订单（金额 100）
+# 预期：订单成功，余额减少 100，日志保存
+GET http://localhost:8084/api/transaction/required?userId=1&amount=100
+Content-Type: application/json
+
+### 
+
+# 5. REQUIRED - 金额过大触发回滚（金额 1500）
+# 预期：抛出异常，全部回滚（订单、余额、日志都回滚）
+GET http://localhost:8084/api/transaction/required?userId=1&amount=1500
+Content-Type: application/json
+
+### 
+
+# 6. REQUIRED - 边界值测试（金额 1000）
+# 预期：刚好不触发回滚（条件是>1000 才回滚）
+GET http://localhost:8084/api/transaction/required?userId=2&amount=1000
+Content-Type: application/json
+
+### ============================================
+### REQUIRES_NEW 传播行为测试
+### ============================================
+
+# 7. REQUIRES_NEW - 创建订单并记录独立日志
+# 预期：订单成功，日志独立保存（即使订单回滚，日志也会保留）
+GET http://localhost:8084/api/transaction/requires-new?userId=1&amount=50
+Content-Type: application/json
+
+### 
+
+# 8. REQUIRES_NEW - 直接测试日志服务
+# 预期：日志独立提交，不受外部事务影响
+GET http://localhost:8084/api/transaction/log/success?operation=TEST&detail=SUCCESS
+Content-Type: application/json
+
+### 
+
+# 9. REQUIRES_NEW - 测试日志失败场景
+# 预期：日志记录失败，但不影响外部事务
+GET http://localhost:8084/api/transaction/log/success?operation=TEST&detail=FAIL
+Content-Type: application/json
+
+### ============================================
+### NESTED 传播行为测试
+### ============================================
+
+# 10. NESTED - 批量创建订单
+# 预期：3 个订单中部分成功、部分失败，失败的不影响其他
+GET http://localhost:8084/api/transaction/nested?userId=1
+Content-Type: application/json
+
+### ============================================
+### SUPPORTS 传播行为测试
+### ============================================
+
+# 11. SUPPORTS - 查询账户（有事务环境）
+# 预期：在事务中执行查询
+GET http://localhost:8084/api/transaction/supports?userId=1
+Content-Type: application/json
+
+### ============================================
+### MANDATORY 传播行为测试
+### ============================================
+
+# 12. MANDATORY - 必须在事务中执行
+# 预期：成功执行（因为外层有@Transactional）
+# 注意：如果直接从非事务方法调用会抛异常
+GET http://localhost:8084/api/transaction/mandatory?userId=1&amount=50
+Content-Type: application/json
+
+### ============================================
+### NEVER 传播行为测试
+### ============================================
+
+# 13. NEVER - 必须在非事务中执行
+# 预期：如果在事务中调用会抛异常
+# 注意：这个接口可能无法直接从 Controller 调用（因为 Controller 方法默认不在事务中）
+GET http://localhost:8084/api/transaction/never?userId=1
+Content-Type: application/json
+
+### ============================================
+### NOT_SUPPORTED 传播行为测试
+### ============================================
+
+# 14. NOT_SUPPORTED - 以非事务方式查询
+# 预期：挂起当前事务（如果有），以非事务方式执行
+GET http://localhost:8084/api/transaction/not-supported?userId=1
+Content-Type: application/json
+
+### ============================================
+### 复杂业务场景测试
+### ============================================
+
+# 15. 复杂业务场景 - 结合多种传播行为
+# 包含：SUPPORTS（查询）、REQUIRED（订单）、REQUIRES_NEW（日志）
+# 预期：完整的业务流程，各种传播行为协同工作
+GET http://localhost:8084/api/transaction/complex?userId=1&amount=200
+Content-Type: application/json
+
+### 
+
+# 16. 复杂业务场景 - 金额过大测试
+# 预期：测试复杂场景下的回滚行为
+GET http://localhost:8084/api/transaction/complex?userId=1&amount=2000
+Content-Type: application/json
+
+### ============================================
+### 综合测试序列（按顺序执行）
+### ============================================
+
+# 步骤 1：查看初始状态
+GET http://localhost:8084/api/transaction/account?userId=1
+Content-Type: application/json
+
+### 
+
+# 步骤 2：创建正常订单
+GET http://localhost:8084/api/transaction/required?userId=1&amount=100
+Content-Type: application/json
+
+### 
+
+# 步骤 3：验证余额变化
+GET http://localhost:8084/api/transaction/account?userId=1
+Content-Type: application/json
+
+### 
+
+# 步骤 4：创建失败订单（应该回滚）
+GET http://localhost:8084/api/transaction/required?userId=1&amount=1500
+Content-Type: application/json
+
+### 
+
+# 步骤 5：验证余额未变化（已回滚）
+GET http://localhost:8084/api/transaction/account?userId=1
+Content-Type: application/json
+
+### 
+
+# 步骤 6：测试 REQUIRES_NEW 的日志独立性
+GET http://localhost:8084/api/transaction/requires-new?userId=1&amount=50
+Content-Type: application/json
+
+### ============================================
+### SQL 验证语句（在 MySQL 中执行）
+### ============================================
+
+# 查看账户数据
+# SELECT * FROM t_account WHERE user_id = 1;
+
+# 查看最近的订单
+# SELECT * FROM t_order WHERE user_id = 1 ORDER BY create_time DESC LIMIT 5;
+
+# 查看操作日志
+# SELECT * FROM t_operation_log ORDER BY create_time DESC LIMIT 10;
+
+# 查看所有表
+# SHOW TABLES;
+
+### ============================================
+### 调试技巧
+### ============================================
+
+# 1. 观察控制台日志，可以看到每个方法的执行情况
+# 2. 查看事务名称：TransactionSynchronizationManager.getCurrentTransactionName()
+# 3. 数据库查询验证数据变化
+# 4. 对比 REQUIRED 和 REQUIRES_NEW 的回滚行为差异
+
+### ============================================
+### 注意事项
+### ============================================
+
+# 1. 确保 MySQL 服务已启动
+# 2. 确保数据库 interview 已创建
+# 3. 确保 application.yml 中的数据库连接信息正确
+# 4. 服务启动端口：8084
+# 5. 如果端口被占用，修改 application.yml 中的 server.port
