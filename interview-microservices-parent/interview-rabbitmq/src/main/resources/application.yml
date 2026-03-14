@@ -1,0 +1,36 @@
+spring:
+  application:
+    name: interview-rabbitmq
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: admin
+    password: ${RABBITMQ_PASSWORD}
+    virtual-host: /
+    # 开启确认回调（Publisher Confirm）
+    publisher-confirm-type: correlated
+    # 开启返回回调（Publisher Return）
+    publisher-returns: true
+    listener:
+      simple:
+        # 手动确认模式
+        acknowledge-mode: manual
+        # 最小消费者数量
+        concurrency: 3
+        # 最大消费者数量
+        max-concurrency: 10
+        # 预取数量，控制每次推送的消息数
+        prefetch: 5
+        retry:
+          enabled: true
+          initial-interval: 1000ms
+          max-attempts: 3
+          max-interval: 10000ms
+          multiplier: 2.0
+
+server:
+  port: 8085
+
+logging:
+  level:
+    cn.itzixiao.interview.rabbitmq: debug

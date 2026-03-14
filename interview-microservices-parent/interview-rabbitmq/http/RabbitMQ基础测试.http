@@ -1,0 +1,172 @@
+### RabbitMQ 基础消息测试
+
+# 发送简单消息
+POST {{base_url}}/api/rabbitmq/send/simple?routingKey=routing.key.1
+Content-Type: application/json
+
+"这是一条简单消息 - {{$isoTimestamp}}"
+
+###
+
+# 发送订单消息
+POST {{base_url}}/api/rabbitmq/send/order
+Content-Type: application/json
+
+{
+  "orderId": "ORDER_{{$isoTimestamp}}",
+  "userId": 1001,
+  "productName": "iPhone 15 Pro",
+  "quantity": 1,
+  "amount": 7999.00,
+  "status": "CREATED"
+}
+
+###
+
+### 交换机模式测试
+
+# 发布订阅模式（Fanout）- 广播消息
+POST http://localhost:8085/api/rabbitmq/send/fanout
+Content-Type: application/json
+
+{
+  "userId": 1001,
+  "username": "张三",
+  "email": "zhangsan@example.com",
+  "action": "REGISTER",
+  "timestamp": "{{$isoTimestamp}}"
+}
+
+###
+
+# 路由模式（Direct）- 精确匹配
+POST {{base_url}}/api/rabbitmq/send/routing?routingKey=routing.key.1
+Content-Type: application/json
+
+{
+  "userId": 1002,
+  "username": "李四",
+  "email": "lisi@example.com",
+  "action": "UPDATE",
+  "timestamp": "{{$isoTimestamp}}"
+}
+
+###
+
+# 主题模式（Topic）- 模糊匹配
+POST {{base_url}}/api/rabbitmq/send/topic?routingKey=topic.normal
+Content-Type: application/json
+
+{
+  "userId": 1003,
+  "username": "王五",
+  "action": "DELETE",
+  "timestamp": "{{$isoTimestamp}}"
+}
+
+###
+
+### 高级特性测试
+
+# 延迟队列 - 订单超时取消
+POST {{base_url}}/api/rabbitmq/order/timeout/cancel?orderId=ORDER_TEST_{{$isoTimestamp}}
+
+###
+
+# 发送延迟消息（60 秒后处理）
+POST {{base_url}}/api/rabbitmq/send/delay?delaySeconds=60
+Content-Type: application/json
+
+"这是延迟消息，将在 60 秒后处理 - {{$isoTimestamp}}"
+
+###
+
+# 发送优先级消息（优先级 8）
+POST {{base_url}}/api/rabbitmq/send/priority?priority=8
+Content-Type: application/json
+
+"高优先级消息 - 优先级 8 - {{$isoTimestamp}}"
+
+###
+
+# 批量发送优先级消息（1-5 优先级）
+POST http://localhost:8085/api/rabbitmq/send/priority/batch
+
+###
+
+# 发送到死信队列
+POST {{base_url}}/api/rabbitmq/send/deadletter
+Content-Type: application/json
+
+"这是一条死信消息 - {{$isoTimestamp}}"
+
+###
+
+### 面试题示例接口
+
+# 可靠消息发送
+POST {{base_url}}/api/interview/reliability/send
+Content-Type: application/json
+
+"可靠消息内容 - {{$isoTimestamp}}"
+
+###
+
+# 延迟队列面试题示例
+POST {{base_url}}/api/interview/delay-queue/send?ttl=60000
+Content-Type: application/json
+
+"延迟消息 - 60 秒 TTL - {{$isoTimestamp}}"
+
+###
+
+# 顺序消息发送（发送 3 条有序消息）
+POST {{base_url}}/api/interview/order/send?orderId=ORDER_SEQ_{{$isoTimestamp}}&count=3
+
+###
+
+# 幂等性消息发送
+POST {{base_url}}/api/interview/idempotent/send?messageId=MSG_{{$isoTimestamp}}
+Content-Type: application/json
+
+"需要保证幂等的消息 - {{$isoTimestamp}}"
+
+###
+
+# 优先级批量发送（面试题示例）
+POST http://localhost:8085/api/interview/priority/send-batch
+
+###
+
+# 交换机对比测试
+POST http://localhost:8085/api/interview/exchange/compare
+Content-Type: application/json
+
+"测试消息 - 交换机对比 - {{$isoTimestamp}}"
+
+###
+
+# 直接发送到死信队列（面试题示例）
+POST {{base_url}}/api/interview/dlx/send-failure
+Content-Type: application/json
+
+"死信消息 - 面试题示例 - {{$isoTimestamp}}"
+
+###
+
+### 查询接口
+
+# 获取积压解决方案
+GET http://localhost:8085/api/interview/backlog/solution
+
+###
+
+# 获取高可用方案
+GET http://localhost:8085/api/interview/ha/solution
+
+###
+
+# 获取 MQ 优缺点
+GET http://localhost:8085/api/interview/mq-pros-cons
+
+###

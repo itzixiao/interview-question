@@ -21,5 +21,6 @@
         <module>interview-provider</module>
         <module>interview-service</module>
         <module>interview-transaction-demo</module>
+        <module>interview-rabbitmq</module>
     </modules>
 </project>

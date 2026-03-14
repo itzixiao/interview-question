@@ -17,23 +17,34 @@
 - **面试题：** 10+ 道
 - **重要程度：** ⭐⭐⭐⭐
 
-#### 4. [04-Nacos 核心知识点详解.md](./04-Nacos核心知识点详解.md)
+#### 4. [04-Nacos核心知识点详解.md](./04-Nacos核心知识点详解.md)
 - **内容：** 服务发现、配置管理、服务注册与发现
 - **面试题：** 15+ 道
 - **重要程度：** ⭐⭐⭐⭐⭐
+
+#### 5. [05-Sentinel 限流熔断详解.md](./05-Sentinel 限流熔断详解.md)
+- **内容：** 限流规则、熔断降级、系统自适应保护
+- **面试题：** 12+ 道
+- **重要程度：** ⭐⭐⭐⭐
 
 #### 6. [06-RPC核心原理与实战指南.md](./06-RPC核心原理与实战指南.md)
 - **内容：** RPC 架构、序列化协议、通信协议、负载均衡、容错机制
 - **面试题：** 8+ 道
 - **重要程度：** ⭐⭐⭐⭐⭐
 
+#### 7. [07-RabbitMQ核心知识点详解.md](./07-RabbitMQ核心知识点详解.md)
+- **内容：** 五种工作模式、高级特性（延迟队列、死信队列、优先级）、可靠性保障、高频面试题
+- **面试题：** 20+ 道
+- **重要程度：** ⭐⭐⭐⭐⭐
+- **配套代码：** `interview-microservices-parent/interview-rabbitmq/`
+
 ---
 
 ## 📊 统计信息
 
-- **文档数：** 6 个
-- **面试题总数：** 59+ 道
-- **代码示例：** 配套 Java 代码在 `interview-service/rpc/` 等目录（~2,500 行代码）
+- **文档数：** 7 个
+- **面试题总数：** 79+ 道
+- **代码示例：** 配套 Java 代码在 `interview-service/rpc/`、`interview-rabbitmq/` 等目录（~4,500 行代码）
 
 ---
 
@@ -76,7 +87,7 @@
 
 ### RPC（2-3 天）
 1. **核心原理**
-   - RPC 架构组成
+   - RPC 架构
    - 动态代理机制
    - 序列化/反序列化
 
@@ -89,6 +100,30 @@
    - 服务注册与发现
    - 负载均衡策略
    - 容错机制
+
+### RabbitMQ（3-4 天）
+1. **基础概念**
+   - AMQP 协议
+   - 核心组件（Producer、Consumer、Exchange、Queue）
+   - 五种工作模式
+
+2. **高级特性**
+   - 延迟队列（TTL+DLX）
+   - 死信队列
+   - 优先级队列
+   - 消息 TTL
+
+3. **可靠性保障**
+   - Publisher Confirm
+   - 消费者手动 ACK
+   - 消息持久化
+   - 幂等性处理
+
+4. **实战应用**
+   - 订单超时取消
+   - 异步任务处理
+   - 日志收集
+   - 数据同步
 
 ---
 
@@ -110,6 +145,7 @@
 | Sentinel | 高并发限流、熔断降级 |
 | MyBatis-Plus | 快速开发、通用 CRUD |
 | **RPC** | **微服务远程调用、高性能通信** |
+| **RabbitMQ** | **异步解耦、消息延迟处理、削峰填谷** |
 
 ---
 
@@ -135,6 +171,15 @@
 18. **RPC 框架需要解决哪些核心问题？**
 19. **JDK动态代理在 RPC 中是如何应用的？**
 20. **RPC 中的序列化协议有哪些？如何选择？**
+21. **RabbitMQ 是什么？为什么要用它？**
+22. **RabbitMQ 有哪些组成部分？**
+23. **说说 RabbitMQ 的五种工作模式？**
+24. **如何保证消息不丢失？**
+25. **如何保证消息的顺序性？**
+26. **如何保证消息不重复消费？**
+27. **延迟队列如何实现？**
+28. **死信队列有什么用？**
+29. **RabbitMQ 和 Kafka 的区别？**
 
 ---
 
@@ -202,6 +247,28 @@ public class RpcProxy {
 }
 ```
 
+### RabbitMQ 延迟队列配置示例
+```java
+@Bean
+public Queue orderDelayQueue() {
+    return QueueBuilder.durable("queue.order.delay")
+            .withArgument("x-dead-letter-exchange", "exchange.order.dlx")
+            .withArgument("x-dead-letter-routing-key", "order.timeout")
+            .withArgument("x-message-ttl", 30 * 60 * 1000) // 30 分钟
+            .build();
+}
+
+// 发送延迟消息
+public void sendOrderTimeoutMessage(Order order) {
+    rabbitTemplate.convertAndSend("exchange.order.delay", 
+        "order.delay", order,
+        msg -> {
+            msg.getMessageProperties().setExpiration(String.valueOf(30 * 60 * 1000));
+            return msg;
+        });
+}
+```
+
 ---
 
 ## 📖 推荐学习顺序
@@ -223,12 +290,25 @@ Sentinel 限流
    ↓
 RPC 原理
    ↓
+RabbitMQ 基础
+   ↓
+延迟队列、死信队列
+   ↓
+可靠性保障
+   ↓
 综合实战
 ```
 
 ---
 
 ## 📈 更新日志
+
+### v2.2 - 2026-03-14
+- ✅ 新增《RabbitMQ核心知识点详解》文档（20道面试题）
+- ✅ 更新文档统计信息为7个文档、79+面试题
+- ✅ 补充 RabbitMQ五种工作模式、高级特性、可靠性保障等知识点
+- ✅ 添加 RabbitMQ延迟队列配置示例代码
+- ✅ 更新推荐学习顺序，增加 RabbitMQ 学习路径
 
 ### v2.1 - 2026-03-08
 - ✅ 新增《RPC核心原理与实战指南》文档（8 道面试题）
@@ -248,5 +328,5 @@ RPC 原理
 ---
 
 **维护者：** itzixiao  
-**最后更新：** 2026-03-08  
+**最后更新：** 2026-03-14  
 **问题反馈：** 欢迎提 Issue 或 PR
