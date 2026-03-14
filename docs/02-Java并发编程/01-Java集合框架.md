@@ -3,10 +3,11 @@
 ## 集合框架结构
 
 ```
-                            Collection
-                    /           |           \
-                List          Set          Queue
-               /    \       /      \       /      \
+                                  Collection
+                      /                  |         \
+                    /                    |           \
+                List                   Set          Queue
+               /    \                /      \       /      \
          ArrayList  LinkedList  HashSet  TreeSet  PriorityQueue
               |                    |
         CopyOnWriteArrayList   LinkedHashSet
@@ -14,6 +15,7 @@
                            ConcurrentSkipListSet
 
                                Map
+                      /         |         \
                     /           |           \
               HashMap    LinkedHashMap    TreeMap
                  |
@@ -75,7 +77,134 @@ private static class Node<E> {
 
 **适用场景**：读多写少
 
-## Set 实现
+## ArrayList 线程安全实现方案
+
+### 方案 1：CopyOnWriteArrayList（推荐）
+
+```java
+List<String> safeList = new CopyOnWriteArrayList<>();
+```
+
+**特点**：
+- ✅ 读操作无锁，性能极高
+- ✅ 写操作加锁并复制数组
+- ✅ 迭代器不会抛出 ConcurrentModificationException
+- ❌ 内存占用大（复制数组）
+- ❌ 数据一致性弱（可能读到旧数据）
+
+**适用场景**：读多写少（如监听器列表、白名单配置）
+
+### 方案 2：Collections.synchronizedList
+
+```java
+List<String> list = new ArrayList<>();
+List<String> syncList = Collections.synchronizedList(list);
+```
+
+**特点**：
+- ✅ 所有操作加 synchronized 锁
+- ✅ 包装已有 ArrayList
+- ❌ 性能较低（每次操作都要加锁）
+- ❌ 迭代时需手动同步
+
+**使用注意**：
+```java
+// 迭代时必须手动同步
+synchronized (syncList) {
+    for (String s : syncList) {
+        // 安全操作
+    }
+}
+```
+
+### 方案 3：Vector（已过时，不推荐）
+
+```java
+List<String> vector = new Vector<>();
+```
+
+**特点**：
+- ✅ 线程安全（synchronized）
+- ❌ 性能低
+- ❌ 扩容 2 倍，浪费内存
+- ❌ API 设计老旧
+
+**不推荐原因**：所有方法都用 synchronized 修饰，并发度低
+
+### 方案 4：ReentrantLock + ArrayList（自定义控制）
+
+```java
+public class SafeArrayList<T> {
+    private final List<T> list = new ArrayList<>();
+    private final ReentrantLock lock = new ReentrantLock();
+    
+    public void add(T element) {
+        lock.lock();
+        try {
+            list.add(element);
+        } finally {
+            lock.unlock();
+        }
+    }
+    
+    public T get(int index) {
+        lock.lock();
+        try {
+            return list.get(index);
+        } finally {
+            lock.unlock();
+        }
+    }
+}
+```
+
+**特点**：
+- ✅ 灵活控制锁的粒度
+- ✅ 可实现读写分离
+- ❌ 代码复杂
+
+### 方案 5：ThreadLocal（线程隔离）
+
+```java
+private static final ThreadLocal<List<String>> threadLocalList = 
+    ThreadLocal.withInitial(ArrayList::new);
+```
+
+**特点**：
+- ✅ 每个线程独立副本，无需加锁
+- ✅ 性能极高
+- ❌ 线程间数据不共享
+- ❌ 内存泄漏风险（需手动 remove）
+
+**适用场景**：线程间不需要共享数据的场景
+
+### 方案对比
+
+| 方案                | 性能      | 灵活性 | 适用场景           |
+|---------------------|-----------|--------|--------------------|
+| CopyOnWriteArrayList | ⭐⭐⭐⭐⭐ | 中     | 读多写少           |
+| Collections.synchronizedList | ⭐⭐⭐ | 高     | 通用场景           |
+| Vector              | ⭐⭐      | 低     | 不推荐             |
+| ReentrantLock + ArrayList | ⭐⭐⭐⭐ | 极高   | 需要精细控制       |
+| ThreadLocal         | ⭐⭐⭐⭐⭐ | 中     | 线程隔离           |
+
+### 最佳实践
+
+```java
+// ✅ 推荐：读多写少
+List<String> configList = new CopyOnWriteArrayList<>();
+
+// ✅ 推荐：通用场景
+List<String> syncList = Collections.synchronizedList(new ArrayList<>());
+
+// ✅ 推荐：高并发读写分离
+ReadWriteLock rwLock = new ReentrantReadWriteLock();
+
+// ❌ 不推荐：Vector
+List<String> vector = new Vector<>();  // 性能差
+```
+
+## SET 实现
 
 ### HashSet
 
@@ -147,13 +276,13 @@ new LinkedHashMap<K, V>(16, 0.75f, true) {
 
 ### BlockingQueue
 
-| 实现 | 特点 |
-|------|------|
-| ArrayBlockingQueue | 有界数组，一把锁 |
-| LinkedBlockingQueue | 可选有界，两把锁（读写分离）|
-| PriorityBlockingQueue | 无界优先队列 |
-| SynchronousQueue | 不存储元素，直接传递 |
-| DelayQueue | 延时队列 |
+| 实现                  | 特点                       |
+|-----------------------|----------------------------|
+| ArrayBlockingQueue    | 有界数组，一把锁           |
+| LinkedBlockingQueue   | 可选有界，两把锁（读写分离）|
+| PriorityBlockingQueue | 无界优先队列               |
+| SynchronousQueue      | 不存储元素，直接传递       |
+| DelayQueue            | 延时队列                   |
 
 ## 迭代器与 fail-fast
 
@@ -229,11 +358,11 @@ Collections.min(list);                     // 最小值
 
 ## 性能对比
 
-| 操作 | ArrayList | LinkedList | HashMap | TreeMap |
-|------|-----------|------------|---------|---------|
-| 随机访问 | O(1) | O(n) | - | - |
-| 插入/删除 | O(n) | O(1) | O(1) | O(log n) |
-| 查找 | O(n) | O(n) | O(1) | O(log n) |
+| 操作      | ArrayList   | LinkedList  | HashMap   | TreeMap     |
+|-----------|-------------|-------------|-----------|-------------|
+| 随机访问  | O(1)        | O(n)         | -         | -           |
+| 插入/删除 | O(n)        | O(1)         | O(1)      | O(log n)    |
+| 查找      | O(n)        | O(n)         | O(1)      | O(log n)    |
 
 ## 最佳实践
 
@@ -250,13 +379,14 @@ Collections.min(list);                     // 最小值
 **问题 1:ArrayList 和 LinkedList 的区别？**
 
 答案：
-| 特性 | ArrayList | LinkedList |
-|------|-----------|------------|
-| 底层结构 | 动态数组 | 双向链表 |
-| 随机访问 | O(1) | O(n) |
-| 插入删除 | O(n) | O(1) |
-| 内存占用 | 少 | 多（节点指针） |
-| 功能 | List 接口 | List + Deque 接口 |
+
+| 特性       | ArrayList        | LinkedList            |
+|------------|------------------|-----------------------|
+| 底层结构   | 动态数组         | 双向链表              |
+| 随机访问   | O(1)             | O(n)                  |
+| 插入删除   | O(n)             | O(1)                  |
+| 内存占用   | 少               | 多（节点指针）        |
+| 功能       | List 接口        | List + Deque 接口     |
 
 **源码对比：**
 ```java
@@ -295,14 +425,15 @@ LinkedList.add(i, e);// 0.5ms
 **问题 2:HashMap 和 Hashtable 的区别？**
 
 答案：
-| 特性 | HashMap | Hashtable |
-|------|---------|-----------|
-| 线程安全 | ❌ 否 | ✅ 是（synchronized） |
-| null 值 | ✅ 允许 | ❌ 不允许 |
-| 性能 | 高 | 低 |
-| 扩容 | 2 倍 | 2 倍 +1 |
-| hash 计算 | 优化过 | 直接使用 |
-| 继承 | AbstractMap | Dictionary（已过时） |
+
+| 特性       | HashMap                | Hashtable            |
+|------------|------------------------|----------------------|
+| 线程安全   | ❌ 否                  | ✅ 是（synchronized） |
+| null 值    | ✅ 允许                | ❌ 不允许             |
+| 性能       | 高                     | 低                   |
+| 扩容       | 2 倍                   | 2 倍 +1               |
+| hash 计算  | 优化过                 | 直接使用             |
+| 继承       | AbstractMap            | Dictionary（已过时）  |
 
 **HashMap 优势：**
 ```java
@@ -455,17 +586,18 @@ for (int i = list.size() - 1; i >= 0; i--) {
 }
 ```
 
-**问题 5:ArrayBlockingQueue和 LinkedBlockingQueue的区别？**
+**问题 5:ArrayBlockingQueue 和 LinkedBlockingQueue 的区别？**
 
 答案：
-| 特性 | ArrayBlockingQueue | LinkedBlockingQueue |
-|------|-------------------|--------------------|
-| 底层结构 | 数组 | 链表 |
-| 有界/无界 | 有界（必须指定容量） | 可选（默认 Integer.MAX_VALUE） |
-| 锁机制 | 一把锁（ReentrantLock） | 两把锁（读写分离） |
-| 公平性 | 可选公平/非公平 | 只能非公平 |
-| 内存占用 | 连续空间，较少 | 节点对象，较多 |
-| 适用场景 | 数据量固定 | 数据量不确定 |
+
+| 特性       | ArrayBlockingQueue              | LinkedBlockingQueue          |
+|------------|---------------------------------|-------------------------------|
+| 底层结构   | 数组                            | 链表                          |
+| 有界/无界  | 有界（必须指定容量）           | 可选（默认 Integer.MAX_VALUE） |
+| 锁机制     | 一把锁（ReentrantLock）        | 两把锁（读写分离）            |
+| 公平性     | 可选公平/非公平                | 只能非公平                    |
+| 内存占用   | 连续空间，较少                 | 节点对象，较多                |
+| 适用场景   | 数据量固定                     | 数据量不确定                  |
 
 **源码对比：**
 ```java
@@ -586,14 +718,14 @@ public LinkedHashMap(int initialCapacity,
 删除时 → 删除链表头部（最久未使用）
 ```
 
-**问题 8:Collection和 Collections的区别？**
+**问题 8:Collection 和 Collections 的区别？**
 
 答案：
 
-| 类名 | 类型 | 作用 |
-|------|------|------|
-| Collection | 接口 | 集合的根接口（List/Set/Queue 的父接口） |
-| Collections | 工具类 | 操作集合的静态方法 |
+| 类名        | 类型   | 作用                             |
+|-------------|--------|----------------------------------|
+| Collection  | 接口   | 集合的根接口（List/Set/Queue 的父接口） |
+| Collections | 工具类 | 操作集合的静态方法               |
 
 **Collection 接口：**
 ```java
@@ -630,9 +762,3 @@ Object min = Collections.min(list);
 **记忆技巧：**
 - Collection → 集合（单数，接口）
 - Collections → 集合工具（复数，工具类）
-
----
-
-## 💡 高频面试题
-
-**问题 1：ArrayList 和 LinkedList 的区别？**
