@@ -29,20 +29,21 @@ interview-question/                              # 根目录
 ├── interview-starters/                          # Starter 模块集合（父模块）
 │   └── interview-threadpool-starter/            # 线程池Starter
 │
-└── docs/                                        # 面试知识点文档（13 个分类）
-    ├── 01-Java基础/
-    ├── 02-Java并发编程/
-    ├── 03-JVM/
-    ├── 04-Spring框架/
-    ├── 05-SpringBoot与自动装配/
-    ├── 06-SpringCloud微服务/
-    ├── 07-MySQL数据库/
-    ├── 08-Redis缓存/
-    ├── 09-中间件/
-    ├── 10-算法与数据结构/
-    ├── 11-设计模式/
-    ├── 12-分布式系统/
-    └── 13-DevOps/
+├── docs/                                        # 面试知识点文档（14 个分类）
+│   ├── 01-Java基础/
+│   ├── 02-Java并发编程/
+│   ├── 03-JVM/
+│   ├── 04-Spring框架/
+│   ├── 05-SpringBoot与自动装配/
+│   ├── 06-SpringCloud微服务/
+│   ├── 07-MySQL数据库/
+│   ├── 08-Redis缓存/
+│   ├── 09-中间件/
+│   ├── 10-算法与数据结构/
+│   ├── 11-设计模式/
+│   ├── 12-分布式系统/
+│   ├── 13-DevOps/
+│   └── 14-SPI 与 IO模型/
 ```
 
 ### 模块职责说明
@@ -100,8 +101,9 @@ mvn spring-boot:run
 | 🔹 **11-设计模式** | 1 篇 | 20+ 道 | [详细文档](./docs/11-设计模式/README.md) |
 | 🔹 **12-分布式系统** | 1 篇 | 15+ 道 | [详细文档](./docs/12-分布式系统/README.md) |
 | 🔹 **13-DevOps** | 1 篇 | 20+ 道 | [详细文档](./docs/13-DevOps/README.md) |
+| 🔹 **14-SPI与 IO模型** | 1 篇 | 30+ 道 | [详细文档](./docs/14-SPI 与 IO模型/README.md) |
 
-**总计：** 49 篇文档 · 368+ 道面试题 · 配套 ~30,000 行示例代码
+**总计：** 50 篇文档 · 398+ 道面试题 · 配套 ~35,000 行示例代码
 
 ---
 
@@ -171,6 +173,13 @@ mvn spring-boot:run
 - [Nginx 负载均衡策略？](./docs/13-DevOps/01-DevOps%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%86%E7%82%B9%E8%AF%A6%E8%A7%A3.md)
 - [CI/CD流程？](./docs/13-DevOps/01-DevOps%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%86%E7%82%B9%E8%AF%A6%E8%A7%A3.md)
 
+### SPI与IO模型（30+ 道）
+- [什么是 SPI？工作原理是什么？](./docs/14-SPI与IO模型/README.md#一 spi-机制详解)
+- [BIO、NIO、AIO 的区别？](./docs/14-SPI与IO模型/README.md#九-三种-io-模型对比)
+- [NIO 的核心组件？](./docs/14-SPI与IO模型/README.md#七-nio-同步非阻塞-io)
+- [Reactor 模式的三种变体？](./docs/14-SPI与IO模型/README.md#73-reactor-模式)
+- [Netty 为什么性能高？](./docs/14-SPI与IO模型/README.md#十二-主流框架)
+
 ---
 
 ## 📊 知识点覆盖统计
@@ -190,7 +199,8 @@ mvn spring-boot:run
 | 设计模式 | 1 | 20+ | ⭐⭐⭐ |
 | 分布式系统 | 1 | 15+ | ⭐⭐⭐⭐ |
 | DevOps | 1 | 20+ | ⭐⭐⭐ |
-| **总计** | **49** | **368+** | - |
+| **SPI与 IO模型** | **1** | **30+** | **⭐⭐⭐⭐⭐** |
+| **总计** | **50** | **398+** | - |
 
 ---
 
@@ -278,3 +288,4 @@ mvn spring-boot:run
 - [📘 11-设计模式](./docs/11-设计模式/README.md) - 1 篇文档，20+ 道面试题
 - [📘 12-分布式系统](./docs/12-分布式系统/README.md) - 1 篇文档，15+ 道面试题
 - [📘 13-DevOps](./docs/13-DevOps/README.md) - 1 篇文档，20+ 道面试题
+- [📘 14-SPI与IO模型](./docs/14-SPI与 IO模型/README.md) - 1 篇文档，30+ 道面试题
