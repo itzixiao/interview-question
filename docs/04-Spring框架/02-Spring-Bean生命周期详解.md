@@ -598,6 +598,7 @@ public class UserService {
 ```
 
 **三种注入方式**：
+
 | 方式 | 示例 | 特点 |
 |------|------|------|
 | 构造器注入 | `@Autowired public UserService(UserDao dao)` | 推荐，依赖明确，不可变 |
@@ -636,6 +637,7 @@ public class UserService implements
 ```
 
 **常用 Aware 接口**：
+
 | 接口 | 作用 |
 |------|------|
 | BeanNameAware | 获取 Bean 在容器中的名称 |
