@@ -1,0 +1,532 @@
+# ============================================
+# Elasticsearch 进阶功能测试指南
+# ============================================
+# 说明：以下测试脚本使用 REST Client 插件运行
+# 使用方法：在 IDEA 中打开此文件，点击绿色箭头执行请求
+# ============================================
+
+### 0. 前置准备 - 确保 ES 服务正常运行
+GET http://localhost:19200/_cluster/health
+Authorization: Basic elastic your_password
+Content-Type: application/json
+
+### 查看现有索引
+GET http://localhost:19200/_cat/indices?v
+
+### ============================================
+### 一、倒排索引原理演示
+### ============================================
+
+### 1.1 倒排索引演示
+GET http://localhost:9080/api/es/advanced/inverted-index-demo
+
+### ============================================
+### 二、分词器机制
+### ============================================
+
+### 2.1 测试 IK 分词器（最大匹配）
+POST http://localhost:19200/_analyze
+Content-Type: application/json
+
+{
+  "analyzer": "ik_max_word",
+  "text": "Elasticsearch 分布式搜索引擎"
+}
+
+### 2.2 测试 IK 分词器（智能匹配）
+POST http://localhost:19200/_analyze
+Content-Type: application/json
+
+{
+  "analyzer": "ik_smart",
+  "text": "Elasticsearch 分布式搜索引擎"
+}
+
+### 2.3 测试标准分词器
+POST http://localhost:19200/_analyze
+Content-Type: application/json
+
+{
+  "analyzer": "standard",
+  "text": "Elasticsearch is a distributed search engine"
+}
+
+### 2.4 通过 API 测试分词效果
+POST http://localhost:9080/api/es/advanced/analyze?analyzer=ik_max_word&text=Elasticsearch 分布式搜索引擎
+
+### ============================================
+### 三、查询 DSL 高级用法
+### ============================================
+
+### 3.1 布尔查询示例
+POST http://localhost:9080/api/es/advanced/search/bool-query?index=device_operation_log
+Content-Type: application/json
+
+{
+  "must": {
+    "field": "device_code",
+    "value": "DEV001"
+  },
+  "filter": {
+    "field": "operation_type",
+    "value": 1
+  }
+}
+
+### 3.2 多字段匹配查询
+POST http://localhost:9080/api/es/advanced/search/multi-match?index=device_operation_log&searchText=操作&fields=device_name&fields=operator
+Content-Type: application/json
+
+{
+  "test": "multi_match_query"
+}
+
+### 3.3 高亮搜索
+GET http://localhost:9080/api/es/advanced/search/highlight?index=device_operation_log&searchText=设备&field=device_name
+
+### 3.4 原生 DSL 查询示例 - Match Query
+POST http://localhost:19200/device_operation_log/_search
+Content-Type: application/json
+
+{
+  "query": {
+    "match": {
+      "device_name": {
+        "query": "离心机",
+        "operator": "and"
+      }
+    }
+  }
+}
+
+### 3.5 原生 DSL 查询示例 - Bool Query
+POST http://localhost:19200/device_operation_log/_search
+Content-Type: application/json
+
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "match": {
+            "device_name": "离心机"
+          }
+        }
+      ],
+      "filter": [
+        {
+          "term": {
+            "operation_type": 1
+          }
+        },
+        {
+          "range": {
+            "operation_time": {
+              "gte": "2024-01-01"
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+
+### 3.6 原生 DSL 查询示例 - Multi Match
+POST http://localhost:19200/device_operation_log/_search
+Content-Type: application/json
+
+{
+  "query": {
+    "multi_match": {
+      "query": "离心机 操作",
+      "fields": ["device_name^2", "operator", "description"],
+      "type": "best_fields"
+    }
+  }
+}
+
+### ============================================
+### 四、聚合分析实战
+### ============================================
+
+### 4.1 Terms 聚合 - 按操作类型统计
+GET http://localhost:9080/api/es/advanced/aggregation/terms?index=device_operation_log&fieldName=operation_type
+
+### 4.2 原生 DSL - Terms 聚合
+POST http://localhost:19200/device_operation_log/_search
+Content-Type: application/json
+
+{
+  "size": 0,
+  "aggs": {
+    "operation_types": {
+      "terms": {
+        "field": "operation_type.keyword"
+      }
+    }
+  }
+}
+
+### 4.3 日期直方图聚合
+GET http://localhost:9080/api/es/advanced/aggregation/histogram?index=device_operation_log&dateField=operation_time
+
+### 4.4 原生 DSL - 日期直方图
+POST http://localhost:19200/device_operation_log/_search
+Content-Type: application/json
+
+{
+  "size": 0,
+  "aggs": {
+    "logs_over_time": {
+      "date_histogram": {
+        "field": "operation_time",
+        "calendar_interval": "day"
+      }
+    }
+  }
+}
+
+### 4.5 嵌套聚合示例
+GET http://localhost:9080/api/es/advanced/aggregation/nested?index=device_operation_log
+
+### 4.6 原生 DSL - 嵌套聚合
+POST http://localhost:19200/device_operation_log/_search
+Content-Type: application/json
+
+{
+  "size": 0,
+  "aggs": {
+    "by_operation_type": {
+      "terms": {
+        "field": "operation_type.keyword"
+      },
+      "aggs": {
+        "avg_cost_time": {
+          "avg": {
+            "field": "cost_time"
+          }
+        },
+        "logs_per_day": {
+          "date_histogram": {
+            "field": "operation_time",
+            "calendar_interval": "day"
+          }
+        }
+      }
+    }
+  }
+}
+
+### ============================================
+### 五、性能优化
+### ============================================
+
+### 5.1 批量写入优化测试
+POST http://localhost:9080/api/es/advanced/optimize/bulk-write?index=test_index
+Content-Type: application/json
+
+[
+  {
+    "title": "测试文档 1",
+    "content": "这是测试内容 1",
+    "timestamp": "2024-01-01T10:00:00Z"
+  },
+  {
+    "title": "测试文档 2",
+    "content": "这是测试内容 2",
+    "timestamp": "2024-01-01T10:01:00Z"
+  },
+  {
+    "title": "测试文档 3",
+    "content": "这是测试内容 3",
+    "timestamp": "2024-01-01T10:02:00Z"
+  }
+]
+
+### 5.2 查询缓存优化建议
+GET http://localhost:9080/api/es/advanced/optimize/query-cache?index=device_operation_log&filterField=status&filterValue=active
+
+### 5.3 索引设置优化建议
+GET http://localhost:9080/api/es/advanced/optimize/index-settings?index=device_operation_log
+
+### 5.4 原生 DSL - 优化查询（使用 Filter Context）
+POST http://localhost:19200/device_operation_log/_search
+Content-Type: application/json
+
+{
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "term": {
+            "status": "active"
+          }
+        },
+        {
+          "range": {
+            "operation_time": {
+              "gte": "now-1h"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "_source": ["device_code", "device_name"],
+  "size": 10
+}
+
+### 5.5 调整索引刷新间隔
+PUT http://localhost:19200/device_operation_log/_settings
+Content-Type: application/json
+
+{
+  "refresh_interval": "30s"
+}
+
+### 5.6 查看索引设置
+GET http://localhost:19200/device_operation_log/_settings
+
+### ============================================
+### 六、集群管理与扩容
+### ============================================
+
+### 6.1 获取集群健康状态
+GET http://localhost:9080/api/es/advanced/cluster/health
+
+### 6.2 原生 API - 集群健康
+GET http://localhost:19200/_cluster/health?pretty
+
+### 6.3 获取节点信息
+GET http://localhost:9080/api/es/advanced/cluster/nodes
+
+### 6.4 原生 API - 节点信息
+GET http://localhost:19200/_cat/nodes?v&h=name,ip,port,node.role,master,ram,heap
+
+### 6.5 获取分片分布
+GET http://localhost:9080/api/es/advanced/cluster/shards?index=device_operation_log
+
+### 6.6 原生 API - 分片分布
+GET http://localhost:19200/_cat/shards?v&h=index,shard,prirep,node,docs,store
+
+### 6.7 查看所有索引
+GET http://localhost:19200/_cat/indices?v&h=index,health,status,pri,rep,docs.count,store.size
+
+### 6.8 查看集群状态详情
+GET http://localhost:19200/_cluster/state?pretty
+
+### ============================================
+### 七、ELK 日志分析实战
+### ============================================
+
+### 7.1 采集日志条目
+POST http://localhost:9080/api/es/advanced/elk/ingest-log
+Content-Type: application/json
+
+{
+  "timestamp": "2024-01-15T10:30:00Z",
+  "level": "ERROR",
+  "logger": "com.example.service.UserService",
+  "thread": "http-nio-8080-exec-1",
+  "message": "NullPointerException: null",
+  "exception": "java.lang.NullPointerException",
+  "app": "user-service",
+  "env": "production"
+}
+
+### 7.2 查询日志
+POST http://localhost:9080/api/es/advanced/elk/query?indexPattern=logs-*
+Content-Type: application/json
+
+{
+  "level": "ERROR",
+  "time_range": "last_24h",
+  "app": "user-service"
+}
+
+### 7.3 原生 DSL - 日志查询
+POST http://localhost:19200/logs-*/_search
+Content-Type: application/json
+
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "match": {
+            "level": "ERROR"
+          }
+        }
+      ],
+      "filter": [
+        {
+          "range": {
+            "@timestamp": {
+              "gte": "now-24h",
+              "lte": "now"
+            }
+          }
+        },
+        {
+          "term": {
+            "app.keyword": "user-service"
+          }
+        }
+      ]
+    }
+  },
+  "sort": [
+    {
+      "@timestamp": {
+        "order": "desc"
+      }
+    }
+  ],
+  "size": 20
+}
+
+### 7.4 日志统计 - 错误级别分布
+POST http://localhost:19200/logs-*/_search
+Content-Type: application/json
+
+{
+  "size": 0,
+  "aggs": {
+    "levels": {
+      "terms": {
+        "field": "level.keyword"
+      }
+    }
+  }
+}
+
+### 7.5 日志统计 - 每小时趋势
+POST http://localhost:19200/logs-*/_search
+Content-Type: application/json
+
+{
+  "size": 0,
+  "aggs": {
+    "logs_per_hour": {
+      "date_histogram": {
+        "field": "@timestamp",
+        "calendar_interval": "hour"
+      },
+      "aggs": {
+        "error_count": {
+          "filter": {
+            "term": {
+              "level.keyword": "ERROR"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+### ============================================
+### 八、综合实战场景
+### ============================================
+
+### 8.1 创建测试索引
+PUT http://localhost:19200/test_logs
+Content-Type: application/json
+
+{
+  "settings": {
+    "number_of_shards": 1,
+    "number_of_replicas": 0,
+    "refresh_interval": "5s"
+  },
+  "mappings": {
+    "properties": {
+      "timestamp": { "type": "date" },
+      "level": { 
+        "type": "keyword"
+      },
+      "message": { 
+        "type": "text",
+        "analyzer": "ik_max_word"
+      },
+      "service": { "type": "keyword" },
+      "trace_id": { "type": "keyword" }
+    }
+  }
+}
+
+### 8.2 批量插入测试数据
+POST http://localhost:19200/_bulk
+Content-Type: application/json
+
+{ "index": { "_index": "test_logs" }}
+{ "timestamp": "2024-01-15T10:00:00Z", "level": "INFO", "message": "用户登录成功", "service": "auth-service", "trace_id": "trace-001" }
+{ "index": { "_index": "test_logs" }}
+{ "timestamp": "2024-01-15T10:01:00Z", "level": "ERROR", "message": "数据库连接失败", "service": "user-service", "trace_id": "trace-002" }
+{ "index": { "_index": "test_logs" }}
+{ "timestamp": "2024-01-15T10:02:00Z", "level": "WARN", "message": "缓存命中率低", "service": "order-service", "trace_id": "trace-003" }
+{ "index": { "_index": "test_logs" }}
+{ "timestamp": "2024-01-15T10:03:00Z", "level": "INFO", "message": "订单创建成功", "service": "order-service", "trace_id": "trace-004" }
+{ "index": { "_index": "test_logs" }}
+{ "timestamp": "2024-01-15T10:04:00Z", "level": "ERROR", "message": "支付接口超时", "service": "payment-service", "trace_id": "trace-005" }
+
+### 8.3 刷新索引
+POST http://localhost:19200/test_logs/_refresh
+
+### 8.4 查询测试数据
+POST http://localhost:19200/test_logs/_search
+Content-Type: application/json
+
+{
+  "query": {
+    "match_all": {}
+  }
+}
+
+### 8.5 删除测试索引
+DELETE http://localhost:19200/test_logs
+
+### ============================================
+### 九、调试工具
+### ============================================
+
+### 查看 ES 版本信息
+GET http://localhost:19200/
+
+### 查看集群信息
+GET http://localhost:19200/_cluster/health?pretty
+
+### 查看所有节点
+GET http://localhost:19200/_cat/nodes?v
+
+### 查看所有索引
+GET http://localhost:19200/_cat/indices?v
+
+### 查看分片信息
+GET http://localhost:19200/_cat/shards?v
+
+### 查看集群设置
+GET http://localhost:19200/_cluster/settings?pretty
+
+### ============================================
+### 性能测试提示
+### ============================================
+# 
+# 1. 批量写入测试：
+#    - 使用 Bulk API 批量插入 1000+ 条数据
+#    - 观察写入性能和 ES 资源占用
+#
+# 2. 查询性能测试：
+#    - 对比 Query Context vs Filter Context
+#    - 测试深度分页的性能影响
+#    - 验证缓存命中率
+#
+# 3. 聚合性能测试：
+#    - 测试不同数据量下的聚合性能
+#    - 对比单层聚合 vs 嵌套聚合
+#
+# 4. 集群扩展测试：
+#    - 添加新节点后观察分片重新平衡
+#    - 测试冷热架构的效果
+#
+# ============================================
