@@ -25,5 +25,6 @@
         <module>interview-kafka</module>
         <module>interview-containerization</module>
         <module>interview-system-design</module>
+        <module>interview-observability</module>
     </modules>
 </project>

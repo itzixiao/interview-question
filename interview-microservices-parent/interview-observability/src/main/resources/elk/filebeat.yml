@@ -1,0 +1,75 @@
+# Filebeat 配置文件示例
+# 文件名：filebeat.yml
+# 用途：采集 Spring Boot 应用日志并发送到 Logstash
+
+filebeat.inputs:
+  # 采集 Spring Boot 应用日志
+  - type: log
+    enabled: true
+    paths:
+      - /var/log/interview-observability/*.log
+    json.keys_under_root: true
+    json.add_error_key: true
+    json.message_key: message
+    
+    # 添加字段标识
+    fields:
+      service: interview-observability
+      environment: dev
+      log_type: application
+    
+    # 多行日志合并（Java 堆栈跟踪）
+    multiline.pattern: '^\s'
+    multiline.match: after
+    multiline.max_lines: 500
+  
+  # 采集系统日志
+  - type: log
+    enabled: true
+    paths:
+      - /var/log/syslog
+      - /var/log/messages
+    fields:
+      log_type: system
+
+# processors 用于处理日志数据
+processors:
+  # 添加主机名
+  - add_host_metadata: ~
+  
+  # 添加时间戳
+  - add_timestamp: ~
+  
+  # 删除不必要的字段
+  - drop_fields:
+      fields: ["agent.ephemeral_id", "agent.version"]
+
+# 输出到 Logstash
+output.logstash:
+  hosts: ["logstash:5044"]
+  
+  # SSL 配置（生产环境建议开启）
+  #ssl.enabled: true
+  #ssl.certificate_authorities: ["/etc/pki/root/ca.pem"]
+  #ssl.certificate: "/etc/pki/client/cert.pem"
+  #ssl.key: "/etc/pki/client/cert.key"
+
+# 日志级别
+logging.level: info
+logging.to_files: true
+logging.files:
+  path: /var/log/filebeat
+  name: filebeat.log
+  keepfiles: 7
+  permissions: 0644
+
+# 队列配置
+queue.mem:
+  events: 4096
+  flush.min_events: 512
+  flush.timeout: 5s
+
+# 内部监控
+http.enabled: true
+http.host: localhost
+http.port: 5066

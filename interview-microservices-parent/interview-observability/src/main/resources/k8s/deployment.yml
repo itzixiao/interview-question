@@ -1,0 +1,190 @@
+# Kubernetes Deployment 配置 - 健康检查与自愈
+# 文件名：k8s-deployment.yml
+# 用途：展示 K8s 探针配置实现应用自愈
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: interview-observability
+  labels:
+    app: interview-observability
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: interview-observability
+  template:
+    metadata:
+      labels:
+        app: interview-observability
+    spec:
+      containers:
+      - name: interview-observability
+        image: interview-observability:1.0.0
+        ports:
+        - containerPort: 8080
+        
+        # ==================== 资源限制 ====================
+        resources:
+          requests:
+            cpu: "250m"
+            memory: "512Mi"
+          limits:
+            cpu: "1000m"
+            memory: "1Gi"
+        
+        # ==================== 健康检查探针 ====================
+        
+        # 1. Liveness Probe（存活探针）
+        # 作用：检测容器是否存活，失败则重启容器
+        # 场景：死锁、内存溢出等导致应用无法响应
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 60      # 容器启动后等待 60 秒开始探测
+          periodSeconds: 30            # 每 30 秒探测一次
+          timeoutSeconds: 5            # 超时时间 5 秒
+          successThreshold: 1          # 成功阈值
+          failureThreshold: 3          # 连续失败 3 次则重启容器
+        
+        # 2. Readiness Probe（就绪探针）
+        # 作用：检测容器是否准备好处理请求，失败则从 Service 的 Endpoints 中移除
+        # 场景：应用启动中、依赖服务不可用、数据库连接池耗尽等
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 30      # 容器启动后等待 30 秒开始探测
+          periodSeconds: 10            # 每 10 秒探测一次
+          timeoutSeconds: 3            # 超时时间 3 秒
+          successThreshold: 1          # 成功 1 次即标记为就绪
+          failureThreshold: 3          # 连续失败 3 次则标记为未就绪
+        
+        # 3. Startup Probe（启动探针）
+        # 作用：检测应用是否已完成启动，启动期间不执行 Liveness 和 Readiness 探测
+        # 场景：慢启动应用（如加载大量数据、初始化复杂缓存）
+        startupProbe:
+          httpGet:
+            path: /actuator/health/startup
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 30         # 允许失败 30 次（共 300 秒启动时间）
+        
+        # ==================== 环境变量 ====================
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: "prod"
+        - name: JAVA_OPTS
+          value: "-Xms512m -Xmx512m -XX:+UseG1GC"
+        
+        # ==================== 挂载配置 ====================
+        volumeMounts:
+        - name: config
+          mountPath: /app/config
+          readOnly: true
+        - name: logs
+          mountPath: /var/log/interview-observability
+      
+      # ==================== 卷配置 ====================
+      volumes:
+      - name: config
+        configMap:
+          name: interview-observability-config
+      - name: logs
+        emptyDir: {}
+      
+      # ==================== 其他配置 ====================
+      
+      # 优雅关闭配置
+      terminationGracePeriodSeconds: 30
+      
+      # 镜像拉取策略
+      imagePullPolicy: IfNotPresent
+
+---
+# ==================== Service 配置 ====================
+apiVersion: v1
+kind: Service
+metadata:
+  name: interview-observability-service
+spec:
+  selector:
+    app: interview-observability
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8080
+  type: ClusterIP
+  
+  # 会话保持（可选）
+  sessionAffinity: ClientIP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800  # 3 小时
+
+---
+# ==================== HorizontalPodAutoscaler (HPA) ====================
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: interview-observability-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: interview-observability
+  minReplicas: 2
+  maxReplicas: 10
+  
+  # 扩缩容指标
+  metrics:
+  # CPU 使用率超过 70% 扩容
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  
+  # 内存使用率超过 80% 扩容
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+  
+  # 自定义指标（如 QPS）
+  - type: Pods
+    pods:
+      metric:
+        name: http_requests_per_second
+      target:
+        type: AverageValue
+        averageValue: "1000"
+  
+  # 扩缩容行为控制
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300  # 缩容前稳定 5 分钟
+      policies:
+      - type: Percent
+        value: 10                      # 每次最多缩容 10%
+        periodSeconds: 60
+    scaleUp:
+      stabilizationWindowSeconds: 0    # 扩容立即执行
+      policies:
+      - type: Percent
+        value: 100                     # 每次最多加容 100%
+        periodSeconds: 15
+      - type: Pods
+        value: 4                       # 或每次增加最多 4 个 Pod
+        periodSeconds: 15
+      selectPolicy: Max                # 选择最大值执行

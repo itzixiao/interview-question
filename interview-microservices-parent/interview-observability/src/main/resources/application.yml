@@ -1,0 +1,41 @@
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    health:
+      show-details: always
+    info:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    tags:
+      application: ${spring.application.name}
+      environment: ${ENVIRONMENT:dev}
+
+# Prometheus 抓取配置示例（prometheus.yml）
+# 实际部署时放在 Prometheus 服务器配置目录
+---
+# 以下为 prometheus.yml 配置示例，非本文件内容
+# 
+# global:
+#   scrape_interval: 15s
+#   evaluation_interval: 15s
+# 
+# scrape_configs:
+#   - job_name: 'interview-observability'
+#     metrics_path: '/actuator/prometheus'
+#     static_configs:
+#       - targets: ['localhost:8080']
+#         labels:
+#           service: 'order-service'
+#           env: 'dev'
+#   
+#   - job_name: 'spring-boot-apps'
+#     metrics_path: '/actuator/prometheus'
+#     discovery:
+#       # 使用服务发现动态获取目标
+#   

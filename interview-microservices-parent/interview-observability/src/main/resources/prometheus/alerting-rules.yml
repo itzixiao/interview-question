@@ -1,0 +1,108 @@
+# Prometheus 告警规则配置示例
+# 文件名：alerting-rules.yml
+# 用途：定义告警规则和阈值
+
+groups:
+  - name: application_alerts
+    interval: 30s
+    rules:
+      # 1. 应用宕机告警
+      - alert: ApplicationDown
+        expr: up{job="interview-observability"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "应用 {{ $labels.instance }} 已宕机"
+          description: "应用 {{ $labels.job }} 在 {{ $labels.instance }} 实例上已停止运行超过 1 分钟"
+      
+      # 2. CPU 使用率过高告警
+      - alert: HighCPUUsage
+        expr: process_cpu_seconds_total{job="interview-observability"} > 0.8
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "应用 {{ $labels.instance }} CPU 使用率过高"
+          description: "CPU 使用率超过 80%，当前值：{{ $value }}"
+      
+      # 3. 内存使用率过高告警
+      - alert: HighMemoryUsage
+        expr: jvm_memory_used_bytes{area="heap"} / jvm_memory_max_bytes{area="heap"} > 0.9
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "应用 {{ $labels.instance }} 内存使用率过高"
+          description: "堆内存使用率超过 90%，当前值：{{ $value | humanizePercentage }}"
+      
+      # 4. 接口响应时间过长告警
+      - alert: SlowResponseTime
+        expr: histogram_quantile(0.95, rate(http_server_requests_seconds_bucket{job="interview-observability"}[5m])) > 2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "应用 {{ $labels.instance }} P95 响应时间过长"
+          description: "P95 响应时间超过 2 秒，当前值：{{ $value }}s"
+      
+      # 5. 错误率过高告警
+      - alert: HighErrorRate
+        expr: rate(http_server_requests_seconds_count{status=~"5..",job="interview-observability"}[5m]) / rate(http_server_requests_seconds_count{job="interview-observability"}[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "应用 {{ $labels.instance }} 错误率过高"
+          description: "HTTP 5xx 错误率超过 5%，当前值：{{ $value | humanizePercentage }}"
+      
+      # 6. 订单创建量异常告警（业务指标）
+      - alert: LowOrderCreationRate
+        expr: rate(order_created_total[1h]) < 10
+        for: 30m
+        labels:
+          severity: info
+        annotations:
+          summary: "订单创建量异常低"
+          description: "过去 30 分钟内订单创建速率低于 10 单/小时，当前值：{{ $value }}"
+      
+      # 7. JVM GC 频繁告警
+      - alert: FrequentGC
+        expr: rate(jvm_gc_collection_seconds_count[5m]) > 10
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "应用 {{ $labels.instance }} GC 过于频繁"
+          description: "每分钟 GC 次数超过 10 次，当前值：{{ $value }}"
+      
+      # 8. 线程池耗尽告警
+      - alert: ThreadPoolExhausted
+        expr: tomcat_threads_busy_threads / tomcat_threads_config_max > 0.9
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "应用 {{ $labels.instance }} 线程池即将耗尽"
+          description: "线程池使用率超过 90%，当前值：{{ $value | humanizePercentage }}"
+      
+      # 9. 数据库连接池耗尽告警
+      - alert: DataSourceConnectionPoolExhausted
+        expr: hikaricp_connections_active / hikaricp_connections_max > 0.9
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "应用 {{ $labels.instance }} 数据库连接池即将耗尽"
+          description: "数据库连接池使用率超过 90%，当前值：{{ $value | humanizePercentage }}"
+      
+      # 10. 磁盘空间不足告警
+        # 注意：需要 node_exporter 提供磁盘指标
+      - alert: DiskSpaceLow
+        expr: node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"} < 0.1
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "服务器 {{ $labels.instance }} 磁盘空间不足"
+          description: "根分区可用空间低于 10%，当前值：{{ $value | humanizePercentage }}"

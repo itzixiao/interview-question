@@ -2,24 +2,38 @@
 
 ## 📚 文档列表
 
-#### 1. [01-DevOps 核心知识点详解.md](./01-DevOps%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%86%E7%82%B9%E8%AF%A6%E8%A7%A3.md)
+#### 1. [01-DevOps核心知识点详解.md](./01-DevOps%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%86%E7%82%B9%E8%AF%A6%E8%A7%A3.md)
 - **内容：** Linux、Docker、Jenkins、Nginx 等运维知识
 - **面试题：** 20+ 道
 - **重要程度：** ⭐⭐⭐⭐
 
 #### 2. [02-容器化与云原生详解.md](./02-%E5%AE%B9%E5%99%A8%E5%8C%96%E4%B8%8E%E4%BA%91%E5%8E%9F%E7%94%9F%E8%AF%A6%E8%A7%A3.md)
-- **内容：** Docker、Kubernetes、Helm、CI/CD流水线完整实战
+- **内容：** Docker、Kubernetes、Helm、CI/CD 流水线完整实战
 - **面试题：** 30+ 道（含详细解答）
 - **重要程度：** ⭐⭐⭐⭐⭐
 - **代码示例：** `interview-microservices-parent/interview-containerization/`
+
+#### 3. [03-监控与可观测性详解.md](./03-%E7%9B%91%E6%8E%A7%E4%B8%8E%E5%8F%AF%E8%A7%82%E6%B5%8B%E6%80%A7%E8%AF%A6%E8%A7%A3.md)
+- **内容：** Prometheus、Grafana、SkyWalking、ELK、健康检查与自愈
+- **子主题：**
+  - Prometheus：指标采集、PromQL、告警规则
+  - Grafana：可视化 Dashboard
+  - SkyWalking：APM 链路追踪
+  - ELK：日志平台
+  - K8s：健康检查探针、HPA 自动扩缩容
+- **代码示例：** `interview-microservices-parent/interview-observability/`
+- **面试题：** 20+ 道
+- **重要程度：** ⭐⭐⭐⭐⭐
 
 ---
 
 ## 📊 统计信息
 
-- **文档数：** 2 个
-- **面试题总数：** 50+ 道
-- **代码示例：** 配套 Java 代码在 `interview-microservices-parent/interview-containerization/` 和 `interview-service/devops/` 目录（~2000 行配置 + 代码）
+- **文档数：** 3 个
+- **面试题总数：** 70+ 道
+- **代码示例：** 
+  - 容器化：`interview-microservices-parent/interview-containerization/`（~2000 行配置 + 代码）
+  - 监控可观测性：`interview-microservices-parent/interview-observability/`（~1500 行代码 + 配置）
 
 ---
 
@@ -119,6 +133,36 @@
    - 构建、测试、部署
    - 自动化发布
 
+### 监控与可观测性（1 周）
+
+**第 1-2 天：Prometheus 监控**
+1. **Prometheus 架构**
+   - 指标采集（Exporter）
+   - PromQL 查询语言
+   - AlertManager 告警
+
+2. **Spring Boot 集成**
+   - Spring Boot Actuator
+   - Micrometer 指标采集
+   - 自定义业务指标
+
+**第 3-4 天：Grafana 可视化**
+1. **Dashboard 配置**
+   - 数据源配置
+   - 面板创建
+   - 告警通知
+
+**第 5 天：SkyWalking APM**
+1. **链路追踪原理**
+   - Trace、Span 概念
+   - Java Agent 配置
+   - 性能瓶颈分析
+
+**第 6-7 天：ELK 日志平台**
+1. **Filebeat 日志采集**
+2. **Logstash 数据处理**
+3. **Kibana 可视化**
+
 ---
 
 ## 🔗 跨模块关联
@@ -142,6 +186,10 @@
 | Nginx | 反向代理、负载均衡 |
 | Jenkins | CI/CD 自动化 |
 | Linux | 生产环境运维 |
+| Prometheus | 应用监控、告警 |
+| Grafana | 数据可视化 |
+| SkyWalking | APM 链路追踪 |
+| ELK | 日志采集与分析 |
 
 ---
 
@@ -314,7 +362,15 @@ CI/CD流水线
 
 ## 📈 更新日志
 
-### v2.1 - 2026-03-15
+### v3.0 - 2026-03-15
+- ✅ 新增《监控与可观测性详解》文档
+- ✅ 新增 interview-observability 示例模块
+- ✅ 补充 Prometheus、Grafana、SkyWalking、ELK 完整示例
+- ✅ 补充健康检查与自愈配置
+- ✅ 更新高频面试题（70+ 道）
+- ✅ 完善学习路线和实战技巧
+
+### v2.1 - 2026-03-08
 - ✅ 新增《容器化与云原生详解》文档
 - ✅ 新增 interview-containerization 示例模块
 - ✅ 补充 Docker、K8s、Helm、CI/CD完整示例
@@ -333,5 +389,5 @@ CI/CD流水线
 ---
 
 **维护者：** itzixiao  
-**最后更新：** 2026-03-08  
+**最后更新：** 2026-03-15  
 **问题反馈：** 欢迎提 Issue 或 PR
