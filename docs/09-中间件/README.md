@@ -44,13 +44,19 @@
 - **重要程度：** ⭐⭐⭐⭐
 - **配套代码：** `interview-microservices-parent/interview-provider/hbase/`
 
+#### 9. [09-Kafka 高吞吐消息队列详解.md](09-Kafka高吞吐消息队列详解.md)
+- **内容：** 架构设计、高吞吐原理、Offset 管理、Exactly Once 语义、ISR 副本同步
+- **面试题：** 6+ 道
+- **重要程度：** ⭐⭐⭐⭐⭐
+- **配套代码：** `interview-microservices-parent/interview-kafka/`
+
 ---
 
 ## 📊 统计信息
 
-- **文档数：** 8 个
-- **面试题总数：** 86+ 道
-- **代码示例：** 配套 Java 代码在 `interview-service/rpc/`、`interview-rabbitmq/`、`interview-provider/hbase/` 等目录（~5,500 行代码）
+- **文档数：** 9 个
+- **面试题总数：** 92+ 道
+- **代码示例：** 配套 Java 代码在 `interview-service/rpc/`、`interview-rabbitmq/`、`interview-kafka/`、`interview-provider/hbase/` 等目录（~6,500 行代码）
 
 ---
 

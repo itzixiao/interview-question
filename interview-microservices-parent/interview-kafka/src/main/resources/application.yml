@@ -1,0 +1,60 @@
+spring:
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}  # 支持环境变量
+    
+    # 安全认证配置（SASL/PLAIN）
+    properties:
+      security.protocol: ${KAFKA_SECURITY_PROTOCOL:SASL_PLAINTEXT}
+      sasl.mechanism: ${KAFKA_SASL_MECHANISM:PLAIN}
+      sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="${KAFKA_USERNAME:admin}" password="${KAFKA_PASSWORD:admin-secret}";
+    
+    # 生产者配置
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      # 可靠性配置
+      acks: all  # 所有 ISR 副本确认
+      retries: 3  # 重试次数
+      # 批量发送配置（高吞吐优化）
+      batch-size: 16384  # 批次大小：16KB
+      linger-ms: 1       # 等待更多消息加入批次的时间
+      buffer-memory: 33554432  # 缓冲区大小：32MB
+      # 压缩配置
+      compression-type: lz4  # lz4 压缩算法
+      # 幂等性配置（Exactly Once）
+      enable-idempotence: true
+      max-in-flight-requests-per-connection: 5
+    
+    # 消费者配置
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      # 消费者组
+      group-id: ${KAFKA_CONSUMER_GROUP_ID:kafka-demo-group}
+      # Offset 管理
+      auto-offset-reset: earliest  # 从头开始消费
+      enable-auto-commit: false    # 关闭自动提交
+      # 会话超时
+      session-timeout: 30000
+      heartbeat-interval: 10000
+      # 单次拉取数量
+      max-poll-records: 500
+    
+    # 监听器配置
+    listener:
+      missing-topics-fatal: false  # Topic 不存在时不报错
+      concurrency: 3               # 并发消费者数量
+      ack-mode: manual_immediate   # 手动立即提交 Offset
+
+# 应用配置
+server:
+  port: 8086  # 避免与 interview-provider 冲突
+
+# 日志配置
+logging:
+  level:
+    root: INFO
+    cn.itzixiao.interview.kafka: DEBUG
+    org.springframework.kafka: DEBUG
+    org.apache.kafka: WARN
+    org.apache.kafka.common.security: DEBUG  # 安全认证调试信息
