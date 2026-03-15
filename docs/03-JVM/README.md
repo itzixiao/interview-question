@@ -66,8 +66,8 @@
 
 ### 后续进阶
 - 📚 **[Spring框架](../04-Spring框架/README.md)** - Bean 生命周期、循环依赖
-- 📚 **[MySQL](../07-MySQL 数据库/README.md)** - InnoDB 内存管理
-- 📚 **[Redis](../08-Redis 缓存/README.md)** - 内存淘汰策略对比
+- 📚 **[MySQL](../07-MySQL数据库/README.md)** - InnoDB 内存管理
+- 📚 **[Redis](../08-Redis缓存/README.md)** - 内存淘汰策略对比
 
 ### 知识点对应
 | JVM | 应用场景 |
