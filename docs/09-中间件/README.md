@@ -22,7 +22,7 @@
 - **面试题：** 15+ 道
 - **重要程度：** ⭐⭐⭐⭐⭐
 
-#### 5. [05-Sentinel 限流熔断详解.md](./05-Sentinel 限流熔断详解.md)
+#### 5. [05-Sentinel限流熔断详解.md](./05-Sentinel限流熔断详解.md)
 - **内容：** 限流规则、熔断降级、系统自适应保护
 - **面试题：** 12+ 道
 - **重要程度：** ⭐⭐⭐⭐
@@ -38,13 +38,19 @@
 - **重要程度：** ⭐⭐⭐⭐⭐
 - **配套代码：** `interview-microservices-parent/interview-rabbitmq/`
 
+#### 8. [08-HBase详解.md](./08-HBase详解.md)
+- **内容：** 数据模型、架构原理、核心操作、过滤器、性能优化、Row Key 设计
+- **面试题：** 7+ 道
+- **重要程度：** ⭐⭐⭐⭐
+- **配套代码：** `interview-microservices-parent/interview-provider/hbase/`
+
 ---
 
 ## 📊 统计信息
 
-- **文档数：** 7 个
-- **面试题总数：** 79+ 道
-- **代码示例：** 配套 Java 代码在 `interview-service/rpc/`、`interview-rabbitmq/` 等目录（~4,500 行代码）
+- **文档数：** 8 个
+- **面试题总数：** 86+ 道
+- **代码示例：** 配套 Java 代码在 `interview-service/rpc/`、`interview-rabbitmq/`、`interview-provider/hbase/` 等目录（~5,500 行代码）
 
 ---
 
