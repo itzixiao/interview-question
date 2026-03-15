@@ -2,22 +2,88 @@
 
 ## 📚 文档列表
 
-#### 1. [01-DevOps核心知识点详解.md](./01-DevOps%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%86%E7%82%B9%E8%AF%A6%E8%A7%A3.md)
+#### 1. [01-DevOps 核心知识点详解.md](./01-DevOps%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%86%E7%82%B9%E8%AF%A6%E8%A7%A3.md)
 - **内容：** Linux、Docker、Jenkins、Nginx 等运维知识
 - **面试题：** 20+ 道
 - **重要程度：** ⭐⭐⭐⭐
+
+#### 2. [02-容器化与云原生详解.md](./02-%E5%AE%B9%E5%99%A8%E5%8C%96%E4%B8%8E%E4%BA%91%E5%8E%9F%E7%94%9F%E8%AF%A6%E8%A7%A3.md)
+- **内容：** Docker、Kubernetes、Helm、CI/CD流水线完整实战
+- **面试题：** 30+ 道（含详细解答）
+- **重要程度：** ⭐⭐⭐⭐⭐
+- **代码示例：** `interview-microservices-parent/interview-containerization/`
 
 ---
 
 ## 📊 统计信息
 
-- **文档数：** 1 个
-- **面试题总数：** 20+ 道
-- **代码示例：** 配套 Java 代码在 `interview-service/devops/` 目录（~500 行配置）
+- **文档数：** 2 个
+- **面试题总数：** 50+ 道
+- **代码示例：** 配套 Java 代码在 `interview-microservices-parent/interview-containerization/` 和 `interview-service/devops/` 目录（~2000 行配置 + 代码）
 
 ---
 
 ## 🎯 学习建议
+
+### 容器化与云原生（4 周）
+
+**第 1 周：Docker 基础**
+1. **Docker 安装与配置**
+   - Docker Desktop / Docker Engine
+   - 镜像仓库配置
+
+2. **镜像构建**
+   - Dockerfile 编写
+   - 多阶段构建优化
+   - 最佳实践
+
+3. **容器操作**
+   - 启动、停止、删除
+   - 端口映射、数据卷挂载
+   - 网络配置
+
+4. **Docker Compose**
+   - 多容器编排
+   - 服务依赖管理
+
+**第 2 周：Kubernetes 入门**
+1. **K8s 架构**
+   - Control Plane 组件
+   - Worker Node 组件
+
+2. **核心资源**
+   - Pod、Deployment、Service
+   - ConfigMap、Secret
+   - Namespace
+
+3. **健康检查**
+   - livenessProbe
+   - readinessProbe
+   - startupProbe
+
+**第 3 周：Kubernetes 进阶**
+1. **自动扩缩容**
+   - HPA 配置
+   - 自定义指标
+
+2. **高级调度**
+   - 节点选择器
+   - 亲和性与反亲和性
+   - 污点与容忍
+
+3. **有状态应用**
+   - StatefulSet
+   - PersistentVolume
+
+**第 4 周：Helm 与 CI/CD**
+1. **Helm 包管理**
+   - Chart 开发
+   - 多环境管理
+
+2. **CI/CD流水线**
+   - GitLab CI
+   - Jenkins Pipeline
+   - 部署策略（蓝绿、金丝雀）
 
 ### Linux 基础（2 天）
 1. **常用命令**
@@ -58,39 +124,59 @@
 ## 🔗 跨模块关联
 
 ### 前置知识
-- ✅ **[SpringBoot](../05-SpringBoot 与自动装配/README.md)** - 应用打包部署
+- ✅ **[SpringBoot](../05-SpringBoot与自动装配/README.md)** - 应用打包部署
+- ✅ **[Linux 基础](./01-DevOps核心知识点详解.md)** - 基本命令操作
 
 ### 后续进阶
-- 📚 **[Gateway](../06-SpringCloud 微服务/README.md)** - Nginx vs Gateway
+- 📚 **[Gateway](../06-SpringCloud微服务/README.md)** - Nginx vs Gateway
 - 📚 **[分布式系统](../12-分布式系统/README.md)** - 容器化部署
+- 📚 **[Service Mesh](https://istio.io/)** - 服务网格进阶
 
 ### 知识点对应
 | DevOps | 应用场景 |
-|--------|---------|
+|--------|---------||
 | Docker | 应用容器化部署 |
+| Kubernetes | 容器编排与管理 |
+| Helm | K8s 应用包管理 |
+| CI/CD | 自动化构建与部署 |
 | Nginx | 反向代理、负载均衡 |
 | Jenkins | CI/CD 自动化 |
 | Linux | 生产环境运维 |
 
 ---
 
-## 💡 高频面试题 Top 15
+## 💡 高频面试题 Top 20
 
+### Docker 相关
 1. **Docker 的优势是什么？与虚拟机的区别？**
 2. **Dockerfile 的常用指令有哪些？**
 3. **如何优化 Docker 镜像大小？**
-4. **Nginx 的负载均衡策略有哪些？**
-5. **Nginx 如何实现动静分离？**
-6. **Linux 如何查看 CPU 使用率？**
-7. **Linux 如何查看端口占用？**
-8. **如何查看日志文件的最后 100 行？**
-9. **Jenkins 流水线的基本结构？**
-10. **CI/CD 的流程是怎样的？**
-11. **如何进行灰度发布？**
-12. **如何回滚部署？**
-13. **Docker 网络模式有哪些？**
-14. **Kubernetes 的核心概念？**
-15. **如何进行服务健康检查？**
+4. **Docker 的网络模式有哪些？**
+5. **Docker 数据卷的作用？**
+6. **多阶段构建的优势？**
+7. **Docker Compose 的作用？**
+8. **容器与宿主机的网络通信原理？**
+
+### Kubernetes 相关
+9. **Kubernetes 的核心组件有哪些？**
+10. **Pod 的生命周期？**
+11. **Deployment 的工作原理？**
+12. **Service 的类型和使用场景？**
+13. **ConfigMap 和 Secret 的区别？**
+14. **HPA 的工作原理？**
+15. **K8s 如何实现服务发现？**
+16. **滚动更新的过程？**
+17. **Pod 探针的种类和作用？**
+
+### CI/CD相关
+18. **CI/CD 的流程是怎样的？**
+19. **如何实现灰度发布？**
+20. **蓝绿部署 vs 金丝雀发布？**
+
+### Helm 相关
+21. **Helm 的核心概念？**
+22. **Chart 的结构？**
+23. **Helm 多环境管理？**
 
 ---
 
@@ -98,28 +184,104 @@
 
 ### Dockerfile 示例
 ```dockerfile
-FROM openjdk:8-jdk-alpine
+# 多阶段构建优化版
+FROM maven:3.8-openjdk-8 AS builder
 WORKDIR /app
-COPY target/app.jar app.jar
-EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
+COPY pom.xml .
+RUN mvn dependency:go-offline -B
+COPY src ./src
+RUN mvn clean package -DskipTests -B
+
+FROM openjdk:8-jre-slim
+RUN groupadd -r appgroup && useradd -r -g appgroup appuser
+WORKDIR /app
+COPY --from=builder /app/target/app.jar app.jar
+RUN chown -R appuser:appgroup /app
+USER appuser
+ENV JAVA_OPTS="-Xms512m -Xmx512m -XX:+UseG1GC"
+HEALTHCHECK --interval=30s --timeout=3s --start-period=60s --retries=3 \
+    CMD curl -f http://localhost:8080/health || exit 1
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
 ```
 
-### Nginx 反向代理配置
-```nginx
-upstream backend {
-    server 192.168.1.10:8080;
-    server 192.168.1.11:8080;
-}
+### Kubernetes Deployment 示例
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: interview-app
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: interview-app
+  template:
+    metadata:
+      labels:
+        app: interview-app
+    spec:
+      containers:
+      - name: interview-app
+        image: interview-containerization:1.0.0
+        ports:
+        - containerPort: 8080
+        resources:
+          requests:
+            cpu: "250m"
+            memory: "512Mi"
+          limits:
+            cpu: "500m"
+            memory: "1Gi"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+```
 
-server {
-    listen 80;
-    location / {
-        proxy_pass http://backend;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-    }
-}
+### HPA 自动扩缩容示例
+```yaml
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: interview-app-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: interview-app-deployment
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+    scaleUp:
+      stabilizationWindowSeconds: 0
 ```
 
 ---
@@ -127,24 +289,37 @@ server {
 ## 📖 推荐学习顺序
 
 ```
-Linux 基础命令
-   ↓
-Docker 入门
+Docker 基础
    ↓
 Dockerfile 编写
    ↓
-Nginx 配置
-   ↓
-Jenkins 流水线
-   ↓
-CI/CD 实战
+Docker Compose 编排
    ↓
 Kubernetes 入门
+   ↓
+Pod、Deployment、Service
+   ↓
+ConfigMap、Secret
+   ↓
+HPA 自动扩缩容
+   ↓
+Helm 包管理
+   ↓
+CI/CD流水线
+   ↓
+部署策略（蓝绿、金丝雀）
 ```
 
 ---
 
 ## 📈 更新日志
+
+### v2.1 - 2026-03-15
+- ✅ 新增《容器化与云原生详解》文档
+- ✅ 新增 interview-containerization 示例模块
+- ✅ 补充 Docker、K8s、Helm、CI/CD完整示例
+- ✅ 更新高频面试题（30+ 道）
+- ✅ 完善学习路线和实战技巧
 
 ### v2.0 - 2026-03-08
 - ✅ 新增跨模块关联章节

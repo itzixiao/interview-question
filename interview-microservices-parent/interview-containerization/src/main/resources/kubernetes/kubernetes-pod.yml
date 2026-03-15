@@ -1,0 +1,109 @@
+# ========================
+# Kubernetes 配置示例 - Pod
+# ========================
+# 用途：演示 K8s 最基础的 Pod 资源
+# 作者：itzixiao
+# 时间：2026-03-15
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: interview-app-pod
+  labels:
+    app: interview-app
+    version: v1.0.0
+  annotations:
+    description: "容器化示例应用 Pod"
+spec:
+  # 容器定义
+  containers:
+  - name: interview-app
+    image: interview-containerization:1.0.0
+    imagePullPolicy: IfNotPresent
+    
+    # 端口映射
+    ports:
+    - containerPort: 8080
+      name: http
+      protocol: TCP
+    
+    # 环境变量
+    env:
+    - name: SPRING_PROFILES_ACTIVE
+      value: "kubernetes"
+    - name: DB_HOST
+      value: "mysql-service"
+    - name: REDIS_HOST
+      value: "redis-service"
+    
+    # 健康检查 - 存活探针
+    livenessProbe:
+      httpGet:
+        path: /health
+        port: 8080
+      initialDelaySeconds: 60     # 容器启动后 60 秒开始检查
+      periodSeconds: 30           # 每 30 秒检查一次
+      timeoutSeconds: 3           # 超时时间 3 秒
+      failureThreshold: 3         # 失败 3 次重启容器
+    
+    # 健康检查 - 就绪探针
+    readinessProbe:
+      httpGet:
+        path: /health
+        port: 8080
+      initialDelaySeconds: 30     # 容器启动后 30 秒开始检查
+      periodSeconds: 10           # 每 10 秒检查一次
+      timeoutSeconds: 3
+      successThreshold: 1         # 成功 1 次标记为就绪
+      failureThreshold: 3         # 失败 3 次从 Service 后端移除
+    
+    # 资源限制
+    resources:
+      requests:                   # 请求保证的最小资源
+        memory: "512Mi"
+        cpu: "250m"              # 0.25 核
+      limits:                     # 最大使用资源
+        memory: "1Gi"
+        cpu: "500m"              # 0.5 核
+    
+    # 日志收集
+    volumeMounts:
+    - name: log-volume
+      mountPath: /app/logs
+  
+  # 数据卷定义
+  volumes:
+  - name: log-volume
+    emptyDir: {}
+  
+  # 镜像拉取密钥（私有仓库需要）
+  # imagePullSecrets:
+  # - name: registry-secret
+  
+  # 重启策略
+  restartPolicy: Always
+  
+  # 服务账号
+  serviceAccountName: default
+  
+  # 节点选择器
+  # nodeSelector:
+  #   disktype: ssd
+  
+  # 容忍度（容忍污点）
+  # tolerations:
+  # - key: "node-role.kubernetes.io/master"
+  #   operator: "Exists"
+  #   effect: "NoSchedule"
+
+---
+# ===========================================
+# Pod 操作命令
+# ===========================================
+# 创建 Pod: kubectl apply -f kubernetes-pod.yml
+# 查看 Pod: kubectl get pod interview-app-pod
+# 查看详情：kubectl describe pod interview-app-pod
+# 查看日志：kubectl logs interview-app-pod
+# 进入容器：kubectl exec -it interview-app-pod -- sh
+# 删除 Pod: kubectl delete pod interview-app-pod
+# 实时监视：kubectl get pods -w

@@ -1,0 +1,247 @@
+# ========================
+# Jenkins Pipeline 示例
+# ========================
+# 用途：演示 Jenkins 声明式流水线
+# 作者：itzixiao
+# 时间：2026-03-15
+
+// ===========================================
+// 声明式流水线
+// ===========================================
+pipeline {
+    agent any
+    
+    // ===========================================
+    // 工具和环境配置
+    // ===========================================
+    tools {
+        maven 'Maven-3.8'
+        jdk 'JDK-1.8'
+    }
+    
+    environment {
+        DOCKER_REGISTRY = 'registry.example.com'
+        DOCKER_IMAGE = "${DOCKER_REGISTRY}/interview-containerization"
+        KUBECONFIG_PATH = '/root/.kube/config'
+    }
+    
+    // ===========================================
+    // 全局参数
+    // ===========================================
+    parameters {
+        string(name: 'DEPLOY_ENV', defaultValue: 'dev', description: '部署环境 (dev/prod)')
+        booleanParam(name: 'SKIP_TESTS', defaultValue: false, description: '是否跳过测试')
+        choice(name: 'REPLICAS', choices: ['2', '3', '5'], description: '副本数量')
+    }
+    
+    // ===========================================
+    // 触发器
+    // ===========================================
+    triggers {
+        // 定时构建（每天凌晨 2 点）
+        cron('0 2 * * *')
+        
+        // GitLab Webhook 触发
+        // gitlab(triggerOnPush: true, triggerOnMergeRequest: true)
+        
+        // 轮询 SCM（每 5 分钟检查一次）
+        // pollSCM('*/5 * * * *')
+    }
+    
+    // ===========================================
+    // 选项配置
+    // ===========================================
+    options {
+        timeout(time: 1, unit: 'HOURS')
+        timestamps()
+        disableConcurrentBuilds()
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+    }
+    
+    // ===========================================
+    // 流水线阶段
+    // ===========================================
+    stages {
+        
+        // ========== 阶段 1: 代码检出 ==========
+        stage('Checkout') {
+            steps {
+                echo "========== 代码检出 =========="
+                checkout scm
+                script {
+                    env.GIT_COMMIT_SHORT = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+                    echo "当前提交：${GIT_COMMIT_SHORT}"
+                }
+            }
+        }
+        
+        // ========== 阶段 2: 代码编译 ==========
+        stage('Compile') {
+            steps {
+                echo "========== 开始编译 =========="
+                sh 'mvn clean compile -DskipTests'
+            }
+            post {
+                success {
+                    echo '✅ 编译成功'
+                }
+                failure {
+                    echo '❌ 编译失败'
+                    error('编译失败，终止流水线')
+                }
+            }
+        }
+        
+        // ========== 阶段 3: 单元测试 ==========
+        stage('Test') {
+            when {
+                expression { return !params.SKIP_TESTS }
+            }
+            steps {
+                echo "========== 开始测试 =========="
+                sh 'mvn test'
+            }
+            post {
+                always {
+                    junit allowEmptyResults: true, testResults: 'target/surefire-reports/*.xml'
+                }
+            }
+        }
+        
+        // ========== 阶段 4: 代码质量检查 ==========
+        stage('Code Quality') {
+            steps {
+                echo "========== 代码质量检查 =========="
+                withSonarQubeEnv('SonarQube Server') {
+                    sh '''
+                        mvn clean verify sonar:sonar \
+                            -Dsonar.projectKey=interview-containerization \
+                            -Dsonar.host.url=${SONAR_HOST_URL} \
+                            -Dsonar.login=${SONAR_TOKEN}
+                    '''
+                }
+            }
+        }
+        
+        // ========== 阶段 5: 打包应用 ==========
+        stage('Package') {
+            steps {
+                echo "========== 开始打包 =========="
+                sh 'mvn clean package -DskipTests'
+            }
+            post {
+                success {
+                    archiveArtifacts artifacts: 'target/interview-containerization-1.0.0.jar', fingerprint: true
+                }
+            }
+        }
+        
+        // ========== 阶段 6: Docker 镜像构建 ==========
+        stage('Build Docker Image') {
+            steps {
+                echo "========== 构建 Docker 镜像 =========="
+                script {
+                    docker.withRegistry("https://${DOCKER_REGISTRY}", 'docker-credentials-id') {
+                        def customImage = docker.build("${DOCKER_IMAGE}:${GIT_COMMIT_SHORT}", '-f src/main/resources/docker/Dockerfile .')
+                        customImage.push()
+                        customImage.push('latest')
+                    }
+                }
+            }
+        }
+        
+        // ========== 阶段 7: 部署到开发环境 ==========
+        stage('Deploy to Dev') {
+            when {
+                expression { return params.DEPLOY_ENV == 'dev' }
+            }
+            steps {
+                echo "========== 部署到开发环境 =========="
+                deploy adapters: [kubernetes(cluster: 'k8s-cluster', namespace: 'dev')]
+                sh '''
+                    kubectl set image deployment/interview-app-deployment \
+                        interview-app=${DOCKER_IMAGE}:${GIT_COMMIT_SHORT} -n dev
+                    
+                    kubectl rollout status deployment/interview-app-deployment -n dev
+                '''
+            }
+        }
+        
+        // ========== 阶段 8: 部署到生产环境 ==========
+        stage('Deploy to Prod') {
+            when {
+                expression { return params.DEPLOY_ENV == 'prod' }
+            }
+            steps {
+                echo "========== 部署到生产环境 =========="
+                input message: '确认部署到生产环境？', ok: '确认部署'
+                
+                script {
+                    helmUpgrade(
+                        releaseName: 'interview-containerization',
+                        chartPath: './src/main/resources/helm',
+                        namespace: 'production',
+                        values: './src/main/resources/helm/values-prod.yaml',
+                        extraArgs: "--set image.tag=${GIT_COMMIT_SHORT} --set replicaCount=${REPLICAS}"
+                    )
+                }
+            }
+            post {
+                success {
+                    echo '✅ 生产环境部署成功'
+                }
+                failure {
+                    echo '❌ 生产环境部署失败，执行回滚'
+                    sh 'helm rollback interview-containerization -n production'
+                }
+            }
+        }
+    }
+    
+    // ===========================================
+    // 后置处理（无论成功失败都会执行）
+    // ===========================================
+    post {
+        always {
+            echo '========== 清理工作空间 =========='
+            cleanWs()
+        }
+        success {
+            echo '✅ 流水线执行成功'
+            // 发送成功通知
+            emailext (
+                subject: "✅ 构建成功：${env.JOB_NAME} - ${env.BUILD_NUMBER}",
+                body: "项目：${env.JOB_NAME}\n构建号：${env.BUILD_NUMBER}\n版本：${GIT_COMMIT_SHORT}\n状态：成功",
+                to: 'team@example.com',
+                recipientProviders: [developers(), requestor()]
+            )
+        }
+        failure {
+            echo '❌ 流水线执行失败'
+            // 发送失败通知
+            emailext (
+                subject: "❌ 构建失败：${env.JOB_NAME} - ${env.BUILD_NUMBER}",
+                body: "项目：${env.JOB_NAME}\n构建号：${env.BUILD_NUMBER}\n版本：${GIT_COMMIT_SHORT}\n状态：失败\n请查看：${env.BUILD_URL}",
+                to: 'team@example.com',
+                recipientProviders: [developers(), requestor(), culprits()]
+            )
+        }
+        unstable {
+            echo '⚠️ 构建不稳定（测试失败）'
+        }
+    }
+}
+
+// ===========================================
+// 自定义函数
+// ===========================================
+def helmUpgrade(String releaseName, String chartPath, String namespace, String values, String extraArgs) {
+    sh """
+        helm upgrade --install ${releaseName} ${chartPath} \\
+            --namespace ${namespace} \\
+            --values ${values} \\
+            ${extraArgs}
+        
+        kubectl rollout status deployment/interview-app-deployment -n ${namespace}
+    """
+}

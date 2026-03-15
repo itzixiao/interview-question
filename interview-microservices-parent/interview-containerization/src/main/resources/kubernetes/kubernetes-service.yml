@@ -1,0 +1,129 @@
+# ========================
+# Kubernetes 配置示例 - Service
+# ========================
+# 用途：演示服务发现与负载均衡
+# 作者：itzixiao
+# 时间：2026-03-15
+
+# ===========================================
+# 1. ClusterIP 类型（默认，集群内部访问）
+# ===========================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: interview-app-service
+  labels:
+    app: interview-app
+spec:
+  # Service 类型
+  type: ClusterIP
+  
+  # 端口映射
+  ports:
+  - port: 80              # Service 端口
+    targetPort: 8080      # Pod 容器端口
+    protocol: TCP
+    name: http
+  
+  # 选择器（关联 Deployment 中的 Pod）
+  selector:
+    app: interview-app
+  
+  # Session 保持（可选）
+  # sessionAffinity: ClientIP
+
+---
+# ===========================================
+# 2. NodePort 类型（节点外部访问）
+# ===========================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: interview-app-nodeport
+  labels:
+    app: interview-app
+spec:
+  type: NodePort
+  
+  ports:
+  - port: 80              # Service 端口
+    targetPort: 8080      # Pod 容器端口
+    nodePort: 30080       # 节点端口（范围：30000-32767）
+    protocol: TCP
+    name: http
+  
+  selector:
+    app: interview-app
+
+---
+# ===========================================
+# 3. LoadBalancer 类型（云提供商负载均衡）
+# ===========================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: interview-app-loadbalancer
+  labels:
+    app: interview-app
+  annotations:
+    # AWS NLB 示例注解
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+spec:
+  type: LoadBalancer
+  
+  # 外部流量策略
+  externalTrafficPolicy: Local  # 保留客户端 IP
+  
+  ports:
+  - port: 80
+    targetPort: 8080
+    protocol: TCP
+    name: http
+  
+  selector:
+    app: interview-app
+
+---
+# ===========================================
+# 4. Headless Service（无头服务，用于 StatefulSet）
+# ===========================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: interview-app-headless
+  labels:
+    app: interview-app
+spec:
+  clusterIP: None         # 关键：设置为 None
+  
+  ports:
+  - port: 80
+    targetPort: 8080
+    protocol: TCP
+    name: http
+  
+  selector:
+    app: interview-app
+
+---
+# ===========================================
+# Service 操作命令
+# ===========================================
+# 创建服务：kubectl apply -f kubernetes-service.yml
+# 查看服务：kubectl get service
+# 查看详情：kubectl describe service interview-app-service
+# 查看 Endpoints: kubectl get endpoints interview-app-service
+# 测试访问：kubectl run -it --rm debug --image=curlimages/curl --restart=Never -- curl http://interview-app-service
+# 端口转发：kubectl port-forward service/interview-app-service 8080:80
+# 删除服务：kubectl delete service interview-app-service
+
+# ===========================================
+# 服务发现方式
+# ===========================================
+# 1. 环境变量方式：
+#    INTERVIEW_APP_SERVICE_HOST=10.96.x.x
+#    INTERVIEW_APP_SERVICE_PORT=80
+#
+# 2. DNS 方式（推荐）：
+#    interview-app-service.default.svc.cluster.local
+#    或简化为：interview-app-service

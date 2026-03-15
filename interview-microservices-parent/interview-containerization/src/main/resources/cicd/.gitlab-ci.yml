@@ -1,0 +1,217 @@
+# ========================
+# GitLab CI/CD流水线示例
+# ========================
+# 用途：演示完整的 CI/CD流程
+# 作者：itzixiao
+# 时间：2026-03-15
+
+stages:
+  - build          # 构建阶段
+  - test           # 测试阶段
+  - package        # 打包阶段
+  - docker-build   # Docker 镜像构建
+  - deploy-dev     # 开发环境部署
+  - deploy-prod    # 生产环境部署
+
+# ===========================================
+# 全局变量
+# ===========================================
+variables:
+  MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
+  DOCKER_REGISTRY: registry.example.com
+  DOCKER_IMAGE: ${DOCKER_REGISTRY}/interview-containerization
+  KUBECONFIG_PATH: "/root/.kube/config"
+
+# ===========================================
+# 缓存配置
+# ===========================================
+cache:
+  paths:
+    - .m2/repository/
+    - target/
+
+# ===========================================
+# 1. 构建阶段
+# ===========================================
+build-job:
+  stage: build
+  image: maven:3.8-openjdk-8
+  script:
+    - echo "========== 开始构建 =========="
+    - mvn clean compile -DskipTests
+    - echo "========== 构建完成 =========="
+  only:
+    - branches
+  tags:
+    - java-runner
+
+# ===========================================
+# 2. 测试阶段
+# ===========================================
+test-job:
+  stage: test
+  image: maven:3.8-openjdk-8
+  script:
+    - echo "========== 开始测试 =========="
+    - mvn test
+    - echo "========== 测试完成 =========="
+  artifacts:
+    reports:
+      junit: target/surefire-reports/*.xml
+    coverage: '/Total.*?([0-9]{1,3})%/'
+  only:
+    - branches
+  tags:
+    - java-runner
+
+# ===========================================
+# 3. 打包阶段
+# ===========================================
+package-job:
+  stage: package
+  image: maven:3.8-openjdk-8
+  script:
+    - echo "========== 开始打包 =========="
+    - mvn clean package -DskipTests
+    - echo "========== 打包完成 =========="
+  artifacts:
+    expire_in: 1 week
+    paths:
+      - target/interview-containerization-1.0.0.jar
+  only:
+    - main
+    - develop
+  tags:
+    - java-runner
+
+# ===========================================
+# 4. Docker 镜像构建与推送
+# ===========================================
+docker-build-job:
+  stage: docker-build
+  image: docker:24.0
+  services:
+    - docker:24.0-dind
+  before_script:
+    - echo "登录 Docker 仓库..."
+    - echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin "${DOCKER_REGISTRY}"
+  script:
+    - echo "========== 构建 Docker 镜像 =========="
+    - docker build -t ${DOCKER_IMAGE}:${CI_COMMIT_SHA} -f src/main/resources/docker/Dockerfile .
+    - docker tag ${DOCKER_IMAGE}:${CI_COMMIT_SHA} ${DOCKER_IMAGE}:latest
+    - echo "========== 推送 Docker 镜像 =========="
+    - docker push ${DOCKER_IMAGE}:${CI_COMMIT_SHA}
+    - docker push ${DOCKER_IMAGE}:latest
+    - echo "========== 推送完成 =========="
+  after_script:
+    - docker logout
+  only:
+    - main
+    - develop
+  tags:
+    - docker-runner
+  dependencies:
+    - package-job
+
+# ===========================================
+# 5. 开发环境部署
+# ===========================================
+deploy-dev-job:
+  stage: deploy-dev
+  image: bitnami/kubectl:latest
+  environment:
+    name: development
+    url: http://dev.interview.example.com
+  before_script:
+    - echo "配置 Kubeconfig..."
+    - mkdir -p ~/.kube
+    - echo "$KUBE_CONFIG_DEV" > ~/.kube/config
+    - chmod 600 ~/.kube/config
+  script:
+    - echo "========== 部署到开发环境 =========="
+    - kubectl set image deployment/interview-app-deployment interview-app=${DOCKER_IMAGE}:${CI_COMMIT_SHA} -n dev
+    - kubectl rollout status deployment/interview-app-deployment -n dev
+    - echo "========== 部署完成 =========="
+  only:
+    - develop
+  when: manual
+  tags:
+    - k8s-runner
+
+# ===========================================
+# 6. 生产环境部署
+# ===========================================
+deploy-prod-job:
+  stage: deploy-prod
+  image: bitnami/kubectl:latest
+  environment:
+    name: production
+    url: https://interview.example.com
+  before_script:
+    - echo "配置 Kubeconfig..."
+    - mkdir -p ~/.kube
+    - echo "$KUBE_CONFIG_PROD" > ~/.kube/config
+    - chmod 600 ~/.kube/config
+  script:
+    - echo "========== 部署到生产环境 =========="
+    # 使用 Helm 升级发布
+    - helm upgrade --install interview-containerization ./src/main/resources/helm \
+        --namespace production \
+        --set image.tag=${CI_COMMIT_SHA} \
+        --set replicaCount=5 \
+        --set autoscaling.enabled=true \
+        --values ./src/main/resources/helm/values-prod.yaml
+    - echo "========== 等待部署就绪 =========="
+    - kubectl rollout status deployment/interview-app-deployment -n production
+    - echo "========== 部署完成 =========="
+  after_script:
+    - echo "健康检查..."
+    - curl -f https://interview.example.com/health || echo "健康检查失败"
+  only:
+    - main
+  when: manual
+  tags:
+    - k8s-runner
+  needs:
+    - docker-build-job
+
+# ===========================================
+# 代码质量检查（可选）
+# ===========================================
+sonarqube-check:
+  stage: test
+  image: maven:3.8-openjdk-8
+  script:
+    - mvn clean verify sonar:sonar \
+        -Dsonar.projectKey=interview-containerization \
+        -Dsonar.host.url=${SONAR_HOST_URL} \
+        -Dsonar.login=${SONAR_TOKEN}
+  only:
+    - branches
+  tags:
+    - java-runner
+
+# ===========================================
+# 通知（可选）
+# ===========================================
+notify-success:
+  stage: deploy-prod
+  image: curlimages/curl:latest
+  script:
+    - curl -X POST -H 'Content-type: application/json' \
+        --data "{\"text\":\"✅ 部署成功！版本：${CI_COMMIT_SHA}\"}" \
+        ${WEBHOOK_URL}
+  when: on_success
+  only:
+    - main
+
+notify-failure:
+  stage: deploy-prod
+  image: curlimages/curl:latest
+  script:
+    - curl -X POST -H 'Content-type: application/json' \
+        --data "{\"text\":\"❌ 部署失败！版本：${CI_COMMIT_SHA}\"}" \
+        ${WEBHOOK_URL}
+  when: on_failure
+  only:
+    - main

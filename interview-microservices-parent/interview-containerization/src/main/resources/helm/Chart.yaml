@@ -1,0 +1,46 @@
+# Chart.yaml - Helm Chart 元数据定义
+apiVersion: v2
+name: interview-containerization
+description: 容器化与云原生示例应用 Helm Chart
+type: application
+
+# Chart 版本号（遵循语义化版本）
+version: 1.0.0
+
+# 应用版本号
+appVersion: "1.0.0"
+
+# 关键词
+keywords:
+  - containerization
+  - cloud-native
+  - spring-boot
+  - kubernetes
+
+# 维护者信息
+maintainers:
+  - name: itzixiao
+    email: itzixiao@example.com
+
+# 源码地址
+home: https://github.com/itzixiao/interview-question
+
+# 依赖的 Charts
+dependencies:
+  # MySQL 数据库
+  - name: mysql
+    version: 9.8.0
+    repository: https://charts.bitnami.com/bitnami
+    condition: mysql.enabled
+  
+  # Redis 缓存
+  - name: redis
+    version: 17.11.0
+    repository: https://charts.bitnami.com/bitnami
+    condition: redis.enabled
+  
+  # Prometheus 监控
+  - name: prometheus
+    version: 25.23.0
+    repository: https://prometheus-community.github.io/helm-charts
+    condition: prometheus.enabled

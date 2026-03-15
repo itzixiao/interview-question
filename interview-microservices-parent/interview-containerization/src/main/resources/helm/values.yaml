@@ -1,0 +1,153 @@
+# values.yaml - Helm Chart 默认配置值
+
+# ===========================================
+# 应用基础配置
+# ===========================================
+replicaCount: 2
+
+image:
+  repository: interview-containerization
+  tag: "1.0.0"
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+# 服务账号配置
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+# Pod 注解
+podAnnotations: {}
+
+# Pod 安全上下文
+podSecurityContext: {}
+
+# 容器安全上下文
+securityContext: {}
+
+# ===========================================
+# Service 配置
+# ===========================================
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8080
+
+# ===========================================
+# Ingress 配置（可选）
+# ===========================================
+ingress:
+  enabled: false
+  className: "nginx"
+  annotations: {}
+  hosts:
+    - host: interview.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+# ===========================================
+# 资源限制配置
+# ===========================================
+resources:
+  requests:
+    cpu: "250m"
+    memory: "512Mi"
+  limits:
+    cpu: "500m"
+    memory: "1Gi"
+
+# ===========================================
+# 自动扩缩容配置（HPA）
+# ===========================================
+autoscaling:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+# ===========================================
+# 健康检查配置
+# ===========================================
+livenessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 60
+  periodSeconds: 30
+  timeoutSeconds: 3
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 3
+  successThreshold: 1
+  failureThreshold: 3
+
+# ===========================================
+# 环境变量配置
+# ===========================================
+env:
+  APP_NAME: "interview-containerization"
+  APP_ENV: "kubernetes"
+  LOG_LEVEL: "INFO"
+
+# 数据库配置
+database:
+  host: "mysql-service"
+  port: 3306
+  name: "interview_db"
+  username: "interview"
+  password: "interview123"
+
+# Redis 配置
+redis:
+  host: "redis-service"
+  port: 6379
+
+# ===========================================
+# 数据卷配置
+# ===========================================
+volumes: []
+volumeMounts: []
+
+# ===========================================
+# 节点选择器和容忍度
+# ===========================================
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+# ===========================================
+# 依赖组件开关
+# ===========================================
+mysql:
+  enabled: true
+  auth:
+    rootPassword: "root123"
+    database: "interview_db"
+    username: "interview"
+    password: "interview123"
+
+redis:
+  enabled: true
+  auth:
+    enabled: false
+    password: "redis123"
+
+prometheus:
+  enabled: false
+
+grafana:
+  enabled: false
+  adminPassword: "admin123"

@@ -23,5 +23,6 @@
         <module>interview-transaction-demo</module>
         <module>interview-rabbitmq</module>
         <module>interview-kafka</module>
+        <module>interview-containerization</module>
     </modules>
 </project>

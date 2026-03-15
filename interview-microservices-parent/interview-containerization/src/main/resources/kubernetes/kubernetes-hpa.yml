@@ -1,0 +1,201 @@
+# ========================
+# Kubernetes 配置示例 - HPA 自动扩缩容
+# ========================
+# 用途：演示水平 Pod 自动伸缩
+# 作者：itzixiao
+# 时间：2026-03-15
+
+# ===========================================
+# 1. 基础版 HPA（基于 CPU 使用率）
+# ===========================================
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: interview-app-hpa
+  labels:
+    app: interview-app
+spec:
+  # 目标 Deployment
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: interview-app-deployment
+  
+  # 副本数范围
+  minReplicas: 2              # 最小副本数
+  maxReplicas: 10             # 最大副本数
+  
+  # 扩缩容行为
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300   # 缩容稳定窗口（5 分钟）
+      policies:
+      - type: Percent
+        value: 50                       # 每次最多缩容 50%
+        periodSeconds: 60
+    scaleUp:
+      stabilizationWindowSeconds: 0     # 扩容立即执行
+      policies:
+      - type: Percent
+        value: 100                      # 每次最多扩容 100%
+        periodSeconds: 15
+      - type: Pods
+        value: 4                        # 或每次最多扩容 4 个 Pod
+        periodSeconds: 15
+      selectPolicy: Max                 # 选择最大值
+  
+  # 指标配置
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70          # CPU 使用率超过 70% 扩容
+  
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80          # 内存使用率超过 80% 扩容
+
+---
+# ===========================================
+# 2. 高级版 HPA（多指标 + 自定义指标）
+# ===========================================
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: interview-app-hpa-advanced
+  labels:
+    app: interview-app
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: interview-app-deployment
+  
+  minReplicas: 3
+  maxReplicas: 20
+  
+  # 多指标触发
+  metrics:
+  # CPU 指标
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: AverageValue
+        averageValue: "500m"          # 平均 CPU 超过 0.5 核扩容
+  
+  # 内存指标
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: AverageValue
+        averageValue: "768Mi"         # 平均内存超过 768MB 扩容
+  
+  # 自定义指标（需要 Metrics Server）
+  - type: Pods
+    pods:
+      metric:
+        name: http_requests_per_second
+      target:
+        type: AverageValue
+        averageValue: "100"           # 每个 Pod 每秒请求数超过 100 扩容
+  
+  # 外部指标（如 Kafka 队列长度）
+  - type: External
+    external:
+      metric:
+        name: kafka_lag
+        selector:
+          matchLabels:
+            topic: user-events
+      target:
+        type: Value
+        value: "1000"                 # Kafka 消费滞后超过 1000 扩容
+
+---
+# ===========================================
+# 3. 定时扩缩容 CronHPA（夜间缩容，白天扩容）
+# ===========================================
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: interview-app-cronhpa
+  labels:
+    app: interview-app
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: interview-app-deployment
+  
+  minReplicas: 2
+  maxReplicas: 10
+  
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+
+---
+# 配合使用的 CronJob（定时任务）
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: hpa-scale-scheduler
+spec:
+  schedule: "0 9 * * *"         # 每天早上 9 点执行
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: kubectl
+            image: bitnami/kubectl:latest
+            command:
+            - /bin/sh
+            - -c
+            - |
+              kubectl scale deployment interview-app-deployment --replicas=10
+          restartPolicy: OnFailure
+
+---
+# ===========================================
+# HPA 操作命令
+# ===========================================
+# 创建 HPA: kubectl apply -f kubernetes-hpa.yml
+# 查看 HPA: kubectl get hpa
+# 查看 HPA 详情：kubectl describe hpa interview-app-hpa
+# 查看 HPA 状态：kubectl get hpa interview-app-hpa -w
+# 手动扩缩容：kubectl scale deployment interview-app-deployment --replicas=5
+# 删除 HPA: kubectl delete hpa interview-app-hpa
+
+# 查看指标（需要 Metrics Server）
+# kubectl top nodes
+# kubectl top pods
+
+# ===========================================
+# 前置条件
+# ===========================================
+# 1. 安装 Metrics Server（用于采集 CPU/内存指标）
+#    kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+#
+# 2. 确保 Deployment 设置了资源请求和限制
+#    resources:
+#      requests:
+#        cpu: "250m"
+#        memory: "512Mi"
+#      limits:
+#        cpu: "500m"
+#        memory: "1Gi"
+#
+# 3. 自定义指标需要 Prometheus + Adapter
+#    https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack

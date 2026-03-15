@@ -1,0 +1,112 @@
+# ========================
+# Kubernetes 配置示例 - Deployment
+# ========================
+# 用途：演示无状态应用的部署管理
+# 作者：itzixiao
+# 时间：2026-03-15
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: interview-app-deployment
+  labels:
+    app: interview-app
+    version: v1.0.0
+spec:
+  # 副本数（Pod 数量）
+  replicas: 3
+  
+  # 修订历史限制
+  revisionHistoryLimit: 5
+  
+  # 滚动更新策略
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1              # 最大超出副本数（可以是绝对数或百分比）
+      maxUnavailable: 0        # 最大不可用副本数（保证服务不中断）
+  
+  # Pod 选择器
+  selector:
+    matchLabels:
+      app: interview-app
+  
+  # Pod 模板
+  template:
+    metadata:
+      labels:
+        app: interview-app
+        version: v1.0.0
+      annotations:
+        description: "容器化示例应用"
+    spec:
+      containers:
+      - name: interview-app
+        image: interview-containerization:1.0.0
+        imagePullPolicy: IfNotPresent
+        
+        ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: "kubernetes"
+        
+        # 健康检查
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 3
+          failureThreshold: 3
+        
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 3
+          successThreshold: 1
+          failureThreshold: 3
+        
+        # 资源管理
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        
+        # 从 ConfigMap 读取配置
+        envFrom:
+        - configMapRef:
+            name: interview-config
+        
+        # 从 Secret 读取敏感信息
+        - secretRef:
+            name: interview-secret
+
+---
+# ===========================================
+# Deployment 操作命令
+# ===========================================
+# 创建部署：kubectl apply -f kubernetes-deployment.yml
+# 查看部署：kubectl get deployment interview-app-deployment
+# 查看详情：kubectl describe deployment interview-app-deployment
+# 查看 ReplicaSet: kubectl get rs
+# 查看 Pods: kubectl get pods -l app=interview-app
+# 扩缩容：kubectl scale deployment interview-app-deployment --replicas=5
+# 滚动更新：kubectl set image deployment/interview-app-deployment interview-app=interview-containerization:1.0.1
+# 查看更新状态：kubectl rollout status deployment/interview-app-deployment
+# 查看历史版本：kubectl rollout history deployment/interview-app-deployment
+# 回滚到上一版本：kubectl rollout undo deployment/interview-app-deployment
+# 回滚到指定版本：kubectl rollout undo deployment/interview-app-deployment --to-revision=1
+# 暂停更新：kubectl rollout pause deployment/interview-app-deployment
+# 恢复更新：kubectl rollout resume deployment/interview-app-deployment
+# 删除部署：kubectl delete deployment interview-app-deployment

@@ -1,0 +1,145 @@
+# values-prod.yaml - 生产环境配置
+
+# ===========================================
+# 生产环境副本数
+# ===========================================
+replicaCount: 5
+
+image:
+  repository: registry.example.com/interview-containerization
+  tag: "1.0.0"
+  pullPolicy: Always
+
+# ===========================================
+# 生产环境资源配置（更高配置）
+# ===========================================
+resources:
+  requests:
+    cpu: "500m"
+    memory: "1Gi"
+  limits:
+    cpu: "1000m"
+    memory: "2Gi"
+
+# ===========================================
+# 生产环境自动扩缩容
+# ===========================================
+autoscaling:
+  enabled: true
+  minReplicas: 5
+  maxReplicas: 20
+  targetCPUUtilizationPercentage: 60
+  targetMemoryUtilizationPercentage: 70
+
+# ===========================================
+# 生产环境健康检查（更严格）
+# ===========================================
+livenessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 90
+  periodSeconds: 30
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 60
+  periodSeconds: 10
+  timeoutSeconds: 5
+  successThreshold: 1
+  failureThreshold: 3
+
+# ===========================================
+# 生产环境变量
+# ===========================================
+env:
+  APP_NAME: "interview-containerization"
+  APP_ENV: "production"
+  LOG_LEVEL: "WARN"
+
+# ===========================================
+# 生产环境数据库配置（外部 RDS）
+# ===========================================
+database:
+  host: "prod-mysql-rds.example.com"
+  port: 3306
+  name: "interview_prod"
+  username: "interview_prod"
+  password: "SecureP@ssw0rd2026"
+
+# ===========================================
+# 生产环境 Redis 配置（集群模式）
+# ===========================================
+redis:
+  host: "prod-redis-cluster.example.com"
+  port: 6379
+
+# ===========================================
+# 生产环境 Ingress 配置
+# ===========================================
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+  hosts:
+    - host: interview.prod.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: interview-tls-secret
+      hosts:
+        - interview.prod.example.com
+
+# ===========================================
+# 生产环境节点选择器
+# ===========================================
+nodeSelector:
+  node-type: production
+  disktype: ssd
+
+# ===========================================
+# 生产环境容忍度
+# ===========================================
+tolerations:
+  - key: "dedicated"
+    operator: "Equal"
+    value: "production"
+    effect: "NoSchedule"
+
+# ===========================================
+# 生产环境亲和性
+# ===========================================
+affinity:
+  podAntiAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+            - key: app
+              operator: In
+              values:
+                - interview-containerization
+        topologyKey: "kubernetes.io/hostname"
+
+# ===========================================
+# 依赖组件开关（生产使用外部服务）
+# ===========================================
+mysql:
+  enabled: false
+
+redis:
+  enabled: false
+
+prometheus:
+  enabled: true
+
+grafana:
+  enabled: true
+  adminPassword: "SecureGrafanaP@ss2026"
