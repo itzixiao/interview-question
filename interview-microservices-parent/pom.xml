@@ -24,5 +24,6 @@
         <module>interview-rabbitmq</module>
         <module>interview-kafka</module>
         <module>interview-containerization</module>
+        <module>interview-system-design</module>
     </modules>
 </project>
