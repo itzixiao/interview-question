@@ -56,6 +56,12 @@
 - **重要程度：** ⭐⭐⭐⭐
 - **配套代码：** `interview-microservices-parent/interview-provider/elasticsearch/`
 
+#### 11. [11-Netty高性能框架详解.md](./11-Netty高性能框架详解.md) ⭐新增
+- **内容：** NIO实战、Reactor模式、零拷贝、ByteBuf、编解码器
+- **面试题：** 10+ 道
+- **重要程度：** ⭐⭐⭐⭐⭐
+- **配套代码：** `interview-microservices-parent/interview-provider/netty/`
+
 #### 12. [12-大数据技术栈详解.md](./12-大数据技术栈详解.md)
 - **内容：** Hadoop、Spark、Flink、Hive 等大数据技术
 - **面试题：** 6+ 道
@@ -65,9 +71,9 @@
 
 ## 📊 统计信息
 
-- **文档数：** 11 个
-- **面试题总数：** 106+ 道
-- **代码示例：** 配套 Java 代码在 `interview-service/rpc/`、`interview-rabbitmq/`、`interview-kafka/`、`interview-provider/hbase/`、`interview-provider/elasticsearch/` 等目录（~8,000 行代码）
+- **文档数：** 12 个
+- **面试题总数：** 116+ 道
+- **代码示例：** 配套 Java 代码在 `interview-service/rpc/`、`interview-rabbitmq/`、`interview-kafka/`、`interview-provider/hbase/`、`interview-provider/elasticsearch/`、`interview-provider/netty/` 等目录（~10,000 行代码）
 
 ---
 

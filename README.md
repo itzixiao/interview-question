@@ -29,7 +29,7 @@ interview-question/                              # 根目录
 ├── interview-starters/                          # Starter 模块集合（父模块）
 │   └── interview-threadpool-starter/            # 线程池Starter
 │
-├── docs/                                        # 面试知识点文档（15 个分类）
+├── docs/                                        # 面试知识点文档（16 个分类）
 │   ├── 01-Java基础/
 │   ├── 02-Java并发编程/
 │   ├── 03-JVM/
@@ -43,8 +43,9 @@ interview-question/                              # 根目录
 │   ├── 11-设计模式/
 │   ├── 12-分布式系统/
 │   ├── 13-DevOps/
-│   ├── 14-SPI与 IO模型/
-│   └── 15-工程效能/
+│   ├── 14-JavaIO模型/        # BIO/NIO/AIO
+│   ├── 15-工程效能/
+│   └── 16-SPI机制/
 ```
 
 ### 模块职责说明
@@ -97,15 +98,16 @@ mvn spring-boot:run
 | 🔹 **06-SpringCloud微服务** | 2 篇 | 25+ 道 | [详细文档](./docs/06-SpringCloud微服务/README.md) |
 | 🔹 **07-MySQL数据库** | 9 篇 | 50+ 道 | [详细文档](./docs/07-MySQL数据库/README.md) |
 | 🔹 **08-Redis缓存** | 4 篇 | 30+ 道 | [详细文档](./docs/08-Redis缓存/README.md) |
-| 🔹 **09-中间件** | 11 篇 | 106+ 道 | [详细文档](./docs/09-中间件/README.md) |
+| 🔹 **09-中间件** | 12 篇 | 116+ 道 | [详细文档](./docs/09-中间件/README.md) |
 | 🔹 **10-算法与数据结构** | 4 篇 | 45+ 道 | [详细文档](./docs/10-算法与数据结构/README.md) |
 | 🔹 **11-设计模式** | 1 篇 | 20+ 道 | [详细文档](./docs/11-设计模式/README.md) |
 | 🔹 **12-分布式系统** | 1 篇 | 15+ 道 | [详细文档](./docs/12-分布式系统/README.md) |
 | 🔹 **13-DevOps** | 2 篇 | 25+ 道 | [详细文档](./docs/13-DevOps/README.md) |
-| 🔹 **14-SPI与 IO模型** | 4 篇 | 22+ 道 | [详细文档](./docs/14-SPI与 IO模型/README.md) |
+| 🔹 **14-JavaIO模型** | 4 篇 | 22+ 道 | [详细文档](./docs/14-JavaIO模型/README.md) |
 | 🔹 **15-工程效能** | 6 篇 | 26+ 道 | [详细文档](./docs/15-工程效能/README.md) |
+| 🔹 **16-SPI机制** | 1 篇 | 4+ 道 | [详细文档](./docs/16-SPI机制/README.md) |
 
-**总计：** 61 篇文档 · 579+ 道面试题 · 配套 ~40,000 行示例代码
+**总计：** 63 篇文档 · 593+ 道面试题 · 配套 ~42,000 行示例代码
 
 ---
 
@@ -176,12 +178,17 @@ mvn spring-boot:run
 - [CI/CD流程？](./docs/13-DevOps/01-DevOps%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%86%E7%82%B9%E8%AF%A6%E8%A7%A3.md)
 - [容器化与云原生详解](./docs/13-DevOps/02-容器化与云原生详解.md)
 
-### SPI与IO模型（22+ 道）
-- [什么是 SPI？工作原理是什么？](docs/14-SPI与IO模型/01-SPI机制详解.md)
-- [BIO、NIO、AIO 的区别？](./docs/14-SPI与IO模型/README.md#九 - 三种 io-模型对比)
-- [NIO 的核心组件？](docs/14-SPI与IO模型/03-NIO同步非阻塞IO.md)
-- [Reactor 模式的三种变体？](docs/14-SPI与IO模型/03-NIO同步非阻塞IO.md#73-reactor-模式)
-- [Netty 为什么性能高？](./docs/14-SPI与IO模型/README.md#十二 - 主流框架)
+### JavaIO模型（22+ 道）
+- [BIO、NIO、AIO 的区别？](./docs/14-JavaIO模型/README.md#九 - 三种 io-模型对比)
+- [NIO 的核心组件？](docs/14-JavaIO模型/02-NIO非阻塞IO详解.md)
+- [Reactor模式的三种变体？](docs/14-JavaIO模型/02-NIO非阻塞IO详解.md#73-reactor-模式)
+- [Netty 为什么性能高？](./docs/14-JavaIO模型/README.md#十二 - 主流框架)
+
+### SPI机制（4+ 道） ⭐新增
+- [什么是 SPI？工作原理是什么？](docs/16-SPI机制/01-SPI机制详解.md)
+- [SPI 的优缺点？](docs/16-SPI机制/01-SPI机制详解.md)
+- [JDBC 是如何使用 SPI 的？](docs/16-SPI机制/01-SPI机制详解.md)
+- [Spring Boot自动装配与 SPI 的关系？](docs/16-SPI机制/01-SPI机制详解.md)
 
 ### 工程效能（26+ 道） ⭐新增
 - [代码生成器的核心原理？](./docs/15-工程效能/02-代码生成器设计.md)
@@ -204,14 +211,15 @@ mvn spring-boot:run
 | SpringCloud微服务 | 2 | 25+ | ⭐⭐⭐⭐ |
 | MySQL数据库 | 9 | 50+ | ⭐⭐⭐⭐⭐ |
 | Redis缓存 | 4 | 30+ | ⭐⭐⭐⭐⭐ |
-| 中间件 | 11 | 106+ | ⭐⭐⭐⭐ |
+| 中间件 | 12 | 116+ | ⭐⭐⭐⭐ |
 | 算法与数据结构 | 4 | 45+ | ⭐⭐⭐⭐ |
 | 设计模式 | 1 | 20+ | ⭐⭐⭐ |
 | 分布式系统 | 1 | 15+ | ⭐⭐⭐⭐ |
 | DevOps | 2 | 25+ | ⭐⭐⭐ |
-| **SPI与IO模型** | **4** | **22+** | **⭐⭐⭐⭐⭐** |
+| **JavaIO模型** | **4** | **22+** | **⭐⭐⭐⭐⭐** |
 | **工程效能** | **6** | **26+** | **⭐⭐⭐⭐** |
-| **总计** | **61** | **579+** | - |
+| **SPI机制** | **1** | **4+** | **⭐⭐⭐⭐** |
+| **总计** | **63** | **593+** | - |
 
 ---
 
@@ -299,5 +307,6 @@ mvn spring-boot:run
 - [📘 11-设计模式](./docs/11-设计模式/README.md) - 1 篇文档，20+ 道面试题
 - [📘 12-分布式系统](./docs/12-分布式系统/README.md) - 1 篇文档，15+ 道面试题
 - [📘 13-DevOps](./docs/13-DevOps/README.md) - 2 篇文档，25+ 道面试题
-- [📘 14-SPI与IO模型](./docs/14-SPI与IO模型/README.md) - 4 篇文档，22+ 道面试题
-- [📘 15-工程效能](./docs/15-工程效能/README.md) - 6 篇文档，26+ 道面试题 ⭐新增
+- [📘 14-JavaIO模型](./docs/14-JavaIO模型/README.md) - 4 篇文档，22+ 道面试题
+- [📘 15-工程效能](./docs/15-工程效能/README.md) - 6 篇文档，26+ 道面试题
+- [📘 16-SPI机制](./docs/16-SPI机制/README.md) - 1 篇文档，4+ 道面试题 ⭐新增

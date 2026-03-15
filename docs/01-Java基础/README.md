@@ -43,9 +43,10 @@
 - **重要程度：** ⭐⭐⭐⭐⭐
 
 #### 9. [09-Java IO 与 NIO.md](./09-Java-IO%E4%B8%8ENIO.md)
-- **内容：** BIO、NIO、AIO对比，Channel、Buffer、Selector
+- **内容：** 传统 IO 流（字节流、字符流、缓冲流）、NIO 基础（Buffer、Channel）
 - **面试题：** 10+ 道
 - **重要程度：** ⭐⭐⭐⭐
+- **关联进阶：** [BIO/NIO/AIO IO模型详解](../14-JavaIO模型/README.md)
 
 #### 10. [10-Java异常详解.md](./10-Java%E5%BC%82%E5%B8%B8%E8%AF%A6%E8%A7%A3.md)
 - **内容：** 异常体系、try-catch-finally、自定义异常、异常最佳实践
@@ -105,10 +106,11 @@
 - ✅ **无** - Java基础是其他所有模块的基础
 
 ### 后续进阶
-- 📚 **[Java 并发编程](../02-Java 并发编程/README.md)** - 多线程与线程安全
+- 📚 **[Java并发编程](../02-Java并发编程/README.md)** - 多线程与线程安全
 - 📚 **[JVM](../03-JVM/README.md)** - 内存模型与垃圾回收
 - 📚 **[Spring框架](../04-Spring框架/README.md)** - IOC/AOP 基于反射和动态代理
-- 📚 **[集合框架](../02-Java 并发编程/01-Java 集合框架.md)** - HashMap/ConcurrentHashMap
+- 📚 **[集合框架](../02-Java并发编程/01-Java集合框架.md)** - HashMap/ConcurrentHashMap
+- 📚 **[IO模型](../14-JavaIO模型/README.md)** - BIO/NIO/AIO、Reactor 模式
 
 ### 知识点对应
 | Java基础 | 应用场景 |
