@@ -44,19 +44,30 @@
 - **重要程度：** ⭐⭐⭐⭐
 - **配套代码：** `interview-microservices-parent/interview-provider/hbase/`
 
-#### 9. [09-Kafka 高吞吐消息队列详解.md](09-Kafka高吞吐消息队列详解.md)
+#### 9. [09-Kafka高吞吐消息队列详解.md](09-Kafka高吞吐消息队列详解.md)
 - **内容：** 架构设计、高吞吐原理、Offset 管理、Exactly Once 语义、ISR 副本同步
 - **面试题：** 6+ 道
 - **重要程度：** ⭐⭐⭐⭐⭐
 - **配套代码：** `interview-microservices-parent/interview-kafka/`
 
+#### 10. [10-Elasticsearch进阶详解.md](./10-Elasticsearch进阶详解.md)
+- **内容：** ES 核心概念、倒排索引、查询 DSL、聚合分析
+- **面试题：** 8+ 道
+- **重要程度：** ⭐⭐⭐⭐
+- **配套代码：** `interview-microservices-parent/interview-provider/elasticsearch/`
+
+#### 12. [12-大数据技术栈详解.md](./12-大数据技术栈详解.md)
+- **内容：** Hadoop、Spark、Flink、Hive 等大数据技术
+- **面试题：** 6+ 道
+- **重要程度：** ⭐⭐⭐
+
 ---
 
 ## 📊 统计信息
 
-- **文档数：** 9 个
-- **面试题总数：** 92+ 道
-- **代码示例：** 配套 Java 代码在 `interview-service/rpc/`、`interview-rabbitmq/`、`interview-kafka/`、`interview-provider/hbase/` 等目录（~6,500 行代码）
+- **文档数：** 11 个
+- **面试题总数：** 106+ 道
+- **代码示例：** 配套 Java 代码在 `interview-service/rpc/`、`interview-rabbitmq/`、`interview-kafka/`、`interview-provider/hbase/`、`interview-provider/elasticsearch/` 等目录（~8,000 行代码）
 
 ---
 
@@ -198,7 +209,7 @@
 ## 🛠️ 实战技巧
 
 ### MyBatis 动态 SQL 示例
-```xml
+``xml
 <select id="findUsers" resultType="User">
   SELECT * FROM users
   <where>
@@ -315,6 +326,12 @@ RabbitMQ 基础
 
 ## 📈 更新日志
 
+### v2.3 - 2026-03-15
+- ✅ 新增《10-Elasticsearch 进阶详解》文档（8+ 道面试题）
+- ✅ 新增《12-大数据技术栈详解》文档（6+ 道面试题）
+- ✅ 更新文档统计信息（11 个文档，106+ 面试题）
+- ✅ 更新代码示例规模和路径
+
 ### v2.2 - 2026-03-14
 - ✅ 新增《RabbitMQ核心知识点详解》文档（20道面试题）
 - ✅ 更新文档统计信息为7个文档、79+面试题
@@ -340,5 +357,5 @@ RabbitMQ 基础
 ---
 
 **维护者：** itzixiao  
-**最后更新：** 2026-03-14  
+**最后更新：** 2026-03-15  
 **问题反馈：** 欢迎提 Issue 或 PR

@@ -29,7 +29,7 @@ interview-question/                              # 根目录
 ├── interview-starters/                          # Starter 模块集合（父模块）
 │   └── interview-threadpool-starter/            # 线程池Starter
 │
-├── docs/                                        # 面试知识点文档（14 个分类）
+├── docs/                                        # 面试知识点文档（15 个分类）
 │   ├── 01-Java基础/
 │   ├── 02-Java并发编程/
 │   ├── 03-JVM/
@@ -43,7 +43,8 @@ interview-question/                              # 根目录
 │   ├── 11-设计模式/
 │   ├── 12-分布式系统/
 │   ├── 13-DevOps/
-│   └── 14-SPI 与 IO模型/
+│   ├── 14-SPI与 IO模型/
+│   └── 15-工程效能/
 ```
 
 ### 模块职责说明
@@ -89,21 +90,22 @@ mvn spring-boot:run
 | 模块 | 文档数 | 面试题 | README 导航 |
 |------|--------|--------|-------------|
 | 🔹 **01-Java基础** | 9 篇 | 45+ 道 | [详细文档](./docs/01-Java基础/README.md) |
-| 🔹 **02-Java并发编程** | 8 篇 | 50+ 道 | [详细文档](./docs/02-Java并发编程/README.md) |
+| 🔹 **02-Java并发编程** | 9 篇 | 98+ 道 | [详细文档](./docs/02-Java并发编程/README.md) |
 | 🔹 **03-JVM** | 1 篇 | 10+ 道 | [详细文档](./docs/03-JVM/README.md) |
-| 🔹 **04-Spring框架** | 5 篇 | 35+ 道 | [详细文档](./docs/04-Spring框架/README.md) |
-| 🔹 **05-SpringBoot与自动装配** | 1 篇 | 8+ 道 | [详细文档](./docs/05-SpringBoot与自动装配/README.md) |
+| 🔹 **04-Spring框架** | 8 篇 | 62+ 道 | [详细文档](./docs/04-Spring框架/README.md) |
+| 🔹 **05-SpringBoot与自动装配** | 4 篇 | 20+ 道 | [详细文档](./docs/05-SpringBoot与自动装配/README.md) |
 | 🔹 **06-SpringCloud微服务** | 2 篇 | 25+ 道 | [详细文档](./docs/06-SpringCloud微服务/README.md) |
-| 🔹 **07-MySQL数据库** | 8 篇 | 40+ 道 | [详细文档](./docs/07-MySQL数据库/README.md) |
+| 🔹 **07-MySQL数据库** | 9 篇 | 50+ 道 | [详细文档](./docs/07-MySQL数据库/README.md) |
 | 🔹 **08-Redis缓存** | 4 篇 | 30+ 道 | [详细文档](./docs/08-Redis缓存/README.md) |
-| 🔹 **09-中间件** | 5 篇 | 35+ 道 | [详细文档](./docs/09-中间件/README.md) |
-| 🔹 **10-算法与数据结构** | 3 篇 | 35+ 道 | [详细文档](./docs/10-算法与数据结构/README.md) |
+| 🔹 **09-中间件** | 11 篇 | 106+ 道 | [详细文档](./docs/09-中间件/README.md) |
+| 🔹 **10-算法与数据结构** | 4 篇 | 45+ 道 | [详细文档](./docs/10-算法与数据结构/README.md) |
 | 🔹 **11-设计模式** | 1 篇 | 20+ 道 | [详细文档](./docs/11-设计模式/README.md) |
 | 🔹 **12-分布式系统** | 1 篇 | 15+ 道 | [详细文档](./docs/12-分布式系统/README.md) |
-| 🔹 **13-DevOps** | 1 篇 | 20+ 道 | [详细文档](./docs/13-DevOps/README.md) |
-| 🔹 **14-SPI与 IO模型** | 1 篇 | 30+ 道 | [详细文档](./docs/14-SPI 与 IO模型/README.md) |
+| 🔹 **13-DevOps** | 2 篇 | 25+ 道 | [详细文档](./docs/13-DevOps/README.md) |
+| 🔹 **14-SPI与 IO模型** | 4 篇 | 22+ 道 | [详细文档](./docs/14-SPI与 IO模型/README.md) |
+| 🔹 **15-工程效能** | 6 篇 | 26+ 道 | [详细文档](./docs/15-工程效能/README.md) |
 
-**总计：** 50 篇文档 · 398+ 道面试题 · 配套 ~35,000 行示例代码
+**总计：** 61 篇文档 · 579+ 道面试题 · 配套 ~40,000 行示例代码
 
 ---
 
@@ -168,17 +170,25 @@ mvn spring-boot:run
 ### 分布式系统（15+ 道）
 - [分布式幂等-防重放-加密详解.md](docs/12-%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/01-%E5%88%86%E5%B8%83%E5%BC%8F%E5%B9%82%E7%AD%89-%E9%98%B2%E9%87%8D%E6%94%BE-%E5%8A%A0%E5%AF%86%E8%AF%A6%E8%A7%A3.md)
 
-### DevOps（20+ 道）
+### DevOps（25+ 道）
 - [Docker 的优势？](./docs/13-DevOps/01-DevOps%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%86%E7%82%B9%E8%AF%A6%E8%A7%A3.md)
 - [Nginx 负载均衡策略？](./docs/13-DevOps/01-DevOps%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%86%E7%82%B9%E8%AF%A6%E8%A7%A3.md)
 - [CI/CD流程？](./docs/13-DevOps/01-DevOps%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%86%E7%82%B9%E8%AF%A6%E8%A7%A3.md)
+- [容器化与云原生详解](./docs/13-DevOps/02-容器化与云原生详解.md)
 
-### SPI与IO模型（30+ 道）
-- [什么是 SPI？工作原理是什么？](./docs/14-SPI与IO模型/README.md#一 spi-机制详解)
-- [BIO、NIO、AIO 的区别？](./docs/14-SPI与IO模型/README.md#九-三种-io-模型对比)
-- [NIO 的核心组件？](./docs/14-SPI与IO模型/README.md#七-nio-同步非阻塞-io)
-- [Reactor 模式的三种变体？](./docs/14-SPI与IO模型/README.md#73-reactor-模式)
-- [Netty 为什么性能高？](./docs/14-SPI与IO模型/README.md#十二-主流框架)
+### SPI与IO模型（22+ 道）
+- [什么是 SPI？工作原理是什么？](docs/14-SPI与IO模型/01-SPI机制详解.md)
+- [BIO、NIO、AIO 的区别？](./docs/14-SPI与IO模型/README.md#九 - 三种 io-模型对比)
+- [NIO 的核心组件？](docs/14-SPI与IO模型/03-NIO同步非阻塞IO.md)
+- [Reactor 模式的三种变体？](docs/14-SPI与IO模型/03-NIO同步非阻塞IO.md#73-reactor-模式)
+- [Netty 为什么性能高？](./docs/14-SPI与IO模型/README.md#十二 - 主流框架)
+
+### 工程效能（26+ 道） ⭐新增
+- [代码生成器的核心原理？](./docs/15-工程效能/02-代码生成器设计.md)
+- [动态表单引擎的设计思路？](./docs/15-工程效能/03-动态表单引擎.md)
+- [Activiti 的核心组件？](docs/15-工程效能/04-流程引擎Activiti.md)
+- [Drools 的工作原理？](docs/15-工程效能/05-规则引擎Drools.md)
+- [POI 生成 Excel 的优化技巧？](./docs/15-工程效能/06-报表引擎.md)
 
 ---
 
@@ -187,20 +197,21 @@ mvn spring-boot:run
 | 分类 | 文档数 | 面试题数 | 重要程度 |
 |------|--------|----------|----------|
 | Java基础 | 9 | 45+ | ⭐⭐⭐⭐⭐ |
-| Java并发编程 | 8 | 50+ | ⭐⭐⭐⭐⭐ |
+| Java并发编程 | 9 | 98+ | ⭐⭐⭐⭐⭐ |
 | JVM | 1 | 10+ | ⭐⭐⭐⭐ |
-| Spring框架 | 5 | 35+ | ⭐⭐⭐⭐⭐ |
-| SpringBoot与自动装配 | 1 | 8+ | ⭐⭐⭐⭐ |
+| Spring框架 | 8 | 62+ | ⭐⭐⭐⭐⭐ |
+| SpringBoot与自动装配 | 4 | 20+ | ⭐⭐⭐⭐ |
 | SpringCloud微服务 | 2 | 25+ | ⭐⭐⭐⭐ |
-| MySQL数据库 | 8 | 40+ | ⭐⭐⭐⭐⭐ |
+| MySQL数据库 | 9 | 50+ | ⭐⭐⭐⭐⭐ |
 | Redis缓存 | 4 | 30+ | ⭐⭐⭐⭐⭐ |
-| 中间件 | 5 | 35+ | ⭐⭐⭐⭐ |
-| 算法与数据结构 | 3 | 35+ | ⭐⭐⭐⭐ |
+| 中间件 | 11 | 106+ | ⭐⭐⭐⭐ |
+| 算法与数据结构 | 4 | 45+ | ⭐⭐⭐⭐ |
 | 设计模式 | 1 | 20+ | ⭐⭐⭐ |
 | 分布式系统 | 1 | 15+ | ⭐⭐⭐⭐ |
-| DevOps | 1 | 20+ | ⭐⭐⭐ |
-| **SPI与 IO模型** | **1** | **30+** | **⭐⭐⭐⭐⭐** |
-| **总计** | **50** | **398+** | - |
+| DevOps | 2 | 25+ | ⭐⭐⭐ |
+| **SPI与IO模型** | **4** | **22+** | **⭐⭐⭐⭐⭐** |
+| **工程效能** | **6** | **26+** | **⭐⭐⭐⭐** |
+| **总计** | **61** | **579+** | - |
 
 ---
 
@@ -276,16 +287,17 @@ mvn spring-boot:run
 
 ### 模块级导航（推荐）
 - [📘 01-Java基础](./docs/01-Java基础/README.md) - 9 篇文档，45+ 道面试题
-- [📘 02-Java并发编程](./docs/02-Java并发编程/README.md) - 8 篇文档，50+ 道面试题
+- [📘 02-Java并发编程](./docs/02-Java并发编程/README.md) - 9 篇文档，98+ 道面试题
 - [📘 03-JVM](./docs/03-JVM/README.md) - 1 篇文档，10+ 道面试题
-- [📘 04-Spring框架](./docs/04-Spring框架/README.md) - 5 篇文档，35+ 道面试题
-- [📘 05-SpringBoot与自动装配](./docs/05-SpringBoot与自动装配/README.md) - 1 篇文档，8+ 道面试题
+- [📘 04-Spring框架](./docs/04-Spring框架/README.md) - 8 篇文档，62+ 道面试题
+- [📘 05-SpringBoot与自动装配](./docs/05-SpringBoot与自动装配/README.md) - 4 篇文档，20+ 道面试题
 - [📘 06-SpringCloud微服务](./docs/06-SpringCloud微服务/README.md) - 2 篇文档，25+ 道面试题
-- [📘 07-MySQL数据库](./docs/07-MySQL数据库/README.md) - 7 篇文档，40+ 道面试题
+- [📘 07-MySQL数据库](./docs/07-MySQL数据库/README.md) - 9 篇文档，50+ 道面试题
 - [📘 08-Redis缓存](./docs/08-Redis缓存/README.md) - 4 篇文档，30+ 道面试题
-- [📘 09-中间件](./docs/09-中间件/README.md) - 5 篇文档，35+ 道面试题
-- [📘 10-算法与数据结构](./docs/10-算法与数据结构/README.md) - 3 篇文档，35+ 道面试题
+- [📘 09-中间件](./docs/09-中间件/README.md) - 11 篇文档，106+ 道面试题
+- [📘 10-算法与数据结构](./docs/10-算法与数据结构/README.md) - 4 篇文档，45+ 道面试题
 - [📘 11-设计模式](./docs/11-设计模式/README.md) - 1 篇文档，20+ 道面试题
 - [📘 12-分布式系统](./docs/12-分布式系统/README.md) - 1 篇文档，15+ 道面试题
-- [📘 13-DevOps](./docs/13-DevOps/README.md) - 1 篇文档，20+ 道面试题
-- [📘 14-SPI与IO模型](./docs/14-SPI与 IO模型/README.md) - 1 篇文档，30+ 道面试题
+- [📘 13-DevOps](./docs/13-DevOps/README.md) - 2 篇文档，25+ 道面试题
+- [📘 14-SPI与IO模型](./docs/14-SPI与IO模型/README.md) - 4 篇文档，22+ 道面试题
+- [📘 15-工程效能](./docs/15-工程效能/README.md) - 6 篇文档，26+ 道面试题 ⭐新增

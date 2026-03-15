@@ -200,7 +200,7 @@
 ### 后续进阶
 - 📚 **[Gateway](../06-SpringCloud微服务/README.md)** - Nginx vs Gateway
 - 📚 **[分布式系统](../12-分布式系统/README.md)** - 容器化部署
-- 📚 **[Service Mesh](./05-Service-Mesh 服务网格详解.md)** - 服务网格进阶（Istio、Sidecar、流量管理）
+- 📚 **[Service Mesh](05-Service-Mesh服务网格详解.md)** - 服务网格进阶（Istio、Sidecar、流量管理）
 
 ### 知识点对应
 | DevOps | 应用场景 |
