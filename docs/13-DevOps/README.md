@@ -15,7 +15,7 @@
 
 #### 3. [03-监控与可观测性详解.md](./03-%E7%9B%91%E6%8E%A7%E4%B8%8E%E5%8F%AF%E8%A7%82%E6%B5%8B%E6%80%A7%E8%AF%A6%E8%A7%A3.md)
 - **内容：** Prometheus、Grafana、SkyWalking、ELK、健康检查与自愈
-- **子主题：**
+- **子主题**：
   - Prometheus：指标采集、PromQL、告警规则
   - Grafana：可视化 Dashboard
   - SkyWalking：APM 链路追踪
@@ -25,15 +25,28 @@
 - **面试题：** 20+ 道
 - **重要程度：** ⭐⭐⭐⭐⭐
 
+#### 4. [04-性能调优全链路详解.md](./04-%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98%E5%85%A8%E9%93%BE%E8%B7%AF%E8%AF%A6%E8%A7%A3.md)
+- **内容：** JVM 调优、MySQL 优化、Redis 优化、Tomcat 调优、Linux 系统优化
+- **子主题**：
+  - JVM：GC 日志分析、MAT/JProfiler 工具、内存泄漏排查
+  - MySQL：Explain 执行计划、慢查询优化、锁等待分析
+  - Redis：大 Key/热 Key 处理、集群性能监控
+  - Tomcat：线程池配置、NIO 连接器优化
+  - Linux：CPU/内存/磁盘 IO、网络参数优化
+- **代码示例：** `interview-microservices-parent/interview-performance-tuning/`
+- **面试题：** 38+ 道
+- **重要程度：** ⭐⭐⭐⭐⭐
+
 ---
 
 ## 📊 统计信息
 
-- **文档数：** 3 个
-- **面试题总数：** 70+ 道
+- **文档数：** 4 个
+- **面试题总数：** 108+ 道
 - **代码示例：** 
   - 容器化：`interview-microservices-parent/interview-containerization/`（~2000 行配置 + 代码）
   - 监控可观测性：`interview-microservices-parent/interview-observability/`（~1500 行代码 + 配置）
+  - 性能调优：`interview-microservices-parent/interview-performance-tuning/`（~500 行代码 + 配置）
 
 ---
 

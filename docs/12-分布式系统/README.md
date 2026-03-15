@@ -18,15 +18,42 @@
 - **面试题：** 20+ 道
 - **重要程度：** ⭐⭐⭐⭐⭐
 
+#### 3. [03-安全与认证授权详解.md](./03-%E5%AE%89%E5%85%A8%E4%B8%8E%E8%AE%A4%E8%AF%81%E6%8E%88%E6%9D%83%E8%AF%A6%E8%A7%A3.md)
+- **内容：** OAuth2.0、Spring Security、SSO、RBAC、API 网关鉴权、常见攻击防护
+- **子主题**：
+  - OAuth2.0：四种授权模式、JWT Token 机制、刷新 Token 策略
+  - Spring Security：认证授权实战
+  - SSO：单点登录原理与实现
+  - RBAC：权限模型设计与实现
+  - API 网关：统一鉴权、限流防刷
+  - 安全防护：XSS、CSRF、SQL 注入防护
+- **代码示例：** 完整 Java 代码在 `interview-microservices-parent/interview-security/`（~1000 行代码）
+- **面试题：** 28+ 道
+- **重要程度：** ⭐⭐⭐⭐⭐
+
+#### 4. [04-分布式事务深入详解.md](./04-%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%E6%B7%B1%E5%85%A5%E8%AF%A6%E8%A7%A3.md)
+- **内容：** CAP/BASE 理论、Seata 框架、本地消息表、RocketMQ 事务消息、最大努力通知
+- **子主题**：
+  - CAP/BASE：CP vs AP 选择、最终一致性实践
+  - Seata：AT/TCC/Saga三种模式原理与实战
+  - 本地消息表：方案设计、代码实现
+  - RocketMQ：事务消息原理、异常处理
+  - 最大努力通知：重试策略、人工介入
+- **代码示例：** `interview-microservices-parent/interview-transaction-demo/`
+- **面试题：** 28+ 道
+- **重要程度：** ⭐⭐⭐⭐⭐
+
 ---
 
 ## 📊 统计信息
 
-- **文档数：** 2 个
-- **面试题总数：** 40+ 道
+- **文档数：** 4 个
+- **面试题总数：** 93+ 道
 - **代码示例：** 
   - 分布式安全：配套 Java 代码在 `interview-service/security/` 目录（~1,000 行代码）
   - 系统架构：配套 Java 代码在 `interview-microservices-parent/interview-system-design/`（~2,000+ 行代码）
+  - 认证授权：配套 Java 代码在 `interview-microservices-parent/interview-security/`（~1,000 行代码）
+  - 分布式事务：配套 Java 代码在 `interview-microservices-parent/interview-transaction-demo/`（~500 行代码）
 
 ---
 
@@ -103,6 +130,10 @@
 | DDD | 复杂业务系统建模 |
 | CQRS | 高并发读写分离 |
 | 事件溯源 | 金融审计、数据追溯 |
+| OAuth2.0 | 第三方登录、开放平台 |
+| JWT | 单点登录、移动认证 |
+| RBAC | 企业权限管理 |
+| 安全防护 | XSS、CSRF、SQL 注入防护 |
 
 ---
 
