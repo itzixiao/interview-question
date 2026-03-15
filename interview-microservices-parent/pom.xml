@@ -28,5 +28,9 @@
         <module>interview-observability</module>
         <module>interview-security</module>
         <module>interview-performance-tuning</module>
+        <module>interview-service-mesh</module>
+        <module>interview-reactive</module>
+        <module>interview-bigdata</module>
+        <module>interview-lowcode</module>
     </modules>
 </project>

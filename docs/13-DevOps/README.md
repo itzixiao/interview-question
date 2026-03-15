@@ -37,16 +37,29 @@
 - **面试题：** 38+ 道
 - **重要程度：** ⭐⭐⭐⭐⭐
 
+#### 5. [05-Service Mesh 服务网格详解.md](./05-Service-Mesh%E6%9C%8D%E5%8A%A1%E7%BD%91%E6%A0%BC%E8%AF%A6%E8%A7%A3.md)
+- **内容：** Istio 架构、Sidecar 模式、流量管理、策略执行、可观测性增强
+- **子主题**：
+  - Istio：控制平面（Pilot/Mixer/Citadel/Galley）、数据平面（Envoy）
+  - Sidecar：透明代理、自动注入、iptables 拦截
+  - 流量管理：VirtualService、DestinationRule、Gateway、金丝雀发布、蓝绿部署
+  - 安全：mTLS 双向认证、JWT 认证、RBAC 授权、限流策略
+  - 可观测性：Prometheus 指标、Jaeger 链路追踪、访问日志
+- **代码示例：** `interview-microservices-parent/interview-service-mesh/`（~200 行代码 + 配置）
+- **面试题：** 36+ 道
+- **重要程度：** ⭐⭐⭐⭐⭐
+
 ---
 
 ## 📊 统计信息
 
-- **文档数：** 4 个
-- **面试题总数：** 108+ 道
+- **文档数：** 5 个
+- **面试题总数：** 144+ 道
 - **代码示例：** 
   - 容器化：`interview-microservices-parent/interview-containerization/`（~2000 行配置 + 代码）
   - 监控可观测性：`interview-microservices-parent/interview-observability/`（~1500 行代码 + 配置）
   - 性能调优：`interview-microservices-parent/interview-performance-tuning/`（~500 行代码 + 配置）
+  - Service Mesh：`interview-microservices-parent/interview-service-mesh/`（~200 行代码 + 配置）
 
 ---
 
@@ -187,7 +200,7 @@
 ### 后续进阶
 - 📚 **[Gateway](../06-SpringCloud微服务/README.md)** - Nginx vs Gateway
 - 📚 **[分布式系统](../12-分布式系统/README.md)** - 容器化部署
-- 📚 **[Service Mesh](https://istio.io/)** - 服务网格进阶
+- 📚 **[Service Mesh](./05-Service-Mesh 服务网格详解.md)** - 服务网格进阶（Istio、Sidecar、流量管理）
 
 ### 知识点对应
 | DevOps | 应用场景 |
@@ -198,6 +211,7 @@
 | CI/CD | 自动化构建与部署 |
 | Nginx | 反向代理、负载均衡 |
 | Jenkins | CI/CD 自动化 |
+| Service Mesh | 下一代微服务治理（Istio、Sidecar） |
 | Linux | 生产环境运维 |
 | Prometheus | 应用监控、告警 |
 | Grafana | 数据可视化 |

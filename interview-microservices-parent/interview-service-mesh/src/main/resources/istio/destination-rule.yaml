@@ -1,0 +1,74 @@
+# Istio DestinationRule 配置 - 负载均衡和熔断
+
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: productpage-destination-rule
+  namespace: default
+spec:
+  host: productpage.default.svc.cluster.local
+  
+  # 流量策略
+  trafficPolicy:
+    # 负载均衡算法
+    loadBalancer:
+      simple: LEAST_CONN  # 最少连接数优先
+    
+    # 连接池配置
+    connectionPool:
+      tcp:
+        maxConnections: 100
+      http:
+        h2UpgradePolicy: UPGRADE
+        http1MaxPendingRequests: 100
+        http2MaxRequests: 1000
+    
+    # 熔断配置
+    outlierDetection:
+      consecutive5xxErrors: 5  # 连续 5 次 5xx 错误
+      interval: 30s            # 检查间隔
+      baseEjectionTime: 30s    # 隔离时间
+      maxEjectionPercent: 50   # 最大隔离比例
+  
+  # 子集定义（用于版本路由）
+  subsets:
+    - name: v1
+      labels:
+        version: v1
+    - name: v2
+      labels:
+        version: v2
+
+---
+# mTLS 双向 TLS 认证配置
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: default-mtls
+  namespace: default
+spec:
+  mtls:
+    mode: STRICT  # 强制 mTLS
+
+---
+# 授权策略 - RBAC 访问控制
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: require-jwt
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: productpage
+  
+  action: ALLOW
+  
+  rules:
+    - from:
+        - source:
+            principals: ["cluster.local/ns/default/sa/bookinfo-productpage"]
+      to:
+        - operation:
+            methods: ["GET", "POST"]
+            paths: ["/api/*"]
