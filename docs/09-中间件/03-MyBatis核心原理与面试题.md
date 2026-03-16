@@ -96,6 +96,7 @@
 ### 2.2 动态查询示例
 
 ```xml
+
 <select id="findByCondition" resultType="User">
     SELECT * FROM user
     <where>
@@ -115,6 +116,7 @@
 ### 2.3 动态更新示例
 
 ```xml
+
 <update id="updateUser">
     UPDATE user
     <set>
@@ -130,6 +132,7 @@
 ### 2.4 批量插入示例
 
 ```xml
+
 <insert id="batchInsert">
     INSERT INTO user (username, email, status) VALUES
     <foreach collection="list" item="item" separator=",">
@@ -255,32 +258,327 @@ IPage<User> result = userMapper.selectPage(page, wrapper);
 
 ## 第五部分：缓存机制
 
-### 5.1 一级缓存
+### 5.1 一级缓存（SqlSession 级别）
 
-- **作用域**：SqlSession 级别
-- **默认开启**：是
-- **生命周期**：SqlSession 关闭或执行增删改时清除
-- **特点**：同一 SqlSession 中相同查询只执行一次 SQL
+#### 5.1.1 基本概念
 
-### 5.2 二级缓存
+- **作用域**：SqlSession 级别（会话级别）
+- **默认开启**：是，无法关闭
+- **存储位置**：内存（HashMap）
+- **生命周期**：与 SqlSession 相同
+
+#### 5.1.2 缓存失效场景
+
+一级缓存在以下情况会失效：
+
+1. **SqlSession 关闭**：`sqlSession.close()`
+2. **执行增删改操作**：INSERT、UPDATE、DELETE
+3. **手动清空缓存**：`sqlSession.clearCache()`
+4. **不同的 SqlSession**：每个 SqlSession 有独立的缓存
+
+#### 5.1.3 执行流程
+
+```
+第一次查询：
+    SqlSession → 数据库 → 结果 → 存入一级缓存 → 返回
+
+第二次查询（相同 SQL）：
+    SqlSession → 一级缓存命中 → 直接返回（不访问数据库）
+
+执行 UPDATE 后：
+    SqlSession → 清空一级缓存 → 访问数据库 → 存入新缓存
+```
+
+#### 5.1.4 代码示例
+
+```java
+// 同一个 SqlSession 内，一级缓存生效
+SqlSession sqlSession = sqlSessionFactory.openSession();
+
+try {
+    UserMapper mapper = sqlSession.getMapper(UserMapper.class);
+    
+    // 第一次查询：访问数据库
+    User user1 = mapper.selectById(1L);
+    System.out.println("第一次查询：" + user1);
+    
+    // 第二次查询：直接从一级缓存获取（不访问数据库）
+    User user2 = mapper.selectById(1L);
+    System.out.println("第二次查询：" + user2);
+    
+    // user1 == user2，是同一个对象
+    System.out.println("是否相同对象：" + (user1 == user2)); // true
+    
+    // 执行更新操作，一级缓存被清空
+    mapper.updateById(new User(1L, "newName"));
+    sqlSession.commit();
+    
+    // 第三次查询：缓存已清空，重新访问数据库
+    User user3 = mapper.selectById(1L);
+    System.out.println("第三次查询：" + user3);
+    
+} finally {
+    sqlSession.close();
+}
+```
+
+#### 5.1.5 注意事项
+
+```java
+// ❌ 错误：不同 SqlSession 无法共享一级缓存
+SqlSession session1 = sqlSessionFactory.openSession();
+SqlSession session2 = sqlSessionFactory.openSession();
+
+User user1 = session1.getMapper(UserMapper.class).selectById(1L); // 访问数据库
+User user2 = session2.getMapper(UserMapper.class).selectById(1L); // 再次访问数据库
+
+// ✅ 正确：使用同一个 SqlSession
+SqlSession session = sqlSessionFactory.openSession();
+UserMapper mapper = session.getMapper(UserMapper.class);
+User user3 = mapper.selectById(1L); // 访问数据库
+User user4 = mapper.selectById(1L); // 从一级缓存获取
+```
+
+---
+
+### 5.2 二级缓存（Mapper 级别）
+
+#### 5.2.1 基本概念
 
 - **作用域**：Mapper（namespace）级别
-- **默认开启**：否
-- **开启方式**：`<cache/>` 或 `@CacheNamespace`
-- **注意事项**：
-    - 实体类需要实现 Serializable
-    - 多表关联查询不建议使用
-    - 建议使用 Redis 等分布式缓存替代
+- **默认开启**：否，需要手动配置
+- **存储位置**：可配置（内存、Redis、Ehcache 等）
+- **生命周期**：应用级别，多个 SqlSession 共享
 
-### 5.3 缓存配置
+#### 5.2.2 开启方式
+
+**方式一：XML 配置**
 
 ```xml
-<!-- Mapper.xml 中开启二级缓存 -->
-<cache
-    eviction="LRU"
-    flushInterval="60000"
-    size="512"
-    readOnly="true"/>
+<!-- Mapper.xml 中开启 -->
+<mapper namespace="cn.itzixiao.interview.mapper.UserMapper">
+    <!-- 开启二级缓存 -->
+    <cache
+        eviction="LRU"
+        flushInterval="60000"
+        size="512"
+        readOnly="true"
+        blocking="false"/>
+</mapper>
+```
+
+**方式二：注解配置**
+
+```java
+@CacheNamespace(
+    eviction = CacheNamespace.Eviction.LRU,
+    flushInterval = 60000,
+    size = 512,
+    readOnly = true
+)
+public interface UserMapper {
+    @Select("SELECT * FROM user WHERE id = #{id}")
+    User selectById(Long id);
+}
+```
+
+**方式三：全局配置（mybatis-config.xml）**
+
+```xml
+<configuration>
+    <settings>
+        <!-- 开启二级缓存总开关 -->
+        <setting name="cacheEnabled" value="true"/>
+    </settings>
+</configuration>
+```
+
+#### 5.2.3 缓存策略（eviction）
+
+| 策略 | 说明 | 适用场景 |
+|------|------|----------|
+| **LRU** | 最近最少使用 | 默认策略，大多数场景适用 |
+| **FIFO** | 先进先出 | 按时间顺序淘汰 |
+| **SOFT** | 软引用 | 内存不足时回收 |
+| **WEAK** | 弱引用 | 更激进的回收策略 |
+
+#### 5.2.4 执行流程
+
+```
+SqlSession1 第一次查询：
+    数据库 → 结果 → 存入一级缓存 → 存入二级缓存 → 返回
+
+SqlSession1 关闭：
+    一级缓存数据刷新到二级缓存
+
+SqlSession2 查询相同数据：
+    二级缓存命中 → 返回（不访问数据库）
+```
+
+#### 5.2.5 代码示例
+
+```java
+// 二级缓存需要实体类实现 Serializable
+public class User implements Serializable {
+    private static final long serialVersionUID = 1L;
+    private Long id;
+    private String username;
+    // ...
+}
+
+// 测试二级缓存
+public void testSecondLevelCache() {
+    SqlSession session1 = sqlSessionFactory.openSession();
+    SqlSession session2 = sqlSessionFactory.openSession();
+    
+    try {
+        // Session1 查询
+        UserMapper mapper1 = session1.getMapper(UserMapper.class);
+        User user1 = mapper1.selectById(1L);
+        System.out.println("Session1 查询：" + user1);
+        session1.close(); // 关闭后，数据刷新到二级缓存
+        
+        // Session2 查询相同数据
+        UserMapper mapper2 = session2.getMapper(UserMapper.class);
+        User user2 = mapper2.selectById(1L);
+        System.out.println("Session2 查询：" + user2);
+        // 此时不会访问数据库，直接从二级缓存获取
+        
+    } finally {
+        session2.close();
+    }
+}
+```
+
+#### 5.2.6 二级缓存失效场景
+
+1. **执行增删改操作**：任何 namespace 下的 INSERT/UPDATE/DELETE
+2. **手动清空**：`sqlSession.clearCache()` 不影响二级缓存
+3. **超过 flushInterval**：配置的刷新间隔到期
+4. **缓存溢出**：超过 size 限制，按策略淘汰
+
+---
+
+### 5.3 一级缓存 vs 二级缓存 对比表
+
+| 特性 | 一级缓存 | 二级缓存 |
+|------|----------|----------|
+| **作用域** | SqlSession 级别 | Mapper（namespace）级别 |
+| **默认状态** | 开启 | 关闭（需手动配置） |
+| **存储位置** | 内存（HashMap） | 可配置（内存/Redis/Ehcache） |
+| **数据共享** | 不共享（SqlSession 隔离） | 共享（多个 SqlSession） |
+| **序列化要求** | 不需要 | 需要（实体类实现 Serializable） |
+| **生命周期** | 随 SqlSession 创建/销毁 | 应用级别，长期存在 |
+| **清空时机** | 增删改、close、clearCache | 增删改、超时、溢出 |
+| **命中率** | 低（单次会话） | 高（跨会话共享） |
+| **适用场景** | 单次会话内重复查询 | 热点数据、配置数据 |
+
+---
+
+### 5.4 缓存使用建议
+
+#### 5.4.1 推荐使用一级缓存的场景
+
+```java
+// ✅ 适合：单次事务内的重复查询
+@Transactional
+public void processOrder(Long orderId) {
+    // 同一个 SqlSession 内多次查询
+    Order order = orderMapper.selectById(orderId);
+    User user = userMapper.selectById(order.getUserId());
+    // 后续可能再次查询 order
+    Order order2 = orderMapper.selectById(orderId); // 走一级缓存
+}
+```
+
+#### 5.4.2 推荐使用二级缓存的场景
+
+```java
+// ✅ 适合：热点数据、不常变化的数据
+// 如：系统配置、字典数据、商品分类
+
+@CacheNamespace(
+    eviction = CacheNamespace.Eviction.LRU,
+    flushInterval = 3600000,  // 1小时刷新
+    size = 1000
+)
+public interface SysConfigMapper {
+    @Select("SELECT * FROM sys_config WHERE config_key = #{key}")
+    SysConfig selectByKey(String key);
+}
+```
+
+#### 5.4.3 不建议使用缓存的场景
+
+```java
+// ❌ 不适合缓存：实时性要求高的数据
+// 如：库存、余额、订单状态
+
+// ❌ 不适合缓存：数据量大的查询
+// 如：分页查询、复杂条件查询
+
+// ❌ 不适合缓存：频繁更新的数据
+// 缓存命中率极低，反而增加开销
+```
+
+---
+
+### 5.5 缓存相关问题排查
+
+#### 5.5.1 缓存不生效的常见原因
+
+```java
+// 1. 二级缓存未开启
+// 检查：Mapper.xml 中是否有 <cache/> 标签
+
+// 2. 实体类未实现 Serializable
+public class User implements Serializable {  // 必须实现
+    private static final long serialVersionUID = 1L;
+}
+
+// 3. 在同一个 SqlSession 内测试二级缓存
+// 二级缓存需要 SqlSession 关闭后才刷新
+sqlSession.close();  // 必须关闭才能刷新到二级缓存
+
+// 4. 配置了 readOnly="true" 但修改了对象
+// readOnly=true 时返回的是缓存对象的引用
+// 修改会影响缓存中的数据
+```
+
+#### 5.5.2 缓存穿透、击穿、雪崩
+
+```java
+// 缓存穿透：查询不存在的数据
+// 解决：布隆过滤器或缓存空值
+
+// 缓存击穿：热点数据过期，大量请求同时访问数据库
+// 解决：互斥锁或逻辑过期
+
+// 缓存雪崩：大量缓存同时过期
+// 解决：随机过期时间、多级缓存
+```
+
+---
+
+### 5.6 生产环境建议
+
+```java
+/**
+ * 生产环境缓存使用建议：
+ * 
+ * 1. 一级缓存：保持默认开启，无需额外配置
+ *    - 适用于单次会话内的重复查询
+ *    - 自动管理，无需干预
+ * 
+ * 2. 二级缓存：谨慎使用，推荐替代方案
+ *    - 简单场景：使用 MyBatis 自带二级缓存
+ *    - 复杂场景：使用 Redis 等分布式缓存
+ *    - 避免多表关联查询使用二级缓存
+ * 
+ * 3. 更好的选择：Spring Cache + Redis
+ *    @Cacheable(value = "user", key = "#id")
+ *    public User getUser(Long id) { ... }
+ */
 ```
 
 ---
@@ -290,12 +588,13 @@ IPage<User> result = userMapper.selectPage(page, wrapper);
 **问题 1:MyBatis的 #{}和 ${}有什么区别？**
 
 **答**：
-| 特性 | #{} | ${} |
-|------|-----|-----|
-| 处理方式 | 预编译，参数绑定 | 直接字符串替换 |
-| 安全性 | 安全，防 SQL 注入 | 有 SQL 注入风险 |
-| 使用场景 | 参数值 | 表名、列名、排序 |
-| 性能 | 可缓存执行计划 | 每次生成新 SQL |
+
+| 特性   | #{}         | ${}        |
+|------|-------------|------------|
+| 处理方式 | 预编译，参数绑定    | 直接字符串替换    |
+| 安全性  | 安全，防 SQL 注入 | 有 SQL 注入风险 |
+| 使用场景 | 参数值         | 表名、列名、排序   |
+| 性能   | 可缓存执行计划     | 每次生成新 SQL  |
 
 ---
 
@@ -313,12 +612,13 @@ IPage<User> result = userMapper.selectPage(page, wrapper);
 **问题 3:MyBatis的一级缓存和二级缓存有什么区别？**
 
 **答**：
-| 特性 | 一级缓存 | 二级缓存 |
-|------|----------|----------|
-| 作用域 | SqlSession | Mapper（namespace） |
-| 默认开启 | 是 | 否 |
-| 生命周期 | SqlSession 关闭或 DML 后清除 | 应用级别 |
-| 适用场景 | 单次会话内重复查询 | 跨会话共享 |
+
+| 特性   | 一级缓存                   | 二级缓存              |
+|------|------------------------|-------------------|
+| 作用域  | SqlSession             | Mapper（namespace） |
+| 默认开启 | 是                      | 否                 |
+| 生命周期 | SqlSession 关闭或 DML 后清除 | 应用级别              |
+| 适用场景 | 单次会话内重复查询              | 跨会话共享             |
 
 ---
 
