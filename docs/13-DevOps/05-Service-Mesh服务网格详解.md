@@ -4,9 +4,9 @@
 
 ## 📚 目录
 
-- [一、Service Mesh 概述](#一 service-mesh 概述)
-- [二、Istio 架构详解](#二 istio-架构详解)
-- [三、Sidecar 模式深入](#三 sidecar-模式深入)
+- [一、Service Mesh 概述](#一service-mesh概述)
+- [二、Istio 架构详解](#二istio-架构详解)
+- [三、Sidecar 模式深入](#三sidecar-模式深入)
 - [四、流量管理实战](#四流量管理实战)
 - [五、策略执行](#五策略执行)
 - [六、可观测性增强](#六可观测性增强)
