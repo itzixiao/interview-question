@@ -4,7 +4,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
  * 自定义配置属性类
- *
+ * <p>
  * 对应 application.yml 或 application.properties 中的配置：
  * my.custom.name=MyName
  * my.custom.value=MyValue

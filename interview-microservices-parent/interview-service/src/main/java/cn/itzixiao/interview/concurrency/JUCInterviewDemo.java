@@ -1,10 +1,9 @@
 package cn.itzixiao.interview.concurrency;
 
-import java.util.*;
 import java.util.concurrent.*;
-import java.util.concurrent.locks.*;
-import java.util.function.IntConsumer;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * Java 并发编程核心知识点详解
@@ -102,8 +101,8 @@ public class JUCInterviewDemo {
         thread1.start();
 
         System.out.println("\n方式二：实现 Runnable 接口");
-        Thread thread2 = new Thread(() -> 
-            System.out.println("Thread-2: " + Thread.currentThread().getName())
+        Thread thread2 = new Thread(() ->
+                System.out.println("Thread-2: " + Thread.currentThread().getName())
         );
         thread2.start();
 
@@ -121,8 +120,8 @@ public class JUCInterviewDemo {
 
         System.out.println("\n方式四：使用线程池（推荐）");
         ExecutorService threadPool = Executors.newFixedThreadPool(2);
-        threadPool.submit(() -> 
-            System.out.println("Thread-4: " + Thread.currentThread().getName())
+        threadPool.submit(() ->
+                System.out.println("Thread-4: " + Thread.currentThread().getName())
         );
         threadPool.shutdown();
 
@@ -176,12 +175,13 @@ public class JUCInterviewDemo {
         System.out.println("【2.2 volatile 关键字】\n");
 
         VolatileCounter counter = new VolatileCounter();
-        
+
         // 线程 1 修改值
         Thread writer = new Thread(() -> {
             try {
                 Thread.sleep(100);
-            } catch (InterruptedException e) {}
+            } catch (InterruptedException e) {
+            }
             counter.setValue(100);
             System.out.println("Writer 修改值为：" + counter.getValue());
         });
@@ -214,8 +214,14 @@ public class JUCInterviewDemo {
     // 辅助类：volatile 计数器
     static class VolatileCounter {
         private volatile int value = 0;
-        public int getValue() { return value; }
-        public void setValue(int value) { this.value = value; }
+
+        public int getValue() {
+            return value;
+        }
+
+        public void setValue(int value) {
+            this.value = value;
+        }
     }
 
     // ==================== 第三部分：死锁 ====================
@@ -676,12 +682,12 @@ public class JUCInterviewDemo {
 
         System.out.println("【9.4 正确使用线程池】\n");
         ThreadPoolExecutor executor = new ThreadPoolExecutor(
-            2,                              // 核心线程数
-            5,                              // 最大线程数
-            60L,                            // 空闲存活时间
-            TimeUnit.SECONDS,               // 时间单位
-            new ArrayBlockingQueue<>(10),   // 有界队列
-            new ThreadPoolExecutor.CallerRunsPolicy() // 拒绝策略
+                2,                              // 核心线程数
+                5,                              // 最大线程数
+                60L,                            // 空闲存活时间
+                TimeUnit.SECONDS,               // 时间单位
+                new ArrayBlockingQueue<>(10),   // 有界队列
+                new ThreadPoolExecutor.CallerRunsPolicy() // 拒绝策略
         );
 
         for (int i = 1; i <= 10; i++) {
@@ -725,9 +731,9 @@ public class JUCInterviewDemo {
 
         // 链式调用
         CompletableFuture<Void> future2 = CompletableFuture.supplyAsync(() -> "Hello")
-            .thenApply(s -> s + " World")
-            .thenAccept(System.out::println)
-            .thenRun(() -> System.out.println("执行完成"));
+                .thenApply(s -> s + " World")
+                .thenAccept(System.out::println)
+                .thenRun(() -> System.out.println("执行完成"));
 
         // 组合多个任务
         CompletableFuture<Integer> future3 = CompletableFuture.supplyAsync(() -> 10);
@@ -782,7 +788,7 @@ public class JUCInterviewDemo {
 
         // JDK 21+ 特性（如果运行在 JDK 21 以下，请注释掉虚拟线程部分）
         System.out.println("【11.2 创建虚拟线程（JDK 21+ 特性）】\n");
-        
+
         // 注意：虚拟线程是 JDK 21 特性，以下代码需要在 JDK 21+ 环境运行
         // 方式一：直接启动
         /*

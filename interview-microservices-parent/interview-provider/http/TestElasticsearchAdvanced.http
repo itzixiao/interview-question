@@ -74,7 +74,8 @@ Content-Type: application/json
 }
 
 ### 3.2 多字段匹配查询
-POST http://localhost:9080/api/es/advanced/search/multi-match?index=device_operation_log&searchText=操作&fields=device_name&fields=operator
+POST http://localhost:9080/api/es/advanced/search/multi-match?index=device_operation_log&searchText=操作&
+    fields=device_name&fields=operator
 Content-Type: application/json
 
 {
@@ -139,7 +140,11 @@ Content-Type: application/json
   "query": {
     "multi_match": {
       "query": "离心机 操作",
-      "fields": ["device_name^2", "operator", "description"],
+      "fields": [
+        "device_name^2",
+        "operator",
+        "description"
+      ],
       "type": "best_fields"
     }
   }
@@ -244,7 +249,8 @@ Content-Type: application/json
 ]
 
 ### 5.2 查询缓存优化建议
-GET http://localhost:9080/api/es/advanced/optimize/query-cache?index=device_operation_log&filterField=status&filterValue=active
+GET http://localhost:9080/api/es/advanced/optimize/query-cache?index=device_operation_log&filterField=status&
+    filterValue=active
 
 ### 5.3 索引设置优化建议
 GET http://localhost:9080/api/es/advanced/optimize/index-settings?index=device_operation_log
@@ -272,7 +278,10 @@ Content-Type: application/json
       ]
     }
   },
-  "_source": ["device_code", "device_name"],
+  "_source": [
+    "device_code",
+    "device_name"
+  ],
   "size": 10
 }
 
@@ -441,16 +450,22 @@ Content-Type: application/json
   },
   "mappings": {
     "properties": {
-      "timestamp": { "type": "date" },
-      "level": { 
+      "timestamp": {
+        "type": "date"
+      },
+      "level": {
         "type": "keyword"
       },
-      "message": { 
+      "message": {
         "type": "text",
         "analyzer": "ik_max_word"
       },
-      "service": { "type": "keyword" },
-      "trace_id": { "type": "keyword" }
+      "service": {
+        "type": "keyword"
+      },
+      "trace_id": {
+        "type": "keyword"
+      }
     }
   }
 }
@@ -459,16 +474,66 @@ Content-Type: application/json
 POST http://localhost:19200/_bulk
 Content-Type: application/json
 
-{ "index": { "_index": "test_logs" }}
-{ "timestamp": "2024-01-15T10:00:00Z", "level": "INFO", "message": "用户登录成功", "service": "auth-service", "trace_id": "trace-001" }
-{ "index": { "_index": "test_logs" }}
-{ "timestamp": "2024-01-15T10:01:00Z", "level": "ERROR", "message": "数据库连接失败", "service": "user-service", "trace_id": "trace-002" }
-{ "index": { "_index": "test_logs" }}
-{ "timestamp": "2024-01-15T10:02:00Z", "level": "WARN", "message": "缓存命中率低", "service": "order-service", "trace_id": "trace-003" }
-{ "index": { "_index": "test_logs" }}
-{ "timestamp": "2024-01-15T10:03:00Z", "level": "INFO", "message": "订单创建成功", "service": "order-service", "trace_id": "trace-004" }
-{ "index": { "_index": "test_logs" }}
-{ "timestamp": "2024-01-15T10:04:00Z", "level": "ERROR", "message": "支付接口超时", "service": "payment-service", "trace_id": "trace-005" }
+{
+  "index": {
+    "_index": "test_logs"
+  }
+}
+{
+  "timestamp": "2024-01-15T10:00:00Z",
+  "level": "INFO",
+  "message": "用户登录成功",
+  "service": "auth-service",
+  "trace_id": "trace-001"
+}
+{
+  "index": {
+    "_index": "test_logs"
+  }
+}
+{
+  "timestamp": "2024-01-15T10:01:00Z",
+  "level": "ERROR",
+  "message": "数据库连接失败",
+  "service": "user-service",
+  "trace_id": "trace-002"
+}
+{
+  "index": {
+    "_index": "test_logs"
+  }
+}
+{
+  "timestamp": "2024-01-15T10:02:00Z",
+  "level": "WARN",
+  "message": "缓存命中率低",
+  "service": "order-service",
+  "trace_id": "trace-003"
+}
+{
+  "index": {
+    "_index": "test_logs"
+  }
+}
+{
+  "timestamp": "2024-01-15T10:03:00Z",
+  "level": "INFO",
+  "message": "订单创建成功",
+  "service": "order-service",
+  "trace_id": "trace-004"
+}
+{
+  "index": {
+    "_index": "test_logs"
+  }
+}
+{
+  "timestamp": "2024-01-15T10:04:00Z",
+  "level": "ERROR",
+  "message": "支付接口超时",
+  "service": "payment-service",
+  "trace_id": "trace-005"
+}
 
 ### 8.3 刷新索引
 POST http://localhost:19200/test_logs/_refresh

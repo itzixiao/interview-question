@@ -19,7 +19,8 @@ Content-Type: application/json
 # 作用：验证给定的 JWT token 是否有效（未过期且签名正确）
 # 参数：token（JWT token 字符串）
 # 响应：valid=true 表示有效，valid=false 表示无效或已过期
-GET http://localhost:8082/api/auth/verify?token=eyJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6eyJyb2xlIjoiQURNSU4iLCJwZXJtaXNzaW9ucyI6WyJyZWFkZCIsIndyaXRlIiwiZGVsZXRlIl19LCJzdWIiOiJhZG1pbiIsImlzcyI6ImludGVydmlldy1wcm92aWRlciIsImlhdCI6MTc3MzA1NTE1MiwiZXhwIjoxNzczMTQxNTUyfQ.k3CMS3__t5L-xC17ePaNtY2kWxEAjoIr6jOL0FftU2w
+GET http://localhost:8082/api/auth/verify?
+    token=eyJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6eyJyb2xlIjoiQURNSU4iLCJwZXJtaXNzaW9ucyI6WyJyZWFkZCIsIndyaXRlIiwiZGVsZXRlIl19LCJzdWIiOiJhZG1pbiIsImlzcyI6ImludGVydmlldy1wcm92aWRlciIsImlhdCI6MTc3MzA1NTE1MiwiZXhwIjoxNzczMTQxNTUyfQ.k3CMS3__t5L-xC17ePaNtY2kWxEAjoIr6jOL0FftU2w
 
 ### 3. 获取当前用户信息
 # 作用：从 Authorization header 中的 token 解析用户信息

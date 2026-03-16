@@ -36,6 +36,7 @@ for file in files:
 ```
 
 **使用方法：**
+
 ```bash
 python check_interview_format.py
 ```
@@ -47,17 +48,20 @@ python check_interview_format.py
 ### check_docs_naming.py
 
 **功能：**
+
 - 检查所有目录名是否包含空格
 - 检查所有.md 文件名是否包含空格
 - 检查每个分类目录下是否有 README.md
 - 生成详细的检查报告
 
 **使用方法：**
+
 ```bash
 python check_docs_naming.py
 ```
 
 **输出示例：**
+
 ```
 ======================================================================
 docs 目录命名规范检查
@@ -89,17 +93,20 @@ README.md 存在性检查
 ### fix_docs_spaces.py
 
 **功能：**
+
 - 批量移除目录名中的空格
 - 批量移除文件名中的空格
 - 智能处理目标已存在的情况
 - 自动备份和清理
 
 **使用方法：**
+
 ```bash
 python fix_docs_spaces.py
 ```
 
 **注意事项：**
+
 - ⚠️ 运行前建议先备份 docs 目录
 - ✅ 脚本会自动处理冲突情况
 - ✅ 会显示详细的处理日志
@@ -132,6 +139,7 @@ done
 ### Git Hooks 示例
 
 **.git/hooks/pre-commit**
+
 ```bash
 #!/bin/bash
 
@@ -154,6 +162,7 @@ exit 0
 ```
 
 **启用方法：**
+
 ```bash
 chmod +x .git/hooks/pre-commit
 ```
@@ -165,6 +174,7 @@ chmod +x .git/hooks/pre-commit
 ### GitHub Actions
 
 **.github/workflows/docs-check.yml**
+
 ```yaml
 name: Docs Check
 
@@ -294,6 +304,7 @@ python -m pydoc check_interview_format
 ### 编辑器配置
 
 **.vscode/settings.json**
+
 ```json
 {
     "files.exclude": {

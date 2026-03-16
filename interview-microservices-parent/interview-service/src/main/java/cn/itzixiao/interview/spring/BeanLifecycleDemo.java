@@ -15,7 +15,7 @@ import javax.annotation.PreDestroy;
 
 /**
  * Spring Bean 生命周期详解
- *
+ * <p>
  * Bean 生命周期流程：
  * ┌─────────────────────────────────────────────────────────────┐
  * │  1. 实例化（Instantiation）                                  │
@@ -152,13 +152,13 @@ public class BeanLifecycleDemo {
 
 /**
  * 生命周期执行顺序总结：
- *
+ * <p>
  * 实例化阶段：
  * 1. 构造方法
- *
+ * <p>
  * 属性赋值阶段：
  * 2. Setter 注入 / @Autowired 字段注入
- *
+ * <p>
  * 初始化阶段：
  * 3. BeanNameAware.setBeanName()
  * 4. BeanFactoryAware.setBeanFactory()
@@ -166,10 +166,10 @@ public class BeanLifecycleDemo {
  * 6. @PostConstruct
  * 7. InitializingBean.afterPropertiesSet()
  * 8. 自定义 init-method
- *
+ * <p>
  * 使用阶段：
  * 9. 业务方法
- *
+ * <p>
  * 销毁阶段：
  * 10. @PreDestroy
  * 11. DisposableBean.destroy()

@@ -4,15 +4,15 @@ package cn.itzixiao.interview.java;
  * =====================================================================================
  * 接口与抽象类详解
  * =====================================================================================
- * 
+ * <p>
  * 一、接口（Interface）
  * -------------------------------------------------------------------------------------
  * 接口是一种抽象类型，是抽象方法的集合。接口以 interface 关键字声明。
- * 
+ * <p>
  * 二、抽象类（Abstract Class）
  * -------------------------------------------------------------------------------------
  * 抽象类是不能被实例化的类，用 abstract 关键字修饰，可以包含抽象方法和具体方法。
- * 
+ * <p>
  * 三、核心区别
  * -------------------------------------------------------------------------------------
  * | 特性           | 接口                          | 抽象类                      |
@@ -23,7 +23,7 @@ package cn.itzixiao.interview.java;
  * | 方法           | JDK8前全是抽象方法            | 可以有抽象和具体方法        |
  * | 构造方法       | 不能有                        | 可以有                      |
  * | 设计理念       | 定义行为契约                  | 代码复用+模板设计           |
- * 
+ * <p>
  * 四、JDK8/9 接口新特性
  * -------------------------------------------------------------------------------------
  * JDK 8: default 方法（默认方法）、static 方法（静态方法）
@@ -194,12 +194,13 @@ public class InterfaceAndAbstractDemo {
  * =====================================================================================
  */
 interface AnimalInterface {
-    
+
     // 常量：默认 public static final
     String TYPE = "动物";
 
     // 抽象方法：默认 public abstract
     void eat();
+
     void sleep();
 
     // JDK8 新特性：默认方法（有具体实现）
@@ -272,7 +273,7 @@ abstract class Shape {
 
     // 具体方法：子类可以直接使用
     public void display() {
-        System.out.println("    [图形信息] 名称: " + name + ", 颜色: " + color + 
+        System.out.println("    [图形信息] 名称: " + name + ", 颜色: " + color +
                 ", 面积: " + calculateArea());
     }
 
@@ -326,7 +327,7 @@ class Rectangle extends Shape {
 // 接口1：手机功能
 interface Phone {
     void call();
-    
+
     default void charge() {
         System.out.println("    [充电] 使用默认充电方式");
     }
@@ -335,7 +336,7 @@ interface Phone {
 // 接口2：相机功能
 interface Camera {
     void takePhoto();
-    
+
     default void charge() {
         System.out.println("    [充电] 使用相机充电方式");
     }
@@ -351,7 +352,7 @@ interface MusicPlayer {
  * 实现了三个接口
  */
 class SmartPhone implements Phone, Camera, MusicPlayer {
-    
+
     @Override
     public void call() {
         System.out.println("    [手机] 打电话");

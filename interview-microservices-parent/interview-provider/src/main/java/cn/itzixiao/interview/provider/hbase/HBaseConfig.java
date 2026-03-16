@@ -12,9 +12,9 @@ import java.io.IOException;
 
 /**
  * HBase 配置类
- * 
+ *
  * <p>用于配置和创建 HBase 连接</p>
- * 
+ *
  * <h3>使用说明：</h3>
  * <ul>
  *     <li>需要在 application.yml 中配置 HBase 的 ZooKeeper 地址</li>
@@ -40,34 +40,34 @@ public class HBaseConfig {
 
     /**
      * 创建 HBase 配置对象
-     * 
+     *
      * @return HBaseConfiguration
      */
     @Bean
     public org.apache.hadoop.conf.Configuration hbaseConfiguration() {
         org.apache.hadoop.conf.Configuration config = HBaseConfiguration.create();
-        
+
         // ZooKeeper 配置
         config.set("hbase.zookeeper.quorum", zkQuorum);
         config.set("hbase.zookeeper.property.clientPort", zkPort);
-        
+
         // HDFS 配置
         config.set("hbase.rootdir", rootDir);
         config.set("zookeeper.znode.parent", znodeParent);
-        
+
         // 其他配置
         config.set("hbase.cluster.distributed", "true");
         config.set("hbase.client.retries.number", "3");
         config.set("hbase.client.pause", "1000");
         config.set("hbase.rpc.timeout", "60000");
         config.set("hbase.client.operation.timeout", "60000");
-        
+
         return config;
     }
 
     /**
      * 创建 HBase 连接
-     * 
+     *
      * @param config HBase 配置
      * @return Connection
      * @throws IOException IO 异常

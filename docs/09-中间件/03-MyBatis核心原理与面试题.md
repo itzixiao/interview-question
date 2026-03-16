@@ -3,6 +3,7 @@
 ## 概述
 
 本文档涵盖 MyBatis 和 MyBatis-Plus 的核心知识点：
+
 - MyBatis 核心架构与执行流程
 - 动态 SQL 原理与最佳实践
 - MyBatis-Plus 增强功能
@@ -41,14 +42,14 @@
 
 ### 1.2 核心组件说明
 
-| 组件 | 说明 |
-|------|------|
+| 组件                    | 说明                     |
+|-----------------------|------------------------|
 | **SqlSessionFactory** | 创建 SqlSession 的工厂，全局单例 |
-| **SqlSession** | 会话接口，执行 SQL、获取 Mapper |
-| **Executor** | 执行器，负责 SQL 执行和缓存管理 |
-| **StatementHandler** | 语句处理器，创建 Statement 对象 |
-| **ParameterHandler** | 参数处理器，设置预编译参数 |
-| **ResultSetHandler** | 结果集处理器，封装结果集到对象 |
+| **SqlSession**        | 会话接口，执行 SQL、获取 Mapper  |
+| **Executor**          | 执行器，负责 SQL 执行和缓存管理     |
+| **StatementHandler**  | 语句处理器，创建 Statement 对象  |
+| **ParameterHandler**  | 参数处理器，设置预编译参数          |
+| **ResultSetHandler**  | 结果集处理器，封装结果集到对象        |
 
 ### 1.3 执行流程
 
@@ -82,15 +83,15 @@
 
 ### 2.1 动态 SQL 标签
 
-| 标签 | 作用 | 示例场景 |
-|------|------|----------|
-| `<if>` | 条件判断 | 可选查询条件 |
-| `<choose>` | 多选一 | 类似 switch |
-| `<where>` | 智能 WHERE | 自动去除 AND/OR |
-| `<set>` | 智能 SET | 自动去除逗号 |
-| `<foreach>` | 遍历集合 | IN 查询、批量插入 |
-| `<trim>` | 自定义修剪 | 自定义前后缀 |
-| `<bind>` | 变量绑定 | 模糊查询拼接 |
+| 标签          | 作用       | 示例场景        |
+|-------------|----------|-------------|
+| `<if>`      | 条件判断     | 可选查询条件      |
+| `<choose>`  | 多选一      | 类似 switch   |
+| `<where>`   | 智能 WHERE | 自动去除 AND/OR |
+| `<set>`     | 智能 SET   | 自动去除逗号      |
+| `<foreach>` | 遍历集合     | IN 查询、批量插入  |
+| `<trim>`    | 自定义修剪    | 自定义前后缀      |
+| `<bind>`    | 变量绑定     | 模糊查询拼接      |
 
 ### 2.2 动态查询示例
 
@@ -143,12 +144,12 @@
 
 ### 3.1 核心区别
 
-| 特性 | #{} | ${} |
-|------|-----|-----|
-| **处理方式** | 预编译，参数绑定 | 直接字符串替换 |
-| **安全性** | 安全，防 SQL 注入 | 有 SQL 注入风险 |
-| **使用场景** | 参数值 | 表名、列名、排序字段 |
-| **性能** | 可缓存执行计划 | 每次生成新 SQL |
+| 特性       | #{}         | ${}        |
+|----------|-------------|------------|
+| **处理方式** | 预编译，参数绑定    | 直接字符串替换    |
+| **安全性**  | 安全，防 SQL 注入 | 有 SQL 注入风险 |
+| **使用场景** | 参数值         | 表名、列名、排序字段 |
+| **性能**   | 可缓存执行计划     | 每次生成新 SQL  |
 
 ### 3.2 SQL 注入示例
 
@@ -193,24 +194,24 @@ private String validateOrderBy(String orderBy) {
 
 ### 4.1 核心特性
 
-| 特性 | 说明 |
-|------|------|
+| 特性      | 说明                  |
+|---------|---------------------|
 | 通用 CRUD | BaseMapper 提供基础增删改查 |
-| 条件构造器 | Wrapper 链式编程 |
-| 分页插件 | 物理分页 |
-| 乐观锁 | @Version 注解 |
-| 逻辑删除 | @TableLogic 注解 |
-| 自动填充 | @TableField(fill) |
+| 条件构造器   | Wrapper 链式编程        |
+| 分页插件    | 物理分页                |
+| 乐观锁     | @Version 注解         |
+| 逻辑删除    | @TableLogic 注解      |
+| 自动填充    | @TableField(fill)   |
 
 ### 4.2 常用注解
 
-| 注解 | 用途 |
-|------|------|
-| `@TableName` | 指定表名 |
-| `@TableId` | 主键（支持多种策略） |
-| `@TableField` | 字段映射、填充策略 |
-| `@TableLogic` | 逻辑删除 |
-| `@Version` | 乐观锁版本号 |
+| 注解            | 用途         |
+|---------------|------------|
+| `@TableName`  | 指定表名       |
+| `@TableId`    | 主键（支持多种策略） |
+| `@TableField` | 字段映射、填充策略  |
+| `@TableLogic` | 逻辑删除       |
+| `@Version`    | 乐观锁版本号     |
 
 ### 4.3 条件构造器
 
@@ -267,9 +268,9 @@ IPage<User> result = userMapper.selectPage(page, wrapper);
 - **默认开启**：否
 - **开启方式**：`<cache/>` 或 `@CacheNamespace`
 - **注意事项**：
-  - 实体类需要实现 Serializable
-  - 多表关联查询不建议使用
-  - 建议使用 Redis 等分布式缓存替代
+    - 实体类需要实现 Serializable
+    - 多表关联查询不建议使用
+    - 建议使用 Redis 等分布式缓存替代
 
 ### 5.3 缓存配置
 
@@ -301,6 +302,7 @@ IPage<User> result = userMapper.selectPage(page, wrapper);
 **问题 2:MyBatis如何防止 SQL 注入？**
 
 **答**：
+
 1. **使用 #{}**：参数预编译，自动转义特殊字符
 2. **使用 ${}时进行白名单校验**：限制允许的值
 3. **使用 CONCAT 进行模糊查询**：`LIKE CONCAT('%', #{keyword}, '%')`
@@ -323,6 +325,7 @@ IPage<User> result = userMapper.selectPage(page, wrapper);
 **问题 4:MyBatis的执行流程是怎样的？**
 
 **答**：
+
 1. 加载配置文件，构建 SqlSessionFactory
 2. SqlSessionFactory 创建 SqlSession
 3. SqlSession 获取 Mapper 代理对象
@@ -338,6 +341,7 @@ IPage<User> result = userMapper.selectPage(page, wrapper);
 **问题 5:MyBatis-Plus的 LambdaQueryWrapper有什么优势？**
 
 **答**：
+
 1. **类型安全**：使用方法引用，编译期检查
 2. **避免硬编码**：不需要写字段名字符串
 3. **重构友好**：字段重命名时自动更新
@@ -348,6 +352,7 @@ IPage<User> result = userMapper.selectPage(page, wrapper);
 **问题 6:MyBatis如何实现批量插入？**
 
 **答**：
+
 ```xml
 <!-- XML 方式 -->
 <insert id="batchInsert">
@@ -368,6 +373,7 @@ userService.saveBatch(userList, 1000);  // 每批1000条
 **问题 7:MyBatis的动态 SQL 标签有哪些？**
 
 **答**：
+
 - `<if>`：条件判断
 - `<choose>/<when>/<otherwise>`：多选一
 - `<where>`：智能 WHERE（自动去除 AND/OR）
@@ -382,6 +388,7 @@ userService.saveBatch(userList, 1000);  // 每批1000条
 
 **答**：
 MyBatis 使用 JDK 动态代理：
+
 1. 扫描 Mapper 接口
 2. 为每个接口创建 MapperProxy 代理对象
 3. 调用方法时，MapperProxy 拦截
@@ -393,6 +400,7 @@ MyBatis 使用 JDK 动态代理：
 **问题 9:MyBatis-Plus的乐观锁是如何实现的？**
 
 **答**：
+
 1. 实体类字段加 `@Version` 注解
 2. 配置乐观锁插件 `OptimisticLockerInnerInterceptor`
 3. 更新时自动带上版本条件：
@@ -407,6 +415,7 @@ MyBatis 使用 JDK 动态代理：
 **问题 10:MyBatis的延迟加载是怎么实现的？**
 
 **答**：
+
 1. 配置 `lazyLoadingEnabled=true`
 2. 查询时不立即执行关联查询
 3. 访问关联属性时才执行
@@ -416,6 +425,9 @@ MyBatis 使用 JDK 动态代理：
 
 ## 相关代码示例
 
-- [MyBatisDynamicSqlDemo.java](../../interview-microservices-parent/interview-service/src/main/java/cn/itzixiao/interview/mybatis/MyBatisDynamicSqlDemo.java) - 动态 SQL 示例
-- [MyBatisPlusDemo.java](../../interview-microservices-parent/interview-service/src/main/java/cn/itzixiao/interview/mybatis/MyBatisPlusDemo.java) - MyBatis-Plus 示例
-- [SqlInjectionPreventionDemo.java](../../interview-microservices-parent/interview-service/src/main/java/cn/itzixiao/interview/mybatis/SqlInjectionPreventionDemo.java) - SQL 注入防护
+- [MyBatisDynamicSqlDemo.java](../../interview-microservices-parent/interview-service/src/main/java/cn/itzixiao/interview/mybatis/MyBatisDynamicSqlDemo.java) -
+  动态 SQL 示例
+- [MyBatisPlusDemo.java](../../interview-microservices-parent/interview-service/src/main/java/cn/itzixiao/interview/mybatis/MyBatisPlusDemo.java) -
+  MyBatis-Plus 示例
+- [SqlInjectionPreventionDemo.java](../../interview-microservices-parent/interview-service/src/main/java/cn/itzixiao/interview/mybatis/SqlInjectionPreventionDemo.java) -
+  SQL 注入防护

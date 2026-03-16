@@ -32,7 +32,7 @@ public class DeviceOperationLogESController {
     @PostMapping("/load")
     public Result<Map<String, Object>> loadAllDataToES() {
         log.info("【ES 接口】接收到加载全部数据请求");
-        
+
         try {
             int count = esService.loadAllDataToES();
             Map<String, Object> result = new HashMap<>();
@@ -51,7 +51,7 @@ public class DeviceOperationLogESController {
     @PostMapping("/index/create")
     public Result<String> createIndex() {
         log.info("【ES 接口】接收到创建索引请求");
-        
+
         try {
             esService.createIndex();
             return Result.success("索引创建成功");
@@ -67,7 +67,7 @@ public class DeviceOperationLogESController {
     @DeleteMapping("/index/delete")
     public Result<String> deleteIndex() {
         log.info("【ES 接口】接收到删除索引请求");
-        
+
         try {
             esService.deleteIndex();
             return Result.success("索引删除成功");
@@ -83,7 +83,7 @@ public class DeviceOperationLogESController {
     @GetMapping("/stats")
     public Result<Map<String, Object>> getIndexStats() {
         log.info("【ES 接口】接收到获取统计信息请求");
-        
+
         try {
             Map<String, Object> stats = esService.getIndexStats();
             return Result.success(stats);
@@ -102,7 +102,7 @@ public class DeviceOperationLogESController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         log.info("【ES 接口】搜索设备编号：{}, 页码：{}, 大小：{}", deviceCode, page, size);
-        
+
         try {
             Pageable pageable = PageRequest.of(page, size);
             Page<DeviceOperationLogES> result = esService.findByDeviceCode(deviceCode, pageable);
@@ -122,7 +122,7 @@ public class DeviceOperationLogESController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         log.info("【ES 接口】搜索操作类型：{}, 页码：{}, 大小：{}", operationType, page, size);
-        
+
         try {
             Pageable pageable = PageRequest.of(page, size);
             Page<DeviceOperationLogES> result = esService.findByOperationType(operationType, pageable);
@@ -142,7 +142,7 @@ public class DeviceOperationLogESController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         log.info("【ES 接口】搜索操作人：{}, 页码：{}, 大小：{}", operator, page, size);
-        
+
         try {
             Pageable pageable = PageRequest.of(page, size);
             Page<DeviceOperationLogES> result = esService.findByOperator(operator, pageable);
@@ -162,7 +162,7 @@ public class DeviceOperationLogESController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         log.info("【ES 接口】全文检索设备名称：{}, 页码：{}, 大小：{}", deviceName, page, size);
-        
+
         try {
             Pageable pageable = PageRequest.of(page, size);
             Page<DeviceOperationLogES> result = esService.searchByDeviceName(deviceName, pageable);
@@ -182,9 +182,9 @@ public class DeviceOperationLogESController {
             @RequestParam Integer operationType,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-        log.info("【ES 接口】组合查询 - 设备名称：{}, 操作类型：{}, 页码：{}, 大小：{}", 
+        log.info("【ES 接口】组合查询 - 设备名称：{}, 操作类型：{}, 页码：{}, 大小：{}",
                 deviceName, operationType, page, size);
-        
+
         try {
             Pageable pageable = PageRequest.of(page, size);
             Page<DeviceOperationLogES> result = esService.searchByDeviceNameAndOperationType(

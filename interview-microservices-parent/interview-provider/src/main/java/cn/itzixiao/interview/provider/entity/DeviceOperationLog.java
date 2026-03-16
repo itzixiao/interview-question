@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 
 /**
  * 设备运行日志实体类
- * 
+ * <p>
  * 用于 Excel 导出测试
  */
 @Data

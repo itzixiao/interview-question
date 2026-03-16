@@ -18,7 +18,7 @@ import java.util.List;
 
 /**
  * MyBatis-Plus 快速 CRUD 详解
- *
+ * <p>
  * MyBatis-Plus 是 MyBatis 的增强工具，提供了：
  * ┌─────────────────────────────────────────────────────────────┐
  * │  1. 通用 CRUD：BaseMapper 提供基础增删改查                    │
@@ -35,7 +35,7 @@ public class MyBatisPlusDemo {
 
     /**
      * 1. 实体类定义
-     *
+     * <p>
      * 常用注解：
      * - @TableName：指定表名
      * - @TableId：主键字段
@@ -106,29 +106,82 @@ public class MyBatisPlusDemo {
         private LocalDateTime updateTime;
 
         // Getters and Setters
-        public Long getId() { return id; }
-        public void setId(Long id) { this.id = id; }
-        public String getUsername() { return username; }
-        public void setUsername(String username) { this.username = username; }
-        public String getEmail() { return email; }
-        public void setEmail(String email) { this.email = email; }
-        public Integer getAge() { return age; }
-        public void setAge(Integer age) { this.age = age; }
-        public Integer getStatus() { return status; }
-        public void setStatus(Integer status) { this.status = status; }
-        public Integer getVersion() { return version; }
-        public void setVersion(Integer version) { this.version = version; }
-        public Integer getDeleted() { return deleted; }
-        public void setDeleted(Integer deleted) { this.deleted = deleted; }
-        public LocalDateTime getCreateTime() { return createTime; }
-        public void setCreateTime(LocalDateTime createTime) { this.createTime = createTime; }
-        public LocalDateTime getUpdateTime() { return updateTime; }
-        public void setUpdateTime(LocalDateTime updateTime) { this.updateTime = updateTime; }
+        public Long getId() {
+            return id;
+        }
+
+        public void setId(Long id) {
+            this.id = id;
+        }
+
+        public String getUsername() {
+            return username;
+        }
+
+        public void setUsername(String username) {
+            this.username = username;
+        }
+
+        public String getEmail() {
+            return email;
+        }
+
+        public void setEmail(String email) {
+            this.email = email;
+        }
+
+        public Integer getAge() {
+            return age;
+        }
+
+        public void setAge(Integer age) {
+            this.age = age;
+        }
+
+        public Integer getStatus() {
+            return status;
+        }
+
+        public void setStatus(Integer status) {
+            this.status = status;
+        }
+
+        public Integer getVersion() {
+            return version;
+        }
+
+        public void setVersion(Integer version) {
+            this.version = version;
+        }
+
+        public Integer getDeleted() {
+            return deleted;
+        }
+
+        public void setDeleted(Integer deleted) {
+            this.deleted = deleted;
+        }
+
+        public LocalDateTime getCreateTime() {
+            return createTime;
+        }
+
+        public void setCreateTime(LocalDateTime createTime) {
+            this.createTime = createTime;
+        }
+
+        public LocalDateTime getUpdateTime() {
+            return updateTime;
+        }
+
+        public void setUpdateTime(LocalDateTime updateTime) {
+            this.updateTime = updateTime;
+        }
     }
 
     /**
      * 2. Mapper 接口
-     *
+     * <p>
      * 继承 BaseMapper<T> 即可获得通用 CRUD 方法
      */
     public interface UserMapper extends BaseMapper<User> {
@@ -139,7 +192,7 @@ public class MyBatisPlusDemo {
 
     /**
      * 3. Service 接口
-     *
+     * <p>
      * 继承 IService<T> 获得更丰富的 Service 层方法
      */
     public interface UserService extends IService<User> {
@@ -157,7 +210,7 @@ public class MyBatisPlusDemo {
         public boolean updateStatus(Long userId, Integer status) {
             LambdaUpdateWrapper<User> wrapper = new LambdaUpdateWrapper<>();
             wrapper.eq(User::getId, userId)
-                   .set(User::getStatus, status);
+                    .set(User::getStatus, status);
             return update(wrapper);
         }
     }
@@ -171,42 +224,42 @@ public class MyBatisPlusDemo {
         // 5.1 QueryWrapper - 传统方式（字段名硬编码）
         QueryWrapper<User> queryWrapper1 = new QueryWrapper<>();
         queryWrapper1.eq("status", 1)
-                     .like("username", "admin")
-                     .ge("age", 18)
-                     .orderByDesc("create_time");
+                .like("username", "admin")
+                .ge("age", 18)
+                .orderByDesc("create_time");
         List<User> list1 = userMapper.selectList(queryWrapper1);
 
         // 5.2 LambdaQueryWrapper - Lambda 方式（类型安全，推荐）
         LambdaQueryWrapper<User> lambdaQuery = new LambdaQueryWrapper<>();
         lambdaQuery.eq(User::getStatus, 1)
-                   .like(User::getUsername, "admin")
-                   .ge(User::getAge, 18)
-                   .orderByDesc(User::getCreateTime);
+                .like(User::getUsername, "admin")
+                .ge(User::getAge, 18)
+                .orderByDesc(User::getCreateTime);
         List<User> list2 = userMapper.selectList(lambdaQuery);
 
         // 5.3 复杂条件组合
         LambdaQueryWrapper<User> complexQuery = new LambdaQueryWrapper<>();
         complexQuery.eq(User::getStatus, 1)
-                    .and(wrapper -> wrapper
+                .and(wrapper -> wrapper
                         .like(User::getUsername, "admin")
                         .or()
                         .like(User::getEmail, "@gmail.com"))
-                    .between(User::getAge, 18, 60)
-                    .isNotNull(User::getEmail);
+                .between(User::getAge, 18, 60)
+                .isNotNull(User::getEmail);
         List<User> list3 = userMapper.selectList(complexQuery);
 
         // 5.4 UpdateWrapper - 更新条件
         UpdateWrapper<User> updateWrapper = new UpdateWrapper<>();
         updateWrapper.eq("id", 1L)
-                     .set("status", 0)
-                     .set("update_time", LocalDateTime.now());
+                .set("status", 0)
+                .set("update_time", LocalDateTime.now());
         userMapper.update(null, updateWrapper);
 
         // 5.5 LambdaUpdateWrapper - Lambda 更新（推荐）
         LambdaUpdateWrapper<User> lambdaUpdate = new LambdaUpdateWrapper<>();
         lambdaUpdate.eq(User::getId, 1L)
-                    .set(User::getStatus, 0)
-                    .set(User::getUpdateTime, LocalDateTime.now());
+                .set(User::getStatus, 0)
+                .set(User::getUpdateTime, LocalDateTime.now());
         userMapper.update(null, lambdaUpdate);
     }
 
@@ -251,8 +304,8 @@ public class MyBatisPlusDemo {
 
         // 7.2 批量新增
         List<User> userList = Arrays.asList(
-            createUser("lisi", "lisi@example.com", 30),
-            createUser("wangwu", "wangwu@example.com", 28)
+                createUser("lisi", "lisi@example.com", 30),
+                createUser("wangwu", "wangwu@example.com", 28)
         );
         boolean batchSaveResult = userService.saveBatch(userList);
         System.out.println("批量保存结果: " + batchSaveResult);
@@ -270,7 +323,7 @@ public class MyBatisPlusDemo {
         // 7.5 条件查询（查列表）
         LambdaQueryWrapper<User> listWrapper = new LambdaQueryWrapper<>();
         listWrapper.eq(User::getStatus, 1)
-                   .orderByDesc(User::getCreateTime);
+                .orderByDesc(User::getCreateTime);
         List<User> list = userService.list(listWrapper);
         System.out.println("条件查询列表: " + list.size() + " 条");
 
@@ -288,7 +341,7 @@ public class MyBatisPlusDemo {
         // 7.8 条件更新
         LambdaUpdateWrapper<User> updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.eq(User::getStatus, 0)
-                     .set(User::getStatus, 1);
+                .set(User::getStatus, 1);
         boolean updateByWrapper = userService.update(updateWrapper);
         System.out.println("条件更新结果: " + updateByWrapper);
 

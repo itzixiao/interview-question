@@ -6,29 +6,29 @@ import java.io.*;
  * =====================================================================================
  * 原型模式（Prototype Pattern）
  * =====================================================================================
- * 
+ * <p>
  * 一、定义
  * -------------------------------------------------------------------------------------
  * 用原型实例指定创建对象的种类，通过拷贝这些原型创建新的对象。
- * 
+ * <p>
  * 二、核心思想
  * -------------------------------------------------------------------------------------
  * 1. 原型接口（Prototype）：声明克隆方法
  * 2. 具体原型（Concrete Prototype）：实现克隆方法
  * 3. 客户端（Client）：通过克隆原型创建新对象
- * 
+ * <p>
  * 三、两种克隆方式
  * -------------------------------------------------------------------------------------
  * 1. 浅拷贝（Shallow Clone）
- *    - 创建新对象，复制基本类型属性
- *    - 引用类型属性只复制引用，不复制对象本身
- *    - 实现 Cloneable 接口，重写 clone() 方法
- * 
+ * - 创建新对象，复制基本类型属性
+ * - 引用类型属性只复制引用，不复制对象本身
+ * - 实现 Cloneable 接口，重写 clone() 方法
+ * <p>
  * 2. 深拷贝（Deep Clone）
- *    - 创建新对象，复制所有属性
- *    - 引用类型属性也创建新对象
- *    - 实现方式：序列化/反序列化、手动复制
- * 
+ * - 创建新对象，复制所有属性
+ * - 引用类型属性也创建新对象
+ * - 实现方式：序列化/反序列化、手动复制
+ * <p>
  * 四、浅拷贝 vs 深拷贝
  * -------------------------------------------------------------------------------------
  * ┌─────────────────────────────────────────────────────────────────────┐
@@ -37,9 +37,9 @@ import java.io.*;
  * │  浅拷贝     │  复制值    │  复制引用         │  复制引用（共享）     │
  * │  深拷贝     │  复制值    │  复制引用         │  创建新对象（独立）   │
  * └─────────────────────────────────────────────────────────────────────┘
- * 
+ * <p>
  * 注意：String 类型虽然是引用类型，但由于不可变性，浅拷贝和深拷贝效果相同
- * 
+ * <p>
  * 五、应用场景
  * -------------------------------------------------------------------------------------
  * - 创建成本高的对象（需要查询数据库、网络请求等）
@@ -83,10 +83,10 @@ public class PrototypeDemo {
         // 3. 引用对比
         System.out.println("\n【3. 对象引用对比】\n");
         System.out.println("原始对象 == 浅拷贝: " + (original == shallowCopy));
-        System.out.println("原始对象.Address == 浅拷贝.Address: " + 
+        System.out.println("原始对象.Address == 浅拷贝.Address: " +
                 (original.getAddress() == shallowCopy.getAddress()));
         System.out.println("原始对象 == 深拷贝: " + (deepOriginal == deepCopy));
-        System.out.println("原始对象.Address == 深拷贝.Address: " + 
+        System.out.println("原始对象.Address == 深拷贝.Address: " +
                 (deepOriginal.getAddress() == deepCopy.getAddress()));
 
         System.out.println("\n【模式分析】：");
@@ -119,7 +119,7 @@ class Person implements Cloneable, Serializable {
 
     /**
      * 浅拷贝
-     * 
+     * <p>
      * 实现步骤：
      * 1. 实现 Cloneable 接口
      * 2. 重写 Object.clone() 方法
@@ -135,12 +135,12 @@ class Person implements Cloneable, Serializable {
 
     /**
      * 深拷贝 - 序列化方式
-     * 
+     * <p>
      * 实现步骤：
      * 1. 实现 Serializable 接口
      * 2. 将对象序列化到字节流
      * 3. 从字节流反序列化出新对象
-     * 
+     * <p>
      * 注意：所有引用类型也需要实现 Serializable
      */
     public Person deepClone() {
@@ -169,7 +169,7 @@ class Person implements Cloneable, Serializable {
 
     @Override
     public String toString() {
-        return String.format("Person{name='%s', age=%d, address=%s}", 
+        return String.format("Person{name='%s', age=%d, address=%s}",
                 name, age, address);
     }
 }

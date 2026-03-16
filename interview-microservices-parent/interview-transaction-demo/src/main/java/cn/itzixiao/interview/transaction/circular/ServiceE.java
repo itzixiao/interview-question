@@ -7,16 +7,16 @@ import javax.annotation.PostConstruct;
 
 /**
  * Service E - 演示 @Autowired + @PostConstruct 解决循环依赖
- * 
+ *
  * @author itzixiao
  * @since 2026-03-13
  */
 @Component
 public class ServiceE {
-    
+
     @Autowired
     private ServiceF serviceF;
-    
+
     /**
      * PostConstruct 方法
      * Spring 先创建 ServiceE 实例，然后创建 ServiceF，最后执行 init 方法
@@ -27,7 +27,7 @@ public class ServiceE {
         System.out.println("===== ServiceE @PostConstruct 初始化完成 =====");
         serviceF.methodF();
     }
-    
+
     /**
      * E 执行业务逻辑
      */
@@ -35,7 +35,7 @@ public class ServiceE {
         System.out.println("[ServiceE] 执行业务逻辑");
         serviceF.doSomethingElse();
     }
-    
+
     /**
      * E 的其他方法
      */

@@ -9,7 +9,7 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 
 /**
  * 路由配置 - 函数式端点
- *
+ * <p>
  * 用于配置降级路由等功能
  */
 @Configuration

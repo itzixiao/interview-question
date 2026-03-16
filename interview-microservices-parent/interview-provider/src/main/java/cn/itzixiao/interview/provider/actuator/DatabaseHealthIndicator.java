@@ -6,10 +6,10 @@ import org.springframework.stereotype.Component;
 
 /**
  * 自定义数据库健康检查器
- * 
+ * <p>
  * 作用：监控数据库连接状态
  * 访问端点：/actuator/health
- * 
+ * <p>
  * 使用场景：
  * 1. 数据库连接池健康检查
  * 2. 第三方服务可用性检查
@@ -17,12 +17,12 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class DatabaseHealthIndicator implements HealthIndicator {
-    
+
     @Override
     public Health health() {
         // 模拟数据库连接检查
         boolean databaseIsUp = checkDatabaseConnection();
-        
+
         if (databaseIsUp) {
             // 健康状态
             return Health.up()
@@ -39,7 +39,7 @@ public class DatabaseHealthIndicator implements HealthIndicator {
                     .build();
         }
     }
-    
+
     /**
      * 模拟数据库连接检查
      * 实际项目中应该执行真实的数据库查询

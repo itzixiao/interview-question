@@ -1,14 +1,11 @@
 package cn.itzixiao.interview.redis.advanced;
 
-import java.util.*;
-import java.util.concurrent.*;
-
 /**
  * Redis Sentinel（哨兵）详解
- *
+ * <p>
  * Sentinel 是 Redis 的高可用解决方案，用于监控 Redis 主从架构，
  * 自动故障转移，并提供配置发现功能。
- *
+ * <p>
  * ┌─────────────────────────────────────────────────────────────────────┐
  * │                        Redis Sentinel 架构                          │
  * │                                                                     │

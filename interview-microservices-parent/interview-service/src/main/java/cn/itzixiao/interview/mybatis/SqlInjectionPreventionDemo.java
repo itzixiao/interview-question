@@ -1,16 +1,18 @@
 package cn.itzixiao.interview.mybatis;
 
-import org.apache.ibatis.annotations.*;
+import org.apache.ibatis.annotations.Options;
+import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.mapping.StatementType;
 
 import java.util.List;
 
 /**
  * SQL 注入防护详解
- *
+ * <p>
  * SQL 注入是最常见的 Web 安全漏洞之一，攻击者通过构造特殊的输入，
  * 改变原本 SQL 语句的结构，从而执行非授权的操作。
- *
+ * <p>
  * 危害：
  * ┌─────────────────────────────────────────────────────────────┐
  * │  1. 数据泄露：获取敏感信息（用户密码、银行卡号等）            │
@@ -25,14 +27,14 @@ public class SqlInjectionPreventionDemo {
      * ============================================
      * 1. 安全的参数绑定（#{}）
      * ============================================
-     *
+     * <p>
      * #{} 使用预编译语句，参数会被当作字符串处理，自动转义特殊字符
      */
     public interface SafeUserMapper {
 
         /**
          * 安全查询 - 使用 #{}
-         *
+         * <p>
          * 输入：username = "admin' OR '1'='1"
          * 实际 SQL：SELECT * FROM user WHERE username = 'admin'' OR ''1''=''1' AND status = 1
          * 结果：查询不到数据（参数被转义）
@@ -43,7 +45,7 @@ public class SqlInjectionPreventionDemo {
 
         /**
          * 安全模糊查询
-         *
+         * <p>
          * 注意：CONCAT 中使用 #{}
          */
         @Select("SELECT * FROM user WHERE username LIKE CONCAT('%', #{keyword}, '%')")
@@ -54,14 +56,14 @@ public class SqlInjectionPreventionDemo {
      * ============================================
      * 2. 危险的字符串替换（${}）
      * ============================================
-     *
+     * <p>
      * ${} 直接进行字符串替换，不做任何转义，存在 SQL 注入风险
      */
     public interface DangerousUserMapper {
 
         /**
          * 危险查询 - 使用 ${}
-         *
+         * <p>
          * 输入：username = "admin' OR '1'='1"
          * 实际 SQL：SELECT * FROM user WHERE username = 'admin' OR '1'='1'
          * 结果：查询到所有数据（SQL 注入成功！）
@@ -71,7 +73,7 @@ public class SqlInjectionPreventionDemo {
 
         /**
          * 危险排序 - 使用 ${}
-         *
+         * <p>
          * 输入：orderBy = "id; DROP TABLE user; --"
          * 实际 SQL：SELECT * FROM user ORDER BY id; DROP TABLE user; --
          * 结果：用户表被删除！
@@ -81,7 +83,7 @@ public class SqlInjectionPreventionDemo {
 
         /**
          * 危险表名 - 使用 ${}
-         *
+         * <p>
          * 输入：tableName = "user; DELETE FROM user; --"
          * 实际 SQL：SELECT * FROM user; DELETE FROM user; -- WHERE id = 1
          * 结果：所有用户数据被删除！
@@ -95,7 +97,7 @@ public class SqlInjectionPreventionDemo {
      * ============================================
      * 3. 必须使用 ${} 时的防护方案
      * ============================================
-     *
+     * <p>
      * 某些场景必须使用 ${}，如动态表名、列名、排序字段
      * 此时需要使用白名单机制进行校验
      */
@@ -165,13 +167,13 @@ public class SqlInjectionPreventionDemo {
 
         /**
          * 使用存储过程查询
-         *
+         * <p>
          * 存储过程内部使用参数化查询，可以防止 SQL 注入
          */
         @Select("{CALL sp_get_user_by_username(#{username, mode=IN})}")
         @Options(statementType = StatementType.CALLABLE)
         User findByUsernameWithProcedure(@Param("username") String username);
-        
+
         // 引入 StatementType 枚举
         // StatementType.CALLABLE 表示调用存储过程
     }
@@ -186,14 +188,37 @@ public class SqlInjectionPreventionDemo {
         private Integer status;
 
         // Getters and Setters
-        public Long getId() { return id; }
-        public void setId(Long id) { this.id = id; }
-        public String getUsername() { return username; }
-        public void setUsername(String username) { this.username = username; }
-        public String getEmail() { return email; }
-        public void setEmail(String email) { this.email = email; }
-        public Integer getStatus() { return status; }
-        public void setStatus(Integer status) { this.status = status; }
+        public Long getId() {
+            return id;
+        }
+
+        public void setId(Long id) {
+            this.id = id;
+        }
+
+        public String getUsername() {
+            return username;
+        }
+
+        public void setUsername(String username) {
+            this.username = username;
+        }
+
+        public String getEmail() {
+            return email;
+        }
+
+        public void setEmail(String email) {
+            this.email = email;
+        }
+
+        public Integer getStatus() {
+            return status;
+        }
+
+        public void setStatus(Integer status) {
+            this.status = status;
+        }
     }
 
     /**

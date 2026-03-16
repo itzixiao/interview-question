@@ -156,11 +156,11 @@ deploy-prod-job:
     - echo "========== 部署到生产环境 =========="
     # 使用 Helm 升级发布
     - helm upgrade --install interview-containerization ./src/main/resources/helm \
-        --namespace production \
-        --set image.tag=${CI_COMMIT_SHA} \
-        --set replicaCount=5 \
-        --set autoscaling.enabled=true \
-        --values ./src/main/resources/helm/values-prod.yaml
+      --namespace production \
+      --set image.tag=${CI_COMMIT_SHA} \
+      --set replicaCount=5 \
+      --set autoscaling.enabled=true \
+      --values ./src/main/resources/helm/values-prod.yaml
     - echo "========== 等待部署就绪 =========="
     - kubectl rollout status deployment/interview-app-deployment -n production
     - echo "========== 部署完成 =========="
@@ -183,9 +183,9 @@ sonarqube-check:
   image: maven:3.8-openjdk-8
   script:
     - mvn clean verify sonar:sonar \
-        -Dsonar.projectKey=interview-containerization \
-        -Dsonar.host.url=${SONAR_HOST_URL} \
-        -Dsonar.login=${SONAR_TOKEN}
+      -Dsonar.projectKey=interview-containerization \
+      -Dsonar.host.url=${SONAR_HOST_URL} \
+      -Dsonar.login=${SONAR_TOKEN}
   only:
     - branches
   tags:

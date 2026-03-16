@@ -4,18 +4,18 @@ package cn.itzixiao.interview.designpattern.behavioral.chainofresponsibility;
  * =====================================================================================
  * 责任链模式（Chain of Responsibility Pattern）
  * =====================================================================================
- * 
+ * <p>
  * 一、定义
  * -------------------------------------------------------------------------------------
  * 使多个对象都有机会处理请求，从而避免请求的发送者和接收者之间的耦合关系。
  * 将这些对象连成一条链，并沿着这条链传递该请求，直到有一个对象处理它为止。
- * 
+ * <p>
  * 二、核心思想
  * -------------------------------------------------------------------------------------
  * 1. 抽象处理者（Handler）：定义处理请求的接口，持有后继者引用
  * 2. 具体处理者（Concrete Handler）：处理请求，或转发给后继者
  * 3. 客户端（Client）：创建处理链，发起请求
- * 
+ * <p>
  * 三、责任链结构
  * -------------------------------------------------------------------------------------
  * ┌─────────────────────────────────────────────────────────────────────┐
@@ -32,12 +32,12 @@ package cn.itzixiao.interview.designpattern.behavioral.chainofresponsibility;
  * │      ├── 如果能处理 → 处理并返回                                    │
  * │      └── 如果不能处理 → 传递给后继者                                │
  * └─────────────────────────────────────────────────────────────────────┘
- * 
+ * <p>
  * 四、纯责任链 vs 不纯责任链
  * -------------------------------------------------------------------------------------
  * 1. 纯责任链：每个处理者要么处理，要么转发，不能既处理又转发
  * 2. 不纯责任链：处理者可以处理后继续转发（如 Servlet Filter）
- * 
+ * <p>
  * 五、应用场景
  * -------------------------------------------------------------------------------------
  * - Servlet Filter：过滤器链
@@ -150,7 +150,7 @@ class Director extends Approver {
     @Override
     public void processRequest(PurchaseRequest request) {
         if (request.getAmount() <= 10000) {
-            System.out.println("    [经理 " + name + "] 审批通过: " + 
+            System.out.println("    [经理 " + name + "] 审批通过: " +
                     request.getDescription() + ", 金额: ¥" + request.getAmount());
         } else if (next != null) {
             System.out.println("    [经理 " + name + "] 无权审批，转交上级...");
@@ -172,7 +172,7 @@ class VicePresident extends Approver {
     @Override
     public void processRequest(PurchaseRequest request) {
         if (request.getAmount() <= 100000) {
-            System.out.println("    [副总 " + name + "] 审批通过: " + 
+            System.out.println("    [副总 " + name + "] 审批通过: " +
                     request.getDescription() + ", 金额: ¥" + request.getAmount());
         } else if (next != null) {
             System.out.println("    [副总 " + name + "] 无权审批，转交上级...");
@@ -194,7 +194,7 @@ class President extends Approver {
     @Override
     public void processRequest(PurchaseRequest request) {
         if (request.getAmount() <= 1000000) {
-            System.out.println("    [总裁 " + name + "] 审批通过: " + 
+            System.out.println("    [总裁 " + name + "] 审批通过: " +
                     request.getDescription() + ", 金额: ¥" + request.getAmount());
         } else if (next != null) {
             System.out.println("    [总裁 " + name + "] 无权审批，转交董事会...");
@@ -215,7 +215,7 @@ class Board extends Approver {
 
     @Override
     public void processRequest(PurchaseRequest request) {
-        System.out.println("    [董事会] 召开会议审批通过: " + 
+        System.out.println("    [董事会] 召开会议审批通过: " +
                 request.getDescription() + ", 金额: ¥" + request.getAmount());
     }
 }

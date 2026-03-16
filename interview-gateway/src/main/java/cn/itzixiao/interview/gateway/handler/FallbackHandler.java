@@ -14,7 +14,7 @@ import java.util.Map;
 
 /**
  * 熔断降级处理器
- *
+ * <p>
  * ┌─────────────────────────────────────────────────────────────────────────────┐
  * │                        熔断器工作原理                                        │
  * │                                                                             │
@@ -40,47 +40,47 @@ import java.util.Map;
  * │  HALF_OPEN：半开状态，放行部分请求探测下游服务是否恢复                       │
  * │                                                                             │
  * └─────────────────────────────────────────────────────────────────────────────┘
- *
+ * <p>
  * 配置示例（application.yml）：
- *
+ * <p>
  * spring:
- *   cloud:
- *     gateway:
- *       routes:
- *         - id: circuit-breaker-route
- *           uri: lb://some-service
- *           predicates:
- *             - Path=/api/cb/**
- *           filters:
- *             - name: CircuitBreaker
- *               args:
- *                 name: myCircuitBreaker
- *                 fallbackUri: forward:/fallback
- *
+ * cloud:
+ * gateway:
+ * routes:
+ * - id: circuit-breaker-route
+ * uri: lb://some-service
+ * predicates:
+ * - Path=/api/cb/**
+ * filters:
+ * - name: CircuitBreaker
+ * args:
+ * name: myCircuitBreaker
+ * fallbackUri: forward:/fallback
+ * <p>
  * 需要添加依赖：
  * <dependency>
- *     <groupId>org.springframework.cloud</groupId>
- *     <artifactId>spring-cloud-starter-circuitbreaker-reactor-resilience4j</artifactId>
+ * <groupId>org.springframework.cloud</groupId>
+ * <artifactId>spring-cloud-starter-circuitbreaker-reactor-resilience4j</artifactId>
  * </dependency>
- *
+ * <p>
  * Resilience4j 配置（application.yml）：
- *
+ * <p>
  * resilience4j:
- *   circuitbreaker:
- *     configs:
- *       default:
- *         slidingWindowSize: 10                  # 滑动窗口大小
- *         minimumNumberOfCalls: 5                # 最小调用次数
- *         failureRateThreshold: 50               # 失败率阈值（%）
- *         waitDurationInOpenState: 10000         # 熔断等待时间（ms）
- *         permittedNumberOfCallsInHalfOpenState: 3  # 半开状态允许的调用次数
- *     instances:
- *       myCircuitBreaker:
- *         baseConfig: default
- *   timelimiter:
- *     configs:
- *       default:
- *         timeoutDuration: 3s                    # 超时时间
+ * circuitbreaker:
+ * configs:
+ * default:
+ * slidingWindowSize: 10                  # 滑动窗口大小
+ * minimumNumberOfCalls: 5                # 最小调用次数
+ * failureRateThreshold: 50               # 失败率阈值（%）
+ * waitDurationInOpenState: 10000         # 熔断等待时间（ms）
+ * permittedNumberOfCallsInHalfOpenState: 3  # 半开状态允许的调用次数
+ * instances:
+ * myCircuitBreaker:
+ * baseConfig: default
+ * timelimiter:
+ * configs:
+ * default:
+ * timeoutDuration: 3s                    # 超时时间
  */
 @Component
 public class FallbackHandler implements HandlerFunction<ServerResponse> {

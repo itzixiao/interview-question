@@ -3,13 +3,12 @@ package cn.itzixiao.interview.redis.advanced;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
 /**
  * Redis 限流实现详解
- *
+ * <p>
  * 限流算法对比：
  * ┌─────────────────────────────────────────────────────────────┐
  * │  1. 计数器算法 (Counter)                                     │
@@ -35,7 +34,7 @@ public class RedisRateLimiterDemo {
 
     /**
      * 1. 固定窗口计数器限流
-     *
+     * <p>
      * 问题：临界突发问题
      * 时间: |-------窗口1-------|-------窗口2-------|
      * 请求:              100个              100个
@@ -57,7 +56,7 @@ public class RedisRateLimiterDemo {
 
     /**
      * 2. 滑动窗口限流（基于 Redis ZSet）
-     *
+     * <p>
      * 精确统计时间窗口内的请求数
      */
     public boolean slidingWindowRateLimit(String key, int limit, int windowSeconds) {
@@ -96,7 +95,7 @@ public class RedisRateLimiterDemo {
 
     /**
      * 3. 令牌桶限流（最常用）
-     *
+     * <p>
      * 原理：
      * - 桶容量固定，以固定速率产生令牌
      * - 请求需要获取令牌才能执行
@@ -157,7 +156,7 @@ public class RedisRateLimiterDemo {
 
     /**
      * 4. 漏桶限流
-     *
+     * <p>
      * 原理：
      * - 请求先进入桶（队列）
      * - 桶以固定速率漏出（处理）
@@ -274,8 +273,11 @@ public class RedisRateLimiterDemo {
      */
     public @interface RateLimit {
         String key() default "";
+
         int limit() default 100;
+
         int window() default 60;
+
         String message() default "请求过于频繁，请稍后再试";
     }
 

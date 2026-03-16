@@ -9,7 +9,7 @@ import java.util.*;
 
 /**
  * Elasticsearch 高级功能控制器
- * 
+ *
  * @author itzixiao
  * @date 2026-03-15
  */
@@ -32,30 +32,30 @@ public class ElasticsearchAdvancedController {
     @GetMapping("/inverted-index-demo")
     public Result<Map<String, Object>> invertedIndexDemo() {
         log.info("【倒排索引】演示请求");
-        
+
         Map<String, Object> demo = new HashMap<>();
         demo.put("title", "倒排索引原理演示");
-        
+
         // 示例文档
         List<Map<String, String>> documents = Arrays.asList(
                 createDoc("1", "Elasticsearch 是一个分布式搜索引擎"),
                 createDoc("2", "Elasticsearch 支持全文检索"),
                 createDoc("3", "Hadoop 是大数据处理框架")
         );
-        
+
         demo.put("documents", documents);
-        
+
         // 构建倒排索引
         Map<String, List<String>> invertedIndex = buildInvertedIndex(documents);
         demo.put("inverted_index", invertedIndex);
-        
+
         demo.put("explanation", Arrays.asList(
                 "1. 倒排索引 = 词典（Term Dictionary）+ 倒排表（Posting List）",
                 "2. 词典：按字母顺序存储所有词项",
                 "3. 倒排表：记录包含该词项的文档 ID 列表",
                 "4. 优势：快速根据内容查找文档，适合全文检索"
         ));
-        
+
         return Result.success(demo);
     }
 
@@ -69,7 +69,7 @@ public class ElasticsearchAdvancedController {
             @RequestParam(defaultValue = "ik_max_word") String analyzer,
             @RequestParam(defaultValue = "Elasticsearch 分布式搜索引擎") String text) {
         log.info("【分词测试】analyzer: {}, text: {}", analyzer, text);
-        
+
         try {
             Map<String, Object> result = advancedService.analyzeText(analyzer, text);
             return Result.success(result);
@@ -89,7 +89,7 @@ public class ElasticsearchAdvancedController {
             @RequestParam(defaultValue = "device_operation_log") String index,
             @RequestBody Map<String, Object> queryParams) {
         log.info("【布尔查询】index: {}, params: {}", index, queryParams);
-        
+
         List<Map<String, Object>> results = advancedService.boolQuerySearch(index, queryParams);
         return Result.success(results);
     }
@@ -103,7 +103,7 @@ public class ElasticsearchAdvancedController {
             @RequestParam String searchText,
             @RequestParam List<String> fields) {
         log.info("【多字段查询】index: {}, searchText: {}, fields: {}", index, searchText, fields);
-        
+
         List<Map<String, Object>> results = advancedService.multiMatchQuery(index, searchText, fields);
         return Result.success(results);
     }
@@ -117,7 +117,7 @@ public class ElasticsearchAdvancedController {
             @RequestParam String searchText,
             @RequestParam(defaultValue = "device_name") String field) {
         log.info("【高亮搜索】index: {}, searchText: {}, field: {}", index, searchText, field);
-        
+
         Map<String, Object> result = advancedService.highlightSearch(index, searchText, field);
         return Result.success(result);
     }
@@ -132,7 +132,7 @@ public class ElasticsearchAdvancedController {
             @RequestParam(defaultValue = "device_operation_log") String index,
             @RequestParam(defaultValue = "operation_type") String fieldName) {
         log.info("【Terms 聚合】index: {}, field: {}", index, fieldName);
-        
+
         Map<String, Object> result = advancedService.termsAggregation(index, fieldName);
         return Result.success(result);
     }
@@ -145,7 +145,7 @@ public class ElasticsearchAdvancedController {
             @RequestParam(defaultValue = "device_operation_log") String index,
             @RequestParam(defaultValue = "operation_time") String dateField) {
         log.info("【日期直方图】index: {}, field: {}", index, dateField);
-        
+
         Map<String, Object> result = advancedService.dateHistogramAggregation(index, dateField);
         return Result.success(result);
     }
@@ -157,11 +157,11 @@ public class ElasticsearchAdvancedController {
     public Result<Map<String, Object>> nestedAggregation(
             @RequestParam(defaultValue = "device_operation_log") String index) {
         log.info("【嵌套聚合】index: {}", index);
-        
+
         Map<String, String> aggregations = new HashMap<>();
         aggregations.put("level_agg", "terms(level)");
         aggregations.put("time_histogram", "date_histogram(@timestamp, day)");
-        
+
         Map<String, Object> result = advancedService.nestedAggregation(index, aggregations);
         return Result.success(result);
     }
@@ -176,7 +176,7 @@ public class ElasticsearchAdvancedController {
             @RequestParam(defaultValue = "test_index") String index,
             @RequestBody List<Map<String, Object>> documents) {
         log.info("【批量写入】index: {}, count: {}", index, documents.size());
-        
+
         Map<String, Object> result = advancedService.bulkWriteOptimization(index, documents);
         return Result.success(result);
     }
@@ -190,7 +190,7 @@ public class ElasticsearchAdvancedController {
             @RequestParam(defaultValue = "status") String filterField,
             @RequestParam(defaultValue = "active") String filterValue) {
         log.info("【查询缓存】index: {}, filter: {}={}", index, filterField, filterValue);
-        
+
         Map<String, Object> result = advancedService.queryCacheOptimization(index, filterField, filterValue);
         return Result.success(result);
     }
@@ -202,7 +202,7 @@ public class ElasticsearchAdvancedController {
     public Result<Map<String, Object>> indexSettingsOptimization(
             @RequestParam(defaultValue = "device_operation_log") String index) {
         log.info("【索引优化】index: {}", index);
-        
+
         Map<String, Object> result = advancedService.indexSettingsOptimization(index);
         return Result.success(result);
     }
@@ -215,7 +215,7 @@ public class ElasticsearchAdvancedController {
     @GetMapping("/cluster/health")
     public Result<Map<String, Object>> getClusterHealth() {
         log.info("【集群管理】获取集群健康状态");
-        
+
         Map<String, Object> result = advancedService.getClusterHealth();
         return Result.success(result);
     }
@@ -226,7 +226,7 @@ public class ElasticsearchAdvancedController {
     @GetMapping("/cluster/nodes")
     public Result<Map<String, Object>> getClusterNodes() {
         log.info("【集群管理】获取节点信息");
-        
+
         Map<String, Object> result = advancedService.getClusterNodes();
         return Result.success(result);
     }
@@ -238,7 +238,7 @@ public class ElasticsearchAdvancedController {
     public Result<Map<String, Object>> getShardDistribution(
             @RequestParam(required = false) String index) {
         log.info("【集群管理】获取分片分布");
-        
+
         Map<String, Object> result = advancedService.getShardDistribution(
                 index != null ? index : "*");
         return Result.success(result);
@@ -252,7 +252,7 @@ public class ElasticsearchAdvancedController {
     @PostMapping("/elk/ingest-log")
     public Result<Map<String, Object>> ingestLogEntry(@RequestBody Map<String, Object> logData) {
         log.info("【ELK 日志】采集日志数据");
-        
+
         Map<String, Object> result = advancedService.ingestLogEntry(logData);
         return Result.success(result);
     }
@@ -265,7 +265,7 @@ public class ElasticsearchAdvancedController {
             @RequestParam(defaultValue = "logs-*") String indexPattern,
             @RequestBody Map<String, Object> queryParams) {
         log.info("【ELK 日志】查询：index={}, params={}", indexPattern, queryParams);
-        
+
         Map<String, Object> result = advancedService.queryLogs(indexPattern, queryParams);
         return Result.success(result);
     }
@@ -281,11 +281,11 @@ public class ElasticsearchAdvancedController {
 
     private Map<String, List<String>> buildInvertedIndex(List<Map<String, String>> documents) {
         Map<String, List<String>> index = new HashMap<>();
-        
+
         for (Map<String, String> doc : documents) {
             String content = doc.get("content");
             String docId = doc.get("id");
-            
+
             // 简单分词（按空格和标点）
             String[] words = content.split("[\\s，。、？！,.!?]+");
             for (String word : words) {
@@ -294,7 +294,7 @@ public class ElasticsearchAdvancedController {
                 }
             }
         }
-        
+
         return index;
     }
 }

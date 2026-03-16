@@ -6,7 +6,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * 线程同步机制详解
- *
+ * <p>
  * 锁的分类：
  * ┌─────────────────────────────────────────────────────────────┐
  * │  悲观锁 vs 乐观锁                                            │

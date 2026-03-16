@@ -22,10 +22,10 @@
 
 **正排索引 vs 倒排索引：**
 
-| 类型 | 结构 | 特点 | 适用场景 |
-|------|------|------|----------|
-| 正排索引 | 文档 ID → 内容 | 适合根据 ID 查内容 | 关系型数据库主键索引 |
-| 倒排索引 | 单词 → 文档 ID 列表 | 适合根据内容找文档 | 搜索引擎全文检索 |
+| 类型   | 结构            | 特点          | 适用场景       |
+|------|---------------|-------------|------------|
+| 正排索引 | 文档 ID → 内容    | 适合根据 ID 查内容 | 关系型数据库主键索引 |
+| 倒排索引 | 单词 → 文档 ID 列表 | 适合根据内容找文档   | 搜索引擎全文检索   |
 
 ### 1.2 倒排索引结构
 
@@ -58,6 +58,7 @@ Hadoop     → [文档 3]
 ### 1.3 FST（Finite State Transducers）
 
 Elasticsearch 使用 **FST（有限状态转换器）** 来压缩存储 Term Dictionary，实现：
+
 - ✅ 极高的空间效率
 - ✅ 快速的查找性能
 - ✅ 支持前缀搜索
@@ -78,23 +79,23 @@ Elasticsearch 使用 **FST（有限状态转换器）** 来压缩存储 Term Dic
 分词器（Analyzer）由三部分组成：
 
 1. **Character Filters（字符过滤器）**
-   - 处理原始文本（如去除 HTML 标签、转换字符）
-   
+    - 处理原始文本（如去除 HTML 标签、转换字符）
+
 2. **Tokenizer（分词器）**
-   - 将文本拆分为词项
-   
+    - 将文本拆分为词项
+
 3. **Token Filters（词项过滤器）**
-   - 对词项进行处理（如转小写、去除停用词、同义词）
+    - 对词项进行处理（如转小写、去除停用词、同义词）
 
 ### 2.2 内置分词器
 
-| 分词器 | 说明 | 适用场景 |
-|--------|------|----------|
-| standard | 默认分词器，按词切分 | 英文 |
-| ik_smart | IK 分词器，最少切分 | 中文粗粒度 |
+| 分词器         | 说明          | 适用场景  |
+|-------------|-------------|-------|
+| standard    | 默认分词器，按词切分  | 英文    |
+| ik_smart    | IK 分词器，最少切分 | 中文粗粒度 |
 | ik_max_word | IK 分词器，最细粒度 | 中文细粒度 |
-| whitespace | 按空格切分 | 特殊格式 |
-| keyword | 不分词 | 精确值 |
+| whitespace  | 按空格切分       | 特殊格式  |
+| keyword     | 不分词         | 精确值   |
 
 ### 2.3 代码示例：测试分词效果
 
@@ -128,12 +129,12 @@ PUT /my_index
 
 ### 3.1 Query Context vs Filter Context
 
-| 特性 | Query Context | Filter Context |
-|------|---------------|----------------|
-| 相关性评分 | ✅ 计算 | ❌ 不计算 |
-| 缓存 | ❌ 不缓存 | ✅ 缓存 |
-| 性能 | 较慢 | 更快 |
-| 适用场景 | 全文检索 | 条件过滤 |
+| 特性    | Query Context | Filter Context |
+|-------|---------------|----------------|
+| 相关性评分 | ✅ 计算          | ❌ 不计算          |
+| 缓存    | ❌ 不缓存         | ✅ 缓存           |
+| 性能    | 较慢            | 更快             |
+| 适用场景  | 全文检索          | 条件过滤           |
 
 ### 3.2 常用查询类型
 
@@ -237,11 +238,11 @@ GET /logs/_search
 
 ### 4.1 聚合类型
 
-| 类型 | 说明 | 常见操作 |
-|------|------|----------|
-| Bucket Aggregation | 分组聚合 | term, range, date_histogram |
-| Metric Aggregation | 指标聚合 | avg, sum, min, max, cardinality |
-| Pipeline Aggregation | 管道聚合 | derivative, moving_avg |
+| 类型                   | 说明   | 常见操作                            |
+|----------------------|------|---------------------------------|
+| Bucket Aggregation   | 分组聚合 | term, range, date_histogram     |
+| Metric Aggregation   | 指标聚合 | avg, sum, min, max, cardinality |
+| Pipeline Aggregation | 管道聚合 | derivative, moving_avg          |
 
 ### 4.2 桶聚合示例
 
@@ -461,6 +462,7 @@ PUT /logs
 ```
 
 **分片大小建议：**
+
 - 单个分片大小：10GB ~ 50GB
 - 分片数量 = 数据总量 / 40GB
 
@@ -521,6 +523,7 @@ GET /_cluster/health?pretty&wait_for_status=yellow&timeout=60s
 ```
 
 **状态说明：**
+
 - 🟢 **green**：所有主分片和副本分片正常
 - 🟡 **yellow**：所有主分片正常，部分副本分片异常
 - 🔴 **red**：有主分片不可用
@@ -748,22 +751,22 @@ Management → Stack Management → Index Patterns
 #### 7.4.2 创建 Dashboard
 
 1. **错误日志趋势图**
-   - Visualization → Create new → Line
-   - 指标：Count
-   - X 轴：@timestamp（日期直方图）
-   - 过滤器：level: ERROR
+    - Visualization → Create new → Line
+    - 指标：Count
+    - X 轴：@timestamp（日期直方图）
+    - 过滤器：level: ERROR
 
 2. **日志级别分布饼图**
-   - Visualization → Pie
-   - 切片：level.keyword
-   - 指标：Count
+    - Visualization → Pie
+    - 切片：level.keyword
+    - 指标：Count
 
 3. **Top 10 错误类来源**
-   - Visualization → Data Table
-   - 行：class.keyword
-   - 指标：Count
-   - 排序：Count 降序
-   - 过滤器：level: ERROR
+    - Visualization → Data Table
+    - 行：class.keyword
+    - 指标：Count
+    - 排序：Count 降序
+    - 过滤器：level: ERROR
 
 ### 7.5 日志查询示例
 
@@ -850,6 +853,7 @@ PUT _watcher/watch/error_rate_alert
 ### 8.1 完整示例：设备操作日志检索系统
 
 参考现有代码：
+
 - Entity: `DeviceOperationLogES.java`
 - Repository: `DeviceOperationLogESRepository.java`
 - Service: `DeviceOperationLogESService.java`
@@ -858,6 +862,7 @@ PUT _watcher/watch/error_rate_alert
 ### 8.2 新增进阶功能
 
 以下高级功能将在后续版本中补充：
+
 - [ ] 自定义评分函数
 - [ ] 地理位置搜索
 - [ ] 自动补全建议

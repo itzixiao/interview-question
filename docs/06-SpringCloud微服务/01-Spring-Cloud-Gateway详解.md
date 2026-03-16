@@ -7,6 +7,7 @@
 API 网关是微服务架构的入口，统一接收所有客户端请求。
 
 **主要功能**：
+
 - 路由转发：根据规则将请求转发到不同的服务
 - 认证鉴权：统一的身份验证和权限控制
 - 限流熔断：保护后端服务，防止过载
@@ -15,14 +16,14 @@ API 网关是微服务架构的入口，统一接收所有客户端请求。
 
 ### 为什么选择 Spring Cloud Gateway？
 
-| 特性 | Zuul 1.x | Gateway |
-|------|----------|---------|
-| IO 模型 | 同步阻塞 | 异步非阻塞 |
-| 底层框架 | Servlet | WebFlux/Netty |
-| 性能 | 较低 | 高（约1.6倍） |
-| WebSocket | 不支持 | 支持 |
-| 编程模型 | 命令式 | 响应式 |
-| Spring 集成 | 兼容 | 原生支持 |
+| 特性        | Zuul 1.x | Gateway       |
+|-----------|----------|---------------|
+| IO 模型     | 同步阻塞     | 异步非阻塞         |
+| 底层框架      | Servlet  | WebFlux/Netty |
+| 性能        | 较低       | 高（约1.6倍）      |
+| WebSocket | 不支持      | 支持            |
+| 编程模型      | 命令式      | 响应式           |
+| Spring 集成 | 兼容       | 原生支持          |
 
 ---
 
@@ -68,6 +69,7 @@ spring:
 ### Filter（过滤器）
 
 两种类型：
+
 - **GatewayFilter**：作用于特定路由
 - **GlobalFilter**：作用于所有路由
 
@@ -75,17 +77,17 @@ spring:
 
 ## 三、内置断言（Predicate）
 
-| 断言 | 说明 | 示例 |
-|------|------|------|
-| Path | 路径匹配 | `Path=/api/**` |
-| Method | HTTP 方法 | `Method=GET,POST` |
-| Header | 请求头匹配 | `Header=X-Token, \d+` |
-| Query | 查询参数 | `Query=name, zhang.*` |
-| Cookie | Cookie 匹配 | `Cookie=sessionId, .*` |
-| Host | 主机名匹配 | `Host=**.example.com` |
-| RemoteAddr | IP 匹配 | `RemoteAddr=192.168.1.0/24` |
-| Before/After | 时间匹配 | `After=2024-01-01T00:00:00+08:00` |
-| Weight | 权重（灰度发布）| `Weight=group1, 8` |
+| 断言           | 说明        | 示例                                |
+|--------------|-----------|-----------------------------------|
+| Path         | 路径匹配      | `Path=/api/**`                    |
+| Method       | HTTP 方法   | `Method=GET,POST`                 |
+| Header       | 请求头匹配     | `Header=X-Token, \d+`             |
+| Query        | 查询参数      | `Query=name, zhang.*`             |
+| Cookie       | Cookie 匹配 | `Cookie=sessionId, .*`            |
+| Host         | 主机名匹配     | `Host=**.example.com`             |
+| RemoteAddr   | IP 匹配     | `RemoteAddr=192.168.1.0/24`       |
+| Before/After | 时间匹配      | `After=2024-01-01T00:00:00+08:00` |
+| Weight       | 权重（灰度发布）  | `Weight=group1, 8`                |
 
 **配置示例**：
 
@@ -103,15 +105,15 @@ predicates:
 
 ### 常用过滤器
 
-| 过滤器 | 说明 |
-|--------|------|
-| StripPrefix | 去掉路径前缀 |
-| AddRequestHeader | 添加请求头 |
-| AddResponseHeader | 添加响应头 |
-| RewritePath | 重写路径 |
-| Retry | 失败重试 |
-| CircuitBreaker | 熔断器 |
-| RequestRateLimiter | 限流 |
+| 过滤器                | 说明     |
+|--------------------|--------|
+| StripPrefix        | 去掉路径前缀 |
+| AddRequestHeader   | 添加请求头  |
+| AddResponseHeader  | 添加响应头  |
+| RewritePath        | 重写路径   |
+| Retry              | 失败重试   |
+| CircuitBreaker     | 熔断器    |
+| RequestRateLimiter | 限流     |
 
 ### 配置示例
 
@@ -222,6 +224,7 @@ public class IpBlacklistGatewayFilterFactory
 ```
 
 使用：
+
 ```yaml
 filters:
   - IpBlacklist=192.168.1.100,10.0.0.1
@@ -382,17 +385,19 @@ spring:
 **问题 1：Spring Cloud Gateway 的核心组件有哪些？**
 
 **答案**：
+
 - **Route（路由）**：由 ID、URI、断言、过滤器组成
 - **Predicate（断言）**：匹配 HTTP 请求的条件
 - **Filter（过滤器）**：处理请求和响应
-  - GatewayFilter：路由级
-  - GlobalFilter：全局
+    - GatewayFilter：路由级
+    - GlobalFilter：全局
 
 ---
 
 **问题 2:Gateway 和 Zuul 的区别？**
 
 **答案**：
+
 - Gateway 基于 WebFlux，异步非阻塞，性能更高
 - Zuul 1.x 基于 Servlet，同步阻塞
 - Gateway 支持 WebSocket，Zuul 不支持
@@ -403,6 +408,7 @@ spring:
 **问题 3：过滤器的执行顺序？**
 
 **答案**：
+
 - 实现 `Ordered` 接口，`getOrder()` 返回优先级
 - 数值越小，优先级越高
 - Pre 阶段：按 order 从小到大执行
@@ -414,9 +420,9 @@ spring:
 
 **答案**：
 
-| 类型 | 作用范围 | 配置方式 |
-|------|---------|---------|
-| GlobalFilter | 所有路由 | 实现接口，@Component |
+| 类型            | 作用范围 | 配置方式            |
+|---------------|------|-----------------|
+| GlobalFilter  | 所有路由 | 实现接口，@Component |
 | GatewayFilter | 特定路由 | YAML filters 配置 |
 
 ---
@@ -425,6 +431,7 @@ spring:
 
 **答案**：
 使用 `RequestRateLimiter` 过滤器 + Redis：
+
 - 基于令牌桶算法
 - `replenishRate`：每秒补充令牌数
 - `burstCapacity`：令牌桶容量
@@ -436,6 +443,7 @@ spring:
 
 **答案**：
 集成 Resilience4j 或 Sentinel：
+
 - 配置 `CircuitBreaker` 过滤器
 - 设置 `fallbackUri` 降级路径
 - 熔断状态：CLOSED → OPEN → HALF_OPEN
@@ -445,6 +453,7 @@ spring:
 **问题 7：如何实现动态路由？**
 
 **答案**：
+
 1. **服务发现**：`discovery.locator.enabled=true`
 2. **配置中心**：监听 Nacos 配置变化，调用 `RouteDefinitionWriter` 更新
 3. **Actuator**：`POST /actuator/gateway/routes/{id}`
@@ -454,6 +463,7 @@ spring:
 **问题 8:Gateway 为什么基于 WebFlux？**
 
 **答案**：
+
 - **异步非阻塞**：少量线程处理大量请求
 - **高吞吐量**：适合网关这种 IO 密集型场景
 - **背压支持**：响应式流控制

@@ -1,19 +1,19 @@
 package cn.itzixiao.interview.concurrency;
 
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.AbstractQueuedSynchronizer;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
-import java.util.concurrent.TimeUnit;
 
 /**
  * AQS (AbstractQueuedSynchronizer) 源码详解与原理剖析
- *
+ * <p>
  * =====================================================================================
  * 一、AQS 是什么？
  * =====================================================================================
  * AQS 全称 AbstractQueuedSynchronizer（抽象队列同步器），是 Java 并发包 (JUC) 的核心基石。
  * 它是一个用于构建锁和同步器的框架，采用「模板方法设计模式」。
- * 
+ * <p>
  * 基于 AQS 实现的同步器：
  * ┌─────────────────────────────────────────────────────────────────────────────────┐
  * │  同步器              │  模式       │  state 含义              │  典型用途      │
@@ -24,11 +24,11 @@ import java.util.concurrent.TimeUnit;
  * │  Semaphore          │  共享       │  剩余许可数              │  信号量        │
  * │  ThreadPoolExecutor.Worker │ 独占 │  0=空闲，1=运行中       │  线程池工作线程│
  * └─────────────────────────────────────────────────────────────────────────────────┘
- *
+ * <p>
  * =====================================================================================
  * 二、AQS 核心设计思想（三位一体）
  * =====================================================================================
- * 
+ * <p>
  * ┌─────────────────────────────────────────────────────────────────────────────────┐
  * │  【核心组件 1】volatile int state - 同步状态变量                                 │
  * ├─────────────────────────────────────────────────────────────────────────────────┤
@@ -54,12 +54,12 @@ import java.util.concurrent.TimeUnit;
  * │  • compareAndSetTail()：原子修改尾节点                                          │
  * │  • 底层依赖 Unsafe 类的 compareAndSwapInt 方法                                  │
  * └─────────────────────────────────────────────────────────────────────────────────┘
- *
+ * <p>
  * =====================================================================================
  * 三、设计模式 - 模板方法模式
  * =====================================================================================
  * AQS 定义了获取/释放锁的骨架流程，子类只需实现具体的「尝试获取」和「尝试释放」方法：
- * 
+ * <p>
  * 子类需要重写的方法（根据模式选择）：
  * ┌───────────────────────────────────────────────────────────────────────────────────┐
  * │  方法名                    │  模式   │  说明                                        │
@@ -75,7 +75,7 @@ public class AQSDemo {
 
     /**
      * 主入口方法 - 演示 AQS 的各个方面
-     * 
+     * <p>
      * 执行流程：
      * 1. demonstrateAQSStructure() - 展示 AQS 核心数据结构
      * 2. demonstrateExclusiveLock() - 演示独占锁获取/释放流程
@@ -106,12 +106,12 @@ public class AQSDemo {
      * =================================================================================
      * 1. AQS 核心结构详解
      * =================================================================================
-     * 
+     * <p>
      * AQS 的核心由三个部分组成：
      * 1. state 变量 - 使用 volatile 修饰，表示同步状态
      * 2. CLH 队列 - 双向链表，存储等待获取锁的线程
      * 3. Node 节点 - 队列中的元素，包含线程引用和等待状态
-     * 
+     * <p>
      * 关键理解点：
      * - head 节点是「虚节点」，不绑定线程，代表当前持有锁的位置
      * - tail 节点是队列尾部，新节点总是添加到尾部
@@ -179,7 +179,7 @@ public class AQSDemo {
         System.out.println("└──────────┘     └──────────┘     └──────────┘     └──────────┘");
         System.out.println("     ↑                                                ↑");
         System.out.println("  虚节点（不绑定线程）                          实际等待线程\n");
-        
+
         System.out.println("【关键理解点】：");
         System.out.println("  1. head 节点是虚拟头节点，不存储实际线程，代表\"当前持有锁\"的位置");
         System.out.println("  2. 队列中只有 head 的后继节点才有资格尝试获取锁");
@@ -191,21 +191,21 @@ public class AQSDemo {
      * =================================================================================
      * 2. 独占锁获取与释放流程详解
      * =================================================================================
-     * 
+     * <p>
      * 独占锁（Exclusive Lock）：同一时刻只有一个线程能持有锁
      * 典型应用：ReentrantLock
-     * 
+     * <p>
      * 核心流程图解：
-     * 
+     * <p>
      * 获取锁流程（acquire）：
      * ┌─────────────┐     ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
      * │ tryAcquire  │────→│  addWaiter  │────→│acquireQueued│────→│  阻塞等待   │
      * │ (尝试获取)  │ NO  │ (加入队列)  │     │ (自旋获取)  │     │ (park阻塞) │
      * └─────────────┘     └─────────────┘     └─────────────┘     └─────────────┘
-     *        │ YES
-     *        ↓
-     *   [获取成功返回]
-     * 
+     * │ YES
+     * ↓
+     * [获取成功返回]
+     * <p>
      * 释放锁流程（release）：
      * ┌─────────────┐     ┌──────────────────┐
      * │ tryRelease  │────→│unparkSuccessor   │
@@ -251,9 +251,9 @@ public class AQSDemo {
 
         /*
          * acquireQueued 核心源码解析：
-         * 
+         *
          * 这个方法是独占锁获取的核心，实现了「自旋 + 阻塞」的机制。
-         * 
+         *
          * 关键点：
          * 1. 只有自己的前驱是 head 时，才有资格尝试获取锁（FIFO 公平性）
          * 2. 获取失败后，将前驱节点的 waitStatus 设为 SIGNAL，表示"我需要被唤醒"
@@ -284,7 +284,7 @@ public class AQSDemo {
         System.out.println("│      }                                                      │");
         System.out.println("│  }                                                          │");
         System.out.println("└─────────────────────────────────────────────────────────────┘\n");
-        
+
         System.out.println("【核心流程解析】：");
         System.out.println("  acquireQueued 的执行逻辑：");
         System.out.println("  ├─ for(;;) 无限循环（自旋）");
@@ -307,10 +307,10 @@ public class AQSDemo {
      * =================================================================================
      * 3. 共享锁获取与释放流程详解
      * =================================================================================
-     * 
+     * <p>
      * 共享锁（Shared Lock）：同一时刻多个线程可以同时持有锁
      * 典型应用：Semaphore（信号量）、CountDownLatch（倒计时门闩）
-     * 
+     * <p>
      * 与独占锁的区别：
      * ┌──────────────────────────────────────────────────────────────────────────────┐
      * │  特性            │  独占锁                │  共享锁                      │
@@ -343,10 +343,10 @@ public class AQSDemo {
 
         /*
          * 共享锁的传播机制（Propagation）是核心：
-         * 
+         *
          * 当一个共享锁获取成功后，如果还有剩余资源，需要唤醒后继的共享锁节点。
          * 这就是「传播」的含义——唤醒操作会像多米诺骨牌一样向后传递。
-         * 
+         *
          * setHeadAndPropagate() 方法实现了这个机制：
          * 1. 将当前节点设为 head
          * 2. 检查是否还有剩余资源
@@ -362,7 +362,7 @@ public class AQSDemo {
         System.out.println("│  4. 调用 doReleaseShared() 继续唤醒 C                        │");
         System.out.println("│  5. 形成传播链，提高并发性能                                  │");
         System.out.println("└─────────────────────────────────────────────────────────────┘\n");
-        
+
         System.out.println("【共享锁 vs 独占锁对比】：");
         System.out.println("┌───────────────────────────────────────────────────────────────────────────────┐");
         System.out.println("│  操作           │  独占锁                           │  共享锁                  │");
@@ -382,14 +382,14 @@ public class AQSDemo {
      * =================================================================================
      * 4. 条件队列（Condition）详解
      * =================================================================================
-     * 
+     * <p>
      * Condition 是 AQS 提供的条件变量实现，用于替代传统的 Object.wait/notify。
      * 它允许线程在某些条件不满足时等待，条件满足时被唤醒。
-     * 
+     * <p>
      * 核心概念：
      * 1. 同步队列（Sync Queue）：等待获取锁的线程队列
      * 2. 条件队列（Condition Queue）：调用了 await 的线程队列
-     * 
+     * <p>
      * 一个 Lock 可以创建多个 Condition，每个 Condition 维护一个独立的条件队列。
      */
     private static void demonstrateCondition() {
@@ -408,18 +408,18 @@ public class AQSDemo {
 
         /*
          * Condition 的核心实现原理：
-         * 
+         *
          * AQS 内部维护了两种队列：
          * 1. 同步队列：双向链表，存储等待获取锁的线程
          * 2. 条件队列：单向链表，存储等待条件的线程（通过 nextWaiter 连接）
-         * 
+         *
          * await() 操作：
          * - 将当前线程封装成 Node，加入条件队列
          * - 完全释放锁（保存锁状态，以便后续恢复）
          * - 阻塞等待，直到被 signal 或中断
          * - 被唤醒后，从条件队列转移到同步队列
          * - 在同步队列中竞争锁
-         * 
+         *
          * signal() 操作：
          * - 从条件队列头部取出一个节点
          * - 将该节点转移到同步队列尾部
@@ -456,7 +456,7 @@ public class AQSDemo {
         System.out.println("│  T1 调用 await() → 进入条件队列，释放锁 → T2 获取锁          │");
         System.out.println("│  T2 调用 signal() → T1 从条件队列转移到同步队列              │");
         System.out.println("└─────────────────────────────────────────────────────────────┘\n");
-        
+
         System.out.println("【典型应用场景】：");
         System.out.println("  1. 生产者-消费者模型");
         System.out.println("     - 生产者：队列满时调用 notFull.await() 等待");
@@ -472,16 +472,16 @@ public class AQSDemo {
      * =================================================================================
      * 5. 自定义 AQS 实现 - 手写一个不可重入独占锁
      * =================================================================================
-     * 
+     * <p>
      * 通过实现一个简单的 Mutex（互斥锁），深入理解 AQS 的使用方式。
-     * 
+     * <p>
      * 实现步骤：
      * 1. 创建内部类 Sync 继承 AbstractQueuedSynchronizer
      * 2. 重写 tryAcquire() - 尝试获取锁（CAS 修改 state 从 0 到 1）
      * 3. 重写 tryRelease() - 尝试释放锁（将 state 设为 0）
      * 4. 重写 isHeldExclusively() - 判断是否独占持有
      * 5. 外部类实现 Lock 接口，委托给 Sync 执行
-     * 
+     * <p>
      * 这是一个不可重入锁（Non-reentrant Lock）：
      * - 同一线程不能重复获取锁，否则会死锁
      * - ReentrantLock 是可重入的，因为 state 会累加计数
@@ -552,7 +552,7 @@ public class AQSDemo {
         t2.join();
 
         System.out.println("\n自定义锁测试完成！\n");
-        
+
         System.out.println("【执行结果分析】：");
         System.out.println("  1. Thread-1 和 Thread-2 同时启动，竞争锁");
         System.out.println("  2. 假设 Thread-1 先获取到锁，Thread-2 进入等待队列");
@@ -566,25 +566,25 @@ public class AQSDemo {
  * =================================================================================
  * 基于 AQS 的自定义互斥锁（Mutex）
  * =================================================================================
- * 
+ * <p>
  * 这是一个简单的不可重入独占锁实现，展示如何使用 AQS 构建自定义同步器。
- * 
+ * <p>
  * 核心原理：
  * 1. state = 0：锁未被占用
  * 2. state = 1：锁已被占用
  * 3. 获取锁：通过 CAS 将 state 从 0 改为 1
  * 4. 释放锁：将 state 设为 0
- * 
+ * <p>
  * 与 ReentrantLock 的区别：
  * - ReentrantLock 是可重入的，同一线程可以多次获取锁，state 会累加
  * - 本实现是不可重入的，同一线程重复获取锁会阻塞（死锁）
- * 
+ * <p>
  * 适用场景：
  * - 学习 AQS 原理
  * - 简单的互斥控制场景
  */
 class Mutex implements Lock {
-    
+
     /**
      * 同步器实例，继承 AQS 实现具体的锁逻辑
      */
@@ -592,19 +592,19 @@ class Mutex implements Lock {
 
     /**
      * 内部同步器类 - AQS 的核心实现
-     * 
+     * <p>
      * 通过继承 AbstractQueuedSynchronizer 并重写以下方法：
      * - tryAcquire()：尝试获取独占锁
      * - tryRelease()：尝试释放独占锁
      * - isHeldExclusively()：判断当前线程是否独占持有锁
      */
     private static class Sync extends AbstractQueuedSynchronizer {
-        
+
         /**
          * 判断当前线程是否独占持有锁
-         * 
+         *
          * @return true-当前线程持有锁，false-未持有
-         * 
+         * <p>
          * 使用场景：
          * - Condition 实现需要判断当前线程是否持有锁
          * - 用于实现锁的条件等待机制
@@ -616,15 +616,15 @@ class Mutex implements Lock {
 
         /**
          * 尝试获取独占锁
-         * 
+         *
          * @param acquires 获取参数（通常为 1）
          * @return true-获取成功，false-获取失败
-         * 
+         * <p>
          * 实现逻辑：
          * 1. 使用 compareAndSetState(0, 1) 原子操作尝试获取锁
          * 2. CAS 成功：设置独占线程为当前线程，返回 true
          * 3. CAS 失败：说明锁已被占用，返回 false
-         * 
+         * <p>
          * 注意：
          * - 这是不可重入锁，不会检查当前线程是否已持有锁
          * - 如果已持有锁的线程再次调用，会返回 false 导致阻塞
@@ -642,18 +642,18 @@ class Mutex implements Lock {
 
         /**
          * 尝试释放独占锁
-         * 
+         *
          * @param releases 释放参数（通常为 1）
          * @return true-释放成功
          * @throws IllegalMonitorStateException 如果当前线程未持有锁
-         * 
-         * 实现逻辑：
-         * 1. 检查 state 是否为 0（未持有锁就释放是非法操作）
-         * 2. 清空独占线程引用
-         * 3. 将 state 设为 0
-         * 
-         * 注意：
-         * - setState(0) 不需要 CAS，因为只有持有锁的线程才能释放
+         *                                      <p>
+         *                                      实现逻辑：
+         *                                      1. 检查 state 是否为 0（未持有锁就释放是非法操作）
+         *                                      2. 清空独占线程引用
+         *                                      3. 将 state 设为 0
+         *                                      <p>
+         *                                      注意：
+         *                                      - setState(0) 不需要 CAS，因为只有持有锁的线程才能释放
          */
         @Override
         protected boolean tryRelease(int releases) {
@@ -670,7 +670,7 @@ class Mutex implements Lock {
 
         /**
          * 创建条件变量
-         * 
+         *
          * @return 新的 Condition 实例
          */
         Condition newCondition() {
@@ -680,7 +680,7 @@ class Mutex implements Lock {
 
     /**
      * 获取锁（阻塞式）
-     * 
+     * <p>
      * 调用 AQS 的 acquire() 方法：
      * 1. 先调用 tryAcquire() 尝试获取
      * 2. 失败则加入等待队列阻塞等待
@@ -692,7 +692,7 @@ class Mutex implements Lock {
 
     /**
      * 可中断地获取锁
-     * 
+     * <p>
      * 与 lock() 的区别：
      * - 等待过程中如果被中断，会抛出 InterruptedException
      * - lock() 会忽略中断，只是记录中断状态
@@ -704,9 +704,9 @@ class Mutex implements Lock {
 
     /**
      * 尝试获取锁（非阻塞）
-     * 
+     *
      * @return true-获取成功，false-获取失败（锁被占用）
-     * 
+     * <p>
      * 不会阻塞，立即返回结果
      */
     @Override
@@ -716,7 +716,7 @@ class Mutex implements Lock {
 
     /**
      * 超时尝试获取锁
-     * 
+     *
      * @param time 超时时间
      * @param unit 时间单位
      * @return true-获取成功，false-超时未获取
@@ -728,7 +728,7 @@ class Mutex implements Lock {
 
     /**
      * 释放锁
-     * 
+     * <p>
      * 调用 AQS 的 release() 方法：
      * 1. 调用 tryRelease() 释放锁
      * 2. 唤醒等待队列中的后继线程
@@ -740,7 +740,7 @@ class Mutex implements Lock {
 
     /**
      * 创建条件变量
-     * 
+     *
      * @return 新的 Condition 实例
      */
     @Override

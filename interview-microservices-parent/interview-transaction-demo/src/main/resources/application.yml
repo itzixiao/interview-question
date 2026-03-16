@@ -45,9 +45,9 @@ spring:
       # 禁用服务注册到 Nacos（本地开发不需要）
       discovery:
         enabled: false
-#       server-addr: localhost:8848
-#       namespace: public
-#       group: DEFAULT_GROUP
+  #       server-addr: localhost:8848
+  #       namespace: public
+  #       group: DEFAULT_GROUP
   #       config:
   #         server-addr: localhost:8848
   #         namespace: public

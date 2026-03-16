@@ -13,9 +13,9 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 /**
  * Redis 配置类
- * 
+ * <p>
  * 用于解决 Redis Key 和 Value 的序列化问题，避免中文乱码
- * 
+ *
  * @author lovec
  * @date 2026-03-12
  */
@@ -24,7 +24,7 @@ public class RedisConfig {
 
     /**
      * 配置 RedisTemplate 使用 String 序列化器
-     * 
+     *
      * @param factory Redis 连接工厂
      * @return 配置好的 RedisTemplate
      */

@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Redis 缓存三大问题详解：穿透、击穿、雪崩
- *
+ * <p>
  * ┌─────────────────────────────────────────────────────────────┐
  * │  缓存穿透 (Cache Penetration)                                │
  * │  - 查询不存在的数据，缓存和数据库都没有                        │
@@ -32,7 +32,7 @@ public class RedisCacheProblemDemo {
 
     /**
      * 方案1：缓存空值
-     *
+     * <p>
      * 优点：实现简单
      * 缺点：额外内存消耗，可能造成短期不一致
      */
@@ -70,7 +70,7 @@ public class RedisCacheProblemDemo {
 
     /**
      * 方案2：布隆过滤器
-     *
+     * <p>
      * 优点：内存占用少，没有多余缓存
      * 缺点：有一定误判率，实现复杂
      */
@@ -157,7 +157,7 @@ public class RedisCacheProblemDemo {
 
     /**
      * 方案1：互斥锁（Mutex Lock）
-     *
+     * <p>
      * 保证只有一个线程去重建缓存
      */
     public String cacheBreakdownSolution1(String key) {
@@ -208,7 +208,7 @@ public class RedisCacheProblemDemo {
 
     /**
      * 方案2：逻辑过期（Logical Expiration）
-     *
+     * <p>
      * 不设置TTL，通过逻辑时间判断是否过期
      * 过期后异步重建，无需等待
      */
@@ -225,8 +225,13 @@ public class RedisCacheProblemDemo {
             return System.currentTimeMillis() > expireTime;
         }
 
-        public String getData() { return data; }
-        public long getExpireTime() { return expireTime; }
+        public String getData() {
+            return data;
+        }
+
+        public long getExpireTime() {
+            return expireTime;
+        }
     }
 
     public String cacheBreakdownSolution2(String key) {
@@ -278,7 +283,7 @@ public class RedisCacheProblemDemo {
 
     /**
      * 方案3：热点Key永不过期
-     *
+     * <p>
      * 通过定时任务异步更新缓存
      */
     public String cacheBreakdownSolution3(String key) {
@@ -303,7 +308,7 @@ public class RedisCacheProblemDemo {
 
     /**
      * 方案1：随机过期时间
-     *
+     * <p>
      * 避免大量key同时过期
      */
     public void cacheAvalancheSolution1() {
@@ -326,7 +331,7 @@ public class RedisCacheProblemDemo {
 
     /**
      * 方案2：多级缓存
-     *
+     * <p>
      * Caffeine（本地）+ Redis（远程）+ 数据库
      */
     public static class MultiLevelCache {
@@ -371,7 +376,7 @@ public class RedisCacheProblemDemo {
 
     /**
      * 方案3：熔断降级
-     *
+     * <p>
      * Redis 故障时，直接返回默认值或本地数据
      */
     public String cacheAvalancheSolution3(String key) {
@@ -395,7 +400,7 @@ public class RedisCacheProblemDemo {
 
     /**
      * 方案4：高可用架构
-     *
+     * <p>
      * Redis Cluster + 哨兵 + 主从复制
      */
     public void cacheAvalancheSolution4() {

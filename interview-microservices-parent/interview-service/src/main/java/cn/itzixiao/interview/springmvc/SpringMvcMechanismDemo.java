@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
-import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
@@ -35,7 +34,7 @@ import java.util.Map;
 
 /**
  * Spring MVC 运行机制详解
- *
+ * <p>
  * ┌─────────────────────────────────────────────────────────────────────────────┐
  * │                        Spring MVC 请求处理流程                                │
  * ├─────────────────────────────────────────────────────────────────────────────┤
@@ -57,7 +56,7 @@ import java.util.Map;
  * │   8. 返回响应                                                                │
  * │                                                                             │
  * └─────────────────────────────────────────────────────────────────────────────┘
- *
+ * <p>
  * 核心组件：
  * - DispatcherServlet: 前端控制器，统一接收和分发请求
  * - HandlerMapping: 映射请求到处理器
@@ -419,16 +418,45 @@ class User {
     private String email;
 
     // Getters and Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public String getUsername() { return username; }
-    public void setUsername(String username) { this.username = username; }
-    public String getRole() { return role; }
-    public void setRole(String role) { this.role = role; }
-    public Integer getAge() { return age; }
-    public void setAge(Integer age) { this.age = age; }
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
+
+    public Integer getAge() {
+        return age;
+    }
+
+    public void setAge(Integer age) {
+        this.age = age;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
 
     @Override
     public String toString() {
@@ -465,14 +493,37 @@ class ApiResponse<T> {
     }
 
     // Getters and Setters
-    public int getCode() { return code; }
-    public void setCode(int code) { this.code = code; }
-    public String getMessage() { return message; }
-    public void setMessage(String message) { this.message = message; }
-    public T getData() { return data; }
-    public void setData(T data) { this.data = data; }
-    public long getTimestamp() { return timestamp; }
-    public void setTimestamp(long timestamp) { this.timestamp = timestamp; }
+    public int getCode() {
+        return code;
+    }
+
+    public void setCode(int code) {
+        this.code = code;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public T getData() {
+        return data;
+    }
+
+    public void setData(T data) {
+        this.data = data;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+    }
 }
 
 /**
@@ -486,5 +537,7 @@ class BusinessException extends RuntimeException {
         this.code = code;
     }
 
-    public int getCode() { return code; }
+    public int getCode() {
+        return code;
+    }
 }

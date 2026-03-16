@@ -101,11 +101,13 @@ protected void doDispatch(HttpServletRequest request, HttpServletResponse respon
 **作用**：根据请求 URL 找到对应的处理器（Controller 方法）
 
 **主要实现类**：
+
 - `RequestMappingHandlerMapping`：处理 @RequestMapping 注解
 - `BeanNameUrlHandlerMapping`：根据 Bean 名称映射
 - `SimpleUrlHandlerMapping`：简单 URL 映射
 
 **映射过程**：
+
 ```java
 // 初始化时扫描 @RequestMapping
 @RequestMapping("/users/{id}")
@@ -120,11 +122,13 @@ GET /users/123  →  匹配到 getUser 方法，id=123
 **作用**：适配不同形式的处理器，统一调用方式
 
 **主要实现类**：
+
 - `RequestMappingHandlerAdapter`：处理 @RequestMapping 方法
 - `HttpRequestHandlerAdapter`：处理 HttpRequestHandler
 - `SimpleControllerHandlerAdapter`：处理 Controller 接口
 
 **核心方法**：
+
 ```java
 ModelAndView handle(HttpServletRequest request, 
                     HttpServletResponse response, 
@@ -136,6 +140,7 @@ ModelAndView handle(HttpServletRequest request,
 **作用**：在请求处理前后进行拦截处理
 
 **三个回调方法**：
+
 ```java
 public interface HandlerInterceptor {
     // 处理器执行前，返回 false 则中断处理
@@ -153,6 +158,7 @@ public interface HandlerInterceptor {
 ```
 
 **执行顺序**：
+
 ```
 Interceptor1.preHandle()
     Interceptor2.preHandle()
@@ -169,12 +175,14 @@ Interceptor1.afterCompletion()
 **作用**：解析方法参数值
 
 **内置解析器**：
+
 - `@RequestParam` → RequestParamMethodArgumentResolver
 - `@PathVariable` → PathVariableMethodArgumentResolver
 - `@RequestBody` → RequestResponseBodyMethodProcessor
 - `@ModelAttribute` → ServletModelAttributeMethodProcessor
 
 **自定义解析器示例**：
+
 ```java
 public class CurrentUserArgumentResolver implements HandlerMethodArgumentResolver {
     @Override
@@ -204,6 +212,7 @@ public class CurrentUserArgumentResolver implements HandlerMethodArgumentResolve
 | FormHttpMessageConverter | 表单数据转换 |
 
 **执行时机**：
+
 - 请求：`@RequestBody` → 使用转换器将请求体转为 Java 对象
 - 响应：`@ResponseBody` → 使用转换器将 Java 对象转为响应体
 
@@ -212,11 +221,13 @@ public class CurrentUserArgumentResolver implements HandlerMethodArgumentResolve
 **作用**：处理异常并返回 ModelAndView 或写入响应
 
 **主要实现类**：
+
 - `ExceptionHandlerExceptionResolver`：处理 @ExceptionHandler
 - `DefaultHandlerExceptionResolver`：处理标准 Spring 异常
 - `SimpleMappingExceptionResolver`：简单异常映射
 
 **使用方式**：
+
 ```java
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -233,11 +244,13 @@ public class GlobalExceptionHandler {
 **作用**：根据视图名称解析 View 对象
 
 **主要实现类**：
+
 - `InternalResourceViewResolver`：JSP 视图
 - `ThymeleafViewResolver`：Thymeleaf 模板
 - `FreeMarkerViewResolver`：FreeMarker 模板
 
 **解析过程**：
+
 ```java
 // 控制器返回视图名称
 return "user/detail";
@@ -251,6 +264,7 @@ prefix + viewName + suffix = /WEB-INF/views/user/detail.jsp
 ### 类型转换
 
 **Converter**：简单类型转换
+
 ```java
 public interface Converter<S, T> {
     T convert(S source);
@@ -267,6 +281,7 @@ public class StringToDateConverter implements Converter<String, Date> {
 ```
 
 **Formatter**：带 Locale 的格式化
+
 ```java
 public interface Formatter<T> extends Printer<T>, Parser<T> {
 }
@@ -301,23 +316,23 @@ Controller 方法参数
 
 ## 常用注解
 
-| 注解 | 作用 |
-|------|------|
-| `@Controller` | 标记控制器类 |
-| `@RestController` | @Controller + @ResponseBody |
-| `@RequestMapping` | 映射请求路径 |
-| `@GetMapping` | GET 请求映射 |
-| `@PostMapping` | POST 请求映射 |
-| `@PutMapping` | PUT 请求映射 |
-| `@DeleteMapping` | DELETE 请求映射 |
-| `@PathVariable` | 路径变量 |
-| `@RequestParam` | 请求参数 |
-| `@RequestBody` | 请求体（JSON） |
-| `@ResponseBody` | 响应体（JSON） |
-| `@ModelAttribute` | 模型属性 |
-| `@InitBinder` | 初始化数据绑定器 |
-| `@ExceptionHandler` | 异常处理 |
-| `@ControllerAdvice` | 全局控制器增强 |
+| 注解                  | 作用                          |
+|---------------------|-----------------------------|
+| `@Controller`       | 标记控制器类                      |
+| `@RestController`   | @Controller + @ResponseBody |
+| `@RequestMapping`   | 映射请求路径                      |
+| `@GetMapping`       | GET 请求映射                    |
+| `@PostMapping`      | POST 请求映射                   |
+| `@PutMapping`       | PUT 请求映射                    |
+| `@DeleteMapping`    | DELETE 请求映射                 |
+| `@PathVariable`     | 路径变量                        |
+| `@RequestParam`     | 请求参数                        |
+| `@RequestBody`      | 请求体（JSON）                   |
+| `@ResponseBody`     | 响应体（JSON）                   |
+| `@ModelAttribute`   | 模型属性                        |
+| `@InitBinder`       | 初始化数据绑定器                    |
+| `@ExceptionHandler` | 异常处理                        |
+| `@ControllerAdvice` | 全局控制器增强                     |
 
 ## 最佳实践
 
@@ -411,6 +426,7 @@ public void init() {
 ### 3. 断点调试
 
 关键断点位置：
+
 - `DispatcherServlet.doDispatch()`
 - `RequestMappingHandlerMapping.getHandler()`
 - `RequestMappingHandlerAdapter.invokeHandlerMethod()`
@@ -457,12 +473,14 @@ Spring MVC 采用前端控制器模式，核心流程如下：
 **DispatcherServlet** 是 Spring MVC 的核心，作为前端控制器（Front Controller），承担以下职责：
 
 **核心作用：**
+
 1. **统一入口**：接收所有 HTTP 请求
 2. **协调组件**：调度 HandlerMapping、HandlerAdapter、ViewResolver 等组件
 3. **流程控制**：控制整个请求处理的流程
 4. **异常处理**：统一处理异常
 
 **主要工作：**
+
 ```java
 protected void doDispatch(HttpServletRequest request, HttpServletResponse response) {
     // 1. 获取 Handler（处理器）
@@ -492,20 +510,22 @@ protected void doDispatch(HttpServletRequest request, HttpServletResponse respon
 
 答案：
 
-| 特性 | HandlerMapping | HandlerAdapter |
-|------|---------------|----------------|
-| 作用 | 找到处理器 | 调用处理器 |
-| 输入 | HTTP 请求 | Handler 对象 |
-| 输出 | HandlerExecutionChain | ModelAndView |
-| 核心方法 | getHandler() | handle() |
+| 特性   | HandlerMapping        | HandlerAdapter |
+|------|-----------------------|----------------|
+| 作用   | 找到处理器                 | 调用处理器          |
+| 输入   | HTTP 请求               | Handler 对象     |
+| 输出   | HandlerExecutionChain | ModelAndView   |
+| 核心方法 | getHandler()          | handle()       |
 
 **HandlerMapping（找谁处理）：**
+
 ```java
 // 根据 URL 找到对应的 Controller 方法
 GET /users/123 → @GetMapping("/users/{id}") getUser(@PathVariable Long id)
 ```
 
 **HandlerAdapter（怎么调用）：**
+
 ```java
 // 统一调用方式，无论什么类型的 Handler
 ModelAndView mv = adapter.handle(request, response, handler);
@@ -513,6 +533,7 @@ ModelAndView mv = adapter.handle(request, response, handler);
 
 **为什么需要 Adapter？**
 因为 Handler 有多种形式：
+
 - `@Controller` 注解方法
 - `HttpRequestHandler` 接口实现
 - `Controller` 接口实现
@@ -523,16 +544,17 @@ ModelAndView mv = adapter.handle(request, response, handler);
 
 答案：
 
-| 特性 | 过滤器（Filter） | 拦截器（Interceptor） |
-|------|----------------|---------------------|
-| 所属规范 | Servlet 规范 | Spring MVC 提供 |
-| 运行容器 | Servlet 容器 | Spring 容器 |
-| 触发时机 | 请求到达时最早执行 | DispatcherServlet 之后 |
-| 作用范围 | 所有请求（包括静态资源） | 仅 Controller 请求 |
-| 访问权限 | 无法访问 Spring Bean | 可以访问 Spring Bean |
+| 特性   | 过滤器（Filter）                       | 拦截器（Interceptor）     |
+|------|-----------------------------------|----------------------|
+| 所属规范 | Servlet 规范                        | Spring MVC 提供        |
+| 运行容器 | Servlet 容器                        | Spring 容器            |
+| 触发时机 | 请求到达时最早执行                         | DispatcherServlet 之后 |
+| 作用范围 | 所有请求（包括静态资源）                      | 仅 Controller 请求      |
+| 访问权限 | 无法访问 Spring Bean                  | 可以访问 Spring Bean     |
 | 执行顺序 | Filter → Interceptor → Controller |
 
 **过滤器示例：**
+
 ```java
 @Component
 public class AuthFilter implements Filter {
@@ -547,6 +569,7 @@ public class AuthFilter implements Filter {
 ```
 
 **拦截器示例：**
+
 ```java
 @Component
 public class AuthInterceptor implements HandlerInterceptor {
@@ -563,6 +586,7 @@ public class AuthInterceptor implements HandlerInterceptor {
 ```
 
 **使用建议：**
+
 - 通用处理（编码、CORS）→ 用 Filter
 - 业务相关（权限、日志）→ 用 Interceptor
 
@@ -570,14 +594,15 @@ public class AuthInterceptor implements HandlerInterceptor {
 
 答案：
 
-| 特性 | @Controller | @RestController |
-|------|------------|----------------|
-| 组成 | 基础注解 | @Controller + @ResponseBody |
-| 返回值 | ModelAndView 或 String（视图名） | 直接返回数据（JSON/XML） |
-| 适用场景 | 模板引擎（JSP、Thymeleaf） | RESTful API |
-| 是否需要视图解析 | 是 | 否 |
+| 特性       | @Controller                | @RestController             |
+|----------|----------------------------|-----------------------------|
+| 组成       | 基础注解                       | @Controller + @ResponseBody |
+| 返回值      | ModelAndView 或 String（视图名） | 直接返回数据（JSON/XML）            |
+| 适用场景     | 模板引擎（JSP、Thymeleaf）        | RESTful API                 |
+| 是否需要视图解析 | 是                          | 否                           |
 
 **@Controller（返回视图）：**
+
 ```java
 @Controller
 public class UserController {
@@ -591,6 +616,7 @@ public class UserController {
 ```
 
 **@RestController（返回数据）：**
+
 ```java
 @RestController
 public class UserRestController {
@@ -602,6 +628,7 @@ public class UserRestController {
 ```
 
 **@RestController = @Controller + @ResponseBody：**
+
 ```java
 // 等价于
 @RestController
@@ -619,6 +646,7 @@ public class UserRestController {}
 Spring MVC 提供三种异常处理方式：
 
 **1. @ExceptionHandler（局部）**
+
 ```java
 @Controller
 public class UserController {
@@ -631,6 +659,7 @@ public class UserController {
 ```
 
 **2. @ControllerAdvice（全局）**
+
 ```java
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -649,6 +678,7 @@ public class GlobalExceptionHandler {
 ```
 
 **3. SimpleMappingExceptionResolver（配置式）**
+
 ```java
 @Bean
 public SimpleMappingExceptionResolver exceptionResolver() {
@@ -662,6 +692,7 @@ public SimpleMappingExceptionResolver exceptionResolver() {
 ```
 
 **执行优先级：**
+
 ```
 @ControllerAdvice（全局） > @ExceptionHandler（局部） > ExceptionResolver（配置）
 ```
@@ -671,6 +702,7 @@ public SimpleMappingExceptionResolver exceptionResolver() {
 答案：
 
 **@RequestBody（请求体 → Java 对象）：**
+
 ```java
 @PostMapping("/users")
 public User createUser(@RequestBody UserCreateRequest request) {
@@ -681,11 +713,13 @@ public User createUser(@RequestBody UserCreateRequest request) {
 ```
 
 **工作原理：**
+
 1. 读取 HTTP 请求体
 2. HttpMessageConverter 根据 Content-Type 选择转换器
 3. MappingJackson2HttpMessageConverter 将 JSON 转为 Java 对象
 
 **@ResponseBody（Java 对象 → 响应体）：**
+
 ```java
 @GetMapping("/users/{id}")
 @ResponseBody
@@ -696,11 +730,13 @@ public User getUser(@PathVariable Long id) {
 ```
 
 **工作原理：**
+
 1. 检查返回值类型
 2. HttpMessageConverter 根据 Accept 头选择转换器
 3. MappingJackson2HttpMessageConverter 将 Java 对象转为 JSON
 
 **常用组合：**
+
 ```java
 @RestController // = @Controller + @ResponseBody
 public class UserRestController {
@@ -727,6 +763,7 @@ public class UserRestController {
 | @ModelAttribute | ServletModelAttributeMethodProcessor | 解析模型属性 |
 
 **示例：**
+
 ```java
 @GetMapping("/users/{id}")
 public User getUser(
@@ -763,12 +800,14 @@ public User getUser(
 | SourceHttpMessageConverter | XML ↔ Java 对象 |
 
 **工作流程：**
+
 ```
 请求：HTTP Body → HttpMessageConverter → Java 对象
 响应：Java 对象 → HttpMessageConverter → HTTP Body
 ```
 
 **配置示例：**
+
 ```yaml
 spring:
   jackson:
@@ -779,6 +818,7 @@ spring:
 ```
 
 **自定义转换器：**
+
 ```java
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
@@ -795,6 +835,7 @@ public class WebConfig implements WebMvcConfigurer {
 答案：
 
 **方式一：ResponseBodyAdvice（推荐）**
+
 ```java
 @ControllerAdvice
 public class GlobalResponseAdvice implements ResponseBodyAdvice<Object> {
@@ -817,6 +858,7 @@ public class GlobalResponseAdvice implements ResponseBodyAdvice<Object> {
 ```
 
 **方式二：手动包装**
+
 ```java
 @RestController
 public class UserController {
@@ -829,6 +871,7 @@ public class UserController {
 ```
 
 **统一响应类：**
+
 ```java
 @Data
 public class ApiResponse<T> {
@@ -847,6 +890,7 @@ public class ApiResponse<T> {
 ```
 
 **效果：**
+
 ```json
 {
   "code": 200,

@@ -10,7 +10,7 @@ import java.lang.reflect.Proxy;
 
 /**
  * JDK动态代理 vs CGLIB 对比示例
- *
+ * <p>
  * 核心区别：
  * ┌─────────────┬────────────────────────┬────────────────────────┐
  * │   特性       │     JDK动态代理         │       CGLIB            │
@@ -198,6 +198,7 @@ public class ProxyComparisonDemo {
      */
     interface UserService {
         void addUser(String name);
+
         void deleteUser(int id);
     }
 

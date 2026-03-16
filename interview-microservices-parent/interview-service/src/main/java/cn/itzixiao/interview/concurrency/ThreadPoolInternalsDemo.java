@@ -1,12 +1,8 @@
 package cn.itzixiao.interview.concurrency;
 
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.AbstractQueuedSynchronizer;
-
 /**
  * 线程池核心源码详解（基于 ThreadPoolExecutor）
- *
+ * <p>
  * 线程池核心设计：
  * ┌─────────────────────────────────────────────────────────────┐
  * │  1. 线程复用：工作线程循环从任务队列取任务执行                │
@@ -14,7 +10,7 @@ import java.util.concurrent.locks.AbstractQueuedSynchronizer;
  * │  3. 任务队列：缓冲待执行任务                                  │
  * │  4. 拒绝策略：队列满且线程数达最大时的处理                    │
  * └─────────────────────────────────────────────────────────────┘
- *
+ * <p>
  * 线程池状态（ctl 变量高3位）：
  * ┌───────────┬─────────────────────────────────────────────────┐
  * │  RUNNING  │  接受新任务，处理队列任务    │  111 << 29       │

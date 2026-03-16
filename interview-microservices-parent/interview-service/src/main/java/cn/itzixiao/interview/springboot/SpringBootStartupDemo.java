@@ -6,7 +6,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 
 /**
  * Spring Boot 启动过程详解
- *
+ * <p>
  * Spring Boot 启动流程：
  * ┌─────────────────────────────────────────────────────────────┐
  * │  1. 构造 SpringApplication 对象                               │

@@ -7,39 +7,39 @@ import org.springframework.stereotype.Component;
 
 /**
  * 命令处理器 - 处理创建订单命令
- * 
+ * <p>
  * 写模型职责：
  * 1. 业务规则验证
  * 2. 数据一致性保证
  * 3. 领域逻辑执行
  * 4. 发布领域事件
- * 
+ *
  * @author itzixiao
  * @date 2026-03-15
  */
 @Slf4j
 @Component
 public class CreateOrderCommandHandler {
-    
+
     /**
      * 处理创建订单命令
      */
     public CommandResult handle(CreateOrderCommand command) {
         log.info("处理创建订单命令：userId={}", command.getUserId());
-        
+
         try {
             // 1. 参数验证
             validateCommand(command);
-            
+
             // 2. 业务规则验证
             validateBusinessRules(command);
-            
+
             // 3. 执行创建操作
             String orderId = createOrderInDatabase(command);
-            
+
             // 4. 返回结果
             return CommandResult.success(orderId);
-            
+
         } catch (IllegalArgumentException e) {
             log.error("参数验证失败", e);
             return CommandResult.error(e.getMessage());
@@ -48,7 +48,7 @@ public class CreateOrderCommandHandler {
             return CommandResult.error("系统繁忙，请稍后重试");
         }
     }
-    
+
     /**
      * 验证命令参数
      */
@@ -63,7 +63,7 @@ public class CreateOrderCommandHandler {
             throw new IllegalArgumentException("收货地址不能为空");
         }
     }
-    
+
     /**
      * 验证业务规则
      */
@@ -71,7 +71,7 @@ public class CreateOrderCommandHandler {
         // 模拟业务规则验证
         log.info("验证业务规则：检查库存、用户权限等");
     }
-    
+
     /**
      * 在数据库中创建订单
      */

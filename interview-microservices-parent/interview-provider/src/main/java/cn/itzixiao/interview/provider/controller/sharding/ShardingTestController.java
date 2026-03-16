@@ -23,20 +23,20 @@ import java.util.Map;
 @RestController
 @RequestMapping("/sharding/test")
 public class ShardingTestController {
-    
+
     @Resource
     private DeviceOperationLogMapper deviceOperationLogMapper;
-    
+
     @Resource
     private DeviceOperationLogESRepository esRepository;
-    
+
     @Resource
     private RedisTemplate<String, Object> redisTemplate;
-    
+
     /**
      * 测试精确查询 - 根据单个时间点查询
      * 应该只路由到单个月份表
-     * 
+     * <p>
      * 注意：ShardingSphere 4.1.1 不支持 ResultSet.getObject() with type，
      * 因此需要在 Controller 层进行结果转换
      */
@@ -45,12 +45,12 @@ public class ShardingTestController {
             @RequestParam String time) {
         LocalDateTime operationTime = LocalDateTime.parse(time);
         log.info("精确查询测试，operationTime={}", operationTime);
-        
+
         // 查询指定时间范围的数据（ShardingSphere 会根据 operation_time 路由到对应的月份表）
         List<DeviceOperationLog> result = deviceOperationLogMapper.selectByTimeRange(operationTime, operationTime.plusHours(23).plusMinutes(59).plusSeconds(59));
         return Result.success(result);
     }
-    
+
     /**
      * 测试范围查询 - 根据时间范围查询
      * 应该路由到多个月份表
@@ -62,11 +62,11 @@ public class ShardingTestController {
         LocalDateTime start = LocalDateTime.parse(startTime);
         LocalDateTime end = LocalDateTime.parse(endTime);
         log.info("范围查询测试，startTime={}, endTime={}", start, end);
-        
+
         List<DeviceOperationLog> result = deviceOperationLogMapper.selectByTimeRange(start, end);
         return Result.success(result);
     }
-    
+
     /**
      * 测试按设备 + 时间范围查询
      * 测试多条件组合查询
@@ -79,11 +79,11 @@ public class ShardingTestController {
         LocalDateTime start = LocalDateTime.parse(startTime);
         LocalDateTime end = LocalDateTime.parse(endTime);
         log.info("设备 + 时间范围查询，deviceCode={}, startTime={}, endTime={}", deviceCode, start, end);
-        
+
         List<DeviceOperationLog> result = deviceOperationLogMapper.selectByDeviceAndTimeRange(deviceCode, start, end);
         return Result.success(result);
     }
-    
+
     /**
      * 测试全年数据查询
      * 应该路由到所有 12 张表
@@ -93,7 +93,7 @@ public class ShardingTestController {
         LocalDateTime start = LocalDateTime.of(2026, 1, 1, 0, 0, 0);
         LocalDateTime end = LocalDateTime.of(2026, 12, 31, 23, 59, 59);
         log.info("全年数据查询，startTime={}, endTime={}", start, end);
-        
+
         List<DeviceOperationLog> result = deviceOperationLogMapper.selectByTimeRange(start, end);
         return Result.success(result);
     }
@@ -111,16 +111,16 @@ public class ShardingTestController {
             @RequestParam(required = false) Double operationValue,
             @RequestParam(required = false) String operator,
             @RequestParam(required = false) String remark) {
-        
+
         log.info("【分片测试】接收到新增请求：deviceCode={}, deviceName={}, operationType={}, operationTime={}",
                 deviceCode, deviceName, operationType, operationTime);
-        
+
         try {
             // 从 Redis 获取全局唯一 ID
             String redisKey = "global:id:device_operation_log";
             long uniqueId = redisTemplate.opsForValue().increment(redisKey);
             log.info("【分片测试】从 Redis 获取唯一 ID: {}", uniqueId);
-            
+
             // 创建实体对象
             DeviceOperationLog logEntity = new DeviceOperationLog();
             logEntity.setId(uniqueId);  // 设置全局唯一 ID
@@ -134,12 +134,12 @@ public class ShardingTestController {
             }
             logEntity.setOperator(operator);
             logEntity.setRemark(remark);
-            
+
             // 插入数据库（ShardingSphere 会自动路由）
             int rows = deviceOperationLogMapper.insert(logEntity);
-            
+
             log.info("【分片测试】插入 MySQL 成功，影响行数：{}, 生成的 ID: {}", rows, logEntity.getId());
-            
+
             // 同步到 Elasticsearch
             try {
                 DeviceOperationLogES esEntity = new DeviceOperationLogES();
@@ -152,14 +152,14 @@ public class ShardingTestController {
                 log.error("【分片测试】同步到 ES 失败", e);
                 // ES 失败不影响主流程，仅记录日志
             }
-            
+
             // 返回结果
             Map<String, Object> result = new HashMap<>();
             result.put("message", "插入成功");
             result.put("id", logEntity.getId());
             result.put("targetTable", getTargetTableName(logEntity.getOperationTime()));
             result.put("rows", rows);
-            
+
             return Result.success(result);
         } catch (Exception e) {
             log.error("【分片测试】插入失败", e);

@@ -1,14 +1,10 @@
 package cn.itzixiao.interview.springboot.autoconfig;
 
-import org.springframework.core.io.support.SpringFactoriesLoader;
-
-import java.util.List;
-
 /**
  * SpringFactoriesLoader 详解
- *
+ * <p>
  * 作用：从 META-INF/spring.factories 文件加载配置
- *
+ * <p>
  * spring.factories 文件格式：
  * ┌─────────────────────────────────────────────────────────────┐
  * │  # 注释                                                      │
@@ -19,7 +15,7 @@ import java.util.List;
  * │    org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration,\│
  * │    org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration│
  * └─────────────────────────────────────────────────────────────┘
- *
+ * <p>
  * Spring Boot 2.7+ 新特性：
  * - 支持 META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports
  * - 每行一个自动配置类，更清晰

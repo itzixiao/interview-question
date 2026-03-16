@@ -6,7 +6,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Java 集合框架深入理解
- *
+ * <p>
  * 集合框架结构：
  * ┌─────────────────────────────────────────────────────────────┐
  * │                         Collection                          │
@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * │               /    \      /    \       /     \              │
  * │         ArrayList  LinkedList  HashSet  TreeSet  PriorityQueue│
  * └─────────────────────────────────────────────────────────────┘
- *
+ * <p>
  * ┌─────────────────────────────────────────────────────────────┐
  * │                          Map                                │
  * │                    /          |          \                  │

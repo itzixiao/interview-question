@@ -5,18 +5,14 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Condition;
-import org.springframework.context.annotation.ConditionContext;
-import org.springframework.context.annotation.Conditional;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.*;
 import org.springframework.core.type.AnnotatedTypeMetadata;
 
 import java.lang.annotation.*;
 
 /**
  * 自定义 Spring Boot Starter 开发详解 - 教学型示例
- *
+ * <p>
  * ┌─────────────────────────────────────────────────────────────────────────────┐
  * │                      自定义 Starter 开发完整流程                             │
  * │                                                                             │
@@ -732,23 +728,63 @@ public class CustomStarterDevelopmentDemo {
             private int maxSize = 10;
             private int minIdle = 2;
 
-            public int getMaxSize() { return maxSize; }
-            public void setMaxSize(int maxSize) { this.maxSize = maxSize; }
-            public int getMinIdle() { return minIdle; }
-            public void setMinIdle(int minIdle) { this.minIdle = minIdle; }
+            public int getMaxSize() {
+                return maxSize;
+            }
+
+            public void setMaxSize(int maxSize) {
+                this.maxSize = maxSize;
+            }
+
+            public int getMinIdle() {
+                return minIdle;
+            }
+
+            public void setMinIdle(int minIdle) {
+                this.minIdle = minIdle;
+            }
         }
 
         // Getters and Setters
-        public boolean isEnabled() { return enabled; }
-        public void setEnabled(boolean enabled) { this.enabled = enabled; }
-        public String getAccessKey() { return accessKey; }
-        public void setAccessKey(String accessKey) { this.accessKey = accessKey; }
-        public String getSecretKey() { return secretKey; }
-        public void setSecretKey(String secretKey) { this.secretKey = secretKey; }
-        public String getSignName() { return signName; }
-        public void setSignName(String signName) { this.signName = signName; }
-        public Pool getPool() { return pool; }
-        public void setPool(Pool pool) { this.pool = pool; }
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
+        }
+
+        public String getAccessKey() {
+            return accessKey;
+        }
+
+        public void setAccessKey(String accessKey) {
+            this.accessKey = accessKey;
+        }
+
+        public String getSecretKey() {
+            return secretKey;
+        }
+
+        public void setSecretKey(String secretKey) {
+            this.secretKey = secretKey;
+        }
+
+        public String getSignName() {
+            return signName;
+        }
+
+        public void setSignName(String signName) {
+            this.signName = signName;
+        }
+
+        public Pool getPool() {
+            return pool;
+        }
+
+        public void setPool(Pool pool) {
+            this.pool = pool;
+        }
     }
 
     /**

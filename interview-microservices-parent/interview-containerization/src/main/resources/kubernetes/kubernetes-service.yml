@@ -20,10 +20,10 @@ spec:
   
   # 端口映射
   ports:
-  - port: 80              # Service 端口
-    targetPort: 8080      # Pod 容器端口
-    protocol: TCP
-    name: http
+    - port: 80              # Service 端口
+      targetPort: 8080      # Pod 容器端口
+      protocol: TCP
+      name: http
   
   # 选择器（关联 Deployment 中的 Pod）
   selector:
@@ -46,11 +46,11 @@ spec:
   type: NodePort
   
   ports:
-  - port: 80              # Service 端口
-    targetPort: 8080      # Pod 容器端口
-    nodePort: 30080       # 节点端口（范围：30000-32767）
-    protocol: TCP
-    name: http
+    - port: 80              # Service 端口
+      targetPort: 8080      # Pod 容器端口
+      nodePort: 30080       # 节点端口（范围：30000-32767）
+      protocol: TCP
+      name: http
   
   selector:
     app: interview-app
@@ -75,10 +75,10 @@ spec:
   externalTrafficPolicy: Local  # 保留客户端 IP
   
   ports:
-  - port: 80
-    targetPort: 8080
-    protocol: TCP
-    name: http
+    - port: 80
+      targetPort: 8080
+      protocol: TCP
+      name: http
   
   selector:
     app: interview-app
@@ -97,10 +97,10 @@ spec:
   clusterIP: None         # 关键：设置为 None
   
   ports:
-  - port: 80
-    targetPort: 8080
-    protocol: TCP
-    name: http
+    - port: 80
+      targetPort: 8080
+      protocol: TCP
+      name: http
   
   selector:
     app: interview-app

@@ -21,14 +21,14 @@ public class CustomGcEndpoint {
     public Map<String, Object> gcInfo() {
         Map<String, Object> result = new HashMap<>();
         List<GarbageCollectorMXBean> gcBeans = ManagementFactory.getGarbageCollectorMXBeans();
-        
+
         // 遍历所有GC收集器（PS Scavenge/PS MarkSweep等）
         for (GarbageCollectorMXBean bean : gcBeans) {
             Map<String, Object> gcData = new HashMap<>();
             gcData.put("collectionCount", bean.getCollectionCount()); // GC次数
             gcData.put("collectionTime", bean.getCollectionTime()); // GC总耗时（毫秒）
             gcData.put("memoryPools", bean.getMemoryPoolNames()); // 关联的内存池
-            
+
             result.put(bean.getName(), gcData);
         }
         return result;

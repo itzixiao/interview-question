@@ -73,11 +73,13 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
 ```
 
 **Spring Boot 2.7+ 新方式**：
+
 ```
 META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports
 ```
 
 每行一个配置类，更清晰：
+
 ```
 org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration
 org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
@@ -85,16 +87,16 @@ org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
 
 ### 2. 条件注解
 
-| 条件注解 | 说明 |
-|----------|------|
-| @ConditionalOnClass | 类路径存在指定类时生效 |
-| @ConditionalOnMissingClass | 类路径不存在指定类时生效 |
-| @ConditionalOnBean | 容器中存在指定 Bean 时生效 |
-| @ConditionalOnMissingBean | 容器中不存在指定 Bean 时生效 |
-| @ConditionalOnProperty | 配置属性满足条件时生效 |
-| @ConditionalOnWebApplication | 是 Web 应用时生效 |
-| @ConditionalOnResource | 指定资源存在时生效 |
-| @ConditionalOnExpression | SpEL 表达式为 true 时生效 |
+| 条件注解                         | 说明                 |
+|------------------------------|--------------------|
+| @ConditionalOnClass          | 类路径存在指定类时生效        |
+| @ConditionalOnMissingClass   | 类路径不存在指定类时生效       |
+| @ConditionalOnBean           | 容器中存在指定 Bean 时生效   |
+| @ConditionalOnMissingBean    | 容器中不存在指定 Bean 时生效  |
+| @ConditionalOnProperty       | 配置属性满足条件时生效        |
+| @ConditionalOnWebApplication | 是 Web 应用时生效        |
+| @ConditionalOnResource       | 指定资源存在时生效          |
+| @ConditionalOnExpression     | SpEL 表达式为 true 时生效 |
 
 ### 3. 配置属性绑定
 
@@ -115,9 +117,9 @@ public class DataSourceProperties {
 
 ### 1. Starter 命名规范
 
-| 类型 | 命名规范 | 示例 |
-|------|---------|------|
-| 官方 Starter | spring-boot-starter-{name} | spring-boot-starter-web |
+| 类型          | 命名规范                       | 示例                          |
+|-------------|----------------------------|-----------------------------|
+| 官方 Starter  | spring-boot-starter-{name} | spring-boot-starter-web     |
 | 第三方 Starter | {name}-spring-boot-starter | mybatis-spring-boot-starter |
 
 ### 2. 项目结构
@@ -218,6 +220,7 @@ public class SmsProperties {
 ```
 
 对应的 `application.yml`：
+
 ```yaml
 sms:
   enabled: true
@@ -299,6 +302,7 @@ public class SmsTemplate {
 **Spring Boot 2.7+**：
 
 创建文件 `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports`：
+
 ```
 com.example.sms.SmsAutoConfiguration
 ```
@@ -306,6 +310,7 @@ com.example.sms.SmsAutoConfiguration
 **Spring Boot 2.6 及以前**：
 
 创建文件 `META-INF/spring.factories`：
+
 ```properties
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
   com.example.sms.SmsAutoConfiguration
@@ -488,6 +493,7 @@ public class MyAutoConfiguration {
 **问题 1：Spring Boot自动装配的原理是什么？**
 
 **答案**：
+
 1. `@SpringBootApplication` 包含 `@EnableAutoConfiguration`
 2. `@EnableAutoConfiguration` 导入 `AutoConfigurationImportSelector`
 3. `AutoConfigurationImportSelector` 通过 `SpringFactoriesLoader` 加载 `META-INF/spring.factories` 中的自动配置类
@@ -499,6 +505,7 @@ public class MyAutoConfiguration {
 **问题 2：如何自定义一个 Spring Boot Starter？**
 
 **答案**：
+
 1. 创建项目，命名为 `xxx-spring-boot-starter`
 2. 编写配置属性类（`@ConfigurationProperties`）
 3. 编写自动配置类（`@AutoConfiguration` + `@Conditional`）
@@ -511,16 +518,17 @@ public class MyAutoConfiguration {
 
 **答案**：
 
-| 注解 | 判断对象 | 判断时机 | 用途 |
-|------|---------|---------|------|
-| @ConditionalOnClass | 类路径 | 配置类加载前 | 判断依赖是否引入 |
-| @ConditionalOnBean | Spring 容器 | 配置类加载时 | 判断 Bean 是否存在 |
+| 注解                  | 判断对象      | 判断时机   | 用途           |
+|---------------------|-----------|--------|--------------|
+| @ConditionalOnClass | 类路径       | 配置类加载前 | 判断依赖是否引入     |
+| @ConditionalOnBean  | Spring 容器 | 配置类加载时 | 判断 Bean 是否存在 |
 
 ---
 
 **问题 4：@ConditionalOnMissingBean 的作用？**
 
 **答案**：
+
 - 容器中不存在指定 Bean 时，才创建当前 Bean
 - 允许用户自定义实现覆盖默认配置
 - 体现了 Spring Boot「约定优于配置」的理念
@@ -530,6 +538,7 @@ public class MyAutoConfiguration {
 **问题 5：Spring Boot 2.7 和之前版本的自动配置有什么区别？**
 
 **答案**：
+
 - **2.6 及以前**：使用 `META-INF/spring.factories`
 - **2.7+**：自动配置使用 `META-INF/spring/...AutoConfiguration.imports`，每行一个配置类，更清晰
 
@@ -538,6 +547,7 @@ public class MyAutoConfiguration {
 **问题 6：proxyBeanMethods = false 的作用是什么？**
 
 **答案**：
+
 - 禁用 CGLIB 代理，提高启动性能
 - `@Bean` 方法之间相互调用时，不再保证单例（每次调用都创建新对象）
 - 自动配置类建议设置为 false
@@ -547,6 +557,7 @@ public class MyAutoConfiguration {
 **问题 7：如何排除某个自动配置类？**
 
 **答案**：
+
 ```java
 // 方式一：注解排除
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
@@ -563,6 +574,7 @@ spring:
 **问题 8：SpringFactoriesLoader 的工作原理？**
 
 **答案**：
+
 1. 扫描 classpath 下所有 jar 包的 `META-INF/spring.factories`
 2. 读取指定 key 对应的所有配置类全限定名
 3. 使用反射实例化这些类
@@ -573,6 +585,7 @@ spring:
 **问题 9：如何调试自动配置？**
 
 **答案**：
+
 ```bash
 # 启动参数
 java -jar app.jar --debug
@@ -591,6 +604,7 @@ GET /actuator/conditions
 **问题 10：@EnableConfigurationProperties 的作用？**
 
 **答案**：
+
 - 使 `@ConfigurationProperties` 注解的类生效
 - 将配置属性类注册为 Bean
 - 自动绑定配置文件中的属性到配置类

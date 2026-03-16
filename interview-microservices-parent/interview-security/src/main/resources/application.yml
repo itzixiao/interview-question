@@ -6,7 +6,7 @@ security:
     expiration: 3600
     # Refresh Token 过期时间（秒）- 默认 7 天
     refresh-expiration: 604800
-  
+
 # OAuth2.0 授权服务器配置（示例）
 oauth2:
   authorization:

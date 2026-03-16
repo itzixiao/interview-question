@@ -1,11 +1,8 @@
 package cn.itzixiao.interview.springboot.autoconfig;
 
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.context.annotation.Import;
-
 /**
  * Spring Boot 自动装配原理详解
- *
+ * <p>
  * 自动装配核心流程：
  * ┌─────────────────────────────────────────────────────────────┐
  * │  1. 入口：@SpringBootApplication                             │
@@ -32,11 +29,11 @@ import org.springframework.context.annotation.Import;
  * │     - 创建配置类中定义的 Bean                                │
  * │     - 注入配置属性（@EnableConfigurationProperties）        │
  * └─────────────────────────────────────────────────────────────┘
- *
+ * <p>
  * spring.factories 文件格式：
  * org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
- *   com.example.XXXAutoConfiguration,\
- *   com.example.YYYAutoConfiguration
+ * com.example.XXXAutoConfiguration,\
+ * com.example.YYYAutoConfiguration
  */
 public class AutoConfigurationPrincipleDemo {
 
@@ -123,19 +120,19 @@ public class AutoConfigurationPrincipleDemo {
         System.out.println("@Import({ DataSourcePoolMetadataProvidersConfiguration.class,");
         System.out.println("        DataSourceInitializationConfiguration.class })");
         System.out.println("public class DataSourceAutoConfiguration {");
-        System.out.println("");
+        System.out.println(" ");
         System.out.println("    @Configuration(proxyBeanMethods = false)");
         System.out.println("    @Conditional(EmbeddedDatabaseCondition.class)");
         System.out.println("    @ConditionalOnMissingBean({ DataSource.class, XADataSource.class })");
         System.out.println("    protected static class EmbeddedDatabaseConfiguration {");
-        System.out.println("");
+        System.out.println(" ");
         System.out.println("        @Bean");
         System.out.println("        public EmbeddedDatabaseFactoryBean dataSource(");
         System.out.println("                DataSourceProperties properties) {");
         System.out.println("            // 创建嵌入式数据源");
         System.out.println("        }");
         System.out.println("    }");
-        System.out.println("");
+        System.out.println(" ");
         System.out.println("    @Configuration(proxyBeanMethods = false)");
         System.out.println("    @Conditional(PooledDataSourceCondition.class)");
         System.out.println("    @ConditionalOnMissingBean({ DataSource.class, XADataSource.class })");

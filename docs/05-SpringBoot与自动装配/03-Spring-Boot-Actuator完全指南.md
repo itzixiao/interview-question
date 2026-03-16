@@ -42,6 +42,7 @@ graph TB
 ```
 
 **核心价值：**
+
 - ✅ 统一监控接口标准
 - ✅ 快速故障定位
 - ✅ 性能瓶颈分析
@@ -86,6 +87,7 @@ java cn.itzixiao.interview.actuator.SpringBootActuatorDemo
 ```
 
 访问端点：
+
 ```bash
 # 查看所有端点列表
 curl http://localhost:8080/actuator
@@ -106,21 +108,22 @@ curl http://localhost:8080/actuator/metrics
 
 ### 3.1 常用端点列表
 
-| 端点 | 路径 | 说明 | 使用场景 |
-|------|------|------|----------|
-| health | /actuator/health | 健康检查 | K8s 探针、负载均衡 |
-| info | /actuator/info | 应用信息 | 版本管理、部署信息 |
-| metrics | /actuator/metrics | 性能指标 | 监控告警、性能分析 |
-| env | /actuator/env | 环境变量 | 配置排查、调试 |
-| beans | /actuator/beans | Spring Bean 列表 | 依赖分析、调试 |
-| threaddump | /actuator/threaddump | 线程快照 | 死锁检测、性能优化 |
-| heapdump | /actuator/heapdump | 堆快照 | 内存泄漏分析 |
-| logfile | /actuator/logfile | 日志文件 | 日志查看 |
-| httpexchanges | /actuator/httpexchanges | HTTP 请求追踪 | 接口调用链分析 |
+| 端点            | 路径                      | 说明             | 使用场景        |
+|---------------|-------------------------|----------------|-------------|
+| health        | /actuator/health        | 健康检查           | K8s 探针、负载均衡 |
+| info          | /actuator/info          | 应用信息           | 版本管理、部署信息   |
+| metrics       | /actuator/metrics       | 性能指标           | 监控告警、性能分析   |
+| env           | /actuator/env           | 环境变量           | 配置排查、调试     |
+| beans         | /actuator/beans         | Spring Bean 列表 | 依赖分析、调试     |
+| threaddump    | /actuator/threaddump    | 线程快照           | 死锁检测、性能优化   |
+| heapdump      | /actuator/heapdump      | 堆快照            | 内存泄漏分析      |
+| logfile       | /actuator/logfile       | 日志文件           | 日志查看        |
+| httpexchanges | /actuator/httpexchanges | HTTP 请求追踪      | 接口调用链分析     |
 
 ### 3.2 Health 端点详解
 
 **基础响应：**
+
 ```json
 {
   "status": "UP",
@@ -165,6 +168,7 @@ public class DatabaseHealthIndicator implements HealthIndicator {
 ### 3.3 Metrics 端点详解
 
 **JVM 内存指标：**
+
 ```bash
 # 查看 JVM 内存使用情况
 curl http://localhost:8080/actuator/metrics/jvm.memory.used
@@ -174,6 +178,7 @@ curl http://localhost:8080/actuator/metrics/jvm.memory.used?tag=area:heap
 ```
 
 **HTTP 请求指标：**
+
 ```bash
 # 查看 HTTP 请求量
 curl http://localhost:8080/actuator/metrics/http.server.requests
@@ -183,6 +188,7 @@ curl http://localhost:8080/actuator/metrics/http.server.requests?tag=status:200
 ```
 
 **自定义业务指标：**
+
 ```java
 @RestController
 @RequestMapping("/api")
@@ -230,6 +236,7 @@ public class DemoEndpoint {
 ```
 
 **访问方式：**
+
 ```bash
 # GET 请求
 curl http://localhost:8080/actuator/demo
@@ -254,6 +261,7 @@ public class CustomInfoContributor implements InfoContributor {
 ```
 
 **响应示例：**
+
 ```json
 {
   "app": {
@@ -364,6 +372,7 @@ management:
 ```
 
 **访问指标：**
+
 ```bash
 curl http://localhost:8080/actuator/prometheus
 ```
@@ -414,6 +423,7 @@ Actuator 提供应用的**可观测性**，包括：
 5. **故障诊断** - 线程快照、堆快照
 
 **典型应用场景：**
+
 - K8s 存活/就绪探针
 - Prometheus 监控数据采集
 - 运维管理平台集成
@@ -423,6 +433,7 @@ Actuator 提供应用的**可观测性**，包括：
 **答案：**
 
 **方案 1：限制暴露的端点**
+
 ```yaml
 management:
   endpoints:
@@ -432,6 +443,7 @@ management:
 ```
 
 **方案 2：使用独立管理端口**
+
 ```yaml
 management:
   server:
@@ -439,6 +451,7 @@ management:
 ```
 
 **方案 3：集成 Spring Security**
+
 ```java
 @Configuration
 public class ManagementSecurityConfig {
@@ -453,6 +466,7 @@ public class ManagementSecurityConfig {
 ```
 
 **方案 4：网络隔离**
+
 - 管理端口只监听内网
 - 防火墙规则限制访问来源
 
@@ -479,6 +493,7 @@ public class DatabaseHealthIndicator implements HealthIndicator {
 ```
 
 **关键要点：**
+
 - 使用 `Health.up()` 表示健康
 - 使用 `Health.down()` 表示不健康
 - 通过 `withDetail()` 添加详细信息
@@ -489,6 +504,7 @@ public class DatabaseHealthIndicator implements HealthIndicator {
 **答案：**
 
 **步骤 1：启用详细指标**
+
 ```yaml
 management:
   metrics:
@@ -498,6 +514,7 @@ management:
 ```
 
 **步骤 2：分析关键指标**
+
 ```bash
 # CPU 使用率
 curl /actuator/metrics/system.cpu.usage
@@ -510,6 +527,7 @@ curl /actuator/metrics/http.server.requests
 ```
 
 **步骤 3：线程分析**
+
 ```bash
 # 获取线程快照
 curl /actuator/threaddump > thread_dump.txt
@@ -518,6 +536,7 @@ curl /actuator/threaddump > thread_dump.txt
 ```
 
 **步骤 4：自定义业务指标**
+
 ```java
 @GetMapping("/api/data")
 public String getData() {
@@ -531,6 +550,7 @@ public String getData() {
 **答案：**
 
 **1. 最小化暴露原则**
+
 ```yaml
 management:
   endpoints:
@@ -540,6 +560,7 @@ management:
 ```
 
 **2. 网络隔离**
+
 ```yaml
 management:
   server:
@@ -548,6 +569,7 @@ management:
 ```
 
 **3. 认证授权**
+
 ```java
 @Bean
 public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -559,11 +581,13 @@ public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 ```
 
 **4. 监控告警**
+
 - 集成 Prometheus + Grafana
 - 设置健康检查告警规则
 - 监控关键业务指标
 
 **5. 日志审计**
+
 - 记录所有管理端点访问
 - 敏感操作（如 shutdown）需要审批
 
@@ -573,14 +597,14 @@ public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
 ### 核心知识点
 
-| 知识点 | 重要程度 | 考察频率 |
-|--------|---------|---------|
-| Actuator 作用 | ⭐⭐⭐⭐⭐ | 高 |
-| 常用端点 | ⭐⭐⭐⭐⭐ | 高 |
-| 安全配置 | ⭐⭐⭐⭐⭐ | 中 |
-| 自定义端点 | ⭐⭐⭐⭐ | 中 |
-| 健康检查 | ⭐⭐⭐⭐⭐ | 高 |
-| 性能监控 | ⭐⭐⭐⭐ | 中 |
+| 知识点         | 重要程度  | 考察频率 |
+|-------------|-------|------|
+| Actuator 作用 | ⭐⭐⭐⭐⭐ | 高    |
+| 常用端点        | ⭐⭐⭐⭐⭐ | 高    |
+| 安全配置        | ⭐⭐⭐⭐⭐ | 中    |
+| 自定义端点       | ⭐⭐⭐⭐  | 中    |
+| 健康检查        | ⭐⭐⭐⭐⭐ | 高    |
+| 性能监控        | ⭐⭐⭐⭐  | 中    |
 
 ### 学习建议
 

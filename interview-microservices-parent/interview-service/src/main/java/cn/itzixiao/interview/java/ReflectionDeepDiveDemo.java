@@ -5,13 +5,10 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.*;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Function;
 
 /**
  * Java 反射机制深入理解 - 教学型详解
- *
+ * <p>
  * ┌─────────────────────────────────────────────────────────────────────────────┐
  * │                           Java 反射机制总览                                 │
  * │                                                                             │
@@ -887,8 +884,11 @@ public class ReflectionDeepDiveDemo {
 
     // 子类，用于测试 getMethods vs getDeclaredMethods
     static class ChildPerson extends Person {
-        private void childPrivateMethod() {}
-        public void childPublicMethod() {}
+        private void childPrivateMethod() {
+        }
+
+        public void childPublicMethod() {
+        }
     }
 
     @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.RUNTIME)
@@ -897,6 +897,7 @@ public class ReflectionDeepDiveDemo {
             java.lang.annotation.ElementType.FIELD})
     @interface MyAnnotation {
         String value();
+
         String description() default "";
     }
 
@@ -935,6 +936,7 @@ public class ReflectionDeepDiveDemo {
     // 枚举单例 - 反射无法破坏
     enum EnumSingleton {
         INSTANCE;
+
         public void doSomething() {
             System.out.println("枚举单例方法");
         }
@@ -943,6 +945,7 @@ public class ReflectionDeepDiveDemo {
     // Final 字段测试类
     static class FinalFieldDemo {
         private final String finalField = "原始值";
+
         public String getFinalField() {
             return finalField;
         }
@@ -955,7 +958,7 @@ public class ReflectionDeepDiveDemo {
 
     public static void main(String[] args) throws Throwable {
         ReflectionDeepDiveDemo demo = new ReflectionDeepDiveDemo();
-        
+
         System.out.println("\n");
         System.out.println("███████████████████████████████████████████████████████████████████");
         System.out.println("█                                                                   █");
@@ -963,7 +966,7 @@ public class ReflectionDeepDiveDemo {
         System.out.println("█                                                                   █");
         System.out.println("███████████████████████████████████████████████████████████████████");
         System.out.println();
-        
+
         // 基础部分
         demo.getClassObject();
         demo.classMethods();
@@ -974,13 +977,13 @@ public class ReflectionDeepDiveDemo {
         demo.dynamicProxy();
         demo.performanceTest();
         demo.breakSingleton();
-        
+
         // 进阶部分
         demo.methodHandleDemo();
         demo.modifyFinalField();
         demo.arrayReflection();
         demo.genericReflection();
-        
+
         // 高频面试题
         demo.interviewQuestion1();
         demo.interviewQuestion2();
@@ -989,7 +992,7 @@ public class ReflectionDeepDiveDemo {
         demo.interviewQuestion5();
         demo.interviewQuestion6();
         demo.interviewQuestion7();
-        
+
         System.out.println("\n");
         System.out.println("███████████████████████████████████████████████████████████████████");
         System.out.println("█                        全部演示完成                             █");

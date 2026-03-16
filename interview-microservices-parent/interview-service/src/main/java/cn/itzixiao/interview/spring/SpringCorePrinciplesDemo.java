@@ -1,14 +1,8 @@
 package cn.itzixiao.interview.spring;
 
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-
 /**
  * Spring 核心原理总结
- *
+ * <p>
  * ┌─────────────────────────────────────────────────────────────────────────┐
  * │                         Spring 框架核心架构                              │
  * ├─────────────────────────────────────────────────────────────────────────┤

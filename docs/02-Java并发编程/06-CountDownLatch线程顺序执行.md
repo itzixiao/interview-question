@@ -75,13 +75,13 @@ public class SequentialExecution {
 
 ## 核心 API
 
-| 方法 | 说明 |
-|------|------|
-| `CountDownLatch(int count)` | 构造函数，指定计数器初始值 |
-| `await()` | 等待计数器归零（无限期阻塞） |
-| `await(long timeout, TimeUnit unit)` | 等待指定时间 |
-| `countDown()` | 计数器减 1 |
-| `getCount()` | 获取当前计数器值 |
+| 方法                                   | 说明             |
+|--------------------------------------|----------------|
+| `CountDownLatch(int count)`          | 构造函数，指定计数器初始值  |
+| `await()`                            | 等待计数器归零（无限期阻塞） |
+| `await(long timeout, TimeUnit unit)` | 等待指定时间         |
+| `countDown()`                        | 计数器减 1         |
+| `getCount()`                         | 获取当前计数器值       |
 
 ## 典型应用场景
 
@@ -173,8 +173,12 @@ public class MainWaitForWorkers {
 ```java
 // CountDownLatch 是一次性的
 CountDownLatch latch = new CountDownLatch(1);
-latch.countDown();
-latch.await();  // 立即通过
+latch.
+
+countDown();
+latch.
+
+await();  // 立即通过
 
 // 不能重置，再次使用需要创建新的
 // latch = new CountDownLatch(1);  // 需要重新创建
@@ -186,10 +190,18 @@ latch.await();  // 立即通过
 // 错误：countDown() 在 await() 之后，且在同一线程
 CountDownLatch latch = new CountDownLatch(1);
 
-new Thread(() -> {
-    latch.await();      // 永远等待
-    latch.countDown();  // 永远不会执行
-}).start();
+new
+
+Thread(() ->{
+        latch.
+
+await();      // 永远等待
+    latch.
+
+countDown();  // 永远不会执行
+}).
+
+start();
 ```
 
 ### 3. 异常处理
@@ -197,43 +209,57 @@ new Thread(() -> {
 ```java
 CountDownLatch latch = new CountDownLatch(1);
 
-try {
-    latch.await();
-} catch (InterruptedException e) {
-    // 恢复中断状态
-    Thread.currentThread().interrupt();
-    // 或者处理中断
+try{
+        latch.
+
+await();
+}catch(
+InterruptedException e){
+        // 恢复中断状态
+        Thread.
+
+currentThread().
+
+interrupt();
+// 或者处理中断
 }
 ```
 
 ## 与其他同步工具对比
 
-| 工具 | 特点 | 适用场景 |
-|------|------|----------|
+| 工具                 | 特点             | 适用场景       |
+|--------------------|----------------|------------|
 | **CountDownLatch** | 一次性，计数器归零后不能重置 | 任务分组、多阶段任务 |
-| **CyclicBarrier** | 可循环使用，线程互相等待 | 分阶段计算、并行迭代 |
-| **Semaphore** | 控制同时访问的线程数量 | 资源池、限流 |
-| **Phaser** | 更灵活的分阶段控制 | 复杂多阶段任务 |
+| **CyclicBarrier**  | 可循环使用，线程互相等待   | 分阶段计算、并行迭代 |
+| **Semaphore**      | 控制同时访问的线程数量    | 资源池、限流     |
+| **Phaser**         | 更灵活的分阶段控制      | 复杂多阶段任务    |
 
 ## 面试常见问题
 
 **问题 1:CountDownLatch 和 CyclicBarrier 的区别？**
 
 **A**:
+
 - **CountDownLatch**：一次性，一个或多个线程等待其他线程完成
 - **CyclicBarrier**：可循环，多个线程互相等待，同时到达屏障
 
 **问题 2：为什么 CountDownLatch 不能重置？**
 
-**A**: CountDownLatch 设计为一次性使用，计数器归零后状态不可改变。如果需要重复使用，应该使用 CyclicBarrier 或重新创建 CountDownLatch 实例。
+**A**: CountDownLatch 设计为一次性使用，计数器归零后状态不可改变。如果需要重复使用，应该使用 CyclicBarrier 或重新创建
+CountDownLatch 实例。
 
 **问题 3：如何实现多个线程的顺序执行？**
 
 **A**: 使用多个 CountDownLatch 串联：
+
 ```java
-CountDownLatch[] latches = new CountDownLatch[n-1];
-for (int i = 0; i < n-1; i++) {
-    latches[i] = new CountDownLatch(1);
+CountDownLatch[] latches = new CountDownLatch[n - 1];
+for(
+int i = 0;
+i<n-1;i++){
+latches[i]=new
+
+CountDownLatch(1);
 }
 
 // 线程 i 等待 latches[i-1]，完成后调用 latches[i].countDown()
@@ -254,10 +280,13 @@ for (int i = 0; i < n-1; i++) {
 ```java
 CountDownLatch latch = new CountDownLatch(1);
 
-try {
-    doWork();
-} finally {
-    latch.countDown();  // 确保一定会执行
+try{
+
+doWork();
+}finally{
+        latch.
+
+countDown();  // 确保一定会执行
 }
 ```
 
@@ -266,9 +295,9 @@ try {
 ```java
 // 避免永久阻塞
 boolean completed = latch.await(10, TimeUnit.SECONDS);
-if (!completed) {
-    // 处理超时
-}
+if(!completed){
+        // 处理超时
+        }
 ```
 
 ### 3. 合理设置计数器
@@ -285,16 +314,27 @@ CountDownLatch latch = new CountDownLatch(taskCount);
 ExecutorService executor = Executors.newFixedThreadPool(4);
 CountDownLatch latch = new CountDownLatch(tasks.size());
 
-for (Task task : tasks) {
-    executor.submit(() -> {
-        try {
-            task.execute();
-        } finally {
-            latch.countDown();
-        }
-    });
-}
+for(
+Task task :tasks){
+        executor.
 
-latch.await();
-executor.shutdown();
+submit(() ->{
+        try{
+        task.
+
+execute();
+        }finally{
+                latch.
+
+countDown();
+        }
+                });
+                }
+
+                latch.
+
+await();
+executor.
+
+shutdown();
 ```

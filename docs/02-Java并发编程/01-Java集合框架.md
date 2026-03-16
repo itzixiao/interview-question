@@ -27,12 +27,14 @@
 ### ArrayList
 
 **特点**：
+
 - 基于动态数组实现
 - 随机访问 O(1)
 - 插入删除 O(n)
 - 非线程安全
 
 **扩容机制**：
+
 ```java
 // 默认初始容量 10
 // 扩容：原容量的 1.5 倍
@@ -46,12 +48,14 @@ grow() {
 ### LinkedList
 
 **特点**：
+
 - 基于双向链表实现
 - 随机访问 O(n)
 - 插入删除 O(1)
 - 实现了 Deque 接口
 
 **节点结构**：
+
 ```java
 private static class Node<E> {
     E item;
@@ -71,6 +75,7 @@ private static class Node<E> {
 ### CopyOnWriteArrayList
 
 **特点**：
+
 - 线程安全
 - 读操作无锁
 - 写操作复制新数组
@@ -86,6 +91,7 @@ List<String> safeList = new CopyOnWriteArrayList<>();
 ```
 
 **特点**：
+
 - ✅ 读操作无锁，性能极高
 - ✅ 写操作加锁并复制数组
 - ✅ 迭代器不会抛出 ConcurrentModificationException
@@ -102,12 +108,14 @@ List<String> syncList = Collections.synchronizedList(list);
 ```
 
 **特点**：
+
 - ✅ 所有操作加 synchronized 锁
 - ✅ 包装已有 ArrayList
 - ❌ 性能较低（每次操作都要加锁）
 - ❌ 迭代时需手动同步
 
 **使用注意**：
+
 ```java
 // 迭代时必须手动同步
 synchronized (syncList) {
@@ -124,6 +132,7 @@ List<String> vector = new Vector<>();
 ```
 
 **特点**：
+
 - ✅ 线程安全（synchronized）
 - ❌ 性能低
 - ❌ 扩容 2 倍，浪费内存
@@ -159,6 +168,7 @@ public class SafeArrayList<T> {
 ```
 
 **特点**：
+
 - ✅ 灵活控制锁的粒度
 - ✅ 可实现读写分离
 - ❌ 代码复杂
@@ -171,6 +181,7 @@ private static final ThreadLocal<List<String>> threadLocalList =
 ```
 
 **特点**：
+
 - ✅ 每个线程独立副本，无需加锁
 - ✅ 性能极高
 - ❌ 线程间数据不共享
@@ -180,13 +191,13 @@ private static final ThreadLocal<List<String>> threadLocalList =
 
 ### 方案对比
 
-| 方案                | 性能      | 灵活性 | 适用场景           |
-|---------------------|-----------|--------|--------------------|
-| CopyOnWriteArrayList | ⭐⭐⭐⭐⭐ | 中     | 读多写少           |
-| Collections.synchronizedList | ⭐⭐⭐ | 高     | 通用场景           |
-| Vector              | ⭐⭐      | 低     | 不推荐             |
-| ReentrantLock + ArrayList | ⭐⭐⭐⭐ | 极高   | 需要精细控制       |
-| ThreadLocal         | ⭐⭐⭐⭐⭐ | 中     | 线程隔离           |
+| 方案                           | 性能    | 灵活性 | 适用场景   |
+|------------------------------|-------|-----|--------|
+| CopyOnWriteArrayList         | ⭐⭐⭐⭐⭐ | 中   | 读多写少   |
+| Collections.synchronizedList | ⭐⭐⭐   | 高   | 通用场景   |
+| Vector                       | ⭐⭐    | 低   | 不推荐    |
+| ReentrantLock + ArrayList    | ⭐⭐⭐⭐  | 极高  | 需要精细控制 |
+| ThreadLocal                  | ⭐⭐⭐⭐⭐ | 中   | 线程隔离   |
 
 ### 最佳实践
 
@@ -209,11 +220,13 @@ List<String> vector = new Vector<>();  // 性能差
 ### HashSet
 
 **特点**：
+
 - 基于 HashMap 实现
 - 无序、去重
 - O(1) 操作
 
 **去重原理**：
+
 - hashCode() 确定桶位置
 - equals() 判断是否相等
 
@@ -276,13 +289,13 @@ new LinkedHashMap<K, V>(16, 0.75f, true) {
 
 ### BlockingQueue
 
-| 实现                  | 特点                       |
-|-----------------------|----------------------------|
-| ArrayBlockingQueue    | 有界数组，一把锁           |
-| LinkedBlockingQueue   | 可选有界，两把锁（读写分离）|
-| PriorityBlockingQueue | 无界优先队列               |
-| SynchronousQueue      | 不存储元素，直接传递       |
-| DelayQueue            | 延时队列                   |
+| 实现                    | 特点             |
+|-----------------------|----------------|
+| ArrayBlockingQueue    | 有界数组，一把锁       |
+| LinkedBlockingQueue   | 可选有界，两把锁（读写分离） |
+| PriorityBlockingQueue | 无界优先队列         |
+| SynchronousQueue      | 不存储元素，直接传递     |
+| DelayQueue            | 延时队列           |
 
 ## 迭代器与 fail-fast
 
@@ -296,6 +309,7 @@ for (String s : list) {
 ```
 
 **原理**：
+
 - modCount 记录修改次数
 - 迭代时检查 modCount 是否变化
 
@@ -358,11 +372,11 @@ Collections.min(list);                     // 最小值
 
 ## 性能对比
 
-| 操作      | ArrayList   | LinkedList  | HashMap   | TreeMap     |
-|-----------|-------------|-------------|-----------|-------------|
-| 随机访问  | O(1)        | O(n)         | -         | -           |
-| 插入/删除 | O(n)        | O(1)         | O(1)      | O(log n)    |
-| 查找      | O(n)        | O(n)         | O(1)      | O(log n)    |
+| 操作    | ArrayList | LinkedList | HashMap | TreeMap  |
+|-------|-----------|------------|---------|----------|
+| 随机访问  | O(1)      | O(n)       | -       | -        |
+| 插入/删除 | O(n)      | O(1)       | O(1)    | O(log n) |
+| 查找    | O(n)      | O(n)       | O(1)    | O(log n) |
 
 ## 最佳实践
 
@@ -380,15 +394,16 @@ Collections.min(list);                     // 最小值
 
 答案：
 
-| 特性       | ArrayList        | LinkedList            |
-|------------|------------------|-----------------------|
-| 底层结构   | 动态数组         | 双向链表              |
-| 随机访问   | O(1)             | O(n)                  |
-| 插入删除   | O(n)             | O(1)                  |
-| 内存占用   | 少               | 多（节点指针）        |
-| 功能       | List 接口        | List + Deque 接口     |
+| 特性   | ArrayList | LinkedList      |
+|------|-----------|-----------------|
+| 底层结构 | 动态数组      | 双向链表            |
+| 随机访问 | O(1)      | O(n)            |
+| 插入删除 | O(n)      | O(1)            |
+| 内存占用 | 少         | 多（节点指针）         |
+| 功能   | List 接口   | List + Deque 接口 |
 
 **源码对比：**
+
 ```java
 // ArrayList - 数组
 transient Object[] elementData;
@@ -404,10 +419,12 @@ private static class Node<E> {
 ```
 
 **使用场景：**
+
 - ✅ ArrayList：查询多、增删少（90% 场景）
 - ✅ LinkedList：频繁在首尾插入删除、需要队列操作
 
 **性能测试（10 万次操作）：**
+
 ```java
 // 随机访问
 ArrayList.get(i);    // 0.1ms
@@ -426,16 +443,17 @@ LinkedList.add(i, e);// 0.5ms
 
 答案：
 
-| 特性       | HashMap                | Hashtable            |
-|------------|------------------------|----------------------|
-| 线程安全   | ❌ 否                  | ✅ 是（synchronized） |
-| null 值    | ✅ 允许                | ❌ 不允许             |
-| 性能       | 高                     | 低                   |
-| 扩容       | 2 倍                   | 2 倍 +1               |
-| hash 计算  | 优化过                 | 直接使用             |
-| 继承       | AbstractMap            | Dictionary（已过时）  |
+| 特性      | HashMap     | Hashtable         |
+|---------|-------------|-------------------|
+| 线程安全    | ❌ 否         | ✅ 是（synchronized） |
+| null 值  | ✅ 允许        | ❌ 不允许             |
+| 性能      | 高           | 低                 |
+| 扩容      | 2 倍         | 2 倍 +1            |
+| hash 计算 | 优化过         | 直接使用              |
+| 继承      | AbstractMap | Dictionary（已过时）   |
 
 **HashMap 优势：**
+
 ```java
 // 允许 null
 map.put(null, value);
@@ -448,6 +466,7 @@ for (int i = 0; i < 100000; i++) {
 ```
 
 **线程安全替代方案：**
+
 ```java
 // ❌ 不推荐 Hashtable
 Map<String, String> map = new Hashtable<>();
@@ -465,6 +484,7 @@ Map<String, String> syncMap = Collections.synchronizedMap(new HashMap<>());
 HashSet 基于 HashMap 实现，通过 hashCode() 和 equals() 保证唯一性。
 
 **源码分析：**
+
 ```java
 public class HashSet<E> extends AbstractSet<E> {
     private transient HashMap<E,Object> map;
@@ -477,6 +497,7 @@ public class HashSet<E> extends AbstractSet<E> {
 ```
 
 **去重流程：**
+
 ```
 1. 计算 hashCode() 确定桶位置
 2. 如果桶为空 → 直接放入
@@ -489,6 +510,7 @@ public class HashSet<E> extends AbstractSet<E> {
 ```
 
 **示例：**
+
 ```java
 class Person {
     String name;
@@ -515,6 +537,7 @@ set.add(new Person("张三", 1));  // false，重复
 ```
 
 **重写要求：**
+
 - ✅ 必须同时重写 hashCode() 和 equals()
 - ✅ 相等对象必须有相同 hashCode
 - ✅ 只重写一个会导致去重失效
@@ -525,6 +548,7 @@ set.add(new Person("张三", 1));  // false，重复
 fail-fast 是集合的一种错误检测机制，在迭代过程中如果集合被修改，立即抛出 ConcurrentModificationException。
 
 **原理：**
+
 ```java
 // AbstractList 中维护 modCount
 protected transient int modCount = 0;
@@ -540,6 +564,7 @@ final void checkForComodification() {
 ```
 
 **触发场景：**
+
 ```java
 // ❌ 错误示范
 List<String> list = new ArrayList<>();
@@ -554,6 +579,7 @@ for (String s : list) {
 **解决方案：**
 
 **方案 1：Iterator.remove()**
+
 ```java
 Iterator<String> it = list.iterator();
 while (it.hasNext()) {
@@ -565,11 +591,13 @@ while (it.hasNext()) {
 ```
 
 **方案 2：removeIf（Java 8+）**
+
 ```java
 list.removeIf(s -> condition);  // ✅ 最简洁
 ```
 
 **方案 3：CopyOnWriteArrayList**
+
 ```java
 CopyOnWriteArrayList<String> cowList = new CopyOnWriteArrayList<>(list);
 for (String s : cowList) {
@@ -578,6 +606,7 @@ for (String s : cowList) {
 ```
 
 **方案 4：普通 for 循环（倒序）**
+
 ```java
 for (int i = list.size() - 1; i >= 0; i--) {
     if (condition) {
@@ -590,16 +619,17 @@ for (int i = list.size() - 1; i >= 0; i--) {
 
 答案：
 
-| 特性       | ArrayBlockingQueue              | LinkedBlockingQueue          |
-|------------|---------------------------------|-------------------------------|
-| 底层结构   | 数组                            | 链表                          |
-| 有界/无界  | 有界（必须指定容量）           | 可选（默认 Integer.MAX_VALUE） |
-| 锁机制     | 一把锁（ReentrantLock）        | 两把锁（读写分离）            |
-| 公平性     | 可选公平/非公平                | 只能非公平                    |
-| 内存占用   | 连续空间，较少                 | 节点对象，较多                |
-| 适用场景   | 数据量固定                     | 数据量不确定                  |
+| 特性    | ArrayBlockingQueue | LinkedBlockingQueue      |
+|-------|--------------------|--------------------------|
+| 底层结构  | 数组                 | 链表                       |
+| 有界/无界 | 有界（必须指定容量）         | 可选（默认 Integer.MAX_VALUE） |
+| 锁机制   | 一把锁（ReentrantLock） | 两把锁（读写分离）                |
+| 公平性   | 可选公平/非公平           | 只能非公平                    |
+| 内存占用  | 连续空间，较少            | 节点对象，较多                  |
+| 适用场景  | 数据量固定              | 数据量不确定                   |
 
 **源码对比：**
+
 ```java
 // ArrayBlockingQueue - 一把锁
 final ReentrantLock lock;
@@ -614,6 +644,7 @@ private final Condition notFull;
 ```
 
 **性能对比：**
+
 ```java
 // 高并发场景
 LinkedBlockingQueue 吞吐量更高（读写锁分离）
@@ -621,6 +652,7 @@ ArrayBlockingQueue 简单高效（单锁）
 ```
 
 **使用建议：**
+
 - ✅ 容量固定 → ArrayBlockingQueue
 - ✅ 容量不确定 → LinkedBlockingQueue（注意设置上限）
 - ✅ 高并发读 → LinkedBlockingQueue
@@ -631,6 +663,7 @@ ArrayBlockingQueue 简单高效（单锁）
 CopyOnWriteArrayList（COW）是一种线程安全的 List，核心思想是**写时复制**。
 
 **原理：**
+
 ```java
 public boolean add(E e) {
     final ReentrantLock lock = this.lock;
@@ -650,6 +683,7 @@ public boolean add(E e) {
 ```
 
 **特点：**
+
 - ✅ 读操作无锁，性能极高
 - ✅ 写操作加锁并复制数组
 - ✅ 迭代器不会抛出 ConcurrentModificationException
@@ -657,11 +691,13 @@ public boolean add(E e) {
 - ❌ 数据一致性弱（可能读到旧数据）
 
 **使用场景：**
+
 - ✅ 读多写少（如监听器列表）
 - ✅ 白名单、黑名单配置
 - ❌ 写多读少（频繁复制，性能差）
 
 **示例：**
+
 ```java
 CopyOnWriteArrayList<String> list = new CopyOnWriteArrayList<>();
 list.add("A");
@@ -679,6 +715,7 @@ for (String s : list) {
 LinkedHashMap 可以通过 accessOrder 参数实现 LRU（最近最少使用）缓存。
 
 **实现方式：**
+
 ```java
 public class LRUCache<K, V> extends LinkedHashMap<K, V> {
     private final int maxCapacity;
@@ -703,6 +740,7 @@ for (int i = 0; i < 10; i++) {
 ```
 
 **核心参数：**
+
 ```java
 public LinkedHashMap(int initialCapacity,
                      float loadFactor,
@@ -713,6 +751,7 @@ public LinkedHashMap(int initialCapacity,
 ```
 
 **LRU 原理：**
+
 ```
 每次访问（get/put）→ 移动到链表尾部
 删除时 → 删除链表头部（最久未使用）
@@ -722,12 +761,13 @@ public LinkedHashMap(int initialCapacity,
 
 答案：
 
-| 类名        | 类型   | 作用                             |
-|-------------|--------|----------------------------------|
-| Collection  | 接口   | 集合的根接口（List/Set/Queue 的父接口） |
-| Collections | 工具类 | 操作集合的静态方法               |
+| 类名          | 类型  | 作用                          |
+|-------------|-----|-----------------------------|
+| Collection  | 接口  | 集合的根接口（List/Set/Queue 的父接口） |
+| Collections | 工具类 | 操作集合的静态方法                   |
 
 **Collection 接口：**
+
 ```java
 public interface Collection<E> extends Iterable<E> {
     boolean add(E e);
@@ -738,6 +778,7 @@ public interface Collection<E> extends Iterable<E> {
 ```
 
 **Collections 工具类：**
+
 ```java
 // 排序
 Collections.sort(list);
@@ -760,5 +801,6 @@ Object min = Collections.min(list);
 ```
 
 **记忆技巧：**
+
 - Collection → 集合（单数，接口）
 - Collections → 集合工具（复数，工具类）

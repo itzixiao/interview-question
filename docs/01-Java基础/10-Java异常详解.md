@@ -40,21 +40,21 @@ Throwable
 
 ### Error vs Exception
 
-| 特性 | Error | Exception |
-|------|-------|-----------|
-| **性质** | JVM 级别的严重错误 | 程序可以处理的异常 |
-| **原因** | 系统资源耗尽、虚拟机错误 | 程序逻辑或外部资源问题 |
-| **处理** | 不应尝试捕获 | 应该捕获并处理 |
+| 特性     | Error             | Exception       |
+|--------|-------------------|-----------------|
+| **性质** | JVM 级别的严重错误       | 程序可以处理的异常       |
+| **原因** | 系统资源耗尽、虚拟机错误      | 程序逻辑或外部资源问题     |
+| **处理** | 不应尝试捕获            | 应该捕获并处理         |
 | **示例** | OOM、StackOverflow | NPE、IOException |
 
 ### RuntimeException vs Checked Exception
 
-| 特性 | RuntimeException | Checked Exception |
-|------|------------------|-------------------|
-| **检查时机** | 运行时 | 编译时 |
-| **强制处理** | ❌ 不需要 | ✅ 必须处理 |
-| **常见类型** | NPE、数组越界 | IOException、SQLException |
-| **设计意图** | 程序逻辑错误 | 可恢复的外部条件 |
+| 特性       | RuntimeException | Checked Exception        |
+|----------|------------------|--------------------------|
+| **检查时机** | 运行时              | 编译时                      |
+| **强制处理** | ❌ 不需要            | ✅ 必须处理                   |
+| **常见类型** | NPE、数组越界         | IOException、SQLException |
+| **设计意图** | 程序逻辑错误           | 可恢复的外部条件                 |
 
 ---
 
@@ -83,9 +83,9 @@ try {
 1. **正常情况**：try → finally → 返回
 2. **异常情况**：try → catch → finally → 返回
 3. **finally 不执行的情况**：
-   - `System.exit()` 调用
-   - 线程被杀死
-   - JVM 崩溃
+    - `System.exit()` 调用
+    - 线程被杀死
+    - JVM 崩溃
 
 ### 多个 catch 块的顺序
 
@@ -121,6 +121,7 @@ public void readFile() throws IOException {
 ```
 
 **特点**：
+
 - 用于方法签名
 - 可以声明多个异常：`throws AException, BException`
 - 将异常处理责任交给调用者
@@ -138,18 +139,19 @@ public void validateAge(int age) {
 ```
 
 **特点**：
+
 - 用于方法体内部
 - 只能抛出一个异常对象
 - 后面不能有可执行代码
 
 ### 对比表
 
-| 特性 | throw | throws |
-|------|-------|--------|
-| **位置** | 方法体内 | 方法签名 |
-| **作用** | 抛出异常对象 | 声明异常类型 |
-| **数量** | 一次一个 | 可声明多个 |
-| **后续代码** | 不可执行 | 无影响 |
+| 特性       | throw  | throws |
+|----------|--------|--------|
+| **位置**   | 方法体内   | 方法签名   |
+| **作用**   | 抛出异常对象 | 声明异常类型 |
+| **数量**   | 一次一个   | 可声明多个  |
+| **后续代码** | 不可执行   | 无影响    |
 
 ---
 
@@ -477,14 +479,15 @@ try {
 
 **答案：**
 
-| 维度 | Error | Exception |
-|------|-------|-----------|
-| **定义** | JVM 无法处理的严重错误 | 程序可以处理的异常 |
-| **原因** | 系统资源问题、虚拟机错误 | 程序逻辑、外部环境问题 |
-| **处理策略** | 不应捕获，应让程序终止 | 应该捕获并恢复 |
+| 维度       | Error                                  | Exception                           |
+|----------|----------------------------------------|-------------------------------------|
+| **定义**   | JVM 无法处理的严重错误                          | 程序可以处理的异常                           |
+| **原因**   | 系统资源问题、虚拟机错误                           | 程序逻辑、外部环境问题                         |
+| **处理策略** | 不应捕获，应让程序终止                            | 应该捕获并恢复                             |
 | **常见类型** | OutOfMemoryError<br>StackOverflowError | IOException<br>NullPointerException |
 
 **示例：**
+
 ```java
 // Error - 不应捕获
 try {
@@ -509,18 +512,20 @@ try {
 
 **答案：**
 
-| 维度 | RuntimeException | Checked Exception |
-|------|------------------|-------------------|
-| **检查时机** | 运行时 | 编译时 |
-| **强制处理** | 否 | 是（throws 或 try-catch） |
-| **代表场景** | 程序逻辑错误 | 外部资源访问 |
-| **恢复性** | 通常不可恢复 | 通常可恢复 |
+| 维度       | RuntimeException | Checked Exception     |
+|----------|------------------|-----------------------|
+| **检查时机** | 运行时              | 编译时                   |
+| **强制处理** | 否                | 是（throws 或 try-catch） |
+| **代表场景** | 程序逻辑错误           | 外部资源访问                |
+| **恢复性**  | 通常不可恢复           | 通常可恢复                 |
 
 **常见类型：**
+
 - **RuntimeException**：NPE、数组越界、类型转换异常
 - **Checked Exception**：IOException、SQLException、ClassNotFoundException
 
 **设计哲学：**
+
 - RuntimeException：程序员应该避免的错误
 - Checked Exception：外部环境导致的可预期问题
 
@@ -530,13 +535,14 @@ try {
 
 **答案：**
 
-| 关键字 | 作用 | 使用场景 |
-|--------|------|----------|
-| **final** | 修饰符：不可变 | 常量、方法不可重写、类不可继承 |
-| **finally** | 异常处理：总执行 | try-catch 后清理资源 |
+| 关键字          | 作用               | 使用场景                  |
+|--------------|------------------|-----------------------|
+| **final**    | 修饰符：不可变          | 常量、方法不可重写、类不可继承       |
+| **finally**  | 异常处理：总执行         | try-catch 后清理资源       |
 | **finalize** | Object 方法：GC 前回调 | 已废弃（JDK9+），改用 Cleaner |
 
 **示例：**
+
 ```java
 // final
 final int MAX_VALUE = 100;  // 常量
@@ -563,12 +569,14 @@ protected void finalize() throws Throwable {
 **答案：**
 
 **优势：**
+
 1. **自动关闭资源**：无需手动调用 close()
 2. **避免资源泄漏**：即使异常也会关闭
 3. **代码简洁**：减少大量样板代码
 4. **抑制异常**：多个异常时保留主异常
 
 **对比：**
+
 ```java
 // 传统写法（冗长）
 InputStream is = null;
@@ -594,6 +602,7 @@ try (InputStream is = new FileInputStream("file.txt")) {
 ```
 
 **适用条件：**
+
 - 实现了 `AutoCloseable` 或 `Closeable` 接口
 - JDK7+ 支持
 
@@ -604,12 +613,14 @@ try (InputStream is = new FileInputStream("file.txt")) {
 **答案：**
 
 **设计原则：**
+
 1. **继承 RuntimeException**：非受检异常，避免污染方法签名
 2. **包含错误码**：便于前端展示和日志追踪
 3. **保持异常链**：传递原始异常原因
 4. **分层设计**：不同业务域有不同异常
 
 **示例架构：**
+
 ```
 BaseException（抽象基类）
 ├── BusinessException（业务异常）
@@ -623,6 +634,7 @@ BaseException（抽象基类）
 ```
 
 **代码实现：**
+
 ```java
 // 基类
 public abstract class BaseException extends RuntimeException {
@@ -656,11 +668,13 @@ public class OrderNotFoundException extends BusinessException {
 **答案：**
 
 **性能影响：**
+
 1. **创建异常对象开销大**：填充堆栈跟踪
 2. **频繁抛异常影响性能**：比条件判断慢几个数量级
 3. **避免用异常控制流程**：应用于真正的异常情况
 
 **性能对比：**
+
 ```java
 // ❌ 性能差（10000 次异常耗时约 500ms）
 long start = System.currentTimeMillis();
@@ -680,6 +694,7 @@ for (int i = 0; i < 10000; i++) {
 ```
 
 **优化建议：**
+
 - 只在真正异常情况下抛异常
 - 正常业务流程用条件判断
 - 高并发场景避免频繁抛异常
@@ -689,10 +704,12 @@ for (int i = 0; i < 10000; i++) {
 ## 🔗 跨模块关联
 
 ### 前置知识
+
 - ✅ **Java基础语法** - 方法、类、接口
 - ✅ **面向对象** - 继承、多态
 
 ### 后续应用
+
 - 📚 **[MySQL](../07-MySQL 数据库/README.md)** - SQLException 处理
 - 📚 **[Spring框架](../04-Spring框架/README.md)** - 事务异常传播
 - 📚 **[MyBatis](../09-中间件/README.md)** - 持久层异常封装
@@ -703,16 +720,19 @@ for (int i = 0; i < 10000; i++) {
 ## 📖 学习建议
 
 ### 第一阶段：理解异常体系（1 天）
+
 1. 掌握 Throwable、Error、Exception 的关系
 2. 区分 RuntimeException 和 Checked Exception
 3. 熟悉常见异常类型
 
 ### 第二阶段：异常处理语法（1 天）
+
 1. try-catch-finally 执行流程
 2. throws 和 throw 的使用
 3. 多异常捕获和异常链
 
 ### 第三阶段：实战应用（1-2 天）
+
 1. 自定义异常设计
 2. try-with-resources
 3. 全局异常处理器
@@ -723,6 +743,7 @@ for (int i = 0; i < 10000; i++) {
 ## 📈 更新日志
 
 ### v1.0 - 2026-03-15
+
 - ✅ 新增 Java 异常详解文档
 - ✅ 补充 6 道高频面试题
 - ✅ 添加异常处理最佳实践

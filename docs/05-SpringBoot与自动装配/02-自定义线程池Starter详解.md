@@ -403,6 +403,7 @@ cn.itxiao.starter.ThreadPoolAutoConfiguration
 ```
 
 **作用说明：**
+
 - Spring Boot 启动时会扫描所有 jar 包中的 `META-INF/spring.factories` 文件
 - 读取 `EnableAutoConfiguration` 键对应的自动配置类
 - 根据条件注解决定是否加载这些配置类
@@ -608,23 +609,24 @@ public class TestController {
 Spring Boot Starter 的自动装配基于以下核心机制：
 
 1. **spring.factories 文件**
-   - 位于 `META-INF/spring.factories`
-   - 指定自动配置类的全限定名
+    - 位于 `META-INF/spring.factories`
+    - 指定自动配置类的全限定名
 
 2. **@EnableAutoConfiguration 注解**
-   - 扫描 classpath 下所有 jar 包的 spring.factories
-   - 加载其中的自动配置类
+    - 扫描 classpath 下所有 jar 包的 spring.factories
+    - 加载其中的自动配置类
 
 3. **条件注解**
-   - `@ConditionalOnClass`：类路径存在某类时才生效
-   - `@ConditionalOnProperty`：配置满足条件时才生效
-   - `@ConditionalOnMissingBean`：容器中没有某 Bean 时才创建
+    - `@ConditionalOnClass`：类路径存在某类时才生效
+    - `@ConditionalOnProperty`：配置满足条件时才生效
+    - `@ConditionalOnMissingBean`：容器中没有某 Bean 时才创建
 
 4. **配置属性绑定**
-   - `@ConfigurationProperties` 将 yml 配置绑定到 JavaBean
-   - 实现类型安全的配置管理
+    - `@ConfigurationProperties` 将 yml 配置绑定到 JavaBean
+    - 实现类型安全的配置管理
 
 **执行流程：**
+
 ```
 启动 → 扫描 spring.factories → 读取自动配置类 → 
 检查条件注解 → 加载配置类 → 创建 Bean → 注册到容器
@@ -637,11 +639,13 @@ Spring Boot Starter 的自动装配基于以下核心机制：
 **答：**
 
 **步骤 1：创建 Maven 项目**
+
 - groupId: cn.itxiao
 - artifactId: interview-threadpool-starter
 - packaging: jar
 
 **步骤 2：添加依赖**
+
 ```xml
 <dependency>
     <groupId>org.springframework.boot</groupId>
@@ -655,21 +659,25 @@ Spring Boot Starter 的自动装配基于以下核心机制：
 ```
 
 **步骤 3：编写三个核心类**
+
 1. XxxProperties：配置属性类（@ConfigurationProperties）
 2. XxxAutoConfiguration：自动配置类（@Configuration）
 3. 业务类：实际功能类（如 CustomThreadPoolExecutor）
 
 **步骤 4：创建 spring.factories**
+
 ```properties
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
 cn.itxiao.starter.XxxAutoConfiguration
 ```
 
 **步骤 5：发布到 Maven 仓库**
+
 - 本地安装：mvn clean install
 - 或发布到 Nexus/Artifactory
 
 **步骤 6：在业务项目中引入**
+
 ```xml
 <dependency>
     <groupId>cn.itxiao</groupId>
@@ -687,15 +695,17 @@ cn.itxiao.starter.XxxAutoConfiguration
 **作用：** 当 Spring 容器中**不存在**指定类型的 Bean 时，才创建当前 Bean。
 
 **使用场景：**
+
 1. **允许用户覆盖默认配置**
-   - Starter 提供默认的 Bean 实现
-   - 用户可以自定义同名/同类型的 Bean 来覆盖
+    - Starter 提供默认的 Bean 实现
+    - 用户可以自定义同名/同类型的 Bean 来覆盖
 
 2. **避免 Bean 冲突**
-   - 多个 Starter 可能都定义了同类型的 Bean
-   - 使用此注解确保只有一个被创建
+    - 多个 Starter 可能都定义了同类型的 Bean
+    - 使用此注解确保只有一个被创建
 
 **示例：**
+
 ```java
 @Bean
 @ConditionalOnMissingBean(ThreadPoolExecutor.class)
@@ -715,6 +725,7 @@ public class MyConfig {
 ```
 
 **优先级规则：**
+
 - 用户自定义的 Bean 优先级 > Starter 自动配置的 Bean
 
 ---
@@ -726,23 +737,24 @@ public class MyConfig {
 **原理：**
 
 1. **编译时代码生成**
-   - spring-boot-configuration-processor 在编译时生成元数据
-   - 生成 `META-INF/spring-configuration-metadata.json`
-   - 包含所有可配置属性的名称、类型、描述
+    - spring-boot-configuration-processor 在编译时生成元数据
+    - 生成 `META-INF/spring-configuration-metadata.json`
+    - 包含所有可配置属性的名称、类型、描述
 
 2. **运行时绑定**
-   - Spring Boot 启动时读取元数据
-   - 解析配置文件（yml/properties）
-   - 通过反射将属性值注入到 JavaBean
+    - Spring Boot 启动时读取元数据
+    - 解析配置文件（yml/properties）
+    - 通过反射将属性值注入到 JavaBean
 
 3. **松散绑定（Relaxed Binding）**
-   - 支持多种命名格式：
-     - kebab-case: `core-pool-size`
-     - camelCase: `corePoolSize`
-     - snake_case: `core_pool_size`
-   - 都能正确映射到 JavaBean 的 `corePoolSize` 字段
+    - 支持多种命名格式：
+        - kebab-case: `core-pool-size`
+        - camelCase: `corePoolSize`
+        - snake_case: `core_pool_size`
+    - 都能正确映射到 JavaBean 的 `corePoolSize` 字段
 
 **示例：**
+
 ```yaml
 # application.yml
 custom:
@@ -769,28 +781,30 @@ public class ThreadPoolProperties {
 
 **使用 Starter 的优势：**
 
-| 对比项 | 直接配置 | Starter |
-|--------|---------|---------|
-| **代码复用** | ❌ 每个项目重复配置 | ✅ 一次开发，多处使用 |
-| **维护成本** | ❌ 修改需更新所有项目 | ✅ 升级版本号即可 |
-| **依赖管理** | ❌ 手动管理所有依赖 | ✅ 传递依赖自动引入 |
-| **标准化** | ❌ 各项目配置不一致 | ✅ 统一配置规范 |
-| **开箱即用** | ❌ 需手动创建 Bean | ✅ 引入依赖自动装配 |
+| 对比项      | 直接配置         | Starter     |
+|----------|--------------|-------------|
+| **代码复用** | ❌ 每个项目重复配置   | ✅ 一次开发，多处使用 |
+| **维护成本** | ❌ 修改需更新所有项目  | ✅ 升级版本号即可   |
+| **依赖管理** | ❌ 手动管理所有依赖   | ✅ 传递依赖自动引入  |
+| **标准化**  | ❌ 各项目配置不一致   | ✅ 统一配置规范    |
+| **开箱即用** | ❌ 需手动创建 Bean | ✅ 引入依赖自动装配  |
 
 **典型应用场景：**
+
 1. **公司内部框架**
-   - 统一的数据库连接池配置
-   - 统一的 Redis、MQ 客户端配置
+    - 统一的数据库连接池配置
+    - 统一的 Redis、MQ 客户端配置
 
 2. **第三方服务集成**
-   - 阿里云 OSS、短信服务
-   - 微信支付、支付宝支付
+    - 阿里云 OSS、短信服务
+    - 微信支付、支付宝支付
 
 3. **技术中间件**
-   - MyBatis-Plus、ShardingSphere
-   - Sentinel、Seata
+    - MyBatis-Plus、ShardingSphere
+    - Sentinel、Seata
 
 **最佳实践：**
+
 - 通用性强、需要复用的功能 → 封装成 Starter
 - 仅单个项目使用的功能 → 直接配置
 
@@ -801,19 +815,19 @@ public class ThreadPoolProperties {
 ### 6.1 核心知识点
 
 1. **Starter 的本质**
-   - 自动配置 + 依赖管理
-   - 约定优于配置
+    - 自动配置 + 依赖管理
+    - 约定优于配置
 
 2. **三个核心组件**
-   - Properties：配置属性绑定
-   - AutoConfiguration：自动配置类
-   - spring.factories：装配入口
+    - Properties：配置属性绑定
+    - AutoConfiguration：自动配置类
+    - spring.factories：装配入口
 
 3. **关键注解**
-   - @Configuration：配置类
-   - @EnableConfigurationProperties：启用配置属性
-   - @ConditionalOnXxx：条件装配
-   - @ConfigurationProperties：属性绑定
+    - @Configuration：配置类
+    - @EnableConfigurationProperties：启用配置属性
+    - @ConditionalOnXxx：条件装配
+    - @ConfigurationProperties：属性绑定
 
 ### 6.2 开发流程
 
@@ -842,13 +856,13 @@ public class ThreadPoolProperties {
 尝试实现以下功能：
 
 1. **线程池监控**
-   - 定时输出线程池状态
-   - 超过阈值告警
+    - 定时输出线程池状态
+    - 超过阈值告警
 
 2. **多数据源 Starter**
-   - 支持配置多个 DataSource
-   - 动态切换数据源
+    - 支持配置多个 DataSource
+    - 动态切换数据源
 
 3. **分布式锁 Starter**
-   - 基于 Redis 实现分布式锁
-   - 支持看门狗自动续期
+    - 基于 Redis 实现分布式锁
+    - 支持看门狗自动续期

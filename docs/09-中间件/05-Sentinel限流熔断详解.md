@@ -36,13 +36,13 @@ public Result<String> getQuestions(String category) {
 
 针对资源设置的保护规则，包括：
 
-| 规则类型 | 说明 | 对应异常 |
-|----------|------|----------|
-| 流控规则 | QPS / 并发线程数限制 | `FlowException` |
-| 降级规则 | 慢调用 / 异常比例 / 异常数 | `DegradeException` |
-| 热点规则 | 针对热点参数限流 | `ParamFlowException` |
+| 规则类型 | 说明               | 对应异常                   |
+|------|------------------|------------------------|
+| 流控规则 | QPS / 并发线程数限制    | `FlowException`        |
+| 降级规则 | 慢调用 / 异常比例 / 异常数 | `DegradeException`     |
+| 热点规则 | 针对热点参数限流         | `ParamFlowException`   |
 | 系统规则 | CPU / 负载 / RT 保护 | `SystemBlockException` |
-| 授权规则 | 黑白名单控制 | `AuthorityException` |
+| 授权规则 | 黑白名单控制           | `AuthorityException`   |
 
 ---
 
@@ -70,11 +70,11 @@ public Result<String> getQuestions(String category) {
 
 ### 3.3 流控效果
 
-| 效果 | 说明 | 适用场景 |
-|------|------|----------|
-| **快速失败** | 超阈值立即拒绝 | 普通接口保护 |
+| 效果          | 说明          | 适用场景   |
+|-------------|-------------|--------|
+| **快速失败**    | 超阈值立即拒绝     | 普通接口保护 |
 | **Warm Up** | 冷启动，逐渐增加通过量 | 缓存预热场景 |
-| **排队等待** | 匀速排队，等待执行 | 削峰填谷 |
+| **排队等待**    | 匀速排队，等待执行   | 削峰填谷   |
 
 ---
 
@@ -109,6 +109,7 @@ public Result<String> getQuestions(String category) {
 ### 4.2 三种降级策略
 
 #### 慢调用比例
+
 ```
 统计窗口内：慢调用(RT > 阈值) 的比例 > 设定比例 → 触发熔断
 
@@ -117,6 +118,7 @@ public Result<String> getQuestions(String category) {
 ```
 
 #### 异常比例
+
 ```
 统计窗口内：异常请求 / 总请求 > 比例阈值 → 触发熔断
 
@@ -124,6 +126,7 @@ public Result<String> getQuestions(String category) {
 ```
 
 #### 异常数
+
 ```
 统计窗口内：异常数 > 阈值 → 触发熔断
 
@@ -167,10 +170,10 @@ public Result getQuestion(@PathVariable Long id) { ... }
 
 ### blockHandler vs fallback 区别
 
-| 属性 | 触发时机 | 参数要求 |
-|------|----------|----------|
+| 属性             | 触发时机                 | 参数要求                   |
+|----------------|----------------------|------------------------|
 | `blockHandler` | Sentinel 规则触发（限流/降级） | 原参数 + `BlockException` |
-| `fallback` | 业务代码抛出异常 | 原参数 + `Throwable`（可选） |
+| `fallback`     | 业务代码抛出异常             | 原参数 + `Throwable`（可选）  |
 
 ```java
 // 正确示例
@@ -189,20 +192,20 @@ public Result<String> getQuestionsFallback(String category, Throwable ex) {
 
 ### 7.1 InterviewController 限流接口
 
-| 接口 | 资源名 | 保护方式 |
-|------|--------|----------|
-| `GET /interview/questions` | `getQuestions` | 限流回调 |
-| `GET /interview/question/{id}` | `getQuestion` | 限流回调 |
+| 接口                             | 资源名            | 保护方式 |
+|--------------------------------|----------------|------|
+| `GET /interview/questions`     | `getQuestions` | 限流回调 |
+| `GET /interview/question/{id}` | `getQuestion`  | 限流回调 |
 
 ### 7.2 SentinelTestController 测试接口
 
-| 接口 | 资源名 | 测试场景 |
-|------|--------|----------|
-| `GET /sentinel/hello` | `sentinelHello` | QPS 限流测试 |
-| `GET /sentinel/hot?userId=xxx` | `sentinelHot` | 热点参数限流测试 |
-| `GET /sentinel/slow` | `sentinelSlow` | 慢调用降级测试（延迟500ms） |
-| `GET /sentinel/error?fail=true` | `sentinelError` | 异常比例降级测试 |
-| `GET /sentinel/info` | - | 查看配置信息 |
+| 接口                              | 资源名             | 测试场景             |
+|---------------------------------|-----------------|------------------|
+| `GET /sentinel/hello`           | `sentinelHello` | QPS 限流测试         |
+| `GET /sentinel/hot?userId=xxx`  | `sentinelHot`   | 热点参数限流测试         |
+| `GET /sentinel/slow`            | `sentinelSlow`  | 慢调用降级测试（延迟500ms） |
+| `GET /sentinel/error?fail=true` | `sentinelError` | 异常比例降级测试         |
+| `GET /sentinel/info`            | -               | 查看配置信息           |
 
 ### 7.3 统一限流响应（SentinelConfig）
 
@@ -247,6 +250,7 @@ spring:
 ### 8.3 在控制台配置规则示例
 
 **流控规则**（给 `sentinelHello` 设置限流）：
+
 ```
 资源名: sentinelHello
 阈值类型: QPS
@@ -255,6 +259,7 @@ spring:
 ```
 
 **降级规则**（给 `sentinelSlow` 设置慢调用降级）：
+
 ```
 资源名: sentinelSlow
 降级策略: 慢调用比例
@@ -268,14 +273,14 @@ spring:
 
 ## 九、Sentinel vs Hystrix
 
-| 特性 | Sentinel | Hystrix |
-|------|----------|---------|
-| 隔离策略 | 信号量（并发线程数） | 线程池隔离 |
-| 熔断降级 | 基于响应时间、异常比例 | 基于异常比例 |
-| 实时统计 | 滑动窗口（LeapArray） | 滑动窗口（RxJava） |
-| 控制台 | 完善（动态规则推送） | 基础（Hystrix Dashboard） |
-| 扩展性 | 强（SPI 扩展点） | 有限 |
-| 维护状态 | 活跃维护 | 停止维护 |
+| 特性   | Sentinel        | Hystrix               |
+|------|-----------------|-----------------------|
+| 隔离策略 | 信号量（并发线程数）      | 线程池隔离                 |
+| 熔断降级 | 基于响应时间、异常比例     | 基于异常比例                |
+| 实时统计 | 滑动窗口（LeapArray） | 滑动窗口（RxJava）          |
+| 控制台  | 完善（动态规则推送）      | 基础（Hystrix Dashboard） |
+| 扩展性  | 强（SPI 扩展点）      | 有限                    |
+| 维护状态 | 活跃维护            | 停止维护                  |
 
 ---
 
@@ -286,6 +291,7 @@ spring:
 **原因**：默认规则存储在内存中，应用重启后规则丢失。
 
 **解决**：集成 Nacos 数据源持久化规则：
+
 ```yaml
 spring:
   cloud:
@@ -303,6 +309,7 @@ spring:
 如果方法签名不匹配，Sentinel 无法找到处理方法，会抛出 `BlockException` 到全局异常处理器。
 
 **正确签名规则**：
+
 - 与原方法相同的参数列表
 - 在参数列表末尾追加 `BlockException`
 - 返回值类型必须与原方法相同

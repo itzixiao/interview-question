@@ -17,7 +17,7 @@ import java.util.Map;
 
 /**
  * Spring 事务失效场景详解
- *
+ * <p>
  * 事务失效的常见原因：
  * 1. 非 public 方法
  * 2. 同类内部调用
@@ -69,7 +69,7 @@ public class TransactionPitfallsDemo implements CommandLineRunner {
      * ============================================
      * 场景1：非 public 方法导致事务失效
      * ============================================
-     *
+     * <p>
      * 原因：@Transactional 只能用于 public 方法
      * Spring AOP 基于代理，非 public 方法无法被代理
      */
@@ -90,7 +90,7 @@ public class TransactionPitfallsDemo implements CommandLineRunner {
      * ============================================
      * 场景2：同类内部调用导致事务失效
      * ============================================
-     *
+     * <p>
      * 原因：this 调用不走代理，@Transactional 不生效
      * 解决方案：
      * 1. 注入自身代理对象
@@ -123,7 +123,7 @@ public class TransactionPitfallsDemo implements CommandLineRunner {
      * ============================================
      * 场景3：异常被捕获未抛出导致事务失效
      * ============================================
-     *
+     * <p>
      * 原因：事务回滚依赖于异常抛出，捕获后未抛出不触发回滚
      */
     private void testExceptionSwallowed() {
@@ -140,7 +140,7 @@ public class TransactionPitfallsDemo implements CommandLineRunner {
      * ============================================
      * 场景4：异常类型不匹配导致事务失效
      * ============================================
-     *
+     * <p>
      * 原因：默认只回滚 RuntimeException 和 Error
      * checked Exception 不会触发回滚
      */
@@ -457,19 +457,19 @@ class BestPracticeUserService {
  * ============================================
  * 事务传播最佳实践
  * ============================================
- *
+ * <p>
  * 场景1：主业务 + 日志记录
  * - 主业务：REQUIRED（默认）
  * - 日志：REQUIRES_NEW（无论主业务是否成功，日志都要记录）
- *
+ * <p>
  * 场景2：订单创建 + 库存扣减
  * - 订单：REQUIRED
  * - 库存：REQUIRED（同成功或同失败）
- *
+ * <p>
  * 场景3：批量处理
  * - 批量方法：REQUIRED
  * - 单条处理：REQUIRES_NEW（单条失败不影响其他）
- *
+ * <p>
  * 场景4：嵌套业务逻辑
  * - 外层：REQUIRED
  * - 内层：NESTED（内层失败可回滚，外层继续）

@@ -105,12 +105,12 @@ for (PaymentService service : loader) {
 
 ## 三、SPI vs Spring IOC
 
-| 特性 | SPI | Spring IOC |
-|------|-----|-----------|
-| 实现方式 | 配置文件 + ServiceLoader | 注解 + 容器管理 |
-| 加载时机 | 延迟加载（使用时加载） | 启动时加载 |
-| 依赖注入 | 无 | 支持 |
-| 应用场景 | JDBC、日志框架 | Spring 应用 |
+| 特性   | SPI                  | Spring IOC |
+|------|----------------------|------------|
+| 实现方式 | 配置文件 + ServiceLoader | 注解 + 容器管理  |
+| 加载时机 | 延迟加载（使用时加载）          | 启动时加载      |
+| 依赖注入 | 无                    | 支持         |
+| 应用场景 | JDBC、日志框架            | Spring 应用  |
 
 ---
 
@@ -132,6 +132,7 @@ for (PaymentService service : loader) {
 SPI（Service Provider Interface）是 Java 提供的一种服务发现机制。
 
 **工作原理：**
+
 1. 定义服务接口
 2. 创建实现类
 3. 在 `META-INF/services/接口全限定名` 文件中配置实现类
@@ -141,11 +142,13 @@ SPI（Service Provider Interface）是 Java 提供的一种服务发现机制。
 ### 2. SPI 的优缺点？
 
 **优点：**
+
 - ✅ 解耦：接口定义与实现分离
 - ✅ 可扩展：无需修改源码即可添加新实现
 - ✅ 动态加载：运行时加载实现类
 
 **缺点：**
+
 - ❌ 需要遍历所有实现，无法按需加载
 - ❌ 延迟加载：第一次使用时才加载
 - ❌ 无法注入依赖：实现类必须有无参构造
@@ -182,6 +185,7 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
 ```
 
 **区别：**
+
 - SPI 使用 `META-INF/services/接口名`
 - Spring Boot 使用 `META-INF/spring.factories`
 - Spring Boot 支持条件装配（@Conditional）
@@ -199,6 +203,7 @@ curl http://localhost:8084/api/spi/explain
 ```
 
 **响应示例：**
+
 ```json
 [
   "支付宝支付：[支付宝] 订单 ORDER001 支付成功，金额：￥100.00",

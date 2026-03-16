@@ -7,12 +7,14 @@
 **作用：** 保证事务持久性，崩溃后恢复
 
 **特点：**
+
 - InnoDB **特有**
 - **循环写入**（空间固定）
 - **顺序写**，性能高
 - 记录的是**物理日志**（数据页修改后的值）
 
 **大小配置：**
+
 ```sql
 -- 查看 Redo Log 大小
 SHOW VARIABLES LIKE 'innodb_log_file_size';
@@ -22,6 +24,7 @@ SHOW VARIABLES LIKE 'innodb_log_files_in_group';
 ```
 
 **写入流程：**
+
 ```
 1. 修改 Buffer Pool 中的数据页
 2. 写入 Redo Log（内存 → 磁盘）
@@ -33,12 +36,14 @@ SHOW VARIABLES LIKE 'innodb_log_files_in_group';
 **作用：** 保证事务原子性，支持回滚
 
 **特点：**
+
 - 记录**逻辑操作**（如 INSERT 对应 DELETE）
 - 支持 **MVCC**（多版本并发控制）
 - 事务提交后不会立即删除（用于快照读）
 - 可以清理（由 purge 线程负责）
 
 **示例：**
+
 ```sql
 BEGIN;
   INSERT INTO users VALUES(1, 'Tom');
@@ -55,19 +60,21 @@ ROLLBACK;  -- 通过 Undo Log 恢复
 **作用：** 记录所有 DDL 和 DML，用于主从复制和数据恢复
 
 **特点：**
+
 - **Server 层**实现，所有引擎都有
 - **追加写入**（不会循环）
 - 记录的是 SQL 语句或行变更
 
 **三种格式：**
 
-| 格式 | 说明 | 优缺点 |
-|------|------|--------|
+| 格式        | 说明       | 优缺点        |
+|-----------|----------|------------|
 | STATEMENT | 记录原始 SQL | 占用小，但可能有风险 |
-| ROW | 记录行变更 | 可靠，但占用大 |
-| MIXED | 混合模式（默认） | 智能选择 |
+| ROW       | 记录行变更    | 可靠，但占用大    |
+| MIXED     | 混合模式（默认） | 智能选择       |
 
 **查看 Binlog：**
+
 ```sql
 -- 开启 Binlog（my.cnf）
 [mysqld]
@@ -86,20 +93,21 @@ mysqlbinlog mysql-bin.000001;
 
 ### 1.4 Redo Log vs Binlog
 
-| 对比项 | Redo Log | Binlog |
-|--------|----------|--------|
-| 所属层级 | InnoDB 引擎层 | Server 层 |
-| 写入方式 | 循环写入（空间固定） | 追加写入（文件递增） |
-| 记录内容 | 物理日志（数据页） | 逻辑日志（SQL/行） |
-| 主要作用 | 崩溃恢复 | 主从复制、数据恢复 |
-| 写入时机 | 事务进行中 | 事务提交后 |
-| 空间大小 | 固定（可配置） | 不固定（持续增加） |
+| 对比项  | Redo Log   | Binlog      |
+|------|------------|-------------|
+| 所属层级 | InnoDB 引擎层 | Server 层    |
+| 写入方式 | 循环写入（空间固定） | 追加写入（文件递增）  |
+| 记录内容 | 物理日志（数据页）  | 逻辑日志（SQL/行） |
+| 主要作用 | 崩溃恢复       | 主从复制、数据恢复   |
+| 写入时机 | 事务进行中      | 事务提交后       |
+| 空间大小 | 固定（可配置）    | 不固定（持续增加）   |
 
 ### 1.5 两阶段提交
 
 **目的：** 保证 Redo Log 和 Binlog 的一致性
 
 **流程：**
+
 ```
 1. Prepare 阶段：写入 Redo Log，标记为 prepare 状态
 2. 写入 Binlog
@@ -109,6 +117,7 @@ mysqlbinlog mysql-bin.000001;
 **为什么需要两阶段？**
 
 避免主从复制时数据不一致：
+
 ```
 场景：没有两阶段提交
 
@@ -126,6 +135,7 @@ mysqlbinlog mysql-bin.000001;
 **作用：** 记录执行时间超过阈值的 SQL
 
 **配置：**
+
 ```sql
 -- my.cnf 配置
 [mysqld]
@@ -146,45 +156,47 @@ SHOW VARIABLES LIKE 'long_query_time';
 ### 2.1 EXPLAIN 分析 SQL
 
 **语法：**
+
 ```sql
 EXPLAIN SELECT * FROM users WHERE id = 1;
 ```
 
 **关键字段说明：**
 
-| 字段 | 说明 | 好坏标准 |
-|------|------|----------|
-| type | 访问类型 | system > const > eq_ref > ref > range > index > ALL |
-| possible_keys | 可能使用的索引 | - |
-| key | 实际使用的索引 | 有值好 |
-| rows | 扫描的行数 | 越少越好 |
-| Extra | 额外信息 | Using index 好，Using filesort 差 |
+| 字段            | 说明      | 好坏标准                                                |
+|---------------|---------|-----------------------------------------------------|
+| type          | 访问类型    | system > const > eq_ref > ref > range > index > ALL |
+| possible_keys | 可能使用的索引 | -                                                   |
+| key           | 实际使用的索引 | 有值好                                                 |
+| rows          | 扫描的行数   | 越少越好                                                |
+| Extra         | 额外信息    | Using index 好，Using filesort 差                      |
 
 **type 类型详解：**
 
-| type | 说明 | 示例 |
-|------|------|------|
-| system | 系统表，只有一行 | - |
-| const | 主键或唯一索引 | WHERE id = 1 |
+| type   | 说明        | 示例                    |
+|--------|-----------|-----------------------|
+| system | 系统表，只有一行  | -                     |
+| const  | 主键或唯一索引   | WHERE id = 1          |
 | eq_ref | 主键或唯一索引连接 | JOIN ON t1.id = t2.id |
-| ref | 普通索引 | WHERE name = 'Tom' |
-| range | 索引范围查询 | WHERE id > 10 |
-| index | 全索引扫描 | SELECT COUNT(*) |
-| ALL | 全表扫描（最差） | 无索引 |
+| ref    | 普通索引      | WHERE name = 'Tom'    |
+| range  | 索引范围查询    | WHERE id > 10         |
+| index  | 全索引扫描     | SELECT COUNT(*)       |
+| ALL    | 全表扫描（最差）  | 无索引                   |
 
 **Extra 常见值：**
 
-| 值 | 说明 | 好坏 |
-|----|------|------|
-| Using index | 覆盖索引 | ✅ 好 |
-| Using where | 使用 WHERE 过滤 | 一般 |
-| Using temporary | 使用临时表 | ❌ 差 |
-| Using filesort | 文件排序 | ❌ 差 |
-| Using join buffer | 使用连接缓存 | ❌ 差 |
+| 值                 | 说明          | 好坏  |
+|-------------------|-------------|-----|
+| Using index       | 覆盖索引        | ✅ 好 |
+| Using where       | 使用 WHERE 过滤 | 一般  |
+| Using temporary   | 使用临时表       | ❌ 差 |
+| Using filesort    | 文件排序        | ❌ 差 |
+| Using join buffer | 使用连接缓存      | ❌ 差 |
 
 ### 2.2 索引优化策略
 
 **1. 为 WHERE、ORDER BY、GROUP BY 创建索引**
+
 ```sql
 -- 为查询条件加索引
 CREATE INDEX idx_email ON users(email);
@@ -194,6 +206,7 @@ CREATE INDEX idx_create_time ON users(create_time);
 ```
 
 **2. 使用覆盖索引（避免回表）**
+
 ```sql
 -- 创建联合索引
 CREATE INDEX idx_name_age ON users(name, age);
@@ -203,6 +216,7 @@ SELECT id, name, age FROM users WHERE name = 'Tom';
 ```
 
 **3. 联合索引遵循最左匹配原则**
+
 ```sql
 -- 联合索引 idx_name_age_city (name, age, city)
 
@@ -214,6 +228,7 @@ WHERE age = 18 AND city = 'Beijing';
 ```
 
 **4. 避免索引失效**
+
 ```sql
 -- ❌ 函数操作导致索引失效
 SELECT * FROM users WHERE YEAR(create_time) = 2024;
@@ -223,12 +238,14 @@ SELECT * FROM users WHERE create_time >= '2024-01-01';
 ```
 
 **5. 前缀索引（针对长字符串）**
+
 ```sql
 -- 全文索引
 CREATE INDEX idx_description ON users(description(50));
 ```
 
 **6. 定期清理无用索引**
+
 ```sql
 -- 查看未使用的索引
 SELECT * FROM sys.schema_unused_indexes;
@@ -242,6 +259,7 @@ DROP INDEX idx_old ON users;
 **推荐做法：**
 
 ✅ **SELECT 指定字段，不用 SELECT \***
+
 ```sql
 -- ❌ 增加网络传输
 SELECT * FROM users;
@@ -251,6 +269,7 @@ SELECT id, name, email FROM users;
 ```
 
 ✅ **用小表驱动大表（EXISTS vs IN）**
+
 ```sql
 -- 小表：order（1000 条）
 -- 大表：user（100 万条）
@@ -267,6 +286,7 @@ SELECT * FROM user u WHERE u.id IN (
 ```
 
 ✅ **UNION ALL 代替 UNION（不去重）**
+
 ```sql
 -- ❌ 去重，性能差
 SELECT id FROM users WHERE id < 100
@@ -280,6 +300,7 @@ SELECT id FROM users WHERE id > 900;
 ```
 
 ✅ **批量操作代替单条操作**
+
 ```sql
 -- ❌ 单条插入（1000 次 IO）
 INSERT INTO users VALUES(1, 'Tom');
@@ -294,6 +315,7 @@ INSERT INTO users VALUES
 ```
 
 ✅ **LIMIT 分页优化（延迟关联）**
+
 ```sql
 -- ❌ 深度分页（扫描 100010 条）
 SELECT * FROM users LIMIT 100000, 10;
@@ -311,6 +333,7 @@ SELECT * FROM users WHERE id > 100000 LIMIT 10;
 **避免的做法：**
 
 ❌ **LIKE '%xxx'（无法用索引）**
+
 ```sql
 -- ❌ 索引失效
 SELECT * FROM users WHERE name LIKE '%Tom';
@@ -320,6 +343,7 @@ SELECT * FROM users WHERE name LIKE 'Tom%';
 ```
 
 ❌ **OR 连接（可能全表扫描）**
+
 ```sql
 -- ❌ 有一边没索引
 SELECT * FROM users WHERE email = 'test@example.com' OR name = 'Tom';
@@ -331,6 +355,7 @@ SELECT * FROM users WHERE name = 'Tom';
 ```
 
 ❌ **函数操作（导致索引失效）**
+
 ```sql
 -- ❌ 索引失效
 SELECT * FROM users WHERE LEFT(phone, 3) = '138';
@@ -342,6 +367,7 @@ SELECT * FROM users WHERE phone >= '138' AND phone < '139';
 ### 2.4 表结构优化
 
 **1. 垂直拆分：大字段单独拆表**
+
 ```sql
 -- 原始表
 CREATE TABLE articles (
@@ -366,6 +392,7 @@ CREATE TABLE articles_detail (
 ```
 
 **2. 水平分区：按时间/地区分表**
+
 ```sql
 -- 按月分表
 CREATE TABLE orders_202401 (...);
@@ -374,6 +401,7 @@ CREATE TABLE orders_202403 (...);
 ```
 
 **3. 适当冗余：减少 JOIN（以空间换时间）**
+
 ```sql
 -- 原始设计（需要 JOIN）
 SELECT o.*, u.name 
@@ -393,14 +421,15 @@ CREATE TABLE orders (
 
 **关键参数：**
 
-| 参数 | 说明 | 推荐值 |
-|------|------|--------|
-| innodb_buffer_pool_size | 缓存池大小 | 物理内存 50%-70% |
-| innodb_log_file_size | Redo Log 大小 | 512M - 1G |
-| max_connections | 最大连接数 | 1000 - 2000 |
-| query_cache_size | 查询缓存 | 8.0 已移除 |
+| 参数                      | 说明          | 推荐值          |
+|-------------------------|-------------|--------------|
+| innodb_buffer_pool_size | 缓存池大小       | 物理内存 50%-70% |
+| innodb_log_file_size    | Redo Log 大小 | 512M - 1G    |
+| max_connections         | 最大连接数       | 1000 - 2000  |
+| query_cache_size        | 查询缓存        | 8.0 已移除      |
 
 **查看配置：**
+
 ```sql
 -- 查看缓冲池大小
 SHOW VARIABLES LIKE 'innodb_buffer_pool_size';
@@ -420,19 +449,20 @@ SHOW VARIABLES LIKE 'max_connections';
 
 **答：**
 
-| 对比项 | Redo Log | Binlog |
-|--------|----------|--------|
-| 所属层级 | InnoDB 引擎层 | Server 层 |
-| 写入方式 | 循环写入（空间固定） | 追加写入（文件递增） |
-| 记录内容 | 物理日志（数据页） | 逻辑日志（SQL/行） |
-| 主要作用 | 崩溃恢复 | 主从复制、数据恢复 |
-| 写入时机 | 事务进行中 | 事务提交后 |
+| 对比项  | Redo Log   | Binlog      |
+|------|------------|-------------|
+| 所属层级 | InnoDB 引擎层 | Server 层    |
+| 写入方式 | 循环写入（空间固定） | 追加写入（文件递增）  |
+| 记录内容 | 物理日志（数据页）  | 逻辑日志（SQL/行） |
+| 主要作用 | 崩溃恢复       | 主从复制、数据恢复   |
+| 写入时机 | 事务进行中      | 事务提交后       |
 
 **问题 2：什么是两阶段提交？为什么需要？**
 
 **答：**
 
 **两阶段：**
+
 1. **Prepare 阶段**：写入 Redo Log，标记为 prepare
 2. **Commit 阶段**：写 Binlog 后提交
 
@@ -473,6 +503,7 @@ SHOW VARIABLES LIKE 'max_connections';
 **优化方案：**
 
 1. **延迟关联**：先查 ID，再 JOIN 原表
+
 ```sql
 SELECT u.* FROM users u
 INNER JOIN (
@@ -481,6 +512,7 @@ INNER JOIN (
 ```
 
 2. **游标分页**：`WHERE id > last_id LIMIT 10`
+
 ```sql
 SELECT * FROM users WHERE id > 100000 LIMIT 10;
 ```
@@ -494,10 +526,12 @@ SELECT * FROM users WHERE id > 100000 LIMIT 10;
 **覆盖索引：** 二级索引包含所有查询字段，无需回表
 
 **优势：**
+
 1. **避免回表**：减少 IO 次数
 2. **提升性能**：直接返回数据
 
 **示例：**
+
 ```sql
 -- 创建联合索引
 CREATE INDEX idx_name_age ON users(name, age);

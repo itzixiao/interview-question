@@ -4,20 +4,20 @@
 
 ### 1.1 三大核心组件
 
-| 组件 | 作用 | 特点 |
-|------|------|------|
-| **Channel** | 数据传输通道 | 双向、异步 |
-| **Buffer** | 数据容器 | 直接内存、高效 |
-| **Selector** | 多路复用器 | 单线程管理多连接 |
+| 组件           | 作用     | 特点       |
+|--------------|--------|----------|
+| **Channel**  | 数据传输通道 | 双向、异步    |
+| **Buffer**   | 数据容器   | 直接内存、高效  |
+| **Selector** | 多路复用器  | 单线程管理多连接 |
 
 ### 1.2 NIO vs BIO
 
-| 特性 | BIO | NIO |
-|------|-----|-----|
-| **IO模型** | 面向流 | 面向缓冲/通道 |
-| **阻塞方式** | 阻塞 | 非阻塞 |
-| **选择器** | 无 | 有（Selector） |
-| **并发能力** | 低 | 高 |
+| 特性       | BIO | NIO         |
+|----------|-----|-------------|
+| **IO模型** | 面向流 | 面向缓冲/通道     |
+| **阻塞方式** | 阻塞  | 非阻塞         |
+| **选择器**  | 无   | 有（Selector） |
+| **并发能力** | 低   | 高           |
 
 ---
 
@@ -60,12 +60,12 @@ mark: 标记位置（可选）
 
 ### 3.1 Channel类型
 
-| 类型 | 用途 |
-|------|------|
-| **FileChannel** | 文件读写 |
-| **SocketChannel** | TCP客户端 |
+| 类型                      | 用途     |
+|-------------------------|--------|
+| **FileChannel**         | 文件读写   |
+| **SocketChannel**       | TCP客户端 |
 | **ServerSocketChannel** | TCP服务端 |
-| **DatagramChannel** | UDP通信 |
+| **DatagramChannel**     | UDP通信  |
 
 ### 3.2 FileChannel示例
 
@@ -106,29 +106,29 @@ public class NioServerDemo {
     public static void main(String[] args) throws IOException {
         // 1. 打开Selector
         Selector selector = Selector.open();
-        
+
         // 2. 创建ServerSocketChannel
         ServerSocketChannel serverChannel = ServerSocketChannel.open();
         serverChannel.configureBlocking(false); // 设置为非阻塞
         serverChannel.bind(new InetSocketAddress(8080));
-        
+
         // 3. 注册接受连接事件
         serverChannel.register(selector, SelectionKey.OP_ACCEPT);
         System.out.println("NIO服务器启动...");
-        
+
         // 4. 轮询就绪事件
         while (true) {
             int readyChannels = selector.select(); // 阻塞
-            
+
             if (readyChannels == 0) continue;
-            
+
             Set<SelectionKey> selectedKeys = selector.selectedKeys();
             Iterator<SelectionKey> keyIterator = selectedKeys.iterator();
-            
+
             while (keyIterator.hasNext()) {
                 SelectionKey key = keyIterator.next();
                 keyIterator.remove(); // 必须移除
-                
+
                 if (key.isAcceptable()) {
                     handleAccept(key, selector);
                 } else if (key.isReadable()) {
@@ -137,22 +137,22 @@ public class NioServerDemo {
             }
         }
     }
-    
-    private static void handleAccept(SelectionKey key, Selector selector) 
+
+    private static void handleAccept(SelectionKey key, Selector selector)
             throws IOException {
         ServerSocketChannel serverChannel = (ServerSocketChannel) key.channel();
         SocketChannel clientChannel = serverChannel.accept();
         clientChannel.configureBlocking(false);
-        
+
         // 注册读事件
         clientChannel.register(selector, SelectionKey.OP_READ);
         System.out.println("客户端连接：" + clientChannel.getRemoteAddress());
     }
-    
+
     private static void handleRead(SelectionKey key) throws IOException {
         SocketChannel clientChannel = (SocketChannel) key.channel();
         ByteBuffer buffer = ByteBuffer.allocate(1024);
-        
+
         int bytesRead = clientChannel.read(buffer);
         if (bytesRead > 0) {
             buffer.flip();
@@ -160,10 +160,10 @@ public class NioServerDemo {
             buffer.get(data);
             String message = new String(data);
             System.out.println("收到消息：" + message);
-            
+
             // 响应客户端
             ByteBuffer responseBuffer = ByteBuffer.wrap(
-                ("服务器收到：" + message).getBytes());
+                    ("服务器收到：" + message).getBytes());
             clientChannel.write(responseBuffer);
         } else if (bytesRead == -1) {
             // 客户端断开
@@ -192,6 +192,7 @@ public class NioServerDemo {
 ```
 
 **特点：**
+
 - ✅ 简单，无线程切换
 - ❌ 性能低，一个线程处理所有
 - 适用：低并发场景
@@ -209,6 +210,7 @@ Sub1     Sub2  ← 子线程池（read/write）
 ```
 
 **特点：**
+
 - ✅ 性能提升
 - ❌ 线程同步复杂
 - 适用：中等并发
@@ -226,6 +228,7 @@ Sub1     Sub2  ← 子线程池（read/write）
 ```
 
 **特点：**
+
 - ✅ 高性能，职责分离
 - ❌ 最复杂
 - 适用：高并发（Netty、Redis）
@@ -239,6 +242,7 @@ Sub1     Sub2  ← 子线程池（read/write）
 **原理：** 一个线程同时监控多个连接
 
 **实现方式：**
+
 - **Select**：轮询所有FD（文件描述符）
 - **Poll**：改进的Select
 - **Epoll**（Linux）：事件驱动，最高效
@@ -246,17 +250,20 @@ Sub1     Sub2  ← 子线程池（read/write）
 ### 6.2 零拷贝技术
 
 **传统IO：** 4次上下文切换，4次数据拷贝
+
 ```
 磁盘 → 内核缓冲 → 用户缓冲 → Socket缓冲 → 网络
 ```
 
 **零拷贝（mmap）：** 2次上下文切换，2次数据拷贝
+
 ```
 磁盘 → 内核缓冲 → Socket缓冲 → 网络
          ↑___________↓
 ```
 
 **零拷贝（sendfile）：** 1次上下文切换，1次数据拷贝
+
 ```
 磁盘 → 内核缓冲（带Socket描述符）→ 网络
 ```
@@ -280,6 +287,7 @@ ByteBuffer directBuffer = ByteBuffer.allocateDirect(1024);
 **参考答案：**
 
 **三大核心组件：**
+
 1. **Channel**：数据传输通道，双向
 2. **Buffer**：数据容器，直接内存
 3. **Selector**：多路复用器，单线程管理多连接
@@ -291,6 +299,7 @@ ByteBuffer directBuffer = ByteBuffer.allocateDirect(1024);
 Selector是NIO的核心，实现IO多路复用。
 
 **作用：**
+
 - 单线程同时监控多个连接
 - 轮询就绪事件（读/写/连接/接受）
 - 提高并发性能
@@ -299,11 +308,11 @@ Selector是NIO的核心，实现IO多路复用。
 
 **参考答案：**
 
-| 特性 | BIO | NIO | AIO |
-|------|-----|-----|-----|
-| **模型** | 阻塞 | 非阻塞 | 异步非阻塞 |
-| **编程难度** | 简单 | 复杂 | 最复杂 |
-| **并发能力** | 低 | 高 | 最高 |
+| 特性       | BIO | NIO | AIO        |
+|----------|-----|-----|------------|
+| **模型**   | 阻塞  | 非阻塞 | 异步非阻塞      |
+| **编程难度** | 简单  | 复杂  | 最复杂        |
+| **并发能力** | 低   | 高   | 最高         |
 | **适用场景** | 少连接 | 高并发 | Windows高性能 |
 
 ### 4. Reactor模式有哪些变体？
@@ -311,6 +320,7 @@ Selector是NIO的核心，实现IO多路复用。
 **参考答案：**
 
 **三种变体：**
+
 1. **单线程Reactor**：简单，性能低
 2. **多线程Reactor**：性能提升，同步复杂
 3. **主从Reactor**：高性能，Netty采用
@@ -320,6 +330,7 @@ Selector是NIO的核心，实现IO多路复用。
 **参考答案：**
 
 **原因：**
+
 1. 采用主从Reactor模式
 2. 零拷贝技术
 3. 内存池优化

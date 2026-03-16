@@ -1,11 +1,8 @@
 package cn.itzixiao.interview.springboot;
 
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.context.annotation.Configuration;
-
 /**
  * Spring Boot 自动装配原理详解
- *
+ * <p>
  * 自动装配核心流程：
  * ┌─────────────────────────────────────────────────────────────┐
  * │  1. @SpringBootApplication                                   │

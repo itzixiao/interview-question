@@ -1,6 +1,5 @@
 package cn.itzixiao.interview.redis.advanced;
 
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 
@@ -8,7 +7,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Redis 分布式缓存实现详解
- *
+ * <p>
  * 缓存策略：
  * ┌─────────────────────────────────────────────────────────────┐
  * │  1. Cache Aside (旁路缓存) - 最常用                          │
@@ -21,7 +20,7 @@ import java.util.concurrent.TimeUnit;
  * │  3. Write Behind (异步回写)                                  │
  * │     - 先写缓存，异步批量写入数据库                            │
  * └─────────────────────────────────────────────────────────────┘
- *
+ * <p>
  * 缓存更新策略：
  * - 过期时间 (TTL)：设置合理的过期时间
  * - 主动更新：数据变更时更新缓存

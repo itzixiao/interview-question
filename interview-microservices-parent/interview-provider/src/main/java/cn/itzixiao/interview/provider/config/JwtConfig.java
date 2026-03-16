@@ -10,9 +10,9 @@ import java.nio.charset.StandardCharsets;
 
 /**
  * JWT 配置类
- * 
+ * <p>
  * 作用：加载 JWT 密钥并生成 SecretKey 对象
- * 
+ * <p>
  * 核心知识点：
  * 1. JWT 密钥长度要求：HS256 算法至少需要 256 位（32 字节）
  * 2. 密钥安全性：生产环境应使用环境变量或配置中心
@@ -20,7 +20,7 @@ import java.nio.charset.StandardCharsets;
  */
 @Configuration
 public class JwtConfig {
-    
+
     /**
      * 从配置文件读取 JWT 密钥
      * 开发环境：application-dev.yml
@@ -28,22 +28,22 @@ public class JwtConfig {
      */
     @Value("${jwt.secret-key}")
     private String secretKey;
-    
+
     /**
      * JWT 签发者
      */
     @Value("${jwt.issuer}")
     private String issuer;
-    
+
     /**
      * JWT 过期时间（秒）
      */
     @Value("${jwt.expiration}")
     private Long expiration;
-    
+
     /**
      * 生成 SecretKey 对象
-     * 
+     *
      * @return SecretKey - 用于 JWT 签名和验证
      */
     @Bean

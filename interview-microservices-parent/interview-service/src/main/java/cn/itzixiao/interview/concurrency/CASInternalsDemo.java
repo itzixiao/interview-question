@@ -1,13 +1,13 @@
 package cn.itzixiao.interview.concurrency;
 
 import sun.misc.Unsafe;
+
 import java.lang.reflect.Field;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicStampedReference;
 
 /**
  * CAS (Compare And Swap) 底层原理详解
- *
+ * <p>
  * CAS 核心思想：
  * ┌─────────────────────────────────────────────────────────────┐
  * │  比较内存位置的当前值和预期值，如果相等则更新为新值            │

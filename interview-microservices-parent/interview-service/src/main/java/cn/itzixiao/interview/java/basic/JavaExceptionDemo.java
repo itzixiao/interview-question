@@ -2,7 +2,7 @@ package cn.itzixiao.interview.java.basic;
 
 /**
  * Java 异常机制详解
- *
+ * <p>
  * ┌─────────────────────────────────────────────────────────────┐
  * │  Java 异常体系                                                 │
  * │                                                               │
@@ -31,7 +31,7 @@ public class JavaExceptionDemo {
 
     public static void main(String[] args) {
         System.out.println("========== Java异常机制 ==========\n");
-    
+
         demonstrateExceptionHierarchy();
         demonstrateTryCatchFinally();
         demonstrateThrowsKeyword();
@@ -39,7 +39,7 @@ public class JavaExceptionDemo {
         demonstrateCustomException();
         demonstrateTryWithResources();
         demonstrateExceptionBestPractices();
-            
+
         System.out.println("\n========== 演示完成 ==========");
     }
 
@@ -206,8 +206,13 @@ public class JavaExceptionDemo {
             this.age = age;
         }
 
-        public String getName() { return name; }
-        public int getAge() { return age; }
+        public String getName() {
+            return name;
+        }
+
+        public int getAge() {
+            return age;
+        }
     }
 
     static class InvalidUserException extends RuntimeException {
@@ -267,7 +272,7 @@ public class JavaExceptionDemo {
         } catch (Exception e) {
             // ❌ 错误做法：空 catch 块
             // System.out.println("出错了，但我不告诉你发生了什么");
-            
+
             // ✅ 正确做法：记录日志或重新抛出
             System.err.println("操作失败：" + e.getMessage());
             e.printStackTrace();
@@ -279,7 +284,7 @@ public class JavaExceptionDemo {
         for (int i = 0; i < 10000; i++) {
             // ❌ 错误做法：用异常判断数组边界
             // try { array[i]; } catch (ArrayIndexOutOfBoundsException e) {}
-            
+
             // ✅ 正确做法：先检查边界
             if (i < 10) {
                 int[] array = new int[10];

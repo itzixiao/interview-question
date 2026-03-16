@@ -5,13 +5,13 @@ import java.util.List;
 
 /**
  * 垃圾回收器理解与对比
- *
+ * <p>
  * 垃圾回收算法基础：
  * 1. 标记-清除 (Mark-Sweep)：标记存活对象，清除未标记，产生碎片
  * 2. 复制 (Copying)：内存分两半，存活对象复制到另一半，无碎片但浪费空间
  * 3. 标记-整理 (Mark-Compact)：标记存活对象，向一端移动，清理边界外内存
  * 4. 分代收集：新生代用复制，老年代用标记-清除或标记-整理
- *
+ * <p>
  * 垃圾回收器对比：
  * ┌─────────────┬─────────────┬─────────────┬─────────────┬─────────────┐
  * │   收集器     │   算法      │   适用区域   │   线程      │   特点      │
@@ -191,14 +191,14 @@ public class GarbageCollectorDemo {
         System.out.println("-Xms8g -Xmx8g                    # 固定堆大小，避免动态调整");
         System.out.println("-Xmn3g                           # 新生代大小");
         System.out.println("-XX:MetaspaceSize=256m           # 元空间初始大小");
-        System.out.println("");
+        System.out.println(" ");
         System.out.println("# GC 选择");
         System.out.println("-XX:+UseG1GC                     # 使用 G1");
         System.out.println("-XX:MaxGCPauseMillis=200         # 目标最大停顿时间");
-        System.out.println("");
+        System.out.println(" ");
         System.out.println("# GC 日志（JDK9+ 统一日志）");
         System.out.println("-Xlog:gc*:file=gc.log:time:filecount=5,filesize=100m");
-        System.out.println("");
+        System.out.println(" ");
         System.out.println("# OOM 处理");
         System.out.println("-XX:+HeapDumpOnOutOfMemoryError");
         System.out.println("-XX:HeapDumpPath=/var/log/heapdump.hprof\n");
@@ -271,7 +271,7 @@ public class GarbageCollectorDemo {
         System.out.println("\r\n开始内存泄漏模拟！\n");
 
         Runtime runtime = Runtime.getRuntime();
-        
+
         try {
             // 持续添加对象，直到 OOM 或手动停止
             int count = 0;
@@ -279,7 +279,7 @@ public class GarbageCollectorDemo {
                 // 每次添加 256KB，让程序运行更长时间便于观察
                 STATIC_LIST.add(new byte[256 * 1024]);
                 count++;
-                
+
                 // 每 50 个对象（约 12.5MB）打印一次内存状态
                 if (count % 50 == 0) {
                     long maxMemory = runtime.maxMemory() / 1024 / 1024;
@@ -287,11 +287,11 @@ public class GarbageCollectorDemo {
                     long freeMemory = runtime.freeMemory() / 1024 / 1024;
                     long usedMemory = totalMemory - freeMemory;
                     long listSizeMB = STATIC_LIST.size() * 256 / 1024;
-                    
+
                     System.out.printf("[%04d] 列表大小: %d MB | 已用: %d MB | 空闲: %d MB | 最大: %d MB%n",
                             count, listSizeMB, usedMemory, freeMemory, maxMemory);
                 }
-                
+
                 // 每 10 个对象暂停一下，控制速度
                 if (count % 10 == 0) {
                     Thread.sleep(200);
@@ -306,7 +306,7 @@ public class GarbageCollectorDemo {
             System.out.println("  2. 使用 WeakHashMap 或软引用");
             System.out.println("  3. 定期清理不需要的数据");
             System.out.println("================================");
-            
+
             // OOM 后暂停 5 秒，方便查看结果
             Thread.sleep(5000);
         }

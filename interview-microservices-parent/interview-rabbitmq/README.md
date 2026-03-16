@@ -92,10 +92,12 @@ mvn spring-boot:run
 ### 1. 基础消息队列
 
 #### 简单队列（Simple Queue）
+
 - 一对一模式，一个生产者，一个消费者
 - 演示最基本的消息发送和接收
 
 **测试接口：**
+
 ```bash
 POST http://localhost:8080/api/rabbitmq/send/simple?routingKey=routing.key.1
 Content-Type: application/json
@@ -104,16 +106,19 @@ Content-Type: application/json
 ```
 
 #### 工作队列（Work Queue）
+
 - 多个消费者负载均衡
 - 演示任务分发模式
 
 ### 2. 交换机模式
 
 #### Direct Exchange（直连交换机）
+
 - routingKey 完全匹配
 - 示例：`routing.key.1` → `queue.simple`
 
 **测试接口：**
+
 ```bash
 POST http://localhost:8080/api/rabbitmq/send/routing?routingKey=routing.key.1
 Content-Type: application/json
@@ -127,10 +132,12 @@ Content-Type: application/json
 ```
 
 #### Fanout Exchange（扇形交换机）
+
 - 广播模式，忽略 routingKey
 - 所有绑定的队列都会收到消息
 
 **测试接口：**
+
 ```bash
 POST http://localhost:8080/api/rabbitmq/send/fanout
 Content-Type: application/json
@@ -144,10 +151,12 @@ Content-Type: application/json
 ```
 
 #### Topic Exchange（主题交换机）
+
 - routingKey 模糊匹配
 - 支持通配符：`*` (匹配一个单词), `#` (匹配零个或多个单词)
 
 **测试接口：**
+
 ```bash
 POST http://localhost:8080/api/rabbitmq/send/topic?routingKey=topic.normal
 Content-Type: application/json
@@ -162,10 +171,12 @@ Content-Type: application/json
 ### 3. 高级特性
 
 #### 延迟队列（Delay Queue）
+
 - 使用 TTL + 死信队列实现
 - 应用场景：订单超时取消、定时任务
 
 **测试接口：**
+
 ```bash
 POST http://localhost:8080/api/rabbitmq/send/delay?delaySeconds=30
 Content-Type: application/json
@@ -174,15 +185,18 @@ Content-Type: application/json
 ```
 
 **订单超时取消示例：**
+
 ```bash
 POST http://localhost:8080/api/rabbitmq/order/timeout/cancel?orderId=ORDER_001
 ```
 
 #### 死信队列（Dead Letter Queue）
+
 - 处理失败的消息
 - 消息被拒绝、超时、队列满等情况
 
 **测试接口：**
+
 ```bash
 POST http://localhost:8080/api/rabbitmq/send/deadletter
 Content-Type: application/json
@@ -191,10 +205,12 @@ Content-Type: application/json
 ```
 
 #### 优先级队列（Priority Queue）
+
 - 高优先级消息优先消费
 - 优先级范围：0-10
 
 **测试接口：**
+
 ```bash
 POST http://localhost:8080/api/rabbitmq/send/priority?priority=8
 Content-Type: application/json
@@ -203,6 +219,7 @@ Content-Type: application/json
 ```
 
 **批量发送（观察优先级效果）：**
+
 ```bash
 POST http://localhost:8080/api/rabbitmq/send/priority/batch
 ```
@@ -210,20 +227,24 @@ POST http://localhost:8080/api/rabbitmq/send/priority/batch
 ### 4. 可靠性保障
 
 #### 消息确认机制
+
 - Publisher Confirm：消息到达交换机的确认
 - Publisher Return：消息无法路由时的回调
 - Consumer ACK：消费者手动确认
 
 #### 手动 ACK 示例
+
 ```java
 channel.basicAck(deliveryTag, false);  // 确认消息
 channel.basicNack(deliveryTag, false, true);  // 拒绝并重新入队
 ```
 
 #### 幂等性处理
+
 通过消息 ID 去重，防止重复消费
 
 **测试接口：**
+
 ```bash
 POST http://localhost:8080/api/interview/idempotent/send?messageId=MSG_001
 Content-Type: application/json
@@ -236,36 +257,37 @@ Content-Type: application/json
 提供 10 道高频面试题及代码示例：
 
 1. ✅ **如何保证消息的可靠性？**
-   - 生产者确认 + 消息持久化 + 消费者手动 ACK + 死信队列
+    - 生产者确认 + 消息持久化 + 消费者手动 ACK + 死信队列
 
 2. ✅ **如何实现延迟队列？**
-   - TTL + 死信队列 / 延迟队列插件
+    - TTL + 死信队列 / 延迟队列插件
 
 3. ✅ **如何保证消息的顺序性？**
-   - 相同 routingKey 发送到同一队列
+    - 相同 routingKey 发送到同一队列
 
 4. ✅ **如何处理重复消息（幂等性）？**
-   - 消息 ID 去重 + Redis / 数据库唯一键
+    - 消息 ID 去重 + Redis / 数据库唯一键
 
 5. ✅ **如何实现优先级队列？**
-   - 队列设置 x-max-priority + 消息设置 priority
+    - 队列设置 x-max-priority + 消息设置 priority
 
 6. ✅ **发布订阅模式的几种交换机区别？**
-   - Direct / Fanout / Topic 对比
+    - Direct / Fanout / Topic 对比
 
 7. ✅ **如何处理大量积压的消息？**
-   - 扩容消费者 + 优化逻辑 + 调整 prefetch
+    - 扩容消费者 + 优化逻辑 + 调整 prefetch
 
 8. ✅ **如何保证高可用？**
-   - 集群 + 镜像队列 + 负载均衡
+    - 集群 + 镜像队列 + 负载均衡
 
 9. ✅ **死信队列的应用场景？**
-   - 失败容错 + 延迟队列 + 异常收集
+    - 失败容错 + 延迟队列 + 异常收集
 
 10. ✅ **消息队列的优缺点？**
     - 解耦、异步、削峰 / 复杂度增加、一致性挑战
 
 **面试题测试接口：**
+
 ```bash
 # 1. 可靠消息
 POST http://localhost:8080/api/interview/reliability/send
@@ -344,11 +366,13 @@ spring:
 ## 📝 知识点总结
 
 ### 消息生产流程
+
 1. Producer → Exchange（根据 routingKey）
 2. Exchange → Queue（根据 Binding）
 3. Queue → Consumer（推送或拉取）
 
 ### 五种消息模式
+
 1. **简单模式**：一对一
 2. **工作队列模式**：多对多（负载均衡）
 3. **发布订阅模式**：Fanout Exchange，广播
@@ -356,6 +380,7 @@ spring:
 5. **主题模式**：Topic Exchange，模糊匹配
 
 ### 可靠性保障机制
+
 - **生产者确认**：确保消息到达交换机
 - **消息持久化**：队列、交换机、消息都持久化
 - **消费者手动 ACK**：确保消息被成功处理
@@ -363,6 +388,7 @@ spring:
 - **重试机制**：自动重试失败的消息
 
 ### 高级特性
+
 - **延迟队列**：TTL + DLX 实现
 - **优先级队列**：x-max-priority 参数
 - **死信队列**：消息失败后的归宿
@@ -371,18 +397,18 @@ spring:
 ## 🎯 使用建议
 
 1. **学习顺序**：
-   - 先理解基础队列 → 交换机模式 → 高级特性 → 可靠性保障
-   
+    - 先理解基础队列 → 交换机模式 → 高级特性 → 可靠性保障
+
 2. **实践建议**：
-   - 每个接口都实际调用，观察日志
-   - 尝试修改配置参数，观察效果
-   - 模拟异常情况（如关闭 RabbitMQ）
+    - 每个接口都实际调用，观察日志
+    - 尝试修改配置参数，观察效果
+    - 模拟异常情况（如关闭 RabbitMQ）
 
 3. **面试准备**：
-   - 重点掌握可靠性保障机制
-   - 理解各种交换机的区别
-   - 掌握延迟队列、死信队列的实现
-   - 能够手写代码解决实际问题
+    - 重点掌握可靠性保障机制
+    - 理解各种交换机的区别
+    - 掌握延迟队列、死信队列的实现
+    - 能够手写代码解决实际问题
 
 ## 📖 参考资料
 
@@ -393,15 +419,19 @@ spring:
 ## 💡 常见问题
 
 ### Q: 消息丢失怎么办？
+
 A: 开启持久化（队列、消息都持久化）+ 生产者确认 + 消费者手动 ACK
 
 ### Q: 如何保证消息不重复？
+
 A: 业务层面实现幂等性（消息 ID 去重、数据库唯一键）
 
 ### Q: 如何保证消息顺序？
+
 A: 使用相同的 routingKey，确保进入同一队列
 
 ### Q: 延迟队列怎么实现？
+
 A: TTL + 死信队列 或 使用延迟队列插件
 
 ## 📧 联系方式

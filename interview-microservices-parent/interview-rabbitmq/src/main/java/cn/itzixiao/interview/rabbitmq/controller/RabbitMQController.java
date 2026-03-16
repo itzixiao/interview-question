@@ -210,10 +210,10 @@ public class RabbitMQController {
                     .status("PENDING_PAYMENT")
                     .createTime(System.currentTimeMillis())
                     .build();
-            
+
             // 发送延迟消息，30 秒后处理订单超时
             messageProducer.sendDelayMessage(orderMessage, 30);
-            
+
             result.put("success", true);
             result.put("message", "订单超时任务已设置，30 秒后将自动取消未支付订单");
         } catch (Exception e) {

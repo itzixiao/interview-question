@@ -10,7 +10,7 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 
 /**
  * Spring AOP (Aspect Oriented Programming) 面向切面编程详解
- *
+ * <p>
  * AOP 核心概念：
  * ┌─────────────────────────────────────────────────────────────┐
  * │  Aspect（切面）    - 横切关注点的模块化，包含通知和切点        │
@@ -21,7 +21,7 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
  * │  Proxy（代理）     - AOP 框架创建的对象，包含增强逻辑           │
  * │  Weaving（织入）   - 将增强应用到目标对象的过程                 │
  * └─────────────────────────────────────────────────────────────┘
- *
+ * <p>
  * AOP 实现方式：
  * ┌─────────────────────────────────────────────────────────────┐
  * │  JDK 动态代理：目标类实现接口时使用                            │
@@ -98,7 +98,8 @@ public class AOPDemo {
          * 定义切点：匹配 UserService 的所有方法
          */
         @Pointcut("execution(* cn.itzixiao.interview.spring.AOPDemo.UserService.*(..))")
-        public void userServicePointcut() {}
+        public void userServicePointcut() {
+        }
 
         /**
          * 前置通知：方法执行前执行
@@ -162,7 +163,7 @@ public class AOPDemo {
 
 /**
  * 通知执行顺序（Spring 4.x / 5.x）：
- *
+ * <p>
  * 正常情况：
  * 1. @Around（前半部分）
  * 2. @Before
@@ -170,7 +171,7 @@ public class AOPDemo {
  * 4. @Around（后半部分）
  * 5. @AfterReturning
  * 6. @After
- *
+ * <p>
  * 异常情况：
  * 1. @Around（前半部分）
  * 2. @Before
@@ -178,7 +179,7 @@ public class AOPDemo {
  * 4. @AfterThrowing
  * 5. @After
  * 6. @Around（捕获异常后）
- *
+ * <p>
  * 注意：
  * - @After 总是执行（类似 finally）
  * - @Around 可以阻止目标方法执行

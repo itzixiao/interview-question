@@ -7,12 +7,12 @@ import java.util.List;
  * =====================================================================================
  * 访问者模式（Visitor Pattern）
  * =====================================================================================
- * 
+ * <p>
  * 一、定义
  * -------------------------------------------------------------------------------------
  * 表示一个作用于某对象结构中的各元素的操作。它使你可以在不改变各元素的类的前提下
  * 定义作用于这些元素的新操作。
- * 
+ * <p>
  * 二、核心思想
  * -------------------------------------------------------------------------------------
  * 1. 访问者接口（Visitor）：为每种元素定义访问方法
@@ -20,13 +20,13 @@ import java.util.List;
  * 3. 元素接口（Element）：定义 accept 方法，接受访问者
  * 4. 具体元素（Concrete Element）：实现 accept 方法
  * 5. 对象结构（Object Structure）：存储元素集合
- * 
+ * <p>
  * 三、双分派机制
  * -------------------------------------------------------------------------------------
  * 访问者模式使用了「双分派」机制：
  * 1. 第一分派：element.accept(visitor) - 根据 element 类型选择方法
  * 2. 第二分派：visitor.visit(this) - 根据 visitor 类型选择方法
- * 
+ * <p>
  * 四、应用场景
  * -------------------------------------------------------------------------------------
  * - 编译器：语法树访问（类型检查、代码生成）
@@ -62,7 +62,9 @@ public class VisitorDemo {
  */
 interface FileVisitor {
     void visit(TextFile textFile);
+
     void visit(ImageFile imageFile);
+
     void visit(VideoFile videoFile);
 }
 
@@ -71,7 +73,9 @@ interface FileVisitor {
  */
 interface FileElement {
     String getName();
+
     long getSize();
+
     void accept(FileVisitor visitor);
 }
 
@@ -89,9 +93,17 @@ class TextFile implements FileElement {
         this.encoding = encoding;
     }
 
-    public String getName() { return name; }
-    public long getSize() { return size; }
-    public String getEncoding() { return encoding; }
+    public String getName() {
+        return name;
+    }
+
+    public long getSize() {
+        return size;
+    }
+
+    public String getEncoding() {
+        return encoding;
+    }
 
     @Override
     public void accept(FileVisitor visitor) {
@@ -113,9 +125,17 @@ class ImageFile implements FileElement {
         this.resolution = resolution;
     }
 
-    public String getName() { return name; }
-    public long getSize() { return size; }
-    public String getResolution() { return resolution; }
+    public String getName() {
+        return name;
+    }
+
+    public long getSize() {
+        return size;
+    }
+
+    public String getResolution() {
+        return resolution;
+    }
 
     @Override
     public void accept(FileVisitor visitor) {
@@ -137,9 +157,17 @@ class VideoFile implements FileElement {
         this.duration = duration;
     }
 
-    public String getName() { return name; }
-    public long getSize() { return size; }
-    public String getDuration() { return duration; }
+    public String getName() {
+        return name;
+    }
+
+    public long getSize() {
+        return size;
+    }
+
+    public String getDuration() {
+        return duration;
+    }
 
     @Override
     public void accept(FileVisitor visitor) {
@@ -170,19 +198,19 @@ class ObjectStructure {
 class TextExportVisitor implements FileVisitor {
     @Override
     public void visit(TextFile textFile) {
-        System.out.println("    [文本] " + textFile.getName() + 
+        System.out.println("    [文本] " + textFile.getName() +
                 " | " + textFile.getSize() + "B | 编码:" + textFile.getEncoding());
     }
 
     @Override
     public void visit(ImageFile imageFile) {
-        System.out.println("    [图片] " + imageFile.getName() + 
+        System.out.println("    [图片] " + imageFile.getName() +
                 " | " + imageFile.getSize() + "B | " + imageFile.getResolution());
     }
 
     @Override
     public void visit(VideoFile videoFile) {
-        System.out.println("    [视频] " + videoFile.getName() + 
+        System.out.println("    [视频] " + videoFile.getName() +
                 " | " + videoFile.getSize() + "B | " + videoFile.getDuration());
     }
 }

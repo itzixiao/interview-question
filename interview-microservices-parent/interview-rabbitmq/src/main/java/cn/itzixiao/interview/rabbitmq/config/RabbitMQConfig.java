@@ -115,13 +115,13 @@ public class RabbitMQConfig {
      */
     @Bean
     public Binding directBinding1(@Qualifier("directExchange") DirectExchange exchange,
-                                   @Qualifier("simpleQueue") Queue queue) {
+                                  @Qualifier("simpleQueue") Queue queue) {
         return BindingBuilder.bind(queue).to(exchange).with("routing.key.1");
     }
 
     @Bean
     public Binding directBinding2(@Qualifier("directExchange") DirectExchange exchange,
-                                   @Qualifier("workQueue") Queue queue) {
+                                  @Qualifier("workQueue") Queue queue) {
         return BindingBuilder.bind(queue).to(exchange).with("routing.key.2");
     }
 
@@ -130,13 +130,13 @@ public class RabbitMQConfig {
      */
     @Bean
     public Binding fanoutBinding1(@Qualifier("fanoutExchange") FanoutExchange exchange,
-                                   @Qualifier("fanoutQueue1") Queue queue) {
+                                  @Qualifier("fanoutQueue1") Queue queue) {
         return BindingBuilder.bind(queue).to(exchange);
     }
 
     @Bean
     public Binding fanoutBinding2(@Qualifier("fanoutExchange") FanoutExchange exchange,
-                                   @Qualifier("fanoutQueue2") Queue queue) {
+                                  @Qualifier("fanoutQueue2") Queue queue) {
         return BindingBuilder.bind(queue).to(exchange);
     }
 
@@ -145,13 +145,13 @@ public class RabbitMQConfig {
      */
     @Bean
     public Binding routingBinding1(@Qualifier("directExchange") DirectExchange exchange,
-                                    @Qualifier("routingQueue1") Queue queue) {
+                                   @Qualifier("routingQueue1") Queue queue) {
         return BindingBuilder.bind(queue).to(exchange).with("routing.*.1");
     }
 
     @Bean
     public Binding routingBinding2(@Qualifier("directExchange") DirectExchange exchange,
-                                    @Qualifier("routingQueue2") Queue queue) {
+                                   @Qualifier("routingQueue2") Queue queue) {
         return BindingBuilder.bind(queue).to(exchange).with("routing.*.2");
     }
 
@@ -160,13 +160,13 @@ public class RabbitMQConfig {
      */
     @Bean
     public Binding topicBinding1(@Qualifier("topicExchange") TopicExchange exchange,
-                                  @Qualifier("topicQueue1") Queue queue) {
+                                 @Qualifier("topicQueue1") Queue queue) {
         return BindingBuilder.bind(queue).to(exchange).with("topic.#");
     }
 
     @Bean
     public Binding topicBinding2(@Qualifier("topicExchange") TopicExchange exchange,
-                                  @Qualifier("topicQueue2") Queue queue) {
+                                 @Qualifier("topicQueue2") Queue queue) {
         return BindingBuilder.bind(queue).to(exchange).with("*.important");
     }
 
@@ -193,7 +193,7 @@ public class RabbitMQConfig {
      */
     @Bean
     public Binding deadLetterBinding(@Qualifier("deadLetterQueue") Queue deadLetterQueue,
-                                      @Qualifier("deadLetterExchange") DirectExchange deadLetterExchange) {
+                                     @Qualifier("deadLetterExchange") DirectExchange deadLetterExchange) {
         return BindingBuilder.bind(deadLetterQueue).to(deadLetterExchange).with("deadletter.routingkey");
     }
 
@@ -213,7 +213,7 @@ public class RabbitMQConfig {
      */
     @Bean
     public Binding normalQueueWithDLXBinding(@Qualifier("normalQueueWithDLX") Queue queue,
-                                              @Qualifier("directExchange") DirectExchange exchange) {
+                                             @Qualifier("directExchange") DirectExchange exchange) {
         return BindingBuilder.bind(queue).to(exchange).with("queue.dlx");
     }
 
@@ -236,7 +236,7 @@ public class RabbitMQConfig {
      */
     @Bean
     public Binding delayQueueBinding(@Qualifier("delayQueue") Queue delayQueue,
-                                      @Qualifier("directExchange") DirectExchange exchange) {
+                                     @Qualifier("directExchange") DirectExchange exchange) {
         return BindingBuilder.bind(delayQueue).to(exchange).with("queue.delay");
     }
 
@@ -253,7 +253,7 @@ public class RabbitMQConfig {
      */
     @Bean
     public Binding delayDeadLetterBinding(@Qualifier("delayDeadLetterQueue") Queue queue,
-                                           @Qualifier("deadLetterExchange") DirectExchange exchange) {
+                                          @Qualifier("deadLetterExchange") DirectExchange exchange) {
         return BindingBuilder.bind(queue).to(exchange).with("delay.routingkey");
     }
 
@@ -274,7 +274,7 @@ public class RabbitMQConfig {
      */
     @Bean
     public Binding priorityQueueBinding(@Qualifier("priorityQueue") Queue priorityQueue,
-                                         @Qualifier("directExchange") DirectExchange exchange) {
+                                        @Qualifier("directExchange") DirectExchange exchange) {
         return BindingBuilder.bind(priorityQueue).to(exchange).with("queue.priority");
     }
 
@@ -293,7 +293,7 @@ public class RabbitMQConfig {
      */
     @Bean
     public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory,
-                                          @Qualifier("jsonMessageConverter") MessageConverter messageConverter) {
+                                         @Qualifier("jsonMessageConverter") MessageConverter messageConverter) {
         RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
         rabbitTemplate.setMessageConverter(messageConverter);
         // 开启 mandatory 标志，确保消息无法路由时触发 ReturnCallback

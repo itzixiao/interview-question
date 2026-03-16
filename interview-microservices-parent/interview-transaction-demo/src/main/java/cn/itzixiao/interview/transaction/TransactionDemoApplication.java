@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
  * 事务传播机制演示应用启动类
- * 
+ *
  * @author itzixiao
  * @since 2026-03-13
  */
@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @MapperScan("cn.itzixiao.interview.transaction.mapper")
 @EnableTransactionManagement // 启用事务管理
 public class TransactionDemoApplication {
-    
+
     public static void main(String[] args) {
         SpringApplication.run(TransactionDemoApplication.class, args);
         System.out.println("===========================================");

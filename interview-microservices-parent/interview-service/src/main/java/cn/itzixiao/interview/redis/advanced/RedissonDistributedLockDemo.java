@@ -4,16 +4,14 @@ import org.redisson.Redisson;
 import org.redisson.api.*;
 import org.redisson.config.Config;
 
-import java.util.Collections;
-import java.util.UUID;
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Redis 与 Redisson 分布式锁详解
- *
+ * <p>
  * 本示例对比展示了 Redis 原生分布式锁和 Redisson 分布式锁的实现方式
- *
+ * <p>
  * ┌─────────────────────────────────────────────────────────────────────────────┐
  * │                        Redis 分布式锁演进                                    │
  * │                                                                             │

@@ -7,7 +7,7 @@ import reactor.core.publisher.Mono;
 
 /**
  * Gateway 限流配置 - KeyResolver 示例
- *
+ * <p>
  * ┌─────────────────────────────────────────────────────────────────────────────┐
  * │                        Gateway 限流原理                                      │
  * │                                                                             │
@@ -44,28 +44,28 @@ import reactor.core.publisher.Mono;
  * │  - 按接口限流：同一接口共享令牌桶                                            │
  * │                                                                             │
  * └─────────────────────────────────────────────────────────────────────────────┘
- *
+ * <p>
  * 使用方式（application.yml）：
- *
+ * <p>
  * spring:
- *   cloud:
- *     gateway:
- *       routes:
- *         - id: rate-limit-route
- *           uri: lb://some-service
- *           predicates:
- *             - Path=/api/limit/**
- *           filters:
- *             - name: RequestRateLimiter
- *               args:
- *                 redis-rate-limiter.replenishRate: 10   # 每秒10个请求
- *                 redis-rate-limiter.burstCapacity: 20   # 最大突发20个
- *                 key-resolver: "#{@ipKeyResolver}"      # 按IP限流
- *
+ * cloud:
+ * gateway:
+ * routes:
+ * - id: rate-limit-route
+ * uri: lb://some-service
+ * predicates:
+ * - Path=/api/limit/**
+ * filters:
+ * - name: RequestRateLimiter
+ * args:
+ * redis-rate-limiter.replenishRate: 10   # 每秒10个请求
+ * redis-rate-limiter.burstCapacity: 20   # 最大突发20个
+ * key-resolver: "#{@ipKeyResolver}"      # 按IP限流
+ * <p>
  * 需要添加依赖：
  * <dependency>
- *     <groupId>org.springframework.boot</groupId>
- *     <artifactId>spring-boot-starter-data-redis-reactive</artifactId>
+ * <groupId>org.springframework.boot</groupId>
+ * <artifactId>spring-boot-starter-data-redis-reactive</artifactId>
  * </dependency>
  */
 @Configuration

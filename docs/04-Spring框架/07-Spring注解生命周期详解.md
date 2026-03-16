@@ -16,17 +16,19 @@
 **定义：** JSR-250 规范定义的注解，用于在依赖注入完成后执行初始化逻辑。
 
 **特点：**
+
 - ✅ **来源：** JDK 标准（`javax.annotation.PostConstruct`），不是 Spring 的注解
 - ✅ **时机：** 在构造方法之后、依赖注入完成时立即执行
 - ✅ **优先级：** 最高（第一个执行的初始化方法）
 - ✅ **限制：**
-  - 只能有一个方法标注此注解
-  - 方法必须是非静态的
-  - 不能有参数
-  - 返回值会被忽略
-  - 不能抛出受检异常（Checked Exception）
+    - 只能有一个方法标注此注解
+    - 方法必须是非静态的
+    - 不能有参数
+    - 返回值会被忽略
+    - 不能抛出受检异常（Checked Exception）
 
 **典型应用场景：**
+
 ```java
 @PostConstruct
 public void init() {
@@ -50,17 +52,19 @@ public void init() {
 **定义：** JSR-250 规范定义的注解，用于在 Bean 销毁前执行清理逻辑。
 
 **特点：**
+
 - ✅ **来源：** JDK 标准（`javax.annotation.PreDestroy`），不是 Spring 的注解
 - ✅ **时机：** 在容器关闭时、Bean 销毁前执行
 - ✅ **优先级：** 最高（第一个执行的销毁方法）
 - ✅ **限制：**
-  - 只能有一个方法标注此注解
-  - 方法必须是非静态的
-  - 不能有参数
-  - 返回值会被忽略
-  - 不能抛出受检异常
+    - 只能有一个方法标注此注解
+    - 方法必须是非静态的
+    - 不能有参数
+    - 返回值会被忽略
+    - 不能抛出受检异常
 
 **典型应用场景：**
+
 ```java
 @PreDestroy
 public void cleanup() {
@@ -76,6 +80,7 @@ public void cleanup() {
 ```
 
 **⚠️ 注意事项：**
+
 - 只有容器**正常关闭**时才会调用（如 `context.close()`）
 - 使用 `System.exit()` 或直接杀死进程**不会调用**
 - 必须在容器启动时注册了关闭钩子（Shutdown Hook）
@@ -87,14 +92,16 @@ public void cleanup() {
 **定义：** Spring框架提供的注解，用于指定 Bean 的初始化和销毁方法。
 
 **特点：**
+
 - ✅ **来源：** Spring框架（`org.springframework.context.annotation.Bean`）
-- ✅ **时机：** 
-  - `initMethod`：在初始化阶段最后执行
-  - `destroyMethod`：在销毁阶段最后执行
+- ✅ **时机：**
+    - `initMethod`：在初始化阶段最后执行
+    - `destroyMethod`：在销毁阶段最后执行
 - ✅ **优先级：** 最低
 - ✅ **灵活性：** 可以自定义方法名
 
 **使用示例：**
+
 ```java
 @Configuration
 class AppConfig {
@@ -137,6 +144,7 @@ class HikariDataSource {
 **记忆口诀：** 先 JDK 后 Spring 最后自定义
 
 **详细流程：**
+
 ```java
 // 1. 构造方法创建 Bean 实例
 UserService userService = new UserService();
@@ -178,6 +186,7 @@ initMethod.invoke(userService);
 **记忆口诀：** 先 JDK 后 Spring 最后自定义
 
 **详细流程：**
+
 ```java
 // 1. 【第 1 个执行】@PreDestroy 方法
 userService.preDestroy();
@@ -336,13 +345,13 @@ class UserService {
 
 **答：**
 
-| 对比项 | @PostConstruct | InitializingBean |
-|--------|---------------|------------------|
-| **来源** | JDK 标准（JSR-250） | Spring框架 |
-| **优先级** | 高（最先执行） | 中（第二个执行） |
-| **耦合度** | 低（普通 Java 类也能用） | 高（依赖 Spring API） |
-| **数量限制** | 只能有一个方法 | 可以实现多次 |
-| **推荐度** | ⭐⭐⭐⭐⭐ 推荐 | ⭐⭐⭐ 不推荐 |
+| 对比项      | @PostConstruct  | InitializingBean |
+|----------|-----------------|------------------|
+| **来源**   | JDK 标准（JSR-250） | Spring框架         |
+| **优先级**  | 高（最先执行）         | 中（第二个执行）         |
+| **耦合度**  | 低（普通 Java 类也能用） | 高（依赖 Spring API） |
+| **数量限制** | 只能有一个方法         | 可以实现多次           |
+| **推荐度**  | ⭐⭐⭐⭐⭐ 推荐        | ⭐⭐⭐ 不推荐          |
 
 **最佳实践：** 优先使用 `@PostConstruct`，避免依赖 Spring API。
 
@@ -380,16 +389,18 @@ class UserService {
 
 ### ❓ 问题 3：@PostConstruct 可以抛出异常吗？
 
-**答：** 
+**答：**
 
 **不可以！** `@PostConstruct` 方法不能抛出受检异常（Checked Exception）。
 
 **原因：**
+
 - 如果抛出异常，会导致 Bean 初始化失败
 - Spring 容器会抛出 `BeanCreationException`
 - 整个应用上下文无法启动
 
 **示例：**
+
 ```java
 // ❌ 错误：不能抛出受检异常
 @PostConstruct
@@ -420,7 +431,8 @@ public void init() {
 3. @Bean(initMethod) 或 XML init-method（自定义方法）
 ```
 
-**记忆技巧：** 
+**记忆技巧：**
+
 - 先国际标准（JDK）
 - 再框架标准（Spring）
 - 最后个人标准（自定义）
@@ -432,6 +444,7 @@ public void init() {
 **答：** **@Autowired 先执行**（依赖注入完成），然后才执行 `@PostConstruct`。
 
 **完整顺序：**
+
 ```
 1. 构造方法
    ↓
@@ -443,6 +456,7 @@ public void init() {
 **原因：** `@PostConstruct` 的设计初衷就是在依赖注入完成后执行初始化逻辑。
 
 **示例：**
+
 ```java
 @Component
 public class UserService {

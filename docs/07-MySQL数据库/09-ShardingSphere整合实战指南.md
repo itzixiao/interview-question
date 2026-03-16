@@ -3,12 +3,15 @@
 ## 1. 项目背景
 
 ### 1.1 需求场景
-- **数据表按月分片**：`device_operation_log` 表按月份拆分为 12 个子表（`device_operation_log_202601` ~ `device_operation_log_202612`）
+
+- **数据表按月分片**：`device_operation_log` 表按月份拆分为 12 个子表（`device_operation_log_202601` ~
+  `device_operation_log_202612`）
 - **时间范围路由**：根据 `operation_time` 字段自动路由到对应的月份表
 - **精确查询优化**：单月查询只访问单张表，避免全表扫描
 - **范围查询支持**：多个月份查询自动路由到所有相关表
 
 ### 1.2 技术选型
+
 - **ShardingSphere 版本**：4.1.1
 - **Spring Boot 版本**：2.7.18
 - **MyBatis 版本**：3.5.10
@@ -124,6 +127,7 @@ spring:
 ```
 
 **⚠️ 关键注意事项**：
+
 1. `actual-data-nodes` 必须显式列出所有带前导零的表名（`202601` 而不是 `20261`）
 2. ShardingSphere 4.1.1 不支持 Groovy 表达式的复杂格式化
 3. 分片列 `operation_time` 必须是数据库中的实际字段名
@@ -250,6 +254,7 @@ public class DeviceOperationLogMonthShardingAlgorithm implements PreciseSharding
 ```
 
 **🔍 关键点解析**：
+
 1. 实现 `PreciseShardingAlgorithm` 和 `RangeShardingAlgorithm` 两个接口
 2. 精确分片返回单个表名，范围分片返回表名集合
 3. 范围计算时需要考虑月初和月末的边界情况
@@ -322,6 +327,7 @@ public interface DeviceOperationLogMapper extends BaseMapper<DeviceOperationLog>
 ```
 
 **⚠️ 重要说明**：
+
 - 使用 XML 映射而非 `@Select` 注解，确保多参数正确传递给 ShardingSphere
 - 使用自定义 `CustomLocalDateTimeTypeHandler` 处理 LocalDateTime 类型转换
 
@@ -396,6 +402,7 @@ curl "http://localhost:8082/sharding/test/all-year"
 ### 6.3 预期日志输出
 
 #### 精确查询示例
+
 ```
 INFO  c.i.i.p.c.ShardingTestController : 精确查询测试，operationTime=2026-03-15T10:30
 INFO  DeviceOperationLogMonthShardingAlgorithm : 范围分片：startTime=2026-03-15T10:30, endTime=2026-03-15T23:59:59
@@ -409,6 +416,7 @@ INFO  ShardingSphere-SQL : Actual SQL: ds0 ::: SELECT * FROM device_operation_lo
 ```
 
 #### 范围查询示例
+
 ```
 INFO  DeviceOperationLogMonthShardingAlgorithm : 范围分片：startTime=2026-01-01T00:00, endTime=2026-06-30T23:59:59
 INFO  [DEBUG] final result: [device_operation_log_202601, device_operation_log_202602, device_operation_log_202603, device_operation_log_202604, device_operation_log_202605, device_operation_log_202606]
@@ -425,15 +433,18 @@ INFO  ShardingSphere-SQL : Actual SQL: ds0 ::: SELECT * FROM device_operation_lo
 ### 7.1 `no table route info` 错误
 
 **问题现象**：
+
 ```
 Caused by: java.lang.IllegalStateException: no table route info
 ```
 
 **根本原因**：
+
 - `actual-data-nodes` 生成的表名格式与分片算法期望的格式不匹配
 - 例如：生成了 `device_operation_log_20261`（无前导零），但算法期望 `device_operation_log_202601`
 
 **解决方案**：
+
 ```yaml
 # ✅ 正确：显式列出所有带前导零的表名
 actual-data-nodes: ds0.device_operation_log_202601,ds0.device_operation_log_202602,...,ds0.device_operation_log_202612
@@ -445,20 +456,24 @@ actual-data-nodes: ds0.device_operation_log_2026$->{1..12}.collect{String.format
 ### 7.2 参数传递丢失问题
 
 **问题现象**：
+
 - Controller 传递了 `startTime` 和 `endTime`，但分片算法只接收到 `startTime`
 
 **解决方案**：
+
 - 使用 MyBatis XML 映射文件代替 `@Select` 注解
 - 确保使用 `@Param` 注解明确参数名称
 
 ### 7.3 LocalDateTime 类型转换异常
 
 **问题现象**：
+
 ```
 Error setting parameters on PreparedStatement
 ```
 
 **解决方案**：
+
 - 实现自定义 `TypeHandler` 处理 LocalDateTime 转换
 - 在 XML 映射中指定 `typeHandler`
 
@@ -467,6 +482,7 @@ Error setting parameters on PreparedStatement
 ## 8. 性能优化建议
 
 ### 8.1 索引优化
+
 ```sql
 -- 为分片列创建索引
 ALTER TABLE device_operation_log_202601 ADD INDEX idx_operation_time (operation_time);
@@ -474,6 +490,7 @@ ALTER TABLE device_operation_log_202601 ADD INDEX idx_operation_time (operation_
 ```
 
 ### 8.2 连接池配置
+
 ```yaml
 hikari:
   minimum-idle: 5          # 最小空闲连接
@@ -484,6 +501,7 @@ hikari:
 ```
 
 ### 8.3 SQL 监控
+
 ```yaml
 spring:
   shardingsphere:
@@ -497,18 +515,21 @@ spring:
 ## 9. 最佳实践总结
 
 ### 9.1 配置规范
+
 1. ✅ `actual-data-nodes` 必须显式列出所有表名（带前导零）
 2. ✅ 分片列必须是数据库中的实际字段名
 3. ✅ 精确分片和范围分片算法类可以复用同一个类
 4. ✅ 开发环境开启 SQL 显示便于调试
 
 ### 9.2 代码规范
+
 1. ✅ 使用 MyBatis XML 映射文件管理复杂 SQL
 2. ✅ 分片算法中添加详细日志便于问题排查
 3. ✅ 范围计算时严格处理边界条件（月初、月末）
 4. ✅ Controller 层统一进行参数校验和异常处理
 
 ### 9.3 测试规范
+
 1. ✅ 精确查询测试：验证单表路由
 2. ✅ 范围查询测试：验证多表路由
 3. ✅ 边界值测试：验证月初、月末、跨年份查询

@@ -19,22 +19,14 @@ import org.springframework.web.servlet.view.AbstractView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.Reader;
-import java.io.Writer;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Spring MVC 内部机制深度解析
- *
+ * <p>
  * 本示例深入讲解：
  * 1. HttpMessageConverter - 消息转换器
  * 2. Formatter/Converter - 类型转换
@@ -308,8 +300,8 @@ public class SpringMvcInternalsDemo {
     public List<Map<String, Object>> listUsers() {
         System.out.println("【HandlerMapping】匹配到 GET /mvc/internal/users");
         return Arrays.asList(
-            createUser(1L, "张三", "zhangsan@example.com"),
-            createUser(2L, "李四", "lisi@example.com")
+                createUser(1L, "张三", "zhangsan@example.com"),
+                createUser(2L, "李四", "lisi@example.com")
         );
     }
 
@@ -394,12 +386,29 @@ public class SpringMvcInternalsDemo {
         private String name;
         private Integer age;
 
-        public Long getId() { return id; }
-        public void setId(Long id) { this.id = id; }
-        public String getName() { return name; }
-        public void setName(String name) { this.name = name; }
-        public Integer getAge() { return age; }
-        public void setAge(Integer age) { this.age = age; }
+        public Long getId() {
+            return id;
+        }
+
+        public void setId(Long id) {
+            this.id = id;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public Integer getAge() {
+            return age;
+        }
+
+        public void setAge(Integer age) {
+            this.age = age;
+        }
 
         @Override
         public String toString() {
@@ -411,10 +420,21 @@ public class SpringMvcInternalsDemo {
         private String currency;
         private double amount;
 
-        public String getCurrency() { return currency; }
-        public void setCurrency(String currency) { this.currency = currency; }
-        public double getAmount() { return amount; }
-        public void setAmount(double amount) { this.amount = amount; }
+        public String getCurrency() {
+            return currency;
+        }
+
+        public void setCurrency(String currency) {
+            this.currency = currency;
+        }
+
+        public double getAmount() {
+            return amount;
+        }
+
+        public void setAmount(double amount) {
+            this.amount = amount;
+        }
 
         @Override
         public String toString() {

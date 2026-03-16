@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * 自定义自动配置类示例
- *
+ * <p>
  * 这个类展示了如何编写一个 Spring Boot 自动配置类
  * 当满足条件时，会自动创建 MyCustomService Bean
  */

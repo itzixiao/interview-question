@@ -19,7 +19,7 @@ import java.util.Map;
 
 /**
  * Spring 事务传播行为详解
- *
+ * <p>
  * ┌─────────────────────────────────────────────────────────────────────────────┐
  * │                        事务传播行为（Propagation）                            │
  * ├─────────────────────────────────────────────────────────────────────────────┤
@@ -33,7 +33,7 @@ import java.util.Map;
  * │  NEVER                当前必须无事务，否则抛出异常                             │
  * │                                                                             │
  * └─────────────────────────────────────────────────────────────────────────────┘
- *
+ * <p>
  * 事务隔离级别（Isolation）：
  * - DEFAULT: 使用数据库默认隔离级别
  * - READ_UNCOMMITTED: 读未提交
@@ -97,7 +97,7 @@ public class TransactionPropagationDemo implements CommandLineRunner {
      * ============================================
      * 1. REQUIRED（默认）- 当前有事务则加入，无则新建
      * ============================================
-     *
+     * <p>
      * 场景：方法 A 调用方法 B，两者都是 REQUIRED
      * - 如果 A 有事务，B 加入 A 的事务
      * - 如果 A 无事务，B 新建一个事务
@@ -121,7 +121,7 @@ public class TransactionPropagationDemo implements CommandLineRunner {
      * ============================================
      * 2. REQUIRES_NEW - 挂起当前事务，新建独立事务
      * ============================================
-     *
+     * <p>
      * 场景：方法 A 调用方法 B，B 是 REQUIRES_NEW
      * - 挂起 A 的事务
      * - B 新建独立事务，独立提交/回滚
@@ -145,12 +145,12 @@ public class TransactionPropagationDemo implements CommandLineRunner {
      * ============================================
      * 3. NESTED - 在当前事务中创建嵌套事务（savepoint）
      * ============================================
-     *
+     * <p>
      * 场景：方法 A 调用方法 B，B 是 NESTED
      * - B 在 A 的事务中创建一个 savepoint
      * - B 回滚只回滚到 savepoint
      * - A 回滚则整个事务回滚
-     *
+     * <p>
      * 注意：NESTED 只对 DataSourceTransactionManager 有效
      */
     private void testNested() {
@@ -171,7 +171,7 @@ public class TransactionPropagationDemo implements CommandLineRunner {
      * ============================================
      * 4. SUPPORTS - 当前有事务则加入，无则以非事务执行
      * ============================================
-     *
+     * <p>
      * 场景：方法 A 调用方法 B，B 是 SUPPORTS
      * - 如果 A 有事务，B 加入
      * - 如果 A 无事务，B 以非事务方式执行
@@ -200,7 +200,7 @@ public class TransactionPropagationDemo implements CommandLineRunner {
      * ============================================
      * 5. NOT_SUPPORTED - 挂起当前事务，以非事务执行
      * ============================================
-     *
+     * <p>
      * 场景：方法 A 调用方法 B，B 是 NOT_SUPPORTED
      * - 挂起 A 的事务
      * - B 以非事务方式执行
@@ -224,7 +224,7 @@ public class TransactionPropagationDemo implements CommandLineRunner {
      * ============================================
      * 6. MANDATORY - 当前必须有事务，否则抛出异常
      * ============================================
-     *
+     * <p>
      * 场景：方法 A 调用方法 B，B 是 MANDATORY
      * - 如果 A 有事务，B 加入
      * - 如果 A 无事务，抛出 IllegalTransactionStateException
@@ -253,7 +253,7 @@ public class TransactionPropagationDemo implements CommandLineRunner {
      * ============================================
      * 7. NEVER - 当前必须无事务，否则抛出异常
      * ============================================
-     *
+     * <p>
      * 场景：方法 A 调用方法 B，B 是 NEVER
      * - 如果 A 无事务，B 以非事务执行
      * - 如果 A 有事务，抛出 IllegalTransactionStateException

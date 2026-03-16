@@ -5,18 +5,19 @@
 ### 1.1 核心特点
 
 **异步非阻塞（Asynchronous IO）**：
+
 - ✅ 真正的异步
 - ✅ 操作系统完成IO操作后通知应用
 - ✅ 无需轮询
 
 ### 1.2 AIO vs NIO
 
-| 特性 | NIO | AIO |
-|------|-----|-----|
-| **同步/异步** | 同步非阻塞 | 异步非阻塞 |
-| **实现方式** | Selector轮询 | CompletionHandler回调 |
-| **操作系统支持** | 跨平台 | Windows(IOCP)、Linux(AIO) |
-| **编程复杂度** | 复杂 | 最复杂 |
+| 特性         | NIO        | AIO                      |
+|------------|------------|--------------------------|
+| **同步/异步**  | 同步非阻塞      | 异步非阻塞                    |
+| **实现方式**   | Selector轮询 | CompletionHandler回调      |
+| **操作系统支持** | 跨平台        | Windows(IOCP)、Linux(AIO) |
+| **编程复杂度**  | 复杂         | 最复杂                      |
 
 ---
 
@@ -28,73 +29,73 @@
 public class AioServerDemo {
     private static final int PORT = 8080;
     private static final int BUFFER_SIZE = 1024;
-    
+
     public static void main(String[] args) throws IOException {
         // 1. 打开异步服务器通道
-        AsynchronousServerSocketChannel serverChannel = 
-            AsynchronousServerSocketChannel.open();
+        AsynchronousServerSocketChannel serverChannel =
+                AsynchronousServerSocketChannel.open();
         serverChannel.bind(new InetSocketAddress(PORT));
-        
+
         System.out.println("AIO服务器启动，监听端口：" + PORT);
-        
+
         // 2. 异步接受连接
         acceptClient(serverChannel);
-        
+
         // 保持主线程运行
         Thread.sleep(Long.MAX_VALUE);
     }
-    
+
     private static void acceptClient(AsynchronousServerSocketChannel serverChannel) {
         // 异步接受连接，带回调
         serverChannel.accept(null, new CompletionHandler<
                 AsynchronousSocketChannel, Void>() {
-            
+
             @Override
             public void completed(AsynchronousSocketChannel clientChannel, Void att) {
                 // 继续接受下一个连接
                 acceptClient(serverChannel);
-                
+
                 System.out.println("新客户端连接：" + clientChannel.toString());
-                
+
                 // 3. 异步读取数据
                 ByteBuffer buffer = ByteBuffer.allocate(BUFFER_SIZE);
-                clientChannel.read(buffer, buffer, 
-                    new CompletionHandler<Integer, ByteBuffer>() {
-                        @Override
-                        public void completed(Integer bytesRead, ByteBuffer readBuffer) {
-                            // 读取完成回调
-                            readBuffer.flip();
-                            byte[] data = new byte[readBuffer.remaining()];
-                            readBuffer.get(data);
-                            String message = new String(data);
-                            
-                            System.out.println("收到消息：" + message);
-                            
-                            // 4. 异步响应
-                            ByteBuffer writeBuffer = ByteBuffer.wrap(
-                                ("服务器收到：" + message).getBytes());
-                            clientChannel.write(writeBuffer, writeBuffer, 
-                                new CompletionHandler<Integer, ByteBuffer>() {
-                                    @Override
-                                    public void completed(Integer bytesWritten, 
-                                                         ByteBuffer writeBuf) {
-                                        System.out.println("响应完成");
-                                    }
-                                    
-                                    @Override
-                                    public void failed(Throwable exc, ByteBuffer att) {
-                                        exc.printStackTrace();
-                                    }
-                                });
-                        }
-                        
-                        @Override
-                        public void failed(Throwable exc, ByteBuffer att) {
-                            exc.printStackTrace();
-                        }
-                    });
+                clientChannel.read(buffer, buffer,
+                        new CompletionHandler<Integer, ByteBuffer>() {
+                            @Override
+                            public void completed(Integer bytesRead, ByteBuffer readBuffer) {
+                                // 读取完成回调
+                                readBuffer.flip();
+                                byte[] data = new byte[readBuffer.remaining()];
+                                readBuffer.get(data);
+                                String message = new String(data);
+
+                                System.out.println("收到消息：" + message);
+
+                                // 4. 异步响应
+                                ByteBuffer writeBuffer = ByteBuffer.wrap(
+                                        ("服务器收到：" + message).getBytes());
+                                clientChannel.write(writeBuffer, writeBuffer,
+                                        new CompletionHandler<Integer, ByteBuffer>() {
+                                            @Override
+                                            public void completed(Integer bytesWritten,
+                                                                  ByteBuffer writeBuf) {
+                                                System.out.println("响应完成");
+                                            }
+
+                                            @Override
+                                            public void failed(Throwable exc, ByteBuffer att) {
+                                                exc.printStackTrace();
+                                            }
+                                        });
+                            }
+
+                            @Override
+                            public void failed(Throwable exc, ByteBuffer att) {
+                                exc.printStackTrace();
+                            }
+                        });
             }
-            
+
             @Override
             public void failed(Throwable exc, Void att) {
                 exc.printStackTrace();
@@ -110,56 +111,56 @@ public class AioServerDemo {
 public class AioClientDemo {
     public static void main(String[] args) throws Exception {
         // 打开异步Socket通道
-        AsynchronousSocketChannel clientChannel = 
-            AsynchronousSocketChannel.open();
-        
+        AsynchronousSocketChannel clientChannel =
+                AsynchronousSocketChannel.open();
+
         // 异步连接服务器
         clientChannel.connect(
-            new InetSocketAddress("localhost", 8080),
-            null,
-            new CompletionHandler<Void, Void>() {
-                @Override
-                public void completed(Void result, Void attachment) {
-                    System.out.println("连接服务器成功");
-                    
-                    // 发送消息
-                    ByteBuffer buffer = ByteBuffer.wrap(
-                        "Hello, AIO Server!".getBytes());
-                    clientChannel.write(buffer);
-                    
-                    // 读取响应
-                    ByteBuffer readBuffer = ByteBuffer.allocate(1024);
-                    clientChannel.read(readBuffer, readBuffer, 
-                        new CompletionHandler<Integer, ByteBuffer>() {
-                            @Override
-                            public void completed(Integer bytesRead, 
-                                                 ByteBuffer readBuf) {
-                                readBuf.flip();
-                                byte[] data = new byte[readBuf.remaining()];
-                                readBuf.get(data);
-                                System.out.println("服务器响应：" + 
-                                    new String(data));
-                                
-                                try {
-                                    clientChannel.close();
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                            
-                            @Override
-                            public void failed(Throwable exc, ByteBuffer att) {
-                                exc.printStackTrace();
-                            }
-                        });
-                }
-                
-                @Override
-                public void failed(Throwable exc, Void attachment) {
-                    System.out.println("连接失败：" + exc.getMessage());
-                }
-            });
-        
+                new InetSocketAddress("localhost", 8080),
+                null,
+                new CompletionHandler<Void, Void>() {
+                    @Override
+                    public void completed(Void result, Void attachment) {
+                        System.out.println("连接服务器成功");
+
+                        // 发送消息
+                        ByteBuffer buffer = ByteBuffer.wrap(
+                                "Hello, AIO Server!".getBytes());
+                        clientChannel.write(buffer);
+
+                        // 读取响应
+                        ByteBuffer readBuffer = ByteBuffer.allocate(1024);
+                        clientChannel.read(readBuffer, readBuffer,
+                                new CompletionHandler<Integer, ByteBuffer>() {
+                                    @Override
+                                    public void completed(Integer bytesRead,
+                                                          ByteBuffer readBuf) {
+                                        readBuf.flip();
+                                        byte[] data = new byte[readBuf.remaining()];
+                                        readBuf.get(data);
+                                        System.out.println("服务器响应：" +
+                                                new String(data));
+
+                                        try {
+                                            clientChannel.close();
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+
+                                    @Override
+                                    public void failed(Throwable exc, ByteBuffer att) {
+                                        exc.printStackTrace();
+                                    }
+                                });
+                    }
+
+                    @Override
+                    public void failed(Throwable exc, Void attachment) {
+                        System.out.println("连接失败：" + exc.getMessage());
+                    }
+                });
+
         // 等待一段时间让异步操作完成
         Thread.sleep(3000);
     }
@@ -195,11 +196,13 @@ public interface CompletionHandler<V, A> {
 ### 4.1 Windows - IOCP
 
 **IOCP（I/O Completion Port）**：
+
 - Windows特有的高性能IO模型
 - 基于完成端口的异步IO
 - 自动线程管理
 
 **工作流程：**
+
 ```
 应用程序发起IO请求
     ↓
@@ -213,11 +216,13 @@ IO完成后放入完成队列
 ### 4.2 Linux - AIO
 
 **Linux AIO（Native AIO）**：
+
 - Linux 2.6+ 支持
 - 仅支持磁盘IO（O_DIRECT）
 - 网络IO支持有限
 
 **替代方案：**
+
 - epoll + 非阻塞IO（Netty采用）
 - io_uring（Linux 5.1+ 新特性）
 
@@ -227,14 +232,14 @@ IO完成后放入完成队列
 
 ### 5.1 完整对比表
 
-| 特性 | BIO | NIO | AIO |
-|------|-----|-----|-----|
-| **中文名** | 同步阻塞IO | 同步非阻塞IO | 异步非阻塞IO |
-| **阻塞方式** | 阻塞 | 非阻塞 | 异步 |
-| **实现难度** | 简单 | 复杂 | 最复杂 |
-| **并发能力** | 低（~500） | 高（~10万） | 最高 |
-| **适用系统** | 所有 | 所有 | Windows为主 |
-| **典型应用** | 传统应用 | Netty | Windows服务 |
+| 特性       | BIO     | NIO     | AIO       |
+|----------|---------|---------|-----------|
+| **中文名**  | 同步阻塞IO  | 同步非阻塞IO | 异步非阻塞IO   |
+| **阻塞方式** | 阻塞      | 非阻塞     | 异步        |
+| **实现难度** | 简单      | 复杂      | 最复杂       |
+| **并发能力** | 低（~500） | 高（~10万） | 最高        |
+| **适用系统** | 所有      | 所有      | Windows为主 |
+| **典型应用** | 传统应用    | Netty   | Windows服务 |
 
 ### 5.2 选择建议
 
@@ -257,12 +262,14 @@ Linux高并发     → NIO（epoll）
 AIO（Asynchronous IO）是异步非阻塞IO。
 
 **工作流程：**
+
 1. 应用程序发起IO请求
 2. 操作系统执行IO操作（不阻塞）
 3. IO完成后通过回调通知应用程序
 4. 应用程序处理结果
 
 **特点：**
+
 - 真正的异步
 - 无需轮询
 - 基于事件驱动
@@ -272,11 +279,13 @@ AIO（Asynchronous IO）是异步非阻塞IO。
 **参考答案：**
 
 **NIO（同步非阻塞）：**
+
 - 需要Selector轮询
 - 应用程序主动检查就绪状态
 - 同步等待IO就绪
 
 **AIO（异步非阻塞）：**
+
 - 基于CompletionHandler回调
 - 操作系统完成IO后通知
 - 无需轮询
@@ -286,16 +295,19 @@ AIO（Asynchronous IO）是异步非阻塞IO。
 **参考答案：**
 
 **Windows：**
+
 - 支持IOCP（I/O Completion Port）
 - 性能优秀
 - 广泛应用于Windows服务
 
 **Linux：**
+
 - 原生AIO支持有限
 - 主要支持磁盘IO
 - 网络IO推荐用epoll
 
 **实际应用：**
+
 - Netty默认使用NIO（epoll）
 - Windows特定场景可用AIO
 
@@ -306,10 +318,12 @@ AIO（Asynchronous IO）是异步非阻塞IO。
 CompletionHandler是AIO的回调接口。
 
 **两个方法：**
+
 - `completed()`：IO操作成功完成时调用
 - `failed()`：IO操作失败时调用
 
 **优势：**
+
 - 事件驱动
 - 无需轮询
 - 代码解耦
@@ -319,12 +333,14 @@ CompletionHandler是AIO的回调接口。
 **参考答案：**
 
 **原因：**
+
 1. Linux下AIO不成熟（主要支持磁盘IO）
 2. epoll已经足够高效
 3. AIO编程复杂度高
 4. 跨平台兼容性考虑
 
 **Netty的选择：**
+
 - Linux：epoll（NIO）
 - Windows：可选IOCP
 - 默认：NIO + Reactor模式

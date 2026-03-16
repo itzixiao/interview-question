@@ -27,9 +27,9 @@ public class MessageProducer {
     public void sendSimpleMessage(String routingKey, Object message) {
         String correlationId = UUID.randomUUID().toString();
         CorrelationData correlationData = new CorrelationData(correlationId);
-        
+
         rabbitTemplate.convertAndSend("exchange.direct", routingKey, message, correlationData);
-        log.info("发送简单消息，correlationId: {}, routingKey: {}, message: {}", 
+        log.info("发送简单消息，correlationId: {}, routingKey: {}, message: {}",
                 correlationId, routingKey, message);
     }
 
@@ -39,9 +39,9 @@ public class MessageProducer {
     public void sendOrderMessage(OrderMessage orderMessage) {
         String correlationId = UUID.randomUUID().toString();
         CorrelationData correlationData = new CorrelationData(correlationId);
-        
+
         rabbitTemplate.convertAndSend("exchange.direct", "queue.dlx", orderMessage, correlationData);
-        log.info("发送订单消息，correlationId: {}, orderId: {}", 
+        log.info("发送订单消息，correlationId: {}, orderId: {}",
                 correlationId, orderMessage.getOrderId());
     }
 
@@ -51,10 +51,10 @@ public class MessageProducer {
     public void sendFanoutMessage(UserMessage userMessage) {
         String correlationId = UUID.randomUUID().toString();
         CorrelationData correlationData = new CorrelationData(correlationId);
-        
+
         // 扇形交换机不需要 routingKey
         rabbitTemplate.convertAndSend("exchange.fanout", "", userMessage, correlationData);
-        log.info("发送扇形消息，correlationId: {}, username: {}", 
+        log.info("发送扇形消息，correlationId: {}, username: {}",
                 correlationId, userMessage.getUsername());
     }
 
@@ -64,9 +64,9 @@ public class MessageProducer {
     public void sendRoutingMessage(String routingKey, UserMessage userMessage) {
         String correlationId = UUID.randomUUID().toString();
         CorrelationData correlationData = new CorrelationData(correlationId);
-        
+
         rabbitTemplate.convertAndSend("exchange.direct", routingKey, userMessage, correlationData);
-        log.info("发送路由消息，correlationId: {}, routingKey: {}", 
+        log.info("发送路由消息，correlationId: {}, routingKey: {}",
                 correlationId, routingKey);
     }
 
@@ -76,9 +76,9 @@ public class MessageProducer {
     public void sendTopicMessage(String routingKey, UserMessage userMessage) {
         String correlationId = UUID.randomUUID().toString();
         CorrelationData correlationData = new CorrelationData(correlationId);
-        
+
         rabbitTemplate.convertAndSend("exchange.topic", routingKey, userMessage, correlationData);
-        log.info("发送主题消息，correlationId: {}, routingKey: {}", 
+        log.info("发送主题消息，correlationId: {}, routingKey: {}",
                 correlationId, routingKey);
     }
 
@@ -88,8 +88,8 @@ public class MessageProducer {
     public void sendDelayMessage(Object message, int delaySeconds) {
         String correlationId = UUID.randomUUID().toString();
         CorrelationData correlationData = new CorrelationData(correlationId);
-        
-        rabbitTemplate.convertAndSend("exchange.direct", "queue.delay", message, 
+
+        rabbitTemplate.convertAndSend("exchange.direct", "queue.delay", message,
                 msg -> {
                     msg.getMessageProperties().setExpiration(String.valueOf(delaySeconds * 1000));
                     return msg;
@@ -104,10 +104,10 @@ public class MessageProducer {
     public void sendPriorityMessage(Object message, int priority) {
         String correlationId = UUID.randomUUID().toString();
         CorrelationData correlationData = new CorrelationData(correlationId);
-        
+
         // 确保优先级在 0-10 之间
         final int finalPriority = Math.max(0, Math.min(10, priority));
-        
+
         rabbitTemplate.convertAndSend("exchange.direct", "queue.priority", message,
                 msg -> {
                     msg.getMessageProperties().setPriority(finalPriority);
@@ -123,8 +123,8 @@ public class MessageProducer {
     public void sendToDeadLetterQueue(Object message) {
         String correlationId = UUID.randomUUID().toString();
         CorrelationData correlationData = new CorrelationData(correlationId);
-        
-        rabbitTemplate.convertAndSend("exchange.deadletter", "deadletter.routingkey", 
+
+        rabbitTemplate.convertAndSend("exchange.deadletter", "deadletter.routingkey",
                 message, correlationData);
         log.info("发送到死信队列，correlationId: {}", correlationId);
     }

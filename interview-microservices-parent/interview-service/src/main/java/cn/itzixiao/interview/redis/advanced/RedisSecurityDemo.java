@@ -6,14 +6,13 @@ import org.springframework.util.DigestUtils;
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
 import java.util.Base64;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /**
  * Redis 安全相关实现：分布式幂等、接口防重放、敏感数据加密
- *
+ * <p>
  * ┌─────────────────────────────────────────────────────────────┐
  * │  分布式幂等性                                                │
  * │  - 防止同一操作被重复执行                                    │
@@ -36,7 +35,7 @@ public class RedisSecurityDemo {
 
     /**
      * 方案1：Token 机制（推荐）
-     *
+     * <p>
      * 流程：
      * 1. 客户端调用接口前先申请 Token
      * 2. 服务端生成 Token 存入 Redis，返回给客户端
@@ -65,7 +64,7 @@ public class RedisSecurityDemo {
 
         /**
          * 验证并消费 Token（保证幂等性）
-         *
+         * <p>
          * 使用 Lua 脚本保证原子性：
          * - 查询 Token 是否存在
          * - 存在则删除并返回成功
@@ -112,7 +111,7 @@ public class RedisSecurityDemo {
 
     /**
      * 方案2：请求指纹去重
-     *
+     * <p>
      * 适用于：接口无 Token 参数，通过请求内容生成唯一标识
      */
     public static class RequestFingerprintService {
@@ -164,7 +163,7 @@ public class RedisSecurityDemo {
 
     /**
      * 防重放攻击实现
-     *
+     * <p>
      * 原理：
      * 1. 请求包含时间戳、随机数(Nonce)、签名
      * 2. 服务端验证时间戳（如5分钟内）
@@ -188,16 +187,45 @@ public class RedisSecurityDemo {
             private String data;            // 业务数据
 
             // Getters and Setters
-            public String getAppId() { return appId; }
-            public void setAppId(String appId) { this.appId = appId; }
-            public long getTimestamp() { return timestamp; }
-            public void setTimestamp(long timestamp) { this.timestamp = timestamp; }
-            public String getNonce() { return nonce; }
-            public void setNonce(String nonce) { this.nonce = nonce; }
-            public String getSign() { return sign; }
-            public void setSign(String sign) { this.sign = sign; }
-            public String getData() { return data; }
-            public void setData(String data) { this.data = data; }
+            public String getAppId() {
+                return appId;
+            }
+
+            public void setAppId(String appId) {
+                this.appId = appId;
+            }
+
+            public long getTimestamp() {
+                return timestamp;
+            }
+
+            public void setTimestamp(long timestamp) {
+                this.timestamp = timestamp;
+            }
+
+            public String getNonce() {
+                return nonce;
+            }
+
+            public void setNonce(String nonce) {
+                this.nonce = nonce;
+            }
+
+            public String getSign() {
+                return sign;
+            }
+
+            public void setSign(String sign) {
+                this.sign = sign;
+            }
+
+            public String getData() {
+                return data;
+            }
+
+            public void setData(String data) {
+                this.data = data;
+            }
         }
 
         /**
@@ -374,12 +402,29 @@ public class RedisSecurityDemo {
         private String productId;
         private int quantity;
 
-        public String getOrderNo() { return orderNo; }
-        public void setOrderNo(String orderNo) { this.orderNo = orderNo; }
-        public String getProductId() { return productId; }
-        public void setProductId(String productId) { this.productId = productId; }
-        public int getQuantity() { return quantity; }
-        public void setQuantity(int quantity) { this.quantity = quantity; }
+        public String getOrderNo() {
+            return orderNo;
+        }
+
+        public void setOrderNo(String orderNo) {
+            this.orderNo = orderNo;
+        }
+
+        public String getProductId() {
+            return productId;
+        }
+
+        public void setProductId(String productId) {
+            this.productId = productId;
+        }
+
+        public int getQuantity() {
+            return quantity;
+        }
+
+        public void setQuantity(int quantity) {
+            this.quantity = quantity;
+        }
     }
 
     /**

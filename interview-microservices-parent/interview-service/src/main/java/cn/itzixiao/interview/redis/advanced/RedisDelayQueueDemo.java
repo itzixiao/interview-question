@@ -5,11 +5,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 import java.util.Set;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Redis 延时队列实现详解
- *
+ * <p>
  * 延时队列应用场景：
  * ┌─────────────────────────────────────────────────────────────┐
  * │  1. 订单超时取消：下单后30分钟未支付自动取消                  │
@@ -18,7 +21,7 @@ import java.util.concurrent.*;
  * │  4. 定时任务：分布式定时任务调度                              │
  * │  5. 延迟处理：优惠券过期提醒、会员到期提醒                    │
  * └─────────────────────────────────────────────────────────────┘
- *
+ * <p>
  * 实现方式对比：
  * ┌─────────────┬─────────────┬─────────────┬─────────────┐
  * │   方式       │   精度      │   可靠性    │   复杂度    │
@@ -45,7 +48,8 @@ public class RedisDelayQueueDemo {
         private long executeTime;
         private int retryCount;
 
-        public DelayMessage() {}
+        public DelayMessage() {
+        }
 
         public DelayMessage(String id, String type, String content, long delayMs) {
             this.id = id;
@@ -56,21 +60,50 @@ public class RedisDelayQueueDemo {
         }
 
         // Getters and Setters
-        public String getId() { return id; }
-        public void setId(String id) { this.id = id; }
-        public String getType() { return type; }
-        public void setType(String type) { this.type = type; }
-        public String getContent() { return content; }
-        public void setContent(String content) { this.content = content; }
-        public long getExecuteTime() { return executeTime; }
-        public void setExecuteTime(long executeTime) { this.executeTime = executeTime; }
-        public int getRetryCount() { return retryCount; }
-        public void setRetryCount(int retryCount) { this.retryCount = retryCount; }
+        public String getId() {
+            return id;
+        }
+
+        public void setId(String id) {
+            this.id = id;
+        }
+
+        public String getType() {
+            return type;
+        }
+
+        public void setType(String type) {
+            this.type = type;
+        }
+
+        public String getContent() {
+            return content;
+        }
+
+        public void setContent(String content) {
+            this.content = content;
+        }
+
+        public long getExecuteTime() {
+            return executeTime;
+        }
+
+        public void setExecuteTime(long executeTime) {
+            this.executeTime = executeTime;
+        }
+
+        public int getRetryCount() {
+            return retryCount;
+        }
+
+        public void setRetryCount(int retryCount) {
+            this.retryCount = retryCount;
+        }
     }
 
     /**
      * 1. ZSet 实现延时队列（最常用）
-     *
+     * <p>
      * 原理：
      * - 使用 ZADD 添加任务，score 为执行时间戳
      * - 使用 ZRANGEBYSCORE 获取到期任务

@@ -1,14 +1,14 @@
 package cn.itzixiao.interview.springboot.autoconfig;
 
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.boot.context.event.ApplicationStartedEvent;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
 
 /**
  * 自定义应用事件监听器
- *
+ * <p>
  * 监听 Spring Boot 应用生命周期事件
  */
 public class MyApplicationListener implements ApplicationListener<ApplicationEvent> {

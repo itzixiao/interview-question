@@ -44,6 +44,7 @@ public class OrderService {
 ```
 
 **执行流程**：
+
 ```
 外部方法（有事务）
     ↓ 调用
@@ -57,6 +58,7 @@ public class OrderService {
 **定义**：挂起当前事务，创建一个新的事务。新事务独立提交或回滚，不影响外部事务。
 
 **使用场景**：
+
 - 日志记录（无论业务是否成功，日志都要保存）
 - 异步处理
 - 需要独立提交的操作
@@ -74,6 +76,7 @@ public class LogService {
 ```
 
 **执行流程**：
+
 ```
 外部方法（事务A）
     ↓ 调用
@@ -89,6 +92,7 @@ public class LogService {
 **定义**：在当前事务中创建一个嵌套事务（使用 savepoint）。嵌套事务可以独立回滚，不影响外部事务。
 
 **使用场景**：
+
 - 部分操作可以失败，但整体继续
 - 批量处理中的单条回滚
 
@@ -107,12 +111,12 @@ public class BatchService {
 
 **REQUIRES_NEW vs NESTED**：
 
-| 特性 | REQUIRES_NEW | NESTED |
-|------|--------------|--------|
-| 事务 | 独立事务 | 嵌套事务（savepoint） |
-| 回滚 | 完全独立 | 可回滚到 savepoint |
-| 提交 | 独立提交 | 随外部事务一起提交 |
-| 实现 | JTA 事务管理 | JDBC savepoint |
+| 特性 | REQUIRES_NEW | NESTED          |
+|----|--------------|-----------------|
+| 事务 | 独立事务         | 嵌套事务（savepoint） |
+| 回滚 | 完全独立         | 可回滚到 savepoint  |
+| 提交 | 独立提交         | 随外部事务一起提交       |
+| 实现 | JTA 事务管理     | JDBC savepoint  |
 
 ### 4. SUPPORTS
 
@@ -137,6 +141,7 @@ public class UserService {
 **定义**：挂起当前事务，以非事务方式执行。
 
 **使用场景**：
+
 - 不需要事务的操作
 - 避免长时间占用数据库连接
 
@@ -175,6 +180,7 @@ public class AccountService {
 **定义**：如果当前存在事务，则抛出异常；如果当前没有事务，则以非事务方式执行。
 
 **使用场景**：
+
 - 绝对不能在事务中执行的操作
 - 防止事务嵌套
 
@@ -209,11 +215,11 @@ public class RemoteService {
 
 ### 隔离级别问题
 
-| 问题 | 说明 | 隔离级别解决 |
-|------|------|-------------|
-| 脏读 | 读到未提交的数据 | READ_COMMITTED+ |
+| 问题    | 说明           | 隔离级别解决           |
+|-------|--------------|------------------|
+| 脏读    | 读到未提交的数据     | READ_COMMITTED+  |
 | 不可重复读 | 同一事务两次读取结果不同 | REPEATABLE_READ+ |
-| 幻读 | 同一事务两次查询行数不同 | SERIALIZABLE |
+| 幻读    | 同一事务两次查询行数不同 | SERIALIZABLE     |
 
 ## 事务失效场景
 
@@ -479,19 +485,22 @@ public class LongRunningService {
 
 **问题 1:REQUIRED 和 REQUIRES_NEW 的区别？**
 
-**A**: 
+**A**:
+
 - **REQUIRED**：加入当前事务，同成功或同失败
 - **REQUIRES_NEW**：挂起当前事务，创建独立事务，独立提交/回滚
 
 **问题 2:NESTED 和 REQUIRES_NEW 的区别？**
 
 **A**:
+
 - **NESTED**：嵌套事务，使用 savepoint，随外部事务一起提交
 - **REQUIRES_NEW**：独立事务，完全独立提交/回滚
 
 **问题 3：事务失效的常见原因？**
 
 **A**:
+
 1. 非 public 方法
 2. 同类内部调用（this 调用）
 3. 异常被捕获未抛出
@@ -501,6 +510,7 @@ public class LongRunningService {
 **问题 4：如何解决同类内部调用事务失效？**
 
 **A**:
+
 1. 注入自身代理对象调用
 2. 使用 `AopContext.currentProxy()`
 3. 拆分到另一个 Service
@@ -509,6 +519,7 @@ public class LongRunningService {
 
 **A**:
 Spring 事务基于 AOP 实现：
+
 1. 使用 `@EnableTransactionManagement` 开启事务管理
 2. Spring 创建代理对象（JDK 动态代理或 CGLIB）
 3. 方法调用时，TransactionInterceptor 拦截

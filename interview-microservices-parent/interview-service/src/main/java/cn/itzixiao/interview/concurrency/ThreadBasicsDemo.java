@@ -1,12 +1,14 @@
 package cn.itzixiao.interview.concurrency;
 
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
 
 /**
  * 多线程基础与线程创建方式详解
- * 
+ *
  * <p>本类全面讲解 Java 多线程编程的核心知识点，包含以下内容：</p>
- * 
+ *
  * <h2>主要内容：</h2>
  * <ol>
  *   <li><strong>线程创建的三种方式</strong>
@@ -55,7 +57,7 @@ import java.util.concurrent.*;
  *     </ul>
  *   </li>
  * </ol>
- * 
+ *
  * <h2>高频面试题覆盖：</h2>
  * <ul>
  *   <li>线程创建的三种方式及区别？</li>
@@ -65,14 +67,14 @@ import java.util.concurrent.*;
  *   <li>守护线程的作用和应用场景？</li>
  *   <li>如何正确中断一个线程？</li>
  * </ul>
- * 
+ *
  * <h2>使用示例：</h2>
  * <pre>{@code
  * public static void main(String[] args) throws Exception {
  *     ThreadBasicsDemo.main(new String[]{});
  * }
  * }</pre>
- * 
+ *
  * @author itzixiao
  * @version 1.0
  * @since 2026-03-08
@@ -81,7 +83,7 @@ public class ThreadBasicsDemo {
 
     /**
      * 主方法：执行所有演示示例
-     * 
+     *
      * <p>按顺序执行以下 6 个部分的多线程演示：</p>
      * <ol>
      *   <li>线程创建的三种方式</li>
@@ -91,7 +93,7 @@ public class ThreadBasicsDemo {
      *   <li>sleep() vs wait() 深度对比</li>
      *   <li>死锁详解与演示</li>
      * </ol>
-     * 
+     *
      * @param args 命令行参数（未使用）
      * @throws Exception 演示过程中可能抛出的异常
      */
@@ -119,7 +121,7 @@ public class ThreadBasicsDemo {
 
     /**
      * 1. 演示线程创建的三种方式
-     * 
+     *
      * <p>详细说明：</p>
      * <ul>
      *   <li><strong>方式 1：继承 Thread 类</strong>
@@ -141,7 +143,7 @@ public class ThreadBasicsDemo {
      *     </ul>
      *   </li>
      * </ul>
-     * 
+     *
      * @throws InterruptedException 线程中断异常
      */
     private static void demonstrateThreadCreation() throws InterruptedException {
@@ -188,17 +190,17 @@ public class ThreadBasicsDemo {
 
     /**
      * 2. 演示线程状态变化
-     * 
+     *
      * <p>通过实际案例展示线程从 NEW → RUNNABLE → TIMED_WAITING → TERMINATED</p>
      * 的状态转换过程。</p>
-     * 
+     *
      * <p>关键测试点：</p>
      * <ul>
      *   <li>使用 getState() 方法查看线程状态</li>
      *   <li>wait(timeout) 使线程进入 TIMED_WAITING</li>
      *   <li>超时后自动唤醒继续执行</li>
      * </ul>
-     * 
+     *
      * @throws InterruptedException 线程中断异常
      */
     private static void demonstrateThreadStates() throws InterruptedException {
@@ -241,7 +243,7 @@ public class ThreadBasicsDemo {
 
     /**
      * 3. 演示线程基本方法的使用
-     * 
+     *
      * <p>重点讲解以下方法的区别和使用场景：</p>
      * <ul>
      *   <li><strong>sleep(millis)</strong> - 暂停指定时间，不释放锁</li>
@@ -249,13 +251,13 @@ public class ThreadBasicsDemo {
      *   <li><strong>join()</strong> - 等待线程执行完毕</li>
      *   <li><strong>interrupt()</strong> - 中断线程，抛出 InterruptedException</li>
      * </ul>
-     * 
+     *
      * <p>注意事项：</p>
      * <ul>
      *   <li>sleep() 和 join() 都必须捕获 InterruptedException</li>
      *   <li>被中断后应重新设置中断标志：Thread.currentThread().interrupt()</li>
      * </ul>
-     * 
+     *
      * @throws InterruptedException 线程中断异常
      */
     private static void demonstrateThreadMethods() throws InterruptedException {
@@ -329,7 +331,7 @@ public class ThreadBasicsDemo {
 
     /**
      * 4. 演示线程优先级和守护线程
-     * 
+     *
      * <p>包含两个重要概念：</p>
      * <ol>
      *   <li><strong>线程优先级</strong>
@@ -347,7 +349,7 @@ public class ThreadBasicsDemo {
      *     </ul>
      *   </li>
      * </ol>
-     * 
+     *
      * @throws InterruptedException 线程中断异常
      */
     private static void demonstratePriorityAndDaemon() throws InterruptedException {
@@ -401,9 +403,9 @@ public class ThreadBasicsDemo {
 
     /**
      * 5. sleep() vs wait() 深度对比
-     * 
+     *
      * <p>全面对比这两个容易混淆的方法，包含以下维度：</p>
-     * 
+     *
      * <h3>核心区别：</h3>
      * <table border="1">
      *   <tr><th>对比项</th><th>sleep()</th><th>wait()</th></tr>
@@ -412,21 +414,21 @@ public class ThreadBasicsDemo {
      *   <tr><td>使用范围</td><td>任何地方</td><td>synchronized 同步块内</td></tr>
      *   <tr><td>唤醒方式</td><td>超时自动唤醒</td><td>notify()/notifyAll()</td></tr>
      * </table>
-     * 
+     *
      * <h3>示例代码：</h3>
      * <ol>
      *   <li>sleep() 不释放锁演示 - 其他线程无法访问同步代码</li>
      *   <li>wait() 释放锁演示 - 其他线程可以获取锁并执行</li>
      *   <li>生产者 - 消费者模式 - wait()/notify() 经典应用</li>
      * </ol>
-     * 
+     *
      * <h3>高频面试题：</h3>
      * <ul>
      *   <li>sleep() 和 wait() 的主要区别？</li>
      *   <li>为什么 wait() 必须在 synchronized 块中调用？</li>
      *   <li>如何正确停止一个正在 sleep 的线程？</li>
      * </ul>
-     * 
+     *
      * @throws InterruptedException 线程中断异常
      */
     private static void compareSleepAndWait() throws InterruptedException {
@@ -449,7 +451,7 @@ public class ThreadBasicsDemo {
         System.out.println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
 
         Object sleepLock = new Object();
-        
+
         Thread sleepHolder = new Thread(() -> {
             synchronized (sleepLock) {
                 System.out.println("  线程 A: 获取锁，开始 sleep(2000ms)");
@@ -568,9 +570,9 @@ public class ThreadBasicsDemo {
 
     /**
      * 6. 死锁（Deadlock）详解与演示
-     * 
+     *
      * <p>深入讲解死锁的概念、产生条件、预防策略和实际案例。</p>
-     * 
+     *
      * <h3>死锁的 4 个必要条件：</h3>
      * <ol>
      *   <li><strong>互斥条件</strong> - 资源一次只能被一个线程占用</li>
@@ -578,21 +580,21 @@ public class ThreadBasicsDemo {
      *   <li><strong>不剥夺条件</strong> - 已获得的资源不能被强制剥夺</li>
      *   <li><strong>循环等待条件</strong> - 线程间形成头尾相连的循环等待链</li>
      * </ol>
-     * 
+     *
      * <h3>演示案例：</h3>
      * <ol>
      *   <li><strong>经典死锁场景（ABBA 模式）</strong> - 两个线程互相等待对方的锁</li>
      *   <li><strong>正确的锁顺序</strong> - 按相同顺序获取锁，破坏循环等待</li>
      *   <li><strong>数据库事务死锁模拟</strong> - 转账操作的死锁场景</li>
      * </ol>
-     * 
+     *
      * <h3>预防策略：</h3>
      * <ul>
      *   <li>破坏请求与保持：一次性申请所有资源</li>
      *   <li>破坏不剥夺：允许抢占资源（可能导致饥饿）</li>
      *   <li>破坏循环等待：对资源编号，按顺序申请（最常用）</li>
      * </ul>
-     * 
+     *
      * <h3>生产环境最佳实践：</h3>
      * <ul>
      *   <li>使用定时锁：tryLock(timeout, TimeUnit)</li>
@@ -600,7 +602,7 @@ public class ThreadBasicsDemo {
      *   <li>使用并发工具类：ConcurrentHashMap、ReentrantLock 等</li>
      *   <li>死锁检测：jps + jstack、VisualVM、JConsole</li>
      * </ul>
-     * 
+     *
      * <h3>高频面试题：</h3>
      * <ul>
      *   <li>什么是死锁？产生的 4 个条件？</li>
@@ -608,7 +610,7 @@ public class ThreadBasicsDemo {
      *   <li>如何检测和诊断死锁？</li>
      *   <li>tryLock() 能否完全避免死锁？</li>
      * </ul>
-     * 
+     *
      * @throws InterruptedException 线程中断异常
      */
     private static void demonstrateDeadlock() throws InterruptedException {
@@ -636,7 +638,10 @@ public class ThreadBasicsDemo {
         Thread threadA = new Thread(() -> {
             synchronized (lock1) {
                 System.out.println("  线程 A: 获取 lock1");
-                try { Thread.sleep(100); } catch (InterruptedException e) {}
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                }
                 System.out.println("  线程 A: 等待 lock2...");
                 synchronized (lock2) {
                     System.out.println("  线程 A: 获取 lock2，执行任务");
@@ -647,7 +652,10 @@ public class ThreadBasicsDemo {
         Thread threadB = new Thread(() -> {
             synchronized (lock2) {
                 System.out.println("  线程 B: 获取 lock2");
-                try { Thread.sleep(100); } catch (InterruptedException e) {}
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                }
                 System.out.println("  线程 B: 等待 lock1...");
                 synchronized (lock1) {
                     System.out.println("  线程 B: 获取 lock1，执行任务");
@@ -673,7 +681,10 @@ public class ThreadBasicsDemo {
         Thread safeThreadA = new Thread(() -> {
             synchronized (resource1) {
                 System.out.println("  安全线程 A: 获取 resource1");
-                try { Thread.sleep(100); } catch (InterruptedException e) {}
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                }
                 synchronized (resource2) {
                     System.out.println("  安全线程 A: 获取 resource2，执行任务");
                 }
@@ -683,7 +694,10 @@ public class ThreadBasicsDemo {
         Thread safeThreadB = new Thread(() -> {
             synchronized (resource1) { // 也先获取 resource1，破坏循环等待
                 System.out.println("  安全线程 B: 获取 resource1");
-                try { Thread.sleep(100); } catch (InterruptedException e) {}
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                }
                 synchronized (resource2) {
                     System.out.println("  安全线程 B: 获取 resource2，执行任务");
                 }
@@ -764,22 +778,22 @@ public class ThreadBasicsDemo {
 
     /**
      * 数据库类（模拟数据库事务死锁）
-     * 
+     *
      * <p>模拟银行账户转账场景，演示不当的锁获取顺序可能导致的死锁问题。</p>
-     * 
+     *
      * <h3>死锁场景：</h3>
      * <pre>{@code
      * 事务 1: transferMoney("账户 A", "账户 B", 100)
      *   - 锁定 accountA
      *   - 等待 accountB
-     * 
+     *
      * 事务 2: transferMoney("账户 B", "账户 A", 50)
      *   - 锁定 accountB
      *   - 等待 accountA
-     * 
+     *
      * 结果：两个事务互相等待，形成死锁
      * }</pre>
-     * 
+     *
      * <h3>解决方案：</h3>
      * <ul>
      *   <li>固定锁顺序：总是先锁定编号小的账户，再锁定编号大的账户</li>
@@ -793,9 +807,9 @@ public class ThreadBasicsDemo {
 
         /**
          * 转账操作（可能产生死锁的版本）
-         * 
+         *
          * <p>按照 from → to 的顺序获取锁，当两个事务反向转账时会形成死锁。</p>
-         * 
+         *
          * @param from   转出账户名称
          * @param to     转入账户名称
          * @param amount 转账金额
@@ -806,19 +820,22 @@ public class ThreadBasicsDemo {
 
             // 注意：这里可能产生死锁，因为两个事务获取锁的顺序不同
             synchronized (fromLock) {
-                System.out.println("  [" + Thread.currentThread().getName() + 
-                                 "] 锁定 " + from);
-                try { Thread.sleep(100); } catch (InterruptedException e) {}
+                System.out.println("  [" + Thread.currentThread().getName() +
+                        "] 锁定 " + from);
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                }
                 synchronized (toLock) {
-                    System.out.println("  [" + Thread.currentThread().getName() + 
-                                     "] 锁定 " + to + ", 转账 " + amount);
+                    System.out.println("  [" + Thread.currentThread().getName() +
+                            "] 锁定 " + to + ", 转账 " + amount);
                 }
             }
         }
 
         /**
          * 根据账户名称获取对应的锁对象
-         * 
+         *
          * @param account 账户名称（"账户 A" 或 "账户 B"）
          * @return 对应的锁对象
          */
@@ -829,9 +846,9 @@ public class ThreadBasicsDemo {
 
     /**
      * 缓冲区类（用于生产者 - 消费者示例）
-     * 
+     *
      * <p>实现一个简单的线程安全缓冲区，支持单个数据的生产与消费。</p>
-     * 
+     *
      * <h3>核心特性：</h3>
      * <ul>
      *   <li>使用 wait()/notifyAll() 实现线程间通信</li>
@@ -839,13 +856,13 @@ public class ThreadBasicsDemo {
      *   <li>使用 while 循环检查条件，防止虚假唤醒</li>
      *   <li>synchronized 保证方法同步，同一时间只有一个线程访问</li>
      * </ul>
-     * 
+     *
      * <h3>工作流程：</h3>
      * <pre>{@code
      * 生产者：put() → 如果 !empty 则 wait() → 放入数据 → notifyAll()
      * 消费者：get()  → 如果 empty 则 wait()  → 取出数据 → notifyAll()
      * }</pre>
-     * 
+     *
      * <p><strong>注意：</strong>使用 notifyAll() 而不是 notify()，确保所有等待的线程都有机会被唤醒。</p>
      */
     static class Buffer {
@@ -854,9 +871,9 @@ public class ThreadBasicsDemo {
 
         /**
          * 向缓冲区放入数据（生产者方法）
-         * 
+         *
          * <p>如果缓冲区非空（!empty），则等待消费者消费；否则放入数据并通知所有等待的线程。</p>
-         * 
+         *
          * @param value 要放入的数据值
          */
         public synchronized void put(int value) {
@@ -875,9 +892,9 @@ public class ThreadBasicsDemo {
 
         /**
          * 从缓冲区取出数据（消费者方法）
-         * 
+         *
          * <p>如果缓冲区为空（empty），则等待生产者生产；否则取出数据并通知所有等待的线程。</p>
-         * 
+         *
          * @return 取出的数据值
          */
         public synchronized int get() {

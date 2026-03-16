@@ -5,7 +5,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 
 /**
  * 自定义应用上下文初始化器
- *
+ * <p>
  * 执行时机：在 Spring 应用上下文刷新之前，ConfigurableApplicationContext 创建之后
  * 用途：在上下文刷新前进行自定义设置，如添加 PropertySource、设置 Profiles 等
  */

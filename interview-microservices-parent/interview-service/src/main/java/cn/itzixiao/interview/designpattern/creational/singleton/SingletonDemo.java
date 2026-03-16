@@ -4,17 +4,17 @@ package cn.itzixiao.interview.designpattern.creational.singleton;
  * =====================================================================================
  * 单例模式（Singleton Pattern）
  * =====================================================================================
- * 
+ * <p>
  * 一、定义
  * -------------------------------------------------------------------------------------
  * 确保一个类只有一个实例，并提供一个全局访问点。
- * 
+ * <p>
  * 二、核心思想
  * -------------------------------------------------------------------------------------
  * 1. 私有构造函数：防止外部通过 new 创建实例
  * 2. 私有静态实例：保存唯一的实例
  * 3. 公有静态方法：提供全局访问点
- * 
+ * <p>
  * 三、应用场景
  * -------------------------------------------------------------------------------------
  * - 配置管理器（Configuration Manager）
@@ -22,7 +22,7 @@ package cn.itzixiao.interview.designpattern.creational.singleton;
  * - 数据库连接池（Database Connection Pool）
  * - 线程池（Thread Pool）
  * - 缓存（Cache）
- * 
+ * <p>
  * 四、实现方式对比
  * -------------------------------------------------------------------------------------
  * | 实现方式           | 线程安全 | 懒加载 | 性能 | 推荐度 |
@@ -90,21 +90,21 @@ public class SingletonDemo {
  * =====================================================================================
  * 1. 饿汉式单例
  * =====================================================================================
- * 
+ * <p>
  * 原理：类加载时就创建实例
  * 优点：实现简单，无线程安全问题
  * 缺点：类加载时就初始化，可能造成资源浪费
  */
 class EagerSingleton {
-    
+
     // 类加载时就创建实例（final 保证不可变）
     private static final EagerSingleton INSTANCE = new EagerSingleton();
-    
+
     // 私有构造函数，防止外部创建实例
     private EagerSingleton() {
         System.out.println("    [饿汉式] 实例已创建");
     }
-    
+
     // 提供全局访问点
     public static EagerSingleton getInstance() {
         return INSTANCE;
@@ -115,19 +115,19 @@ class EagerSingleton {
  * =====================================================================================
  * 2. 懒汉式单例（同步方法）
  * =====================================================================================
- * 
+ * <p>
  * 原理：首次使用时才创建实例
  * 优点：懒加载，节约资源
  * 缺点：synchronized 锁住整个方法，性能差
  */
 class LazySingleton {
-    
+
     private static LazySingleton instance;
-    
+
     private LazySingleton() {
         System.out.println("    [懒汉式] 实例已创建");
     }
-    
+
     // synchronized 保证线程安全，但性能较差
     public static synchronized LazySingleton getInstance() {
         if (instance == null) {
@@ -141,32 +141,32 @@ class LazySingleton {
  * =====================================================================================
  * 3. 双重检查锁单例（Double-Checked Locking）
  * =====================================================================================
- * 
+ * <p>
  * 原理：两次检查 + volatile + synchronized
- * 
+ * <p>
  * 关键点：
  * 1. volatile 防止指令重排序
- *    - instance = new Singleton() 不是原子操作，分为三步：
- *      a. 分配内存空间
- *      b. 初始化对象
- *      c. 将 instance 指向分配的内存地址
- *    - 指令重排序可能导致 b 和 c 交换顺序，使其他线程获得未初始化的对象
- * 
+ * - instance = new Singleton() 不是原子操作，分为三步：
+ * a. 分配内存空间
+ * b. 初始化对象
+ * c. 将 instance 指向分配的内存地址
+ * - 指令重排序可能导致 b 和 c 交换顺序，使其他线程获得未初始化的对象
+ * <p>
  * 2. 两次检查
- *    - 第一次检查：避免不必要的同步
- *    - 第二次检查：确保只创建一个实例
- * 
+ * - 第一次检查：避免不必要的同步
+ * - 第二次检查：确保只创建一个实例
+ * <p>
  * 优点：懒加载 + 线程安全 + 高性能
  */
 class DoubleCheckedLockingSingleton {
-    
+
     // volatile 防止指令重排序，保证可见性
     private static volatile DoubleCheckedLockingSingleton instance;
-    
+
     private DoubleCheckedLockingSingleton() {
         System.out.println("    [双重检查锁] 实例已创建");
     }
-    
+
     public static DoubleCheckedLockingSingleton getInstance() {
         // 第一次检查：避免不必要的同步（性能优化）
         if (instance == null) {
@@ -185,31 +185,31 @@ class DoubleCheckedLockingSingleton {
  * =====================================================================================
  * 4. 静态内部类单例（推荐方式）
  * =====================================================================================
- * 
+ * <p>
  * 原理：利用 Java 类加载机制保证线程安全
- * 
+ * <p>
  * 关键点：
  * 1. 外部类加载时，内部类不会加载
  * 2. 调用 getInstance() 时，JVM 才加载内部类
  * 3. JVM 在类加载时会进行同步，保证线程安全
- * 
+ * <p>
  * 优点：
  * - 懒加载：首次使用时才加载内部类
  * - 线程安全：JVM 保证类加载的线程安全
  * - 代码简洁：无需 synchronized 和 volatile
  */
 class StaticInnerClassSingleton {
-    
+
     // 私有构造函数
     private StaticInnerClassSingleton() {
         System.out.println("    [静态内部类] 实例已创建");
     }
-    
+
     // 静态内部类，持有外部类的实例
     private static class Holder {
         private static final StaticInnerClassSingleton INSTANCE = new StaticInnerClassSingleton();
     }
-    
+
     // 获取实例时才会加载 Holder 类
     public static StaticInnerClassSingleton getInstance() {
         return Holder.INSTANCE;
@@ -220,26 +220,26 @@ class StaticInnerClassSingleton {
  * =====================================================================================
  * 5. 枚举单例（最佳实践）
  * =====================================================================================
- * 
+ * <p>
  * 原理：利用 Java 枚举类型的特性
- * 
+ * <p>
  * 优点：
  * 1. 天然线程安全：枚举实例在类加载时创建，JVM 保证线程安全
  * 2. 防止反射攻击：Constructor#newInstance() 对枚举类型会抛出异常
  * 3. 防止序列化破坏：枚举的序列化机制保证不会创建新实例
  * 4. 代码最简洁
- * 
+ * <p>
  * 推荐：这是《Effective Java》作者 Josh Bloch 推荐的方式
  */
 enum EnumSingleton {
-    
+
     INSTANCE;
-    
+
     // 枚举的构造函数默认是私有的
     EnumSingleton() {
         System.out.println("    [枚举单例] 实例已创建");
     }
-    
+
     // 可以添加业务方法
     public void doSomething() {
         System.out.println("    执行业务逻辑");

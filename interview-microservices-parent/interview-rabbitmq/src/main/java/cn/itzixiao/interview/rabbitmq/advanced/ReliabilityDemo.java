@@ -1,7 +1,6 @@
 package cn.itzixiao.interview.rabbitmq.advanced;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageDeliveryMode;
 import org.springframework.amqp.rabbit.annotation.Queue;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -20,28 +19,28 @@ public class ReliabilityDemo {
      * 只有业务处理成功后才确认消息
      */
     @RabbitListener(queuesToDeclare = @Queue(value = "queue.reliability.manual-ack", durable = "true"))
-    public void manualAckDemo(org.springframework.amqp.core.Message message, 
+    public void manualAckDemo(org.springframework.amqp.core.Message message,
                               com.rabbitmq.client.Channel channel) {
         long deliveryTag = message.getMessageProperties().getDeliveryTag();
-        
+
         try {
             String body = new String(message.getBody());
             log.info("📥 [手动 ACK] 收到消息：{}", body);
-            
+
             // 模拟业务处理
             processBusiness(body);
-            
+
             // 业务处理成功，手动确认
             channel.basicAck(deliveryTag, false);
             log.info("✅ [手动 ACK] 消息确认成功");
-            
+
         } catch (Exception e) {
             log.error("❌ [手动 ACK] 处理失败", e);
             try {
                 // 判断重试次数
                 Integer xDeath = (Integer) message.getMessageProperties()
                         .getHeaders().get("x-death");
-                
+
                 if (xDeath != null && xDeath >= 3) {
                     // 重试超过 3 次，拒绝消息，进入死信队列
                     channel.basicNack(deliveryTag, false, false);
@@ -61,25 +60,25 @@ public class ReliabilityDemo {
      * 演示消息持久化
      * 队列和消息都持久化，防止 RabbitMQ 重启丢失
      */
-    @RabbitListener(queuesToDeclare = @Queue(value = "queue.reliability.persistent", 
-                                              durable = "true"))
+    @RabbitListener(queuesToDeclare = @Queue(value = "queue.reliability.persistent",
+            durable = "true"))
     public void persistentMessageDemo(org.springframework.amqp.core.Message message,
-                                       com.rabbitmq.client.Channel channel) {
+                                      com.rabbitmq.client.Channel channel) {
         long deliveryTag = message.getMessageProperties().getDeliveryTag();
-        
+
         try {
             String body = new String(message.getBody());
             MessageDeliveryMode deliveryMode = message.getMessageProperties().getDeliveryMode();
             boolean isPersistent = deliveryMode == MessageDeliveryMode.PERSISTENT;
-            
+
             log.info("💾 [持久化消息] 收到消息：{}, 持久化标志：{}", body, isPersistent);
-            
+
             // 处理业务
             processBusiness(body);
-            
+
             channel.basicAck(deliveryTag, false);
             log.info("✅ [持久化消息] 处理完成");
-            
+
         } catch (Exception e) {
             log.error("❌ [持久化消息] 处理失败", e);
             try {
@@ -94,34 +93,34 @@ public class ReliabilityDemo {
      * 演示幂等性处理
      * 通过消息 ID 去重，防止重复消费
      */
-    @RabbitListener(queuesToDeclare = @Queue(value = "queue.reliability.idempotent", 
-                                              durable = "true"))
+    @RabbitListener(queuesToDeclare = @Queue(value = "queue.reliability.idempotent",
+            durable = "true"))
     public void idempotentConsumer(org.springframework.amqp.core.Message message,
-                                    com.rabbitmq.client.Channel channel) {
+                                   com.rabbitmq.client.Channel channel) {
         long deliveryTag = message.getMessageProperties().getDeliveryTag();
         String messageId = message.getMessageProperties().getMessageId();
-        
+
         try {
             String body = new String(message.getBody());
-            
+
             // TODO: 检查消息是否已处理过（可以使用 Redis 记录已处理的消息 ID）
             if (isMessageProcessed(messageId)) {
                 log.info("⏭️ [幂等性] 消息已处理，跳过 - ID: {}", messageId);
                 channel.basicAck(deliveryTag, false);
                 return;
             }
-            
+
             log.info("🔄 [幂等性] 处理新消息 - ID: {}, 内容：{}", messageId, body);
-            
+
             // 处理业务
             processBusiness(body);
-            
+
             // TODO: 标记消息已处理
             markMessageAsProcessed(messageId);
-            
+
             channel.basicAck(deliveryTag, false);
             log.info("✅ [幂等性] 消息处理完成并标记");
-            
+
         } catch (Exception e) {
             log.error("❌ [幂等性] 处理失败 - ID: {}", messageId, e);
             try {
@@ -136,24 +135,24 @@ public class ReliabilityDemo {
      * 演示限流处理
      * 通过 prefetch 控制每次推送的消息数量
      */
-    @RabbitListener(queuesToDeclare = @Queue(value = "queue.reliability.rate-limit", 
-                                              durable = "true"))
+    @RabbitListener(queuesToDeclare = @Queue(value = "queue.reliability.rate-limit",
+            durable = "true"))
     public void rateLimitConsumer(org.springframework.amqp.core.Message message,
-                                   com.rabbitmq.client.Channel channel) {
+                                  com.rabbitmq.client.Channel channel) {
         long deliveryTag = message.getMessageProperties().getDeliveryTag();
-        
+
         try {
             String body = new String(message.getBody());
             log.info("🚦 [限流] 收到消息：{}", body);
-            
+
             // 模拟耗时操作
             Thread.sleep(2000);
-            
+
             processBusiness(body);
-            
+
             channel.basicAck(deliveryTag, false);
             log.info("✅ [限流] 消息处理完成");
-            
+
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             log.error("❌ [限流] 线程中断", e);

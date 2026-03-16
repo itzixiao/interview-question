@@ -3,6 +3,7 @@
 ## 一、概述
 
 生产者消费者模式是一种经典的并发协作模式：
+
 - **生产者**：负责生产数据，放入缓冲区
 - **消费者**：从缓冲区取出数据进行消费
 - **缓冲区**：存储数据的容器，通常是有界队列
@@ -19,13 +20,13 @@
 
 ### synchronized vs ReentrantLock
 
-| 特性 | synchronized | ReentrantLock |
-|------|--------------|---------------|
-| 锁获取方式 | JVM 自动管理 | 手动 lock/unlock |
-| 条件变量 | 单个 wait/notify | 多个 Condition |
-| 公平性 | 非公平 | 可选公平/非公平 |
-| 可中断 | 不支持 | 支持 lockInterruptibly |
-| 超时获取 | 不支持 | 支持 tryLock(timeout) |
+| 特性    | synchronized   | ReentrantLock        |
+|-------|----------------|----------------------|
+| 锁获取方式 | JVM 自动管理       | 手动 lock/unlock       |
+| 条件变量  | 单个 wait/notify | 多个 Condition         |
+| 公平性   | 非公平            | 可选公平/非公平             |
+| 可中断   | 不支持            | 支持 lockInterruptibly |
+| 超时获取  | 不支持            | 支持 tryLock(timeout)  |
 
 ### ReentrantLock 的优势
 
@@ -100,12 +101,20 @@ public T take() throws InterruptedException {
 ### synchronized 实现方式
 
 ```java
-synchronized (lock) {
-    while (queue.isFull()) {
-        lock.wait();  // 只有一个等待队列
+synchronized (lock){
+        while(queue.
+
+isFull()){
+        lock.
+
+wait();  // 只有一个等待队列
     }
-    queue.add(item);
-    lock.notifyAll();  // 唤醒所有线程（效率低）
+            queue.
+
+add(item);
+    lock.
+
+notifyAll();  // 唤醒所有线程（效率低）
 }
 ```
 
@@ -113,25 +122,35 @@ synchronized (lock) {
 
 ```java
 lock.lock();
-try {
-    while (queue.isFull()) {
-        notFull.await();  // 生产者独立等待队列
+try{
+        while(queue.
+
+isFull()){
+        notFull.
+
+await();  // 生产者独立等待队列
     }
-    queue.add(item);
-    notEmpty.signal();  // 精准唤醒消费者
-} finally {
-    lock.unlock();
+            queue.
+
+add(item);
+    notEmpty.
+
+signal();  // 精准唤醒消费者
+}finally{
+        lock.
+
+unlock();
 }
 ```
 
 ### ReentrantLock 的优势
 
-| 优势 | 说明 |
-|------|------|
-| 多条件变量 | 生产者和消费者分别等待，避免相互干扰 |
-| 精准唤醒 | signal() 只唤醒特定类型的线程 |
-| 避免惊群 | 不会唤醒所有线程再让大部分重新等待 |
-| 公平性 | 可选择公平锁，避免线程饥饿 |
+| 优势    | 说明                  |
+|-------|---------------------|
+| 多条件变量 | 生产者和消费者分别等待，避免相互干扰  |
+| 精准唤醒  | signal() 只唤醒特定类型的线程 |
+| 避免惊群  | 不会唤醒所有线程再让大部分重新等待   |
+| 公平性   | 可选择公平锁，避免线程饥饿       |
 
 ---
 
@@ -180,6 +199,7 @@ try {
 **问题 1：生产者消费者模式的核心是什么？**
 
 **答案**：
+
 - **互斥**：缓冲区是共享资源，需要互斥访问
 - **同步**：生产者和消费者需要协调工作
 - **通信**：缓冲区状态变化时需要通知对方
@@ -188,6 +208,7 @@ try {
 
 **答案**：
 防止虚假唤醒（Spurious Wakeup）：
+
 - 线程可能在没有收到 signal/notify 的情况下被唤醒
 - 使用 while 可以在被唤醒后重新检查条件
 - 如果用 if，虚假唤醒会导致逻辑错误
@@ -195,6 +216,7 @@ try {
 **问题 3:Condition 的 signal 和 signalAll 有什么区别？**
 
 **答案**：
+
 - `signal()`：唤醒一个等待线程（效率高）
 - `signalAll()`：唤醒所有等待线程（更安全但效率低）
 - ReentrantLock 可以用多个 Condition，signal 更精准
@@ -203,17 +225,18 @@ try {
 
 **答案**：
 
-| 非公平锁（默认） | 公平锁 |
-|------------------|--------|
-| 获取锁时不排队 | 按照请求顺序获取锁 |
-| 性能高 | 不会饥饿 |
-| 可能导致线程饥饿 | 性能略低 |
+| 非公平锁（默认） | 公平锁       |
+|----------|-----------|
+| 获取锁时不排队  | 按照请求顺序获取锁 |
+| 性能高      | 不会饥饿      |
+| 可能导致线程饥饿 | 性能略低      |
 
 创建方式：`new ReentrantLock(true)`
 
 **问题 5：生产者消费者模式有哪些实际应用？**
 
 **答案**：
+
 1. **线程池**：任务队列 + 工作线程
 2. **消息队列**：Kafka、RabbitMQ
 3. **数据库连接池**：连接的生产和复用
@@ -222,6 +245,7 @@ try {
 **问题 6：如何避免死锁？**
 
 **答案**：
+
 1. 确保锁的获取和释放成对出现（try-finally）
 2. 避免嵌套锁
 3. 使用 tryLock 设置超时
@@ -231,17 +255,18 @@ try {
 
 **答案**：
 
-| 特性 | LinkedBlockingQueue | ArrayBlockingQueue |
-|------|---------------------|-------------------|
-| 底层结构 | 链表 | 数组 |
-| 容量 | 可无界也可有界 | 必须有界 |
-| 锁机制 | 两把锁（读写分离） | 一把锁（读写互斥） |
-| 吞吐量 | 更高 | 较低 |
-| 内存占用 | 较大 | 较小 |
+| 特性   | LinkedBlockingQueue | ArrayBlockingQueue |
+|------|---------------------|--------------------|
+| 底层结构 | 链表                  | 数组                 |
+| 容量   | 可无界也可有界             | 必须有界               |
+| 锁机制  | 两把锁（读写分离）           | 一把锁（读写互斥）          |
+| 吞吐量  | 更高                  | 较低                 |
+| 内存占用 | 较大                  | 较小                 |
 
 **问题 8：为什么推荐使用 BlockingQueue？**
 
 **答案**：
+
 1. **代码简洁**：无需手动处理锁和条件变量
 2. **功能完整**：提供阻塞、超时、非阻塞等多种操作
 3. **稳定可靠**：JDK 标准库，经过充分测试
@@ -267,25 +292,30 @@ LinkedBlockingQueue 是 Java 并发包提供的阻塞队列实现，是生产者
 BlockingQueue<String> queue = new LinkedBlockingQueue<>(5);
 
 // 生产者
-queue.put(item);  // 队列满时阻塞
+queue.
+
+put(item);  // 队列满时阻塞
 
 // 消费者
 String item = queue.take();  // 队列空时阻塞
 
 // 带超时的操作
-queue.offer(item, 1, TimeUnit.SECONDS);  // 超时插入
+queue.
+
+offer(item, 1,TimeUnit.SECONDS);  // 超时插入
+
 String item = queue.poll(1, TimeUnit.SECONDS);  // 超时获取
 ```
 
 ### 三种实现方式对比
 
-| 特性 | synchronized | ReentrantLock | LinkedBlockingQueue |
-|------|--------------|---------------|---------------------|
-| 代码复杂度 | 中 | 高 | 低 |
-| 灵活性 | 低 | 高 | 中 |
-| 性能 | 中 | 高 | 高 |
-| 推荐度 | ★★ | ★★★ | ★★★★★ |
-| 使用场景 | 简单场景 | 需要精细控制 | 大多数场景 |
+| 特性    | synchronized | ReentrantLock | LinkedBlockingQueue |
+|-------|--------------|---------------|---------------------|
+| 代码复杂度 | 中            | 高             | 低                   |
+| 灵活性   | 低            | 高             | 中                   |
+| 性能    | 中            | 高             | 高                   |
+| 推荐度   | ★★           | ★★★           | ★★★★★               |
+| 使用场景  | 简单场景         | 需要精细控制        | 大多数场景               |
 
 ### LinkedBlockingQueue 源码要点
 

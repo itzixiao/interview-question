@@ -7,6 +7,7 @@
 **原理**：固定时间窗口内计数，超过阈值则拒绝
 
 **Redis 实现**：
+
 ```java
 @Component
 public class CounterRateLimiter {
@@ -53,6 +54,7 @@ public class CounterRateLimiter {
 **原理**：将时间窗口划分为多个小格子，每个格子独立计数
 
 **Redis 实现（Lua 脚本原子化）**：
+
 ```java
 @Component
 public class SlidingWindowRateLimiter {
@@ -106,6 +108,7 @@ public class SlidingWindowRateLimiter {
 **原理**：固定速率产生令牌，请求获取令牌，无令牌则拒绝
 
 **Redis 实现（Lua 脚本，含浮点精度处理）**：
+
 ```lua
 -- KEYS[1]: 限流 key
 -- ARGV[1]: 桶容量
@@ -142,6 +145,7 @@ end
 ```
 
 **Java 调用**：
+
 ```java
 @Component
 public class TokenBucketRateLimiter {
@@ -192,6 +196,7 @@ public class TokenBucketRateLimiter {
 **原理**：请求流入漏桶，固定速率流出，桶满则溢出
 
 **Redis 实现（Lua 脚本原子化）**：
+
 ```java
 @Component
 public class LeakyBucketRateLimiter {
@@ -248,6 +253,7 @@ public class LeakyBucketRateLimiter {
 **原理**：score = 执行时间戳，zrange 获取到期任务
 
 **实现代码**：
+
 ```java
 @Component
 public class DelayQueue {
@@ -298,6 +304,7 @@ public class DelayQueue {
 ```
 
 **消费者示例**：
+
 ```java
 @Component
 public class DelayQueueConsumer {
@@ -335,6 +342,7 @@ public class DelayQueueConsumer {
 ### 2.2 Redisson 实现
 
 **使用 RDelayedQueue（异步消费）**：
+
 ```java
 @Component
 public class RedissonDelayQueue {
@@ -390,6 +398,7 @@ public class RedissonDelayQueue {
 ### 3.1 Token 机制
 
 **流程**：
+
 ```
 1. 客户端请求接口前，先获取幂等 Token
 2. 请求时携带 Token 和业务 ID
@@ -398,6 +407,7 @@ public class RedissonDelayQueue {
 ```
 
 **实现代码**：
+
 ```java
 @Service
 public class IdempotentService {
@@ -448,6 +458,7 @@ public class IdempotentService {
 ```
 
 **使用示例**：
+
 ```java
 @RestController
 @RequestMapping("/order")
@@ -539,6 +550,7 @@ public class OrderService {
 ### 4.1 大 Key 问题
 
 **发现大 Key**：
+
 ```bash
 # 命令行工具
 redis-cli --bigkeys
@@ -588,6 +600,7 @@ public void deleteLargeKey(String key) {
 ### 4.2 热点 Key 问题
 
 **发现热点 Key**：
+
 ```bash
 # 开启监控
 redis-cli --hotkeys
@@ -669,6 +682,7 @@ public Object getHotKeyReplica(String hotKey, int replicaCount) {
 ### 4.3 Pipeline 批量操作
 
 **使用示例**：
+
 ```java
 // ❌ 错误：多次网络往返
 for (int i = 0; i < 1000; i++) {
@@ -690,6 +704,7 @@ redisTemplate.executePipelined((RedisCallback<?>) connection -> {
 ### 4.4 内存淘汰策略
 
 **配置方式**：
+
 ```bash
 # redis.conf
 maxmemory 4gb
@@ -698,13 +713,27 @@ maxmemory-policy allkeys-lru
 
 **策略选择**：
 
-| 策略 | 说明 | 适用场景 |
-|------|------|----------|
-| `noeviction` | 不淘汰，写入报错 | 数据极其重要 |
-| `allkeys-lru` | 所有 key 中淘汰 LRU | 缓存场景（推荐） |
-| `volatile-lru` | 有过期时间的 key 中淘汰 LRU | 部分数据可过期 |
-| `allkeys-lfu` | 所有 key 中淘汰 LFU（Redis 4.0+） | 热点数据缓存 |
-| `volatile-ttl` | 淘汰即将过期的 key | TTL 分级场景 |
+| 淘汰策略类型 | 策略名称 | 核心逻辑 |
+|------------|---------|---------|
+| **不淘汰数据** | `noeviction` | 内存满时拒绝写入，返回错误，默认策略 |
+| **从所有键中淘汰** | `allkeys-lru` | 从所有键中选择最近最少使用的键淘汰 |
+| **从所有键中淘汰** | `allkeys-random` | 从所有键中随机选择键淘汰 |
+| **从所有键中淘汰** | `allkeys-lfu` | 从所有键中选择最近最不频繁使用的键淘汰（Redis 4.0+） |
+| **仅从设过期时间的键中淘汰** | `volatile-lru` | 从设置了过期时间的键中选择最近最少使用的键淘汰 |
+| **仅从设过期时间的键中淘汰** | `volatile-random` | 从设置了过期时间的键中随机选择键淘汰 |
+| **仅从设过期时间的键中淘汰** | `volatile-lfu` | 从设置了过期时间的键中选择最近最不频繁使用的键淘汰（Redis 4.0+） |
+| **仅从设过期时间的键中淘汰** | `volatile-ttl` | 从设置了过期时间的键中选择剩余 TTL 最短的键淘汰 |
+| **仅从设过期时间的键中淘汰** | `volatile-justexpired` | 仅淘汰已过期的键，若没有则不淘汰 |
+
+**使用建议**：
+
+| 场景 | 推荐策略 | 说明 |
+|------|---------|------|
+| **缓存场景（推荐）** | `allkeys-lru` | 自动淘汰冷数据，保留热数据 |
+| **热点数据缓存** | `allkeys-lfu` | 基于访问频率，避免偶发访问误判 |
+| **部分数据可过期** | `volatile-lru` | 只淘汰有过期时间的数据 |
+| **TTL 分级场景** | `volatile-ttl` | 优先淘汰即将过期的数据 |
+| **数据极其重要** | `noeviction` | 宁可报错也不丢失数据 |
 
 ---
 
@@ -716,12 +745,12 @@ maxmemory-policy allkeys-lru
 
 **常见限流算法**：
 
-| 算法 | 原理 | 特点 |
-|------|------|------|
-| 计数器 | 固定窗口计数 | 简单，但有临界问题 |
-| 滑动窗口 | 多个小格子 | 更精确，占用内存多 |
-| 令牌桶 | 固定速率产生令牌 | 允许突发流量 |
-| 漏桶 | 固定速率处理 | 平滑限流，无法突发 |
+| 算法   | 原理       | 特点        |
+|------|----------|-----------|
+| 计数器  | 固定窗口计数   | 简单，但有临界问题 |
+| 滑动窗口 | 多个小格子    | 更精确，占用内存多 |
+| 令牌桶  | 固定速率产生令牌 | 允许突发流量    |
+| 漏桶   | 固定速率处理   | 平滑限流，无法突发 |
 
 **推荐**：令牌桶算法（平衡性能和灵活性）
 
@@ -732,11 +761,13 @@ maxmemory-policy allkeys-lru
 **参考答案**：
 
 **Sorted Set 实现**：
+
 - score = 执行时间戳
 - zrange 获取到期任务
 - zrem 删除已处理任务
 
 **Redisson 实现**：
+
 - RDelayedQueue
 - 内部使用 DelayedQueue + BlockingQueue
 
@@ -747,11 +778,13 @@ maxmemory-policy allkeys-lru
 **参考答案**：
 
 **Token 机制**：
+
 1. 请求前获取幂等 Token
 2. 请求时携带 Token
 3. 服务端 Lua 脚本原子校验并删除
 
 **唯一索引**：
+
 - Redis 前置校验
 - 数据库唯一索引兜底
 
@@ -762,10 +795,12 @@ maxmemory-policy allkeys-lru
 **参考答案**：
 
 **发现方式**：
+
 - `redis-cli --bigkeys`
 - `MEMORY USAGE key`
 
 **解决方案**：
+
 1. **拆分**：大 Hash 拆成多个小 Hash
 2. **异步删除**：使用 `UNLINK` 代替 `DEL`
 3. **批量操作**：分批处理，避免一次性操作
@@ -778,10 +813,12 @@ maxmemory-policy allkeys-lru
 **参考答案**：
 
 **发现方式**：
+
 - `redis-cli --hotkeys`
 - 监控系统分析
 
 **解决方案**：
+
 1. **多级缓存**：本地缓存 + Redis
 2. **副本分散**：创建多个副本，随机读取
 3. **永不过期**：热点 Key 不设置过期时间
@@ -829,13 +866,13 @@ key1
 
 ## 七、总结
 
-| 应用场景 | 实现方案 |
-|----------|----------|
-| 限流 | 计数器、滑动窗口、令牌桶、漏桶 |
+| 应用场景 | 实现方案                             |
+|------|----------------------------------|
+| 限流   | 计数器、滑动窗口、令牌桶、漏桶                  |
 | 延时队列 | Sorted Set、Redisson DelayedQueue |
-| 幂等 | Token 机制、唯一索引 |
-| 性能优化 | 拆分大 Key、多级缓存、Pipeline |
-| 内存管理 | 合理设置淘汰策略、定期清理 |
+| 幂等   | Token 机制、唯一索引                    |
+| 性能优化 | 拆分大 Key、多级缓存、Pipeline            |
+| 内存管理 | 合理设置淘汰策略、定期清理                    |
 
 ---
 

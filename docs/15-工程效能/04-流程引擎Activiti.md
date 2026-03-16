@@ -63,15 +63,15 @@
 
 ### 2.2 BPMN 元素说明
 
-| 元素 | 说明 | 用途 |
-|------|------|------|
-| **startEvent** | 开始事件 | 流程起点 |
-| **endEvent** | 结束事件 | 流程终点 |
-| **userTask** | 用户任务 | 需要人工处理 |
-| **serviceTask** | 服务任务 | 自动执行代码 |
-| **sequenceFlow** | 顺序流 | 连接节点 |
-| **exclusiveGateway** | 排他网关 | 条件分支 |
-| **parallelGateway** | 并行网关 | 并发执行 |
+| 元素                   | 说明   | 用途     |
+|----------------------|------|--------|
+| **startEvent**       | 开始事件 | 流程起点   |
+| **endEvent**         | 结束事件 | 流程终点   |
+| **userTask**         | 用户任务 | 需要人工处理 |
+| **serviceTask**      | 服务任务 | 自动执行代码 |
+| **sequenceFlow**     | 顺序流  | 连接节点   |
+| **exclusiveGateway** | 排他网关 | 条件分支   |
+| **parallelGateway**  | 并行网关 | 并发执行   |
 
 ---
 
@@ -209,14 +209,14 @@ public void withdrawProcess(String processInstanceId, String userId) {
 
 ## 六、Activiti vs Camunda
 
-| 特性 | Activiti | Camunda |
-|------|---------|---------|
-| 起源 | Alfresco 衍生 | 基于 Activiti  fork |
-| 社区活跃度 | 一般 | 活跃 |
-| 功能特性 | 基础完善 | 更丰富 |
-| 文档质量 | 一般 | 优秀 |
-| 外部任务模式 | 不支持 | 支持 |
-| DMN 决策表 | 基础 | 强大 |
+| 特性      | Activiti    | Camunda           |
+|---------|-------------|-------------------|
+| 起源      | Alfresco 衍生 | 基于 Activiti  fork |
+| 社区活跃度   | 一般          | 活跃                |
+| 功能特性    | 基础完善        | 更丰富               |
+| 文档质量    | 一般          | 优秀                |
+| 外部任务模式  | 不支持         | 支持                |
+| DMN 决策表 | 基础          | 强大                |
 
 ---
 
@@ -227,6 +227,7 @@ public void withdrawProcess(String processInstanceId, String userId) {
 **参考答案：**
 
 **7 大核心服务：**
+
 1. **RepositoryService**：流程定义管理（部署、查询）
 2. **RuntimeService**：流程实例管理（启动、变量）
 3. **TaskService**：任务管理（待办、签收、完成）
@@ -242,12 +243,14 @@ public void withdrawProcess(String processInstanceId, String userId) {
 **BPMN 2.0（Business Process Model and Notation）** 是业务流程建模的标准规范。
 
 **核心元素：**
+
 - **事件（Events）**：开始、结束、中间事件
 - **活动（Activities）**：任务、子流程
 - **网关（Gateways）**：排他、并行、包容、事件网关
 - **连线（Flows）**：顺序流、消息流、关联
 
 **优势：**
+
 - 统一标准，厂商中立
 - 图形化，易理解
 - 可执行，直接驱动引擎
@@ -257,15 +260,18 @@ public void withdrawProcess(String processInstanceId, String userId) {
 **参考答案：**
 
 **会签（多人同时审批）：**
+
 - 使用 `multiInstanceLoopCharacteristics`
 - `isSequential="false"` 表示并行
 - 设置 `completionCondition` 完成条件
 
 **或签（一人审批即可）：**
+
 - 使用 `activiti:candidateUsers` 指定候选人列表
 - 任意一人完成任务即可
 
 **应用场景：**
+
 - 会签：多部门联合会审
 - 或签：领导出差时授权他人代批
 
@@ -274,10 +280,12 @@ public void withdrawProcess(String processInstanceId, String userId) {
 **参考答案：**
 
 **变量作用域：**
+
 1. **全局变量**：整个流程实例
 2. **局部变量**：单个任务或执行树
 
 **API 使用：**
+
 ```java
 // 设置全局变量
 runtimeService.setVariable(processInstanceId, "key", value);
@@ -290,6 +298,7 @@ Object value = runtimeService.getVariable(processInstanceId, "key");
 ```
 
 **使用场景：**
+
 - 传递业务数据
 - 控制流程走向（网关条件）
 - 动态分配审批人
@@ -299,16 +308,19 @@ Object value = runtimeService.getVariable(processInstanceId, "key");
 **参考答案：**
 
 **驳回实现：**
+
 1. 删除当前活动节点
 2. 使用 `ChangeActivityStateBuilder` 跳转到目标节点
 3. 重新创建任务
 
 **撤回实现：**
+
 1. 检查是否还有待办任务（未审批）
 2. 删除流程实例
 3. 记录撤回日志
 
 **注意事项：**
+
 - 需要记录操作日志
 - 考虑数据一致性
 - 通知相关人员
@@ -318,6 +330,7 @@ Object value = runtimeService.getVariable(processInstanceId, "key");
 **参考答案：**
 
 **主要区别：**
+
 1. **外部任务模式**：Camunda 支持，Activiti 不支持
 2. **DMN 决策表**：Camunda 更强大
 3. **用户体验**：Camunda 的 Cockpit 更好用
@@ -325,6 +338,7 @@ Object value = runtimeService.getVariable(processInstanceId, "key");
 5. **版本更新**：Camunda 迭代更快
 
 **选择建议：**
+
 - 传统企业：Activiti 稳定
 - 互联网项目：Camunda 灵活
 

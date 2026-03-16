@@ -16,13 +16,13 @@
     <modules>
         <!-- 公共模块 -->
         <module>interview-common</module>
-        
+
         <!-- 网关服务 -->
         <module>interview-gateway</module>
-        
+
         <!-- 微服务模块集合 -->
         <module>interview-microservices-parent</module>
-        
+
         <!-- Starter 模块集合 -->
         <module>interview-starters-parent</module>
     </modules>
@@ -45,28 +45,28 @@
         <mysql-connector.version>8.0.33</mysql-connector.version>
         <mybatis-plus.version>3.5.3.1</mybatis-plus.version>
         <mybatis-spring-boot.version>2.3.1</mybatis-spring-boot.version>
-        
+
         <!-- Redis 相关版本 -->
         <redisson.version>3.17.6</redisson.version>
-        
+
         <!-- 中间件版本 -->
         <shardingsphere.version>4.1.1</shardingsphere.version>
         <easyexcel.version>3.3.2</easyexcel.version>
-        
+
         <!-- Elasticsearch 版本 -->
         <elasticsearch.version>7.17.9</elasticsearch.version>
-        
+
         <!-- JWT 版本 -->
         <jjwt.version>0.11.5</jjwt.version>
-        
+
         <!-- API 文档版本 -->
         <knife4j.version>3.0.3</knife4j.version>
-        
+
         <!-- 工具类版本 -->
         <lombok.version>1.18.28</lombok.version>
         <guava.version>31.1-jre</guava.version>
         <caffeine.version>2.9.3</caffeine.version>
-        
+
         <!-- Maven 插件版本 -->
         <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
         <maven-compiler-plugin-starter.version>3.8.1</maven-compiler-plugin-starter.version>
@@ -107,21 +107,21 @@
                 <artifactId>interview-common</artifactId>
                 <version>${project.version}</version>
             </dependency>
-            
+
             <!-- 自定义 Starter -->
             <dependency>
                 <groupId>cn.itzixiao</groupId>
                 <artifactId>interview-threadpool-starter</artifactId>
                 <version>${project.version}</version>
             </dependency>
-            
+
             <!-- MySQL 驱动 -->
             <dependency>
                 <groupId>com.mysql</groupId>
                 <artifactId>mysql-connector-j</artifactId>
                 <version>${mysql-connector.version}</version>
             </dependency>
-            
+
             <!-- Lombok -->
             <dependency>
                 <groupId>org.projectlombok</groupId>
@@ -129,42 +129,42 @@
                 <version>${lombok.version}</version>
                 <optional>true</optional>
             </dependency>
-            
+
             <!-- MyBatis-Plus -->
             <dependency>
                 <groupId>com.baomidou</groupId>
                 <artifactId>mybatis-plus-boot-starter</artifactId>
                 <version>${mybatis-plus.version}</version>
             </dependency>
-            
+
             <!-- MyBatis -->
             <dependency>
                 <groupId>org.mybatis.spring.boot</groupId>
                 <artifactId>mybatis-spring-boot-starter</artifactId>
                 <version>${mybatis-spring-boot.version}</version>
             </dependency>
-            
+
             <!-- Redisson -->
             <dependency>
                 <groupId>org.redisson</groupId>
                 <artifactId>redisson-spring-boot-starter</artifactId>
                 <version>${redisson.version}</version>
             </dependency>
-            
+
             <!-- Caffeine -->
             <dependency>
                 <groupId>com.github.ben-manes.caffeine</groupId>
                 <artifactId>caffeine</artifactId>
                 <version>${caffeine.version}</version>
             </dependency>
-            
+
             <!-- Guava -->
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
                 <version>${guava.version}</version>
             </dependency>
-            
+
             <!-- JWT -->
             <dependency>
                 <groupId>io.jsonwebtoken</groupId>
@@ -183,28 +183,28 @@
                 <version>${jjwt.version}</version>
                 <scope>runtime</scope>
             </dependency>
-            
+
             <!-- ShardingSphere -->
             <dependency>
                 <groupId>org.apache.shardingsphere</groupId>
                 <artifactId>sharding-jdbc-spring-boot-starter</artifactId>
                 <version>${shardingsphere.version}</version>
             </dependency>
-            
+
             <!-- EasyExcel -->
             <dependency>
                 <groupId>com.alibaba</groupId>
                 <artifactId>easyexcel</artifactId>
                 <version>${easyexcel.version}</version>
             </dependency>
-            
+
             <!-- Elasticsearch -->
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter-data-elasticsearch</artifactId>
                 <version>${spring-boot.version}</version>
             </dependency>
-            
+
             <!-- Knife4j API 文档 -->
             <dependency>
                 <groupId>com.github.xiaoymin</groupId>

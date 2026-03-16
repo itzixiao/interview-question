@@ -10,15 +10,15 @@
 
 Spring 定义了 7 种事务传播行为：
 
-| 传播行为 | 说明 | 使用场景 |
-|---------|------|---------|
-| **REQUIRED** | 默认。当前有事务则加入，无则新建 | 大多数业务场景 |
-| **REQUIRES_NEW** | 挂起当前事务，新建独立事务 | 日志记录、审计操作 |
-| **NESTED** | 在当前事务中创建嵌套事务（savepoint） | 批量处理、部分回滚 |
-| **SUPPORTS** | 当前有事务则加入，无则以非事务执行 | 查询操作 |
-| **NOT_SUPPORTED** | 挂起当前事务，以非事务执行 | 文件 IO、批量导入 |
-| **MANDATORY** | 当前必须有事务，否则抛出异常 | 强制要求事务的核心业务 |
-| **NEVER** | 当前必须无事务，否则抛出异常 | 绝对不能有事务的操作 |
+| 传播行为              | 说明                      | 使用场景        |
+|-------------------|-------------------------|-------------|
+| **REQUIRED**      | 默认。当前有事务则加入，无则新建        | 大多数业务场景     |
+| **REQUIRES_NEW**  | 挂起当前事务，新建独立事务           | 日志记录、审计操作   |
+| **NESTED**        | 在当前事务中创建嵌套事务（savepoint） | 批量处理、部分回滚   |
+| **SUPPORTS**      | 当前有事务则加入，无则以非事务执行       | 查询操作        |
+| **NOT_SUPPORTED** | 挂起当前事务，以非事务执行           | 文件 IO、批量导入  |
+| **MANDATORY**     | 当前必须有事务，否则抛出异常          | 强制要求事务的核心业务 |
+| **NEVER**         | 当前必须无事务，否则抛出异常          | 绝对不能有事务的操作  |
 
 ---
 
@@ -109,11 +109,13 @@ GET http://localhost:8084/api/transaction/required?userId=1&amount=100
 ```
 
 **说明：**
+
 - 当前有事务则加入，无则新建
 - 所有操作在同一事务中，要么全部成功，要么全部失败
 - 适用于大多数业务场景
 
 **测试场景：**
+
 - `amount=100`：正常情况，订单创建成功
 - `amount=1500`：金额超过 1000，抛出异常，整个事务回滚
 
@@ -124,11 +126,13 @@ GET http://localhost:8084/api/transaction/requires-new?userId=1&amount=50
 ```
 
 **说明：**
+
 - 挂起当前事务，创建新的独立事务
 - 新事务的提交/回滚不影响外部事务
 - 适用于日志记录、审计操作
 
 **测试场景：**
+
 - 即使订单事务回滚，日志也会独立保存
 
 #### 3. NESTED 传播行为
@@ -138,11 +142,13 @@ GET http://localhost:8084/api/transaction/nested?userId=1
 ```
 
 **说明：**
+
 - 在当前事务中创建嵌套事务（使用 savepoint）
 - 嵌套事务可以独立回滚，不影响外层
 - 适用于批量处理中的单条回滚
 
 **测试场景：**
+
 - 批量创建 3 个订单，单个失败不影响其他
 
 #### 4. SUPPORTS 传播行为
@@ -152,6 +158,7 @@ GET http://localhost:8084/api/transaction/supports?userId=1
 ```
 
 **说明：**
+
 - 当前有事务则加入，无则以非事务执行
 - 适用于查询操作
 
@@ -162,6 +169,7 @@ GET http://localhost:8084/api/transaction/mandatory?userId=1&amount=50
 ```
 
 **说明：**
+
 - 必须在事务中执行，否则抛出异常
 - 适用于强制要求事务的核心业务
 
@@ -172,6 +180,7 @@ GET http://localhost:8084/api/transaction/never?userId=1
 ```
 
 **说明：**
+
 - 必须在非事务环境中执行，否则抛出异常
 - 适用于绝对不能有事务的操作
 
@@ -182,6 +191,7 @@ GET http://localhost:8084/api/transaction/not-supported?userId=1
 ```
 
 **说明：**
+
 - 挂起当前事务，以非事务执行
 - 适用于不需要事务的操作（如文件 IO）
 
@@ -194,6 +204,7 @@ GET http://localhost:8084/api/transaction/complex?userId=1&amount=200
 ```
 
 **说明：**
+
 - 结合多种传播行为的完整业务流程
 - 包含：SUPPORTS（查询）、REQUIRED（订单）、REQUIRES_NEW（日志）
 
@@ -216,33 +227,35 @@ GET http://localhost:8084/api/transaction/account?userId=1
 ### 1. REQUIRED 传播行为
 
 ```java
+
 @Service
 public class OrderService {
-    
+
     @Transactional(rollbackFor = Exception.class)
     public Order createOrderWithRequired(Long userId, BigDecimal amount) {
         // 1. 创建订单
         Order order = new Order();
         order.setOrderNo(UUID.randomUUID().toString());
         orderMapper.insert(order);
-        
+
         // 2. 扣减账户余额（REQUIRED - 加入同一事务）
         accountService.depositWithRequired(userId, amount.negate());
-        
+
         // 3. 记录日志（REQUIRED - 加入同一事务）
         logService.logWithRequired("CREATE_ORDER", "订单创建成功");
-        
+
         // 模拟异常测试回滚
         if (amount.compareTo(new BigDecimal("1000")) > 0) {
             throw new RuntimeException("金额超过限制");
         }
-        
+
         return order;
     }
 }
 ```
 
 **执行流程：**
+
 ```
 外部方法（事务 A）
     ↓ 调用
@@ -254,9 +267,10 @@ public class OrderService {
 ### 2. REQUIRES_NEW 传播行为
 
 ```java
+
 @Service
 public class LogService {
-    
+
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void logSuccess(String operation, String detail) {
         OperationLog log = new OperationLog();
@@ -270,6 +284,7 @@ public class LogService {
 ```
 
 **执行流程：**
+
 ```
 外部方法（事务 A）
     ↓ 调用
@@ -283,9 +298,10 @@ public class LogService {
 ### 3. NESTED 传播行为
 
 ```java
+
 @Service
 public class OrderService {
-    
+
     @Transactional(rollbackFor = Exception.class)
     public void batchCreateOrders(Long userId) {
         for (int i = 1; i <= 3; i++) {
@@ -296,7 +312,7 @@ public class OrderService {
             }
         }
     }
-    
+
     @Transactional(propagation = Propagation.NESTED)
     public Order createSingleOrderWithNested(Long userId, BigDecimal amount) {
         // 创建 savepoint
@@ -307,12 +323,12 @@ public class OrderService {
 
 **REQUIRES_NEW vs NESTED 对比：**
 
-| 特性 | REQUIRES_NEW | NESTED |
-|------|--------------|--------|
-| 事务 | 独立事务 | 嵌套事务（savepoint） |
-| 回滚 | 完全独立 | 可回滚到 savepoint |
-| 提交 | 独立提交 | 随外部事务一起提交 |
-| 实现 | JTA 事务管理 | JDBC savepoint |
+| 特性 | REQUIRES_NEW | NESTED          |
+|----|--------------|-----------------|
+| 事务 | 独立事务         | 嵌套事务（savepoint） |
+| 回滚 | 完全独立         | 可回滚到 savepoint  |
+| 提交 | 独立提交         | 随外部事务一起提交       |
+| 实现 | JTA 事务管理     | JDBC savepoint  |
 
 ---
 
@@ -332,20 +348,27 @@ logging:
 ### 2. 查看当前事务名称
 
 ```java
-log.info("当前事务名称：{}", TransactionSynchronizationManager.getCurrentTransactionName());
+log.info("当前事务名称：{}",TransactionSynchronizationManager.getCurrentTransactionName());
 ```
 
 ### 3. 验证数据是否回滚
 
 ```sql
 -- 查看账户余额
-SELECT * FROM t_account WHERE user_id = 1;
+SELECT *
+FROM t_account
+WHERE user_id = 1;
 
 -- 查看订单
-SELECT * FROM t_order WHERE user_id = 1 ORDER BY create_time DESC;
+SELECT *
+FROM t_order
+WHERE user_id = 1
+ORDER BY create_time DESC;
 
 -- 查看操作日志
-SELECT * FROM t_operation_log ORDER BY create_time DESC;
+SELECT *
+FROM t_operation_log
+ORDER BY create_time DESC;
 ```
 
 ---
@@ -355,28 +378,31 @@ SELECT * FROM t_operation_log ORDER BY create_time DESC;
 ### 场景 1：订单创建 + 日志记录
 
 ```java
+
 @Transactional(rollbackFor = Exception.class)
 public Order createOrder(OrderDTO dto) {
     // 1. 创建订单（REQUIRED）
     Order order = createOrder(dto);
-    
+
     // 2. 扣减库存（REQUIRED）
     inventoryService.reduce(dto.getSkuId(), dto.getQuantity());
-    
+
     // 3. 记录日志（REQUIRES_NEW - 独立提交）
     logService.logSuccess("ORDER_CREATED", "订单：" + order.getId());
-    
+
     return order;
 }
 ```
 
 **好处：**
+
 - 订单失败时，库存回滚
 - 但日志独立保存，便于追踪
 
 ### 场景 2：批量数据处理
 
 ```java
+
 @Transactional(rollbackFor = Exception.class)
 public void batchProcess(List<Data> dataList) {
     for (Data data : dataList) {
@@ -398,6 +424,7 @@ public void processSingle(Data data) {
 ### 场景 3：查询优化
 
 ```java
+
 @Transactional(readOnly = true)
 public List<User> listUsers() {
     // readOnly=true 优化：
@@ -414,18 +441,21 @@ public List<User> listUsers() {
 ### Q1: REQUIRED 和 REQUIRES_NEW 的区别？
 
 **A:**
+
 - **REQUIRED**：加入当前事务，同成功或同失败
 - **REQUIRES_NEW**：挂起当前事务，创建独立事务，独立提交/回滚
 
 ### Q2: NESTED 和 REQUIRES_NEW 的区别？
 
 **A:**
+
 - **NESTED**：嵌套事务，使用 savepoint，随外部事务一起提交
 - **REQUIRES_NEW**：独立事务，完全独立提交/回滚
 
 ### Q3: 事务失效的常见场景？
 
 **A:**
+
 1. 非 public 方法
 2. 同类内部调用（this 调用）
 3. 异常被捕获未抛出
@@ -435,6 +465,7 @@ public List<User> listUsers() {
 ### Q4: 如何解决同类内部调用事务失效？
 
 **A:**
+
 1. 注入自身代理对象调用
 2. 使用 `AopContext.currentProxy()`
 3. 拆分到另一个 Service
@@ -486,18 +517,19 @@ SELECT * FROM t_operation_log ORDER BY id DESC LIMIT 1;
 ### 1. 事务方法设计
 
 ```java
+
 @Transactional(rollbackFor = Exception.class)
 public Order createOrder(CreateOrderRequest request) {
     // 1. 创建订单
     Order order = new Order();
     orderMapper.save(order);
-    
+
     // 2. 扣减库存（同事务）
     inventoryService.deduct(request.getSkuId(), request.getQuantity());
-    
+
     // 3. 支付（同事务）
     paymentService.pay(order.getId(), request.getAmount());
-    
+
     return order;
 }
 ```
@@ -505,6 +537,7 @@ public Order createOrder(CreateOrderRequest request) {
 ### 2. 日志记录（REQUIRES_NEW）
 
 ```java
+
 @Transactional(propagation = Propagation.REQUIRES_NEW)
 public void saveOperationLog(String operation, String detail) {
     OperationLog log = new OperationLog();
@@ -548,6 +581,7 @@ public void createOrder() {
 ## 📈 更新日志
 
 ### v1.0 - 2026-03-13
+
 - ✅ 初始版本发布
 - ✅ 支持 7 种事务传播行为演示
 - ✅ 完整的业务场景示例

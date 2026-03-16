@@ -1,12 +1,5 @@
 package cn.itzixiao.interview.mysql;
 
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 /**
  * MySQL 事务与锁机制详解
  *
@@ -207,10 +200,10 @@ public class TransactionAndLockDemo {
         System.out.println("【设置隔离级别】");
         System.out.println("-- 查看当前隔离级别");
         System.out.println("SELECT @@transaction_isolation;");
-        System.out.println("");
+        System.out.println(" ");
         System.out.println("-- 设置会话隔离级别");
         System.out.println("SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED;");
-        System.out.println("");
+        System.out.println(" ");
         System.out.println("-- 设置全局隔离级别（需要重新连接生效）");
         System.out.println("SET GLOBAL TRANSACTION ISOLATION LEVEL REPEATABLE READ;\n");
     }
@@ -294,7 +287,7 @@ public class TransactionAndLockDemo {
         System.out.println("-- MySQL 8.0+");
         System.out.println("SELECT * FROM performance_schema.data_locks;");
         System.out.println("SELECT * FROM performance_schema.data_lock_waits;");
-        System.out.println("");
+        System.out.println(" ");
         System.out.println("-- 查看当前锁等待");
         System.out.println("SHOW ENGINE INNODB STATUS;\n");
     }
@@ -334,7 +327,7 @@ public class TransactionAndLockDemo {
 
         System.out.println("【查看死锁信息】");
         System.out.println("SHOW ENGINE INNODB STATUS;  -- 查看最近一次死锁");
-        System.out.println("");
+        System.out.println(" ");
         System.out.println("-- 开启死锁日志");
         System.out.println("SET GLOBAL innodb_print_all_deadlocks = ON;\n");
 
@@ -445,7 +438,7 @@ public class TransactionAndLockDemo {
         System.out.println("==========================================================================");
         System.out.println("答：");
         System.out.println("默认隔离级别是 REPEATABLE READ（可重复读）。");
-        System.out.println("");
+        System.out.println(" ");
         System.out.println("选择原因：");
         System.out.println("1. 解决脏读和不可重复读问题");
         System.out.println("2. InnoDB 通过 MVCC + 间隙锁还解决了幻读");
@@ -477,7 +470,7 @@ public class TransactionAndLockDemo {
         System.out.println("1. 隐藏字段：DB_TRX_ID（事务ID）、DB_ROLL_PTR（回滚指针）");
         System.out.println("2. Undo Log：保存历史版本，形成版本链");
         System.out.println("3. Read View：记录活跃事务信息，判断数据可见性");
-        System.out.println("");
+        System.out.println(" ");
         System.out.println("不同隔离级别的区别：");
         System.out.println("- RC：每次SELECT创建新ReadView");
         System.out.println("- RR：事务开始时创建ReadView，后续复用\n");
@@ -487,7 +480,7 @@ public class TransactionAndLockDemo {
         System.out.println("==========================================================================");
         System.out.println("答：");
         System.out.println("死锁：两个或多个事务相互等待对方持有的锁。");
-        System.out.println("");
+        System.out.println(" ");
         System.out.println("避免方法：");
         System.out.println("1. 固定加锁顺序（最有效）");
         System.out.println("2. 缩短事务时间");
@@ -515,7 +508,7 @@ public class TransactionAndLockDemo {
         System.out.println("答：");
         System.out.println("FOR UPDATE：加排他锁（X锁），其他事务不能读写");
         System.out.println("LOCK IN SHARE MODE：加共享锁（S锁），其他事务可以读，不能写");
-        System.out.println("");
+        System.out.println(" ");
         System.out.println("使用场景：");
         System.out.println("FOR UPDATE：读取后需要修改");
         System.out.println("LOCK IN SHARE MODE：只需要保证读取时数据不被修改\n");
@@ -540,7 +533,7 @@ public class TransactionAndLockDemo {
         System.out.println("2. 占用大量Undo Log空间");
         System.out.println("3. 回滚时间长");
         System.out.println("4. 主从延迟增大");
-        System.out.println("");
+        System.out.println(" ");
         System.out.println("优化：");
         System.out.println("1. 拆分大事务为小事务");
         System.out.println("2. 批量操作分批提交");

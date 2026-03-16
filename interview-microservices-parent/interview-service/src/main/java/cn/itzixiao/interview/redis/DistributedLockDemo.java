@@ -1,13 +1,10 @@
 package cn.itzixiao.interview.redis;
 
-import java.util.Collections;
-import java.util.UUID;
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Redis 分布式锁详解
- *
+ * <p>
  * 分布式锁要求：
  * ┌─────────────────────────────────────────────────────────────┐
  * │  1. 互斥性：同一时刻只有一个客户端能持有锁                     │
@@ -15,7 +12,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * │  3. 死锁避免：设置过期时间，防止死锁                          │
  * │  4. 容错性：Redis 宕机后，锁能正确释放                        │
  * └─────────────────────────────────────────────────────────────┘
- *
+ * <p>
  * Redis 分布式锁演进：
  * ┌─────────┐ → ┌─────────┐ → ┌─────────┐ → ┌─────────┐
  * │  SETNX  │   │ SET EX  │   │ Lua脚本 │   │ RedLock │

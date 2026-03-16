@@ -1,15 +1,12 @@
 package cn.itzixiao.interview.java;
 
-import java.io.*;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.lang.reflect.Method;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
 /**
  * Java 类加载机制深入理解 - 教学型详解
- *
+ * <p>
  * ┌─────────────────────────────────────────────────────────────────────────────┐
  * │                        Java 类加载机制总览                                  │
  * │                                                                             │
@@ -676,6 +673,7 @@ public class ClassLoaderDeepDiveDemo {
         static {
             System.out.println("  ParentClass 初始化");
         }
+
         public static final int parentStaticField = 123;
     }
 
@@ -715,7 +713,7 @@ public class ClassLoaderDeepDiveDemo {
 
     public static void main(String[] args) throws Exception {
         ClassLoaderDeepDiveDemo demo = new ClassLoaderDeepDiveDemo();
-        
+
         System.out.println("\n");
         System.out.println("███████████████████████████████████████████████████████████████████");
         System.out.println("█                                                                   █");
@@ -723,7 +721,7 @@ public class ClassLoaderDeepDiveDemo {
         System.out.println("█                                                                   █");
         System.out.println("███████████████████████████████████████████████████████████████████");
         System.out.println();
-        
+
         // 基础部分
         demo.classLoaderHierarchy();
         demo.parentDelegationModel();
@@ -732,11 +730,11 @@ public class ClassLoaderDeepDiveDemo {
         demo.breakParentDelegation();
         demo.threadContextClassLoader();
         demo.classUnloading();
-        
+
         // 进阶部分
         demo.classLoadingProcessDeep();
         demo.initializationTimingDeep();
-        
+
         // 高频面试题
         demo.interviewQuestion1();
         demo.interviewQuestion2();
@@ -745,7 +743,7 @@ public class ClassLoaderDeepDiveDemo {
         demo.interviewQuestion5();
         demo.interviewQuestion6();
         demo.interviewQuestion7();
-        
+
         System.out.println("\n");
         System.out.println("███████████████████████████████████████████████████████████████████");
         System.out.println("█                        全部演示完成                             █");

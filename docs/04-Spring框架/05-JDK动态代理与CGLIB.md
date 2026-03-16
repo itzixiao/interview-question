@@ -14,10 +14,10 @@
 
 ### 核心组件
 
-| 组件 | 说明 |
-|------|------|
-| `Proxy` | 代理类的基类 |
-| `InvocationHandler` | 调用处理器接口 |
+| 组件                   | 说明        |
+|----------------------|-----------|
+| `Proxy`              | 代理类的基类    |
+| `InvocationHandler`  | 调用处理器接口   |
 | `newProxyInstance()` | 创建代理对象的方法 |
 
 ### 使用步骤
@@ -53,11 +53,11 @@ MyInterface proxy = (MyInterface) Proxy.newProxyInstance(
 
 ### 核心组件
 
-| 组件 | 说明 |
-|------|------|
-| `Enhancer` | 增强器，用于创建代理 |
-| `MethodInterceptor` | 方法拦截器接口 |
-| `MethodProxy` | 方法代理，用于调用父类方法 |
+| 组件                  | 说明            |
+|---------------------|---------------|
+| `Enhancer`          | 增强器，用于创建代理    |
+| `MethodInterceptor` | 方法拦截器接口       |
+| `MethodProxy`       | 方法代理，用于调用父类方法 |
 
 ### 使用步骤
 
@@ -82,14 +82,14 @@ TargetClass proxy = (TargetClass) enhancer.create();
 
 ## 对比总结
 
-| 特性 | JDK 动态代理 | CGLIB |
-|------|-------------|-------|
-| 实现方式 | 实现接口 | 继承目标类 |
-| 目标要求 | 必须实现接口 | 不能是 final 类/方法 |
+| 特性   | JDK 动态代理           | CGLIB          |
+|------|--------------------|----------------|
+| 实现方式 | 实现接口               | 继承目标类          |
+| 目标要求 | 必须实现接口             | 不能是 final 类/方法 |
 | 调用方式 | 反射 Method.invoke() | FastClass 索引调用 |
-| 性能 | 较慢 | 更快（首次生成慢）|
-| 依赖 | JDK 内置 | 需引入 CGLIB 库 |
-| 包访问 | 支持 | 不支持（继承限制）|
+| 性能   | 较慢                 | 更快（首次生成慢）      |
+| 依赖   | JDK 内置             | 需引入 CGLIB 库    |
+| 包访问  | 支持                 | 不支持（继承限制）      |
 
 ## Spring AOP 代理选择
 
@@ -107,12 +107,12 @@ TargetClass proxy = (TargetClass) enhancer.create();
 
 ## 性能对比
 
-| 场景 | 推荐方案 |
-|------|----------|
-| 有接口，性能要求不高 | JDK 动态代理 |
-| 无接口 | CGLIB |
-| 高性能要求 | CGLIB |
-| 频繁创建代理 | CGLIB（缓存 FastClass）|
+| 场景         | 推荐方案                |
+|------------|---------------------|
+| 有接口，性能要求不高 | JDK 动态代理            |
+| 无接口        | CGLIB               |
+| 高性能要求      | CGLIB               |
+| 频繁创建代理     | CGLIB（缓存 FastClass） |
 
 ## 常见问题
 
@@ -147,6 +147,7 @@ public class Target {
 ```
 
 **解决方案**：
+
 - 注入自身代理
 - 使用 AspectJ 编译时织入
 
@@ -175,6 +176,7 @@ public class Target {
 **问题 2：Spring AOP 默认使用哪种代理？**
 
 答案：
+
 - **有接口**：默认 JDK动态代理
 - **无接口**：使用 CGLIB 代理
 - **强制 CGLIB**：设置 `proxyTargetClass = true`
@@ -182,6 +184,7 @@ public class Target {
 **问题 3：为什么 JDK 代理只能代理接口？**
 
 答案：
+
 - JDK动态代理生成的类继承自 Proxy
 - Java 不支持多继承
 - 所以只能实现接口，不能继承类
@@ -189,6 +192,7 @@ public class Target {
 **问题 4:CGLIB 为什么不能代理 final 方法？**
 
 答案：
+
 - CGLIB 通过继承目标类实现
 - final 方法不能被子类重写
 - 所以无法拦截和增强 final 方法
@@ -196,6 +200,7 @@ public class Target {
 **问题 5：自调用问题的解决方案？**
 
 答案：
+
 ```java
 // 问题：this.methodB() 不经过代理
 public void methodA() {
@@ -214,6 +219,7 @@ public void methodA() {
 **问题 6:Proxy.newProxyInstance() 的参数含义？**
 
 答案：
+
 ```java
 Proxy.newProxyInstance(
     target.getClass().getClassLoader(),  // 类加载器
@@ -225,6 +231,7 @@ Proxy.newProxyInstance(
 **问题 7:CGLIB 的性能优势？**
 
 答案：
+
 - 使用 FastClass 机制，避免反射
 - 直接通过索引调用方法
 - 适合频繁调用的场景

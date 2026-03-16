@@ -44,7 +44,7 @@ public class DeviceOperationLogESService {
      */
     public void createIndex() {
         IndexOperations indexOps = elasticsearchRestTemplate.indexOps(DeviceOperationLogES.class);
-        
+
         // 检查索引是否存在
         if (!indexOps.exists()) {
             log.info("索引不存在，正在创建索引：device_operation_log");
@@ -73,57 +73,57 @@ public class DeviceOperationLogESService {
 
     /**
      * 从 MySQL 加载全部数据到 ES
-     * 
+     *
      * @return 加载的记录数
      */
     public int loadAllDataToES() {
         log.info("===========================================");
         log.info("【ES 数据加载】开始从 MySQL 加载全部数据到 ES");
         log.info("===========================================");
-        
+
         long startTime = System.currentTimeMillis();
-        
+
         // 先确保索引存在
         createIndex();
-        
+
         // 分批查询 MySQL 数据，避免一次性加载过多数据
         // ⚠️ 注意：在 ShardingSphere 环境下，使用 selectAll() 代替 selectPage()
         // 原因：ShardingSphere 的分页查询在分表环境下可能行为异常
         List<DeviceOperationLog> allData = deviceOperationLogMapper.selectAll();
-        
+
         if (allData == null || allData.isEmpty()) {
             log.warn("【ES 数据加载】MySQL 中没有数据");
             return 0;
         }
-        
+
         // 转换为 ES 实体
         List<DeviceOperationLogES> esEntities = convertToESEntities(allData);
-        
+
         // 批量保存到 ES
         List<IndexQuery> indexQueries = new ArrayList<>();
         for (DeviceOperationLogES entity : esEntities) {
             // ⚠️ 关键修复：使用 deviceCode + operationTime 作为 ES 的唯一 ID
             // 原因：ShardingSphere 分表的自增 ID 会重复，直接使用会导致 ES 文档被覆盖
-            String uniqueId = entity.getDeviceCode() + "_" + 
-                             entity.getOperationTime().replace("-", "").replace(" ", "").replace(":", "");
-            
+            String uniqueId = entity.getDeviceCode() + "_" +
+                    entity.getOperationTime().replace("-", "").replace(" ", "").replace(":", "");
+
             IndexQuery indexQuery = new IndexQueryBuilder()
                     .withId(uniqueId)
                     .withObject(entity)
                     .build();
             indexQueries.add(indexQuery);
         }
-        
+
         // 批量索引
-        elasticsearchRestTemplate.bulkIndex(indexQueries, 
+        elasticsearchRestTemplate.bulkIndex(indexQueries,
                 IndexCoordinates.of("device_operation_log"));
-        
+
         log.info("【ES 数据加载】批次完成：共 {} 条，耗时 {}ms",
                 allData.size(), System.currentTimeMillis() - startTime);
-        
+
         log.info("【ES 数据加载】全部完成，总计 {}ms，加载 {} 条记录",
                 System.currentTimeMillis() - startTime, allData.size());
-        
+
         // 手动刷新索引，确保数据立即可搜索
         try {
             elasticsearchRestTemplate.indexOps(DeviceOperationLogES.class).refresh();
@@ -131,7 +131,7 @@ public class DeviceOperationLogESService {
         } catch (Exception e) {
             log.error("【ES 数据加载】刷新索引失败", e);
         }
-        
+
         return allData.size();
     }
 
@@ -140,20 +140,20 @@ public class DeviceOperationLogESService {
      */
     public void updateSingleDataToES(Long id) {
         log.info("【ES 数据更新】正在更新单条数据到 ES，ID: {}", id);
-        
+
         // 从 MySQL 查询数据
         DeviceOperationLog mysqlData = deviceOperationLogMapper.selectById(id);
         if (mysqlData == null) {
             log.warn("【ES 数据更新】MySQL 中未找到数据，ID: {}", id);
             return;
         }
-        
+
         // 转换为 ES 实体
         DeviceOperationLogES esEntity = convertToESEntity(mysqlData);
-        
+
         // 保存到 ES
         esRepository.save(esEntity);
-        
+
         log.info("【ES 数据更新】更新成功，ID: {}", id);
     }
 
@@ -162,9 +162,9 @@ public class DeviceOperationLogESService {
      */
     public void deleteSingleDataFromES(Long id) {
         log.info("【ES 数据删除】正在从 ES 删除数据，ID: {}", id);
-        
+
         esRepository.deleteById(id);
-        
+
         log.info("【ES 数据删除】删除成功，ID: {}", id);
     }
 
@@ -193,16 +193,16 @@ public class DeviceOperationLogESService {
      */
     public Map<String, Object> getIndexStats() {
         log.info("【ES 统计】正在获取索引统计信息");
-        
+
         try {
             // 获取文档总数
             long count = esRepository.count();
-            
+
             Map<String, Object> stats = new HashMap<>();
             stats.put("indexName", "device_operation_log");
             stats.put("documentCount", count);
             stats.put("health", "green"); // 简化实现，实际应该查询集群健康状态
-            
+
             return stats;
         } catch (Exception e) {
             log.error("【ES 统计】获取统计信息失败", e);

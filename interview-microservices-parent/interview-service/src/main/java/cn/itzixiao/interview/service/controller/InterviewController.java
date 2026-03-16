@@ -1,8 +1,6 @@
 package cn.itzixiao.interview.service.controller;
 
 import cn.itzixiao.interview.common.result.Result;
-import com.alibaba.csp.sentinel.annotation.SentinelResource;
-import com.alibaba.csp.sentinel.slots.block.BlockException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;

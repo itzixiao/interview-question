@@ -28,11 +28,13 @@ public void createOrder() {
 ```
 
 **优点：**
+
 - ✅ 非侵入式，业务代码与事务管理分离
 - ✅ 配置简单，易于维护
 - ✅ 基于 AOP 原理，自动代理
 
 **缺点：**
+
 - ❌ 只能用于 public 方法
 - ❌ 自调用会失效
 - ❌ 灵活性相对较低
@@ -57,11 +59,13 @@ public void createUser(String name) {
 ```
 
 **优点：**
+
 - ✅ 灵活，可以精确控制事务边界
 - ✅ 不受方法访问权限限制
 - ✅ 可以在代码中动态决定事务行为
 
 **缺点：**
+
 - ❌ 侵入式，业务代码与事务管理耦合
 - ❌ 代码冗长，维护成本高
 
@@ -115,6 +119,7 @@ public class UserService {
 **解决方案：**
 
 **方案 1：注入自身代理对象**
+
 ```java
 @Service
 public class UserService {
@@ -136,6 +141,7 @@ public class UserService {
 ```
 
 **方案 2：使用 AopContext**
+
 ```java
 @Service
 public class UserService {
@@ -154,6 +160,7 @@ public class UserService {
 ```
 
 **方案 3：拆分到另一个 Service**
+
 ```java
 @Service
 public class UserService {
@@ -193,6 +200,7 @@ public void businessMethod() {
 Spring事务的回滚机制依赖于异常抛出。如果异常被捕获且不再抛出，Spring 会认为方法执行成功，从而提交事务。
 
 **解决方案：**
+
 ```java
 @Transactional
 public void businessMethod() {
@@ -206,6 +214,7 @@ public void businessMethod() {
 ```
 
 或者手动标记回滚：
+
 ```java
 @Transactional
 public void businessMethod() {
@@ -232,6 +241,7 @@ public void businessMethod() throws IOException {
 Spring 默认只回滚 RuntimeException 和 Error，不检查 checked Exception。这是遵循 EJB 规范的设计。
 
 **解决方案：**
+
 ```java
 @Transactional(rollbackFor = Exception.class)  // ✓ 指定回滚所有异常
 public void businessMethod() throws IOException {
@@ -275,6 +285,7 @@ public void asyncMethod() {
 
 **解决方案：**
 使用 Spring 的@Async 注解，并配置事务管理器：
+
 ```java
 @Async
 @Transactional
@@ -385,6 +396,7 @@ public void processSingleItem(Item item) {
 ```
 
 **注意事项：**
+
 - 仅 DataSourceTransactionManager 支持
 - 基于 JDBC savepoint 实现
 - 外层回滚，内层也会回滚
@@ -445,15 +457,15 @@ public void noTransactionMethod() {
 
 ### 3.8 传播行为对比表
 
-| 传播行为 | 外部有事务 | 外部无事务 | 典型场景 |
-|---------|-----------|-----------|---------|
-| **REQUIRED** | 加入 | 新建 | 默认选择 |
-| **REQUIRES_NEW** | 挂起，新建 | 新建 | 日志、审计 |
-| **NESTED** | 嵌套事务 | 新建 | 部分回滚 |
-| **SUPPORTS** | 加入 | 非事务 | 查询操作 |
-| **NOT_SUPPORTED** | 挂起 | 非事务 | 文件 IO |
-| **MANDATORY** | 加入 | 抛异常 | 核心业务 |
-| **NEVER** | 抛异常 | 非事务 | 特殊操作 |
+| 传播行为              | 外部有事务 | 外部无事务 | 典型场景  |
+|-------------------|-------|-------|-------|
+| **REQUIRED**      | 加入    | 新建    | 默认选择  |
+| **REQUIRES_NEW**  | 挂起，新建 | 新建    | 日志、审计 |
+| **NESTED**        | 嵌套事务  | 新建    | 部分回滚  |
+| **SUPPORTS**      | 加入    | 非事务   | 查询操作  |
+| **NOT_SUPPORTED** | 挂起    | 非事务   | 文件 IO |
+| **MANDATORY**     | 加入    | 抛异常   | 核心业务  |
+| **NEVER**         | 抛异常   | 非事务   | 特殊操作  |
 
 ---
 
@@ -464,27 +476,27 @@ public void noTransactionMethod() {
 从低到高：
 
 1. **READ_UNCOMMITTED（读未提交）**
-   - 可能脏读、不可重复读、幻读
-   - 性能最好
-   - 适用：统计分析等对一致性要求不高的场景
+    - 可能脏读、不可重复读、幻读
+    - 性能最好
+    - 适用：统计分析等对一致性要求不高的场景
 
 2. **READ_COMMITTED（读已提交）**
-   - 避免脏读
-   - 可能不可重复读、幻读
-   - Oracle 默认隔离级别
-   - 适用：大多数业务场景
+    - 避免脏读
+    - 可能不可重复读、幻读
+    - Oracle 默认隔离级别
+    - 适用：大多数业务场景
 
 3. **REPEATABLE_READ（可重复读）**
-   - 避免脏读、不可重复读
-   - 可能幻读（InnoDB 通过 Next-Key Lock 基本解决）
-   - MySQL 默认隔离级别
-   - 适用：推荐选择
+    - 避免脏读、不可重复读
+    - 可能幻读（InnoDB 通过 Next-Key Lock 基本解决）
+    - MySQL 默认隔离级别
+    - 适用：推荐选择
 
 4. **SERIALIZABLE（串行化）**
-   - 避免所有并发问题
-   - 强制事务串行执行
-   - 性能最差
-   - 适用：金融等对一致性要求极高的场景
+    - 避免所有并发问题
+    - 强制事务串行执行
+    - 性能最差
+    - 适用：金融等对一致性要求极高的场景
 
 ### 4.2 并发问题详解
 
@@ -529,12 +541,12 @@ public void noTransactionMethod() {
 MySQL InnoDB 在 REPEATABLE_READ 隔离级别下，通过以下技术基本解决了幻读问题：
 
 1. **MVCC（多版本并发控制）**
-   - 读操作不加锁，读取历史版本
-   - 提高并发性能
+    - 读操作不加锁，读取历史版本
+    - 提高并发性能
 
 2. **Next-Key Lock**
-   - 记录锁 + 间隙锁
-   - 防止其他事务在间隙中插入
+    - 记录锁 + 间隙锁
+    - 防止其他事务在间隙中插入
 
 ```sql
 -- 查看当前隔离级别
@@ -729,33 +741,33 @@ public void batchProcess() {}
 
 **答：**
 
-| 对比项 | REQUIRED | REQUIRES_NEW |
-|--------|----------|--------------|
-| 事务关系 | 加入当前事务 | 创建新事务 |
-| 回滚影响 | 同成功或同失败 | 内层回滚不影响外层 |
-| 锁持有时间 | 整个事务期间 | 仅内层事务期间 |
-| 性能 | 较好 | 较差 |
-| 使用场景 | 大多数业务 | 日志、审计 |
+| 对比项   | REQUIRED | REQUIRES_NEW |
+|-------|----------|--------------|
+| 事务关系  | 加入当前事务   | 创建新事务        |
+| 回滚影响  | 同成功或同失败  | 内层回滚不影响外层    |
+| 锁持有时间 | 整个事务期间   | 仅内层事务期间      |
+| 性能    | 较好       | 较差           |
+| 使用场景  | 大多数业务    | 日志、审计        |
 
 **问题 3：NESTED 和 REQUIRES_NEW 有什么区别？**
 
 **答：**
 
 1. **事务关系不同**
-   - NESTED: 嵌套事务，是外层事务的一部分（savepoint）
-   - REQUIRES_NEW: 全新事务，完全独立于外层
+    - NESTED: 嵌套事务，是外层事务的一部分（savepoint）
+    - REQUIRES_NEW: 全新事务，完全独立于外层
 
 2. **回滚影响不同**
-   - NESTED: 外层回滚，内层也回滚
-   - REQUIRES_NEW: 外层回滚，内层已提交的不受影响
+    - NESTED: 外层回滚，内层也回滚
+    - REQUIRES_NEW: 外层回滚，内层已提交的不受影响
 
 3. **实现机制不同**
-   - NESTED: 基于 JDBC savepoint 实现
-   - REQUIRES_NEW: 挂起当前事务，创建新事务
+    - NESTED: 基于 JDBC savepoint 实现
+    - REQUIRES_NEW: 挂起当前事务，创建新事务
 
 4. **支持程度不同**
-   - NESTED: 仅 DataSourceTransactionManager 支持
-   - REQUIRES_NEW: 所有事务管理器都支持
+    - NESTED: 仅 DataSourceTransactionManager 支持
+    - REQUIRES_NEW: 所有事务管理器都支持
 
 **问题 4：如何正确地在事务中记录日志？**
 
@@ -790,6 +802,7 @@ public class LogService {
 ```
 
 **关键点：**
+
 1. 日志服务使用 REQUIRES_NEW 传播行为
 2. 日志操作在 try-catch 块之外调用
 3. 确保日志服务是独立的 Bean
@@ -806,6 +819,7 @@ SQL 标准定义的隔离级别（从低到高）：
 4. **SERIALIZABLE** - 串行化（避免幻读）
 
 **MySQL InnoDB 的特殊优化：**
+
 - 在 REPEATABLE_READ 隔离级别下，通过 MVCC+Next-Key Lock 基本解决了幻读问题
 - 因此 MySQL 默认使用 REPEATABLE_READ 而非 READ_COMMITTED
 
@@ -814,17 +828,20 @@ SQL 标准定义的隔离级别（从低到高）：
 **答：**
 
 **大事务定义：**
+
 - 执行时间长
 - 操作数据量大
 - 持有锁时间久
 
 **危害：**
+
 1. 锁竞争加剧，并发性能下降
 2. 可能导致死锁
 3. 数据库连接占用时间长
 4. 回滚时间长，影响系统可用性
 
 **优化方案：**
+
 1. **事务拆分** - 将大事务拆分为小事务
 2. **异步处理** - 非核心操作异步执行
 3. **批量操作分批提交** - 减少锁持有时间
@@ -837,6 +854,7 @@ SQL 标准定义的隔离级别（从低到高）：
 **核心原理：** AOP（面向切面编程）+ 动态代理
 
 **执行流程：**
+
 ```
 客户端调用
   ↓
@@ -853,6 +871,7 @@ PlatformTransactionManager.getTransaction()
 ```
 
 **关键源码：**
+
 ```java
 // TransactionInterceptor.java
 @Override
@@ -886,6 +905,7 @@ public Object invoke(MethodInvocation invocation) throws Throwable {
 **答：**
 
 **方法 1: 抛出异常（推荐）**
+
 ```java
 @Transactional
 public void method() {
@@ -896,6 +916,7 @@ public void method() {
 ```
 
 **方法 2: 手动设置 rollbackOnly**
+
 ```java
 @Transactional
 public void method() {
@@ -910,6 +931,7 @@ public void method() {
 ```
 
 **方法 3: 编程式事务**
+
 ```java
 transactionTemplate.execute(status -> {
     try {

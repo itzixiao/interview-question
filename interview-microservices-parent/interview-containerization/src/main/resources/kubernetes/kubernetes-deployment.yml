@@ -41,56 +41,56 @@ spec:
         description: "容器化示例应用"
     spec:
       containers:
-      - name: interview-app
-        image: interview-containerization:1.0.0
-        imagePullPolicy: IfNotPresent
-        
-        ports:
-        - containerPort: 8080
-          name: http
-          protocol: TCP
-        
-        env:
-        - name: SPRING_PROFILES_ACTIVE
-          value: "kubernetes"
-        
-        # 健康检查
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 8080
-          initialDelaySeconds: 60
-          periodSeconds: 30
-          timeoutSeconds: 3
-          failureThreshold: 3
-        
-        readinessProbe:
-          httpGet:
-            path: /health
-            port: 8080
-          initialDelaySeconds: 30
-          periodSeconds: 10
-          timeoutSeconds: 3
-          successThreshold: 1
-          failureThreshold: 3
-        
-        # 资源管理
-        resources:
-          requests:
-            memory: "512Mi"
-            cpu: "250m"
-          limits:
-            memory: "1Gi"
-            cpu: "500m"
-        
-        # 从 ConfigMap 读取配置
-        envFrom:
-        - configMapRef:
-            name: interview-config
-        
-        # 从 Secret 读取敏感信息
-        - secretRef:
-            name: interview-secret
+        - name: interview-app
+          image: interview-containerization:1.0.0
+          imagePullPolicy: IfNotPresent
+
+          ports:
+            - containerPort: 8080
+              name: http
+              protocol: TCP
+
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "kubernetes"
+
+          # 健康检查
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 3
+            failureThreshold: 3
+
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 3
+            successThreshold: 1
+            failureThreshold: 3
+
+          # 资源管理
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+
+          # 从 ConfigMap 读取配置
+          envFrom:
+            - configMapRef:
+                name: interview-config
+
+            # 从 Secret 读取敏感信息
+            - secretRef:
+                name: interview-secret
 
 ---
 # ===========================================

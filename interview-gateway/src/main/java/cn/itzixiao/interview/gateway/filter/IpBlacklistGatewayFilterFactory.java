@@ -2,21 +2,18 @@ package cn.itzixiao.interview.gateway.filter;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
-import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
-import org.springframework.web.server.ServerWebExchange;
-import reactor.core.publisher.Mono;
 
 import java.util.Arrays;
 import java.util.List;
 
 /**
  * 自定义 GatewayFilter 示例 - IP 黑名单过滤器
- *
+ * <p>
  * ┌─────────────────────────────────────────────────────────────────────────────┐
  * │                    自定义 GatewayFilter 开发要点                            │
  * │                                                                             │
@@ -34,20 +31,20 @@ import java.util.List;
  * │  4. 实现 apply() 方法返回 GatewayFilter                                     │
  * │                                                                             │
  * └─────────────────────────────────────────────────────────────────────────────┘
- *
+ * <p>
  * 使用方式（application.yml）：
  * spring:
- *   cloud:
- *     gateway:
- *       routes:
- *         - id: test-route
- *           uri: lb://test-service
- *           predicates:
- *             - Path=/api/test/**
- *           filters:
- *             - name: IpBlacklist
- *               args:
- *                 blacklist: 192.168.1.100,10.0.0.1
+ * cloud:
+ * gateway:
+ * routes:
+ * - id: test-route
+ * uri: lb://test-service
+ * predicates:
+ * - Path=/api/test/**
+ * filters:
+ * - name: IpBlacklist
+ * args:
+ * blacklist: 192.168.1.100,10.0.0.1
  */
 @Slf4j
 @Component

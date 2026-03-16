@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
  * 算法面试题库微服务启动类
- * 
+ * <p>
  * 本模块提供常见算法面试题的完整实现和详细注释
  * 包含以下算法分类：
  * - 排序算法：快速排序、归并排序、堆排序等
@@ -15,19 +15,19 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * - 动态规划：背包问题、最长子序列等
  * - 字符串：KMP、正则匹配等
  * - 数据结构：栈、队列、哈希表、堆等
- * 
+ *
  * @author itzixiao
  */
 @SpringBootApplication
 public class AlgorithmApplication {
-    
+
     public static void main(String[] args) {
         System.out.println("╔══════════════════════════════════════════════════════════════════════════╗");
         System.out.println("║                    算法面试题库微服务                                     ║");
         System.out.println("╚══════════════════════════════════════════════════════════════════════════╝\n");
-        
+
         SpringApplication.run(AlgorithmApplication.class, args);
-        
+
         System.out.println("\n✅ 算法面试题库微服务启动成功！");
         System.out.println("📚 本模块包含以下算法分类：");
         System.out.println("   1. 排序算法 - 快速排序、归并排序、堆排序等");

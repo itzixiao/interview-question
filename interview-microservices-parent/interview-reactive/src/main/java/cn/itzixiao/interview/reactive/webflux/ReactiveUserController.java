@@ -8,12 +8,12 @@ import reactor.core.publisher.Mono;
 
 /**
  * Spring WebFlux 响应式控制器
- * 
+ * <p>
  * 支持：
  * - RESTful API
  * - Server-Sent Events (SSE)
  * - 非阻塞 I/O
- * 
+ *
  * @author itzixiao
  * @date 2026-03-15
  */
@@ -21,9 +21,9 @@ import reactor.core.publisher.Mono;
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
 public class ReactiveUserController {
-    
+
     private final ReactiveUserService userService;
-    
+
     /**
      * 获取单个用户
      */
@@ -31,7 +31,7 @@ public class ReactiveUserController {
     public Mono<User> getUser(@PathVariable Long id) {
         return userService.getUserById(id);
     }
-    
+
     /**
      * 获取所有用户（返回 Flux）
      */
@@ -39,7 +39,7 @@ public class ReactiveUserController {
     public Flux<User> getAllUsers() {
         return userService.getAllUsers();
     }
-    
+
     /**
      * 创建用户
      */
@@ -47,7 +47,7 @@ public class ReactiveUserController {
     public Mono<User> createUser(@RequestBody User user) {
         return userService.createUser(user);
     }
-    
+
     /**
      * 更新用户
      */
@@ -55,7 +55,7 @@ public class ReactiveUserController {
     public Mono<User> updateUser(@PathVariable Long id, @RequestBody User user) {
         return userService.updateUser(id, user);
     }
-    
+
     /**
      * 删除用户
      */
@@ -63,7 +63,7 @@ public class ReactiveUserController {
     public Mono<Void> deleteUser(@PathVariable Long id) {
         return userService.deleteUser(id);
     }
-    
+
     /**
      * 搜索用户（SSE 流式响应）
      */

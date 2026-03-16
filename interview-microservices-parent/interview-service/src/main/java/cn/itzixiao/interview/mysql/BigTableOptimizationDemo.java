@@ -1,9 +1,5 @@
 package cn.itzixiao.interview.mysql;
 
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * MySQL 大表优化与批量处理详解
  *
@@ -65,16 +61,16 @@ public class BigTableOptimizationDemo {
 
         System.out.println("-- 查看是否开启");
         System.out.println("SHOW VARIABLES LIKE 'slow_query_log';");
-        System.out.println("");
+        System.out.println(" ");
         System.out.println("-- 开启慢查询日志");
         System.out.println("SET GLOBAL slow_query_log = 'ON';");
-        System.out.println("");
+        System.out.println(" ");
         System.out.println("-- 设置慢查询阈值（秒）");
         System.out.println("SET GLOBAL long_query_time = 2;");
-        System.out.println("");
+        System.out.println(" ");
         System.out.println("-- 记录没有使用索引的查询");
         System.out.println("SET GLOBAL log_queries_not_using_indexes = 'ON';");
-        System.out.println("");
+        System.out.println(" ");
         System.out.println("-- 查看慢查询日志位置");
         System.out.println("SHOW VARIABLES LIKE 'slow_query_log_file';\n");
 
@@ -83,7 +79,7 @@ public class BigTableOptimizationDemo {
         System.out.println("1. mysqldumpslow（MySQL自带）");
         System.out.println("   # 查看最慢的10条SQL");
         System.out.println("   mysqldumpslow -s t -t 10 /var/lib/mysql/slow.log");
-        System.out.println("");
+        System.out.println(" ");
         System.out.println("   # 参数说明：");
         System.out.println("   # -s: 排序方式（t=时间，c=次数，l=锁时间，r=返回行数）");
         System.out.println("   # -t: 显示条数\n");
@@ -451,7 +447,7 @@ public class BigTableOptimizationDemo {
         System.out.println("答：");
         System.out.println("性能从好到差排序：");
         System.out.println("system → const → eq_ref → ref → range → index → ALL");
-        System.out.println("");
+        System.out.println(" ");
         System.out.println("- system: 系统表，只有一行");
         System.out.println("- const: 主键/唯一索引等值查询，最多一行");
         System.out.println("- eq_ref: JOIN时使用主键/唯一索引");
@@ -465,7 +461,7 @@ public class BigTableOptimizationDemo {
         System.out.println("==========================================================================");
         System.out.println("答：");
         System.out.println("深分页问题：LIMIT 1000000, 10 需要扫描100万行");
-        System.out.println("");
+        System.out.println(" ");
         System.out.println("优化方案：");
         System.out.println("1. 延迟关联：先用覆盖索引查出ID，再JOIN查完整数据");
         System.out.println("2. 游标分页：记住上一页最后一条的ID，WHERE id < lastId");
@@ -489,7 +485,7 @@ public class BigTableOptimizationDemo {
         System.out.println("==========================================================================");
         System.out.println("答：");
         System.out.println("原则：分批删除，避免长事务");
-        System.out.println("");
+        System.out.println(" ");
         System.out.println("方法：");
         System.out.println("1. 使用 LIMIT 分批删除");
         System.out.println("   DELETE FROM table WHERE condition LIMIT 10000;");
@@ -516,11 +512,11 @@ public class BigTableOptimizationDemo {
         System.out.println("- 500万以内：索引优化即可");
         System.out.println("- 500万-2000万：考虑分区表或归档");
         System.out.println("- 2000万以上：考虑分库分表");
-        System.out.println("");
+        System.out.println(" ");
         System.out.println("分库分表方案：");
         System.out.println("1. 垂直拆分：按业务拆分到不同库/表");
         System.out.println("2. 水平拆分：按某字段（如用户ID）取模分表");
-        System.out.println("");
+        System.out.println(" ");
         System.out.println("中间件：ShardingSphere、MyCat、TDDL\n");
 
         System.out.println("==========================================================================");
@@ -528,12 +524,12 @@ public class BigTableOptimizationDemo {
         System.out.println("==========================================================================");
         System.out.println("答：");
         System.out.println("覆盖索引：查询的列全部包含在索引中，不需要回表。");
-        System.out.println("");
+        System.out.println(" ");
         System.out.println("好处：");
         System.out.println("1. 减少IO：不需要读取数据行");
         System.out.println("2. 减少随机IO：索引是顺序存储的");
         System.out.println("3. EXPLAIN中 Extra 显示 Using index");
-        System.out.println("");
+        System.out.println(" ");
         System.out.println("示例：");
         System.out.println("INDEX idx_name_age (name, age)");
         System.out.println("SELECT name, age FROM user WHERE name = 'Tom'; -- 覆盖索引\n");
@@ -545,7 +541,7 @@ public class BigTableOptimizationDemo {
         System.out.println("Using filesort（文件排序）：");
         System.out.println("- 原因：ORDER BY 的列没有索引");
         System.out.println("- 优化：为排序列创建索引，注意排序方向要一致");
-        System.out.println("");
+        System.out.println(" ");
         System.out.println("Using temporary（临时表）：");
         System.out.println("- 原因：GROUP BY、DISTINCT、UNION 需要暂存数据");
         System.out.println("- 优化：为分组列创建索引，减少临时表使用\n");
@@ -557,11 +553,11 @@ public class BigTableOptimizationDemo {
         System.out.println("1. 开启慢查询日志");
         System.out.println("   SET GLOBAL slow_query_log = ON;");
         System.out.println("   SET GLOBAL long_query_time = 2;");
-        System.out.println("");
+        System.out.println(" ");
         System.out.println("2. 使用分析工具");
         System.out.println("   - mysqldumpslow（MySQL自带）");
         System.out.println("   - pt-query-digest（Percona）");
-        System.out.println("");
+        System.out.println(" ");
         System.out.println("3. SHOW PROCESSLIST 查看当前执行SQL");
         System.out.println("4. Performance Schema 监控\n");
 

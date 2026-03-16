@@ -38,15 +38,16 @@
 
 ### 2.1 新生代（Young Generation）
 
-| 区域 | 比例 | 说明 |
-|------|------|------|
-| Eden | 8/10 | 新生代内部占比，新对象分配区域 |
+| 区域        | 比例   | 说明              |
+|-----------|------|-----------------|
+| Eden      | 8/10 | 新生代内部占比，新对象分配区域 |
 | Survivor0 | 1/10 | 新生代内部占比，存活对象复制区 |
 | Survivor1 | 1/10 | 新生代内部占比，存活对象复制区 |
 
 > **注**：新生代总容量约占堆内存的 1/3（可通过 `-Xmn`/`-XX:NewRatio` 调整），Eden/S0/S1 是新生代内部的 8:1:1 划分。
 
 **对象晋升过程**：
+
 1. 新对象在 Eden 分配
 2. Minor GC 后存活对象进入 Survivor
 3. 对象在 Survivor 之间复制，年龄 +1
@@ -58,7 +59,7 @@ public class HeapAllocationDemo {
     public static void main(String[] args) {
         // 大部分对象在 Eden 分配
         byte[] buffer = new byte[1024]; // 1KB
-        
+
         // 大对象直接进入老年代（需配合 Serial/ParNew GC，G1/Parallel GC 不生效）
         // 阈值通过 -XX:PretenureSizeThreshold=1048576 设置（1MB）
         byte[] bigObject = new byte[2 * 1024 * 1024]; // 2MB，超过阈值进入老年代
@@ -73,6 +74,7 @@ public class HeapAllocationDemo {
 - Full GC 时回收
 
 **对象晋升条件**：
+
 1. **年龄阈值**：Survivor 中年龄达到 15
 2. **动态年龄判断**：Survivor 中同年龄对象总和 > 一半空间
 3. **大对象直接晋升**：超过 `-XX:PretenureSizeThreshold` 阈值直接进入老年代
@@ -83,12 +85,12 @@ public class HeapAllocationDemo {
 
 ### 3.1 元空间 vs 永久代
 
-| 特性 | 永久代（JDK7 及以前） | 元空间（JDK8+） |
-|------|---------------------|---------------|
-| **存储位置** | JVM 堆内 | 本地内存 |
-| **GC 触发阈值** | `-XX:PermSize` | `-XX:MetaspaceSize` |
-| **最大容量** | `-XX:MaxPermSize` | `-XX:MaxMetaspaceSize`（可选，默认无上限） |
-| **GC 效率** | 低 | 高 |
+| 特性          | 永久代（JDK7 及以前）     | 元空间（JDK8+）                       |
+|-------------|-------------------|----------------------------------|
+| **存储位置**    | JVM 堆内            | 本地内存                             |
+| **GC 触发阈值** | `-XX:PermSize`    | `-XX:MetaspaceSize`              |
+| **最大容量**    | `-XX:MaxPermSize` | `-XX:MaxMetaspaceSize`（可选，默认无上限） |
+| **GC 效率**   | 低                 | 高                                |
 
 ### 3.2 存储内容
 
@@ -166,6 +168,7 @@ public class LocalVariableTableDemo {
 ```
 
 **特点**：
+
 - `this` 占用 slot 0
 - 参数从 slot 1 开始
 - `long`/`double`占用 2 个槽位
@@ -204,12 +207,12 @@ public int calculate(int a, int b, int c) {
 public class NativeMethodDemo {
     // native 方法声明
     public native void nativeMethod();
-    
+
     static {
         // 加载本地库
         System.loadLibrary("nativeLib");
     }
-    
+
     public static void main(String[] args) {
         new NativeMethodDemo().nativeMethod();
         // 调用时切换到本地方法栈执行
@@ -245,34 +248,34 @@ public class NativeMethodDemo {
 
 ### 7.1 线程共享性
 
-| 区域 | 是否线程共享 | 说明 |
-|------|------------|------|
-| **堆** | ✅ 共享 | 所有线程共享 |
-| **元空间** | ✅ 共享 | 所有线程共享 |
-| **虚拟机栈** | ❌ 私有 | 线程独占 |
-| **本地方法栈** | ❌ 私有 | 线程独占 |
-| **程序计数器** | ❌ 私有 | 线程独占 |
+| 区域        | 是否线程共享 | 说明     |
+|-----------|--------|--------|
+| **堆**     | ✅ 共享   | 所有线程共享 |
+| **元空间**   | ✅ 共享   | 所有线程共享 |
+| **虚拟机栈**  | ❌ 私有   | 线程独占   |
+| **本地方法栈** | ❌ 私有   | 线程独占   |
+| **程序计数器** | ❌ 私有   | 线程独占   |
 
 ### 7.2 存储内容
 
-| 区域 | 存储内容 | 生命周期 |
-|------|---------|---------|
-| **堆** | 对象实例、数组 | GC 管理 |
-| **元空间** | 类元数据、常量池 | 类卸载时回收 |
-| **虚拟机栈** | 栈帧（局部变量、操作数栈） | 方法调用结束 |
-| **本地方法栈** | Native 方法状态 | Native 方法返回 |
-| **程序计数器** | 当前指令地址 | 随线程执行变化 |
+| 区域        | 存储内容          | 生命周期        |
+|-----------|---------------|-------------|
+| **堆**     | 对象实例、数组       | GC 管理       |
+| **元空间**   | 类元数据、常量池      | 类卸载时回收      |
+| **虚拟机栈**  | 栈帧（局部变量、操作数栈） | 方法调用结束      |
+| **本地方法栈** | Native 方法状态   | Native 方法返回 |
+| **程序计数器** | 当前指令地址        | 随线程执行变化     |
 
 ### 7.3 异常情况
 
-| 区域 | 可能异常 | 触发条件 |
-|------|---------|---------|
-| **堆** | OutOfMemoryError: Java heap space | 堆内存不足 |
-| **元空间** | OutOfMemoryError: Metaspace | 元空间不足 |
-| **虚拟机栈** | StackOverflowError | 栈深度超限（如递归无终止） |
-| **虚拟机栈** | OutOfMemoryError: unable to create new native thread | 线程创建过多导致栈内存不足 |
-| **本地方法栈** | StackOverflowError / OutOfMemoryError | 类似虚拟机栈 |
-| **程序计数器** | 无 | 不会 OOM |
+| 区域        | 可能异常                                                 | 触发条件          |
+|-----------|------------------------------------------------------|---------------|
+| **堆**     | OutOfMemoryError: Java heap space                    | 堆内存不足         |
+| **元空间**   | OutOfMemoryError: Metaspace                          | 元空间不足         |
+| **虚拟机栈**  | StackOverflowError                                   | 栈深度超限（如递归无终止） |
+| **虚拟机栈**  | OutOfMemoryError: unable to create new native thread | 线程创建过多导致栈内存不足 |
+| **本地方法栈** | StackOverflowError / OutOfMemoryError                | 类似虚拟机栈        |
+| **程序计数器** | 无                                                    | 不会 OOM        |
 
 ---
 
@@ -334,10 +337,12 @@ jmap -dump:live,format=b,file=heap.hprof <pid>
 **参考答案**：
 
 **线程共享**：
+
 1. **堆（Heap）**：对象实例、数组
 2. **元空间（Metaspace）**：类元数据、常量池
 
 **线程私有**：
+
 1. **虚拟机栈**：栈帧、局部变量、操作数栈
 2. **本地方法栈**：Native 方法执行
 3. **程序计数器**：当前指令地址
@@ -346,25 +351,27 @@ jmap -dump:live,format=b,file=heap.hprof <pid>
 
 **参考答案**：
 
-| 维度 | 堆 | 栈 |
-|------|-----|----|
-| **用途** | 存储对象实例 | 存储栈帧（局部变量、方法调用） |
-| **共享性** | 线程共享 | 线程私有 |
-| **大小** | 较大（-Xmx） | 较小（-Xss） |
-| **GC** | 主要 GC 区域 | 自动清理 |
-| **异常** | OutOfMemoryError | StackOverflowError |
+| 维度      | 堆                | 栈                  |
+|---------|------------------|--------------------|
+| **用途**  | 存储对象实例           | 存储栈帧（局部变量、方法调用）    |
+| **共享性** | 线程共享             | 线程私有               |
+| **大小**  | 较大（-Xmx）         | 较小（-Xss）           |
+| **GC**  | 主要 GC 区域         | 自动清理               |
+| **异常**  | OutOfMemoryError | StackOverflowError |
 
 ### 9.3 为什么要用元空间替代永久代？
 
 **参考答案**：
 
 **原因**：
+
 1. **避免 OOM**：永久代容易满，元空间使用本地内存
 2. **提升性能**：元空间 GC 效率更高
 3. **便于管理**：元空间大小可动态调整
 4. **与 HotSpot 合并**：Oracle JRockit 使用元空间
 
 **优势**：
+
 - 类元数据存储在本地内存
 - 默认无上限（可设置`-XX:MaxMetaspaceSize`）
 - 减少 Full GC 次数
@@ -376,14 +383,14 @@ jmap -dump:live,format=b,file=heap.hprof <pid>
 **不一定**，特殊情况：
 
 1. **逃逸分析优化**（JDK7+ 默认开启，可通过 `-XX:+DoEscapeAnalysis` 显式开启）：
-   - **栈上分配**：对象未逃逸出方法作用域，直接在栈上分配（方法结束后随栈帧销毁，无需 GC）；
-   - **标量替换**：将对象分解为基本类型（标量）分配在栈上（如 `new Point(1,2)` 替换为 `int x=1, int y=2`）；
-   - **同步消除**：对象未逃逸，移除 `synchronized` 锁（JIT 优化）。
+    - **栈上分配**：对象未逃逸出方法作用域，直接在栈上分配（方法结束后随栈帧销毁，无需 GC）；
+    - **标量替换**：将对象分解为基本类型（标量）分配在栈上（如 `new Point(1,2)` 替换为 `int x=1, int y=2`）；
+    - **同步消除**：对象未逃逸，移除 `synchronized` 锁（JIT 优化）。
 
 2. **TLAB（Thread Local Allocation Buffer）**（JDK7+ 默认开启）：
-   - 属于堆内存的 Eden 区，为每个线程分配独立的缓存区域；
-   - 新对象优先在 TLAB 分配，减少多线程分配内存的锁竞争；
-   - 可通过 `-XX:TLABSize` 设置大小，`-XX:+UseTLAB` 开启（默认开启）。
+    - 属于堆内存的 Eden 区，为每个线程分配独立的缓存区域；
+    - 新对象优先在 TLAB 分配，减少多线程分配内存的锁竞争；
+    - 可通过 `-XX:TLABSize` 设置大小，`-XX:+UseTLAB` 开启（默认开启）。
 
 3. **大对象直接进入老年代**：
    ```bash
@@ -395,10 +402,12 @@ jmap -dump:live,format=b,file=heap.hprof <pid>
 **参考答案**：
 
 **可达性分析算法**：
+
 - 从 GC Roots 向下搜索
 - 不可达的对象可被回收
 
 **GC Roots 包括**：
+
 1. 虚拟机栈中引用的对象（局部变量表）；
 2. 方法区中静态属性引用的对象；
 3. 方法区中运行时常量池引用的对象（如字符串常量）；
@@ -412,7 +421,6 @@ jmap -dump:live,format=b,file=heap.hprof <pid>
 
 - ➡️ **[垃圾回收详解](./02-JVM垃圾回收详解.md)** - GC 算法与收集器
 - 📚 **[JVM 调优实战](../05-SpringBoot与自动装配/README.md)** - 性能优化
-- 🔗 **[内存泄漏排查](./01-JVM内存模型与垃圾回收.md#八 - 内存泄漏排查)** - 实战技巧
 
 ---
 

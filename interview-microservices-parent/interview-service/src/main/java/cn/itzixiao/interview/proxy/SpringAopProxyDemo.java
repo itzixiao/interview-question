@@ -3,15 +3,10 @@ package cn.itzixiao.interview.proxy;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.aop.framework.ProxyFactoryBean;
-import org.springframework.cglib.proxy.Enhancer;
-import org.springframework.cglib.proxy.MethodProxy;
-
-import java.lang.reflect.Method;
 
 /**
  * Spring AOP 中的代理选择机制演示
- *
+ * <p>
  * Spring选择代理方式的规则：
  * 1. 如果目标类实现了接口，默认使用JDK动态代理
  * 2. 如果目标类没有实现接口，使用CGLIB代理
@@ -108,6 +103,7 @@ public class SpringAopProxyDemo {
      */
     interface OrderService {
         void createOrder(String orderId);
+
         void cancelOrder(String orderId);
     }
 

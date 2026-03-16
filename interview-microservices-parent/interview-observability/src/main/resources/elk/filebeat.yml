@@ -42,11 +42,11 @@ processors:
   
   # 删除不必要的字段
   - drop_fields:
-      fields: ["agent.ephemeral_id", "agent.version"]
+      fields: [ "agent.ephemeral_id", "agent.version" ]
 
 # 输出到 Logstash
 output.logstash:
-  hosts: ["logstash:5044"]
+  hosts: [ "logstash:5044" ]
   
   # SSL 配置（生产环境建议开启）
   #ssl.enabled: true

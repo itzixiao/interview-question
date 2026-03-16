@@ -67,8 +67,8 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
     /**
      * 判断是否属于白名单路径（从配置文件读取）
      * 支持两种匹配模式：
-     *   - 前缀匹配：路径以 /** 结尾，如 /api/interview/**
-     *   - 包含匹配：路径中包含该字符串，如 /login
+     * - 前缀匹配：路径以 /** 结尾，如 /api/interview/**
+     * - 包含匹配：路径中包含该字符串，如 /login
      */
     private boolean isWhitePath(String path) {
         return whiteListProperties.getPaths().stream().anyMatch(white -> {

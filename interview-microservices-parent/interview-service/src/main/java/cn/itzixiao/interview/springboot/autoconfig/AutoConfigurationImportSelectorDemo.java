@@ -8,9 +8,9 @@ import java.util.Set;
 
 /**
  * AutoConfigurationImportSelector 详解
- *
+ * <p>
  * 这是 Spring Boot 自动装配的核心类，实现了 ImportSelector 接口
- *
+ * <p>
  * 核心方法执行流程：
  * ┌─────────────────────────────────────────────────────────────┐
  * │  selectImports(AnnotationMetadata annotationMetadata)        │

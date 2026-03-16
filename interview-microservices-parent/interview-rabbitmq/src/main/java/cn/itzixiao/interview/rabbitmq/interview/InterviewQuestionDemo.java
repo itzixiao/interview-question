@@ -5,10 +5,7 @@ import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageBuilder;
 import org.springframework.amqp.core.MessageDeliveryMode;
 import org.springframework.amqp.core.MessageProperties;
-import org.springframework.amqp.rabbit.connection.Connection;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
-import org.springframework.amqp.rabbit.connection.SimpleConnection;
-import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -43,27 +40,27 @@ public class InterviewQuestionDemo {
     @PostMapping("/reliability/send")
     public Map<String, Object> sendReliableMessage(@RequestBody String message) {
         Map<String, Object> result = new HashMap<>();
-        
+
         // 构建持久化消息
         Message reliableMessage = MessageBuilder
                 .withBody(message.getBytes())
                 .setDeliveryMode(MessageDeliveryMode.PERSISTENT) // 消息持久化
                 .setContentType(MessageProperties.CONTENT_TYPE_TEXT_PLAIN)
                 .build();
-        
+
         try {
             // 发送到持久化队列
             rabbitTemplate.convertAndSend("exchange.direct", "queue.dlx", reliableMessage);
-            
+
             result.put("success", true);
             result.put("message", "已发送可靠消息（持久化 + 确认机制）");
             result.put("tips", "查看日志确认 Publisher Confirm 回调");
-            
+
         } catch (Exception e) {
             result.put("success", false);
             result.put("message", "发送失败：" + e.getMessage());
         }
-        
+
         return result;
     }
 
@@ -72,7 +69,7 @@ public class InterviewQuestionDemo {
      * 答案要点：
      * 方案 1: TTL + 死信队列（本例使用）
      * 方案 2: RabbitMQ 延迟队列插件
-     * 
+     * <p>
      * 应用场景：
      * - 订单超时取消
      * - 定时任务
@@ -83,25 +80,25 @@ public class InterviewQuestionDemo {
             @RequestBody String message,
             @RequestParam(defaultValue = "60000") int ttl) {
         Map<String, Object> result = new HashMap<>();
-        
+
         try {
             // 方式 1: 使用消息 TTL
             Message delayMessage = MessageBuilder
                     .withBody(message.getBytes())
                     .setExpiration(String.valueOf(ttl)) // 设置 TTL
                     .build();
-            
+
             rabbitTemplate.convertAndSend("exchange.direct", "queue.delay", delayMessage);
-            
+
             result.put("success", true);
             result.put("message", String.format("延迟消息已发送，%d 毫秒后处理", ttl));
             result.put("solution", "使用 TTL+ 死信队列实现");
-            
+
         } catch (Exception e) {
             result.put("success", false);
             result.put("message", "发送失败：" + e.getMessage());
         }
-        
+
         return result;
     }
 
@@ -118,27 +115,27 @@ public class InterviewQuestionDemo {
             @RequestParam String orderId,
             @RequestParam(defaultValue = "3") int count) {
         Map<String, Object> result = new HashMap<>();
-        
+
         try {
             // 发送一组有顺序的消息
             for (int i = 1; i <= count; i++) {
                 String message = String.format("订单%s-操作%d", orderId, i);
-                
+
                 // 关键：使用相同的 routingKey，确保进入同一个队列
                 rabbitTemplate.convertAndSend("exchange.direct", "queue.simple", message);
-                
+
                 log.info("发送顺序消息：{}", message);
             }
-            
+
             result.put("success", true);
             result.put("message", String.format("已发送 %d 条顺序消息", count));
             result.put("solution", "使用相同 routingKey 确保进入同一队列");
-            
+
         } catch (Exception e) {
             result.put("success", false);
             result.put("message", "发送失败：" + e.getMessage());
         }
-        
+
         return result;
     }
 
@@ -155,26 +152,26 @@ public class InterviewQuestionDemo {
             @RequestBody String message,
             @RequestParam String messageId) {
         Map<String, Object> result = new HashMap<>();
-        
+
         try {
             // 构建带消息 ID 的消息
             Message idempotentMessage = MessageBuilder
                     .withBody(message.getBytes())
                     .setMessageId(messageId) // 设置消息 ID
                     .build();
-            
-            rabbitTemplate.convertAndSend("exchange.direct", "queue.reliability.idempotent", 
+
+            rabbitTemplate.convertAndSend("exchange.direct", "queue.reliability.idempotent",
                     idempotentMessage);
-            
+
             result.put("success", true);
             result.put("message", "已发送幂等消息");
             result.put("solution", "消费者通过 messageId 去重");
-            
+
         } catch (Exception e) {
             result.put("success", false);
             result.put("message", "发送失败：" + e.getMessage());
         }
-        
+
         return result;
     }
 
@@ -188,32 +185,32 @@ public class InterviewQuestionDemo {
     @PostMapping("/priority/send-batch")
     public Map<String, Object> sendPriorityMessages() {
         Map<String, Object> result = new HashMap<>();
-        
+
         try {
             // 发送不同优先级的消息
             for (int priority = 1; priority <= 5; priority++) {
                 String message = "优先级测试-" + priority;
-                
+
                 Message priorityMessage = MessageBuilder
                         .withBody(message.getBytes())
                         .setPriority(priority) // 设置优先级
                         .build();
-                
-                rabbitTemplate.convertAndSend("exchange.direct", "queue.priority", 
+
+                rabbitTemplate.convertAndSend("exchange.direct", "queue.priority",
                         priorityMessage);
-                
+
                 Thread.sleep(100); // 间隔发送，便于观察
             }
-            
+
             result.put("success", true);
             result.put("message", "已发送 5 条不同优先级的消息");
             result.put("solution", "消费者会优先处理高优先级消息");
-            
+
         } catch (Exception e) {
             result.put("success", false);
             result.put("message", "发送失败：" + e.getMessage());
         }
-        
+
         return result;
     }
 
@@ -227,29 +224,29 @@ public class InterviewQuestionDemo {
     @PostMapping("/exchange/compare")
     public Map<String, Object> compareExchanges(@RequestBody String message) {
         Map<String, Object> result = new HashMap<>();
-        
+
         try {
             // 1. Direct Exchange - 精确匹配
-            rabbitTemplate.convertAndSend("exchange.direct", "routing.key.1", 
+            rabbitTemplate.convertAndSend("exchange.direct", "routing.key.1",
                     "Direct: " + message);
-            
+
             // 2. Fanout Exchange - 广播（不需要 routingKey）
-            rabbitTemplate.convertAndSend("exchange.fanout", "", 
+            rabbitTemplate.convertAndSend("exchange.fanout", "",
                     "Fanout: " + message);
-            
+
             // 3. Topic Exchange - 模糊匹配
-            rabbitTemplate.convertAndSend("exchange.topic", "topic.normal", 
+            rabbitTemplate.convertAndSend("exchange.topic", "topic.normal",
                     "Topic: " + message);
-            
+
             result.put("success", true);
             result.put("message", "已向三种交换机发送消息");
             result.put("comparison", "查看控制台日志，观察不同队列收到的消息");
-            
+
         } catch (Exception e) {
             result.put("success", false);
             result.put("message", "发送失败：" + e.getMessage());
         }
-        
+
         return result;
     }
 
@@ -265,17 +262,17 @@ public class InterviewQuestionDemo {
     @GetMapping("/backlog/solution")
     public Map<String, Object> getBacklogSolution() {
         Map<String, Object> result = new HashMap<>();
-        
+
         result.put("success", true);
         result.put("solutions", new String[]{
-            "1. 增加消费者数量（扩容）",
-            "2. 优化业务逻辑，减少单次处理时间",
-            "3. 调整 prefetch 参数，提高吞吐量",
-            "4. 对于有时效性的消息，设置 TTL 自动过期",
-            "5. 将非紧急消息转移到其他队列，后续批量处理",
-            "6. 检查是否有异常导致消费失败"
+                "1. 增加消费者数量（扩容）",
+                "2. 优化业务逻辑，减少单次处理时间",
+                "3. 调整 prefetch 参数，提高吞吐量",
+                "4. 对于有时效性的消息，设置 TTL 自动过期",
+                "5. 将非紧急消息转移到其他队列，后续批量处理",
+                "6. 检查是否有异常导致消费失败"
         });
-        
+
         return result;
     }
 
@@ -290,16 +287,16 @@ public class InterviewQuestionDemo {
     @GetMapping("/ha/solution")
     public Map<String, Object> getHASolution() {
         Map<String, Object> result = new HashMap<>();
-        
+
         result.put("success", true);
         result.put("solutions", new String[]{
-            "1. 搭建 RabbitMQ 集群（至少 3 个节点）",
-            "2. 使用镜像队列（Mirror Queue）同步数据",
-            "3. 配置负载均衡（HAProxy/Nginx）",
-            "4. 客户端配置多个连接地址",
-            "5. 使用仲裁队列（Quorum Queues，RabbitMQ 3.8+）"
+                "1. 搭建 RabbitMQ 集群（至少 3 个节点）",
+                "2. 使用镜像队列（Mirror Queue）同步数据",
+                "3. 配置负载均衡（HAProxy/Nginx）",
+                "4. 客户端配置多个连接地址",
+                "5. 使用仲裁队列（Quorum Queues，RabbitMQ 3.8+）"
         });
-        
+
         return result;
     }
 
@@ -314,26 +311,26 @@ public class InterviewQuestionDemo {
     @PostMapping("/dlx/send-failure")
     public Map<String, Object> sendToDeadLetter(@RequestBody String message) {
         Map<String, Object> result = new HashMap<>();
-        
+
         try {
             // 直接发送到死信队列
-            rabbitTemplate.convertAndSend("exchange.deadletter", "deadletter.routingkey", 
+            rabbitTemplate.convertAndSend("exchange.deadletter", "deadletter.routingkey",
                     message);
-            
+
             result.put("success", true);
             result.put("message", "消息已发送到死信队列");
             result.put("scenarios", new String[]{
-                "1. 正常队列消费失败的消息",
-                "2. 延迟队列到期后的消息",
-                "3. 超过最大长度限制的消息",
-                "4. 需要人工介入的异常消息"
+                    "1. 正常队列消费失败的消息",
+                    "2. 延迟队列到期后的消息",
+                    "3. 超过最大长度限制的消息",
+                    "4. 需要人工介入的异常消息"
             });
-            
+
         } catch (Exception e) {
             result.put("success", false);
             result.put("message", "发送失败：" + e.getMessage());
         }
-        
+
         return result;
     }
 
@@ -346,27 +343,27 @@ public class InterviewQuestionDemo {
     @GetMapping("/mq-pros-cons")
     public Map<String, Object> getMQProsCons() {
         Map<String, Object> result = new HashMap<>();
-        
+
         Map<String, String[]> pros = new HashMap<>();
         pros.put("优点", new String[]{
-            "1. 解耦：生产者和消费者互不依赖",
-            "2. 异步：提高系统响应速度",
-            "3. 削峰：平滑流量峰值，保护后端系统",
-            "4. 缓冲：缓解瞬时压力"
+                "1. 解耦：生产者和消费者互不依赖",
+                "2. 异步：提高系统响应速度",
+                "3. 削峰：平滑流量峰值，保护后端系统",
+                "4. 缓冲：缓解瞬时压力"
         });
-        
+
         Map<String, String[]> cons = new HashMap<>();
         cons.put("缺点", new String[]{
-            "1. 系统复杂度增加",
-            "2. 数据一致性挑战",
-            "3. 依赖第三方中间件",
-            "4. 运维成本增加"
+                "1. 系统复杂度增加",
+                "2. 数据一致性挑战",
+                "3. 依赖第三方中间件",
+                "4. 运维成本增加"
         });
-        
+
         result.put("success", true);
         result.putAll(pros);
         result.putAll(cons);
-        
+
         return result;
     }
 }

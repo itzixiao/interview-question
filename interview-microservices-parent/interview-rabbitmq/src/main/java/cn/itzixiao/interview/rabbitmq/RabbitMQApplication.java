@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
  * RabbitMQ 实战示例启动类
- * 
+ * <p>
  * 功能包括：
  * 1. 基础消息队列（简单队列、工作队列）
  * 2. 交换机模式（Direct、Fanout、Topic）

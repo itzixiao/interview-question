@@ -1,13 +1,18 @@
 package cn.itzixiao.interview.concurrency;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.*;
-import java.util.concurrent.locks.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.LongAdder;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * 高并发线程安全问题解决方案详解 - 教学型示例
- *
+ * <p>
  * ┌─────────────────────────────────────────────────────────────────────────────┐
  * │                        线程安全问题产生的根本原因                            │
  * │                                                                             │
@@ -28,7 +33,7 @@ import java.util.concurrent.locks.*;
  * │  │   └────────────────────────────────────┘                        │       │
  * │  └──────────────────────────────────────────────────────────────────┘       │
  * └─────────────────────────────────────────────────────────────────────────────┘
- *
+ * <p>
  * ┌─────────────────────────────────────────────────────────────────────────────┐
  * │                          解决方案总览                                        │
  * │                                                                             │

@@ -2,17 +2,18 @@
 
 ## 📖 概述
 
-本文档详细介绍如何在 Spring Boot 项目中整合 Elasticsearch，实现海量数据的分布式搜索功能。通过设备运行日志管理系统的实战案例，从 0 到 1 讲解 ES 的核心用法。
+本文档详细介绍如何在 Spring Boot 项目中整合 Elasticsearch，实现海量数据的分布式搜索功能。通过设备运行日志管理系统的实战案例，从
+0 到 1 讲解 ES 的核心用法。
 
 ### 技术栈版本
 
-| 组件 | 版本 | 说明 |
-|------|------|------|
-| Spring Boot | 2.7.18 | 框架核心 |
-| Spring Data Elasticsearch | 4.4.x | 数据访问层 |
-| Elasticsearch | 7.17.x | 搜索引擎 |
-| MySQL | 8.0+ | 关系型数据库 |
-| ShardingSphere | 4.1.1 | 分库分表中间件 |
+| 组件                        | 版本     | 说明      |
+|---------------------------|--------|---------|
+| Spring Boot               | 2.7.18 | 框架核心    |
+| Spring Data Elasticsearch | 4.4.x  | 数据访问层   |
+| Elasticsearch             | 7.17.x | 搜索引擎    |
+| MySQL                     | 8.0+   | 关系型数据库  |
+| ShardingSphere            | 4.1.1  | 分库分表中间件 |
 
 ---
 
@@ -33,6 +34,7 @@ WHERE device_name LIKE '%设备%'
 ```
 
 **问题：**
+
 - LIKE 模糊查询效率低下（不走索引）
 - 海量数据（千万级）查询缓慢
 - 无法实现全文检索、相关性排序
@@ -47,6 +49,7 @@ Page<DeviceOperationLogES> results =
 ```
 
 **优势：**
+
 - ✅ **倒排索引** - 全文检索毫秒级响应
 - ✅ **分布式架构** - 水平扩展支持 PB 级数据
 - ✅ **复杂查询** - 布尔查询、聚合分析、地理位置
@@ -105,6 +108,7 @@ curl http://localhost:19200
 ```
 
 **返回示例：**
+
 ```json
 {
   "name": "es-node-1",
@@ -121,7 +125,8 @@ curl http://localhost:19200
 
 ### 1. ES 配置类 - 支持认证与超时配置
 
-**文件路径：** `interview-microservices-parent/interview-provider/src/main/java/cn/itzixiao/interview/provider/config/ElasticsearchConfig.java`
+**文件路径：**
+`interview-microservices-parent/interview-provider/src/main/java/cn/itzixiao/interview/provider/config/ElasticsearchConfig.java`
 
 ```java
 package cn.itzixiao.interview.provider.config;
@@ -197,6 +202,7 @@ public class ElasticsearchConfig {
 ```
 
 **关键点：**
+
 - ✅ 支持环境变量配置 ES 地址
 - ✅ 可选的用户名密码认证
 - ✅ 自定义超时时间（避免大数据量操作超时）
@@ -205,7 +211,8 @@ public class ElasticsearchConfig {
 
 ### 2. ES 实体类设计
 
-**文件路径：** `interview-microservices-parent/interview-provider/src/main/java/cn/itzixiao/interview/provider/entity/es/DeviceOperationLogES.java`
+**文件路径：**
+`interview-microservices-parent/interview-provider/src/main/java/cn/itzixiao/interview/provider/entity/es/DeviceOperationLogES.java`
 
 ```java
 package cn.itzixiao.interview.provider.entity.es;
@@ -284,15 +291,16 @@ public class DeviceOperationLogES {
 
 **字段类型详解：**
 
-| 类型 | 说明 | 适用场景 |
-|------|------|----------|
-| `Keyword` | 不分词，精确匹配 | 设备编号、状态码、ID |
-| `Text` | 分词，全文检索 | 设备名称、描述、备注 |
-| `Integer/Long` | 数值类型 | 操作类型、计数 |
-| `Double` | 浮点数 | 温度、电压等测量值 |
-| `Date` | 日期时间 | 操作时间、创建时间 |
+| 类型             | 说明       | 适用场景        |
+|----------------|----------|-------------|
+| `Keyword`      | 不分词，精确匹配 | 设备编号、状态码、ID |
+| `Text`         | 分词，全文检索  | 设备名称、描述、备注  |
+| `Integer/Long` | 数值类型     | 操作类型、计数     |
+| `Double`       | 浮点数      | 温度、电压等测量值   |
+| `Date`         | 日期时间     | 操作时间、创建时间   |
 
 **分词器选择：**
+
 ```java
 // 标准分词器（英文按空格分词，中文单字分词）
 @Field(analyzer = "standard", searchAnalyzer = "standard")
@@ -305,7 +313,8 @@ public class DeviceOperationLogES {
 
 ### 3. Repository 数据访问层
 
-**文件路径：** `interview-microservices-parent/interview-provider/src/main/java/cn/itzixiao/interview/provider/repository/DeviceOperationLogESRepository.java`
+**文件路径：**
+`interview-microservices-parent/interview-provider/src/main/java/cn/itzixiao/interview/provider/repository/DeviceOperationLogESRepository.java`
 
 ```java
 package cn.itzixiao.interview.provider.repository;
@@ -357,18 +366,19 @@ public interface DeviceOperationLogESRepository extends ElasticsearchRepository<
 
 **查询注解说明：**
 
-| 注解 | 查询类型 | 说明 |
-|------|----------|------|
-| `findByXxx` | 方法命名查询 | Spring 自动解析为 Term 查询 |
-| `@Query` + `match` | 全文检索 | 分词匹配，计算相关性得分 |
-| `@Query` + `term` | 精确匹配 | 不分词，用于 Keyword/数值字段 |
-| `@Query` + `bool` | 布尔查询 | must(且)、should(或)、must_not(非) |
+| 注解                 | 查询类型   | 说明                            |
+|--------------------|--------|-------------------------------|
+| `findByXxx`        | 方法命名查询 | Spring 自动解析为 Term 查询          |
+| `@Query` + `match` | 全文检索   | 分词匹配，计算相关性得分                  |
+| `@Query` + `term`  | 精确匹配   | 不分词，用于 Keyword/数值字段           |
+| `@Query` + `bool`  | 布尔查询   | must(且)、should(或)、must_not(非) |
 
 ---
 
 ### 4. Service 业务逻辑层
 
-**文件路径：** `interview-microservices-parent/interview-provider/src/main/java/cn/itzixiao/interview/provider/service/DeviceOperationLogESService.java`
+**文件路径：**
+`interview-microservices-parent/interview-provider/src/main/java/cn/itzixiao/interview/provider/service/DeviceOperationLogESService.java`
 
 ```java
 package cn.itzixiao.interview.provider.service;
@@ -609,14 +619,15 @@ public class DeviceOperationLogESService {
    ```
 
 3. **数据同步策略**
-   - 全量同步：定时任务每天凌晨同步全部数据
-   - 增量同步：MySQL 数据变更时实时更新 ES
+    - 全量同步：定时任务每天凌晨同步全部数据
+    - 增量同步：MySQL 数据变更时实时更新 ES
 
 ---
 
 ### 5. Controller 接口层
 
-**文件路径：** `interview-microservices-parent/interview-provider/src/main/java/cn/itzixiao/interview/provider/controller/DeviceOperationLogESController.java`
+**文件路径：**
+`interview-microservices-parent/interview-provider/src/main/java/cn/itzixiao/interview/provider/controller/DeviceOperationLogESController.java`
 
 ```java
 package cn.itzixiao.interview.provider.controller;
@@ -894,6 +905,7 @@ mvn spring-boot:run
 ### 预期输出示例
 
 **1. 加载数据成功：**
+
 ```json
 {
   "code": 200,
@@ -906,6 +918,7 @@ mvn spring-boot:run
 ```
 
 **2. 索引统计信息：**
+
 ```json
 {
   "code": 200,
@@ -919,6 +932,7 @@ mvn spring-boot:run
 ```
 
 **3. 搜索结果（分页）：**
+
 ```json
 {
   "code": 200,
@@ -951,12 +965,14 @@ mvn spring-boot:run
 ### 1. 倒排索引（Inverted Index）
 
 **传统正排索引：**
+
 ```
 文档 1: 我 爱 北 京 天 安 门
 文档 2: 他 爱 上 海 外 滩
 ```
 
 **倒排索引：**
+
 ```
 "爱" -> [文档 1, 文档 2]
 "北京" -> [文档 1]
@@ -976,6 +992,7 @@ mvn spring-boot:run
 ```
 
 **配置示例：**
+
 ```java
 @Field(analyzer = "ik_max_word", searchAnalyzer = "ik_smart")
 private String deviceName;
@@ -998,6 +1015,7 @@ private String deviceName;
 ```
 
 **查询子句：**
+
 - `must`: 必须匹配（贡献评分）
 - `should`: 可选匹配（贡献评分）
 - `must_not`: 必须不匹配
@@ -1092,11 +1110,13 @@ PUT /device_operation_log/_settings
 ### 1. Connection Timeout 连接超时
 
 **问题：**
+
 ```
 org.elasticsearch.client.ResponseException: method [POST], host [http://localhost:19200]
 ```
 
 **解决方案：**
+
 ```java
 // 增加超时时间
 RequestConfig requestConfig = RequestConfig.custom()
@@ -1111,6 +1131,7 @@ RequestConfig requestConfig = RequestConfig.custom()
 **问题：** 中文被分成单字，搜索结果不准确
 
 **解决方案：**
+
 ```java
 // 1. 安装 IK 分词插件（在 ES 容器中）
 docker exec -it elasticsearch bash
@@ -1124,6 +1145,7 @@ private String deviceName;
 ### 3. 索引映射冲突
 
 **问题：**
+
 ```
 MapperParsingException: failed to parse field [deviceCode]
 ```
@@ -1131,6 +1153,7 @@ MapperParsingException: failed to parse field [deviceCode]
 **原因：** 同一字段在不同文档中类型不一致
 
 **解决方案：**
+
 ```java
 // 明确指定字段类型
 @Field(type = FieldType.Keyword)
@@ -1147,6 +1170,7 @@ indexOps.putMapping(indexOps.createMapping());
 **问题：** 一次性加载 100 万条数据到 ES，导致内存溢出
 
 **解决方案：**
+
 ```java
 // 分批处理，每批 1000 条
 int batchSize = 1000;
@@ -1175,26 +1199,26 @@ while (true) {
 **参考答案：**
 
 1. **倒排索引**
-   - 传统数据库：文档 → 单词（正排）
-   - ES：单词 → 文档列表（倒排）
-   - 全文检索时直接查倒排表，无需遍历所有文档
+    - 传统数据库：文档 → 单词（正排）
+    - ES：单词 → 文档列表（倒排）
+    - 全文检索时直接查倒排表，无需遍历所有文档
 
 2. **分词器优化**
-   - IK 智能分词、拼音分词等
-   - 提前分词建立索引，查询时直接使用
+    - IK 智能分词、拼音分词等
+    - 提前分词建立索引，查询时直接使用
 
 3. **缓存机制**
-   - Filter Cache：过滤结果缓存
-   - Query Cache：查询结果缓存
-   - Field Data Cache：字段数据缓存
+    - Filter Cache：过滤结果缓存
+    - Query Cache：查询结果缓存
+    - Field Data Cache：字段数据缓存
 
 4. **分布式架构**
-   - 数据分片存储，并行查询
-   - 近实时搜索（NRT），1 秒延迟
+    - 数据分片存储，并行查询
+    - 近实时搜索（NRT），1 秒延迟
 
 5. **列式存储**
-   - Doc Values（磁盘上的列式结构）
-   - 适合聚合、排序、分组查询
+    - Doc Values（磁盘上的列式结构）
+    - 适合聚合、排序、分组查询
 
 ---
 
@@ -1202,19 +1226,21 @@ while (true) {
 
 **参考答案：**
 
-| 特性 | MySQL | Elasticsearch |
-|------|-------|---------------|
-| 数据模型 | 关系型 | 文档型（JSON） |
-| 查询方式 | SQL | RESTful API/DSL |
-| 擅长领域 | 事务处理、复杂关联 | 全文检索、数据分析 |
-| 扩展性 | 垂直扩展为主 | 水平扩展（分片） |
-| 实时性 | 实时 | 近实时（1 秒延迟） |
+| 特性   | MySQL     | Elasticsearch   |
+|------|-----------|-----------------|
+| 数据模型 | 关系型       | 文档型（JSON）       |
+| 查询方式 | SQL       | RESTful API/DSL |
+| 擅长领域 | 事务处理、复杂关联 | 全文检索、数据分析       |
+| 扩展性  | 垂直扩展为主    | 水平扩展（分片）        |
+| 实时性  | 实时        | 近实时（1 秒延迟）      |
 
 **应用场景：**
+
 - **MySQL**: 订单、支付、用户信息等强一致性场景
 - **ES**: 商品搜索、日志分析、监控告警等检索场景
 
 **最佳实践：** MySQL + ES 异构数据源
+
 - MySQL 作为权威数据源（增删改）
 - ES 作为搜索引擎（查询）
 - 通过 Canal/Maxwell 等工具实时同步
@@ -1226,15 +1252,18 @@ while (true) {
 **参考答案：**
 
 **方案 1：双写（简单但不可靠）**
+
 ```java
 // 先写 MySQL
 mysqlMapper.insert(log);
 // 再写 ES
 esRepository.save(esEntity);
 ```
+
 **问题：** ES 写入失败会导致不一致
 
 **方案 2：异步消息队列（推荐）**
+
 ```java
 // 1. MySQL 写入成功后发送 MQ 消息
 mysqlMapper.insert(log);
@@ -1247,9 +1276,11 @@ public void syncToES(Long id) {
     esRepository.save(convertToES(log));
 }
 ```
+
 **优势：** 解耦、削峰、可靠投递
 
 **方案 3：Canal 监听 Binlog（阿里方案）**
+
 ```
 MySQL (Master) 
   ↓ (Binlog)
@@ -1257,9 +1288,11 @@ Canal Server (模拟 Slave)
   ↓ (MQ: RocketMQ/Kafka)
 Canal Client → 写入 ES
 ```
+
 **优势：** 无侵入、准实时（秒级）
 
 **方案 4：定时全量补偿**
+
 ```java
 // 每天凌晨对比 MySQL 和 ES 数据
 @Scheduled(cron = "0 0 2 * * ?")
@@ -1280,6 +1313,7 @@ public void fullSync() {
 ```
 
 **生产环境最佳实践：**
+
 - 实时同步：Canal + MQ
 - 兜底方案：每天凌晨全量补偿
 - 监控告警：数据不一致超过阈值时报警
@@ -1291,16 +1325,19 @@ public void fullSync() {
 **参考答案：**
 
 **分片（Shard）：**
+
 - 将索引数据分散到多个节点
 - 每个分片是一个独立的 Lucene 实例
 - 分片数在创建索引时设定，之后不可变（除非 Reindex）
 
 **副本（Replica）：**
+
 - 分片的备份，提高可用性
 - 副本数可动态调整
 - 副本不会和主分片在同一节点
 
 **示例：**
+
 ```json
 PUT /device_operation_log
 {
@@ -1312,6 +1349,7 @@ PUT /device_operation_log
 ```
 
 **集群状态：**
+
 - 绿色：所有主分片和副本分片都正常
 - 黄色：所有主分片正常，部分副本分片异常
 - 红色：部分主分片异常（数据不完整）
@@ -1323,11 +1361,13 @@ PUT /device_operation_log
 **参考答案：**
 
 **1. 索引设计优化**
+
 - 合理设置分片数（单分片 30-50GB）
 - 使用合适的字段类型（Keyword vs Text）
 - 关闭不必要的 `_all` 字段
 
 **2. 查询语句优化**
+
 ```json
 // ❌ 性能差：使用 score 排序
 {
@@ -1353,11 +1393,13 @@ PUT /device_operation_log
 ```
 
 **3. 缓存优化**
+
 - 使用 Filter 代替 Query（不计算评分，可缓存）
 - 开启 Query Cache
 - 合理使用 Field Cache
 
 **4. 硬件优化**
+
 - SSD 硬盘（IOPS 提升 10 倍+）
 - 增加内存（至少 32GB）
 - 独立部署（不与 Kibana/Logstash 混部）
@@ -1376,6 +1418,7 @@ PUT /device_operation_log
 6. **返回响应** → 所有副本成功后返回客户端
 
 **关键点：**
+
 - 写一致性：默认等待所有活跃分片确认
 - Translog：防止数据丢失（定期 fsync）
 - Refresh：默认 1 秒后将内存数据变为可搜索
@@ -1387,6 +1430,7 @@ PUT /device_operation_log
 **参考答案：**
 
 **方案 1：Reindex API（官方推荐）**
+
 ```json
 POST _reindex
 {
@@ -1402,6 +1446,7 @@ POST _reindex
 ```
 
 **方案 2：Logstash 同步**
+
 ```ruby
 input {
   elasticsearch {
@@ -1419,6 +1464,7 @@ output {
 ```
 
 **方案 3：双写 + 灰度切换**
+
 1. 代码改造支持双写（同时写新旧索引）
 2. 历史数据通过 Reindex 迁移
 3. 灰度切换读流量到新索引
@@ -1506,14 +1552,17 @@ PUT _ilm/policy/device_log_policy
 ## 🔗 参考资料
 
 ### 官方文档
+
 - [Elasticsearch 官方文档](https://www.elastic.co/guide/en/elasticsearch/reference/current/index.html)
 - [Spring Data Elasticsearch](https://docs.spring.io/spring-data/elasticsearch/docs/current/reference/html/)
 
 ### 学习资源
+
 - [Elasticsearch 权威指南（中文版）](https://es.xiaoleilu.com/)
 - [Elasticsearch 源码解析](https://github.com/elastic/elasticsearch)
 
 ### 工具推荐
+
 - **Kibana**: ES 官方可视化工具
 - **Elasticsearch Head**: 集群管理插件
 - **Cerebro**: 集群监控与管理
@@ -1524,6 +1573,7 @@ PUT _ilm/policy/device_log_policy
 ## 📈 更新日志
 
 ### v1.0 - 2026-03-12
+
 - ✅ 完整的 Spring Boot 整合 ES 实战案例
 - ✅ 包含配置、实体类、Repository、Service、Controller 全套代码
 - ✅ 详细的性能优化方案

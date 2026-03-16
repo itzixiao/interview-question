@@ -1,12 +1,8 @@
 package cn.itzixiao.interview.mysql;
 
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * MySQL 索引优化详解
- *
+ * <p>
  * 索引类型：
  * ┌─────────────────────────────────────────────────────────────┐
  * │  按数据结构分类：                                             │

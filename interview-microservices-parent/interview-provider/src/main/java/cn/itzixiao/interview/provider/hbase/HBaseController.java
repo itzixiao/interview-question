@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.*;
 
 /**
  * HBase 示例接口
- * 
+ *
  * <p>用于演示 HBase 的基本操作</p>
  */
 @RestController
@@ -17,7 +17,7 @@ public class HBaseController {
 
     /**
      * 运行 HBase 操作演示
-     * 
+     *
      * @return 执行结果
      */
     @PostMapping("/demo")
@@ -32,8 +32,8 @@ public class HBaseController {
 
     /**
      * 创建表
-     * 
-     * @param tableName 表名
+     *
+     * @param tableName      表名
      * @param columnFamilies 列族（逗号分隔）
      * @return 结果
      */
@@ -52,12 +52,12 @@ public class HBaseController {
 
     /**
      * 插入数据
-     * 
+     *
      * @param tableName 表名
-     * @param rowKey 行键
-     * @param family 列族
+     * @param rowKey    行键
+     * @param family    列族
      * @param qualifier 列限定符
-     * @param value 值
+     * @param value     值
      * @return 结果
      */
     @PostMapping("/put")
@@ -77,9 +77,9 @@ public class HBaseController {
 
     /**
      * 查询数据
-     * 
+     *
      * @param tableName 表名
-     * @param rowKey 行键
+     * @param rowKey    行键
      * @return 结果
      */
     @GetMapping("/get")
@@ -96,7 +96,7 @@ public class HBaseController {
 
     /**
      * 扫描表
-     * 
+     *
      * @param tableName 表名
      * @return 结果
      */
@@ -112,9 +112,9 @@ public class HBaseController {
 
     /**
      * 删除行
-     * 
+     *
      * @param tableName 表名
-     * @param rowKey 行键
+     * @param rowKey    行键
      * @return 结果
      */
     @DeleteMapping("/delete")

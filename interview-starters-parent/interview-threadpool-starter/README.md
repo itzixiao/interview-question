@@ -27,6 +27,7 @@ mvn clean install
 ```
 
 **预期输出：**
+
 ```
 [INFO] BUILD SUCCESS
 [INFO] ------------------------------------------------------------------------
@@ -83,7 +84,7 @@ mvn spring-boot:run
    ```bash
    curl http://localhost:8082/test/thread-pool
    ```
-   
+
    **预期控制台输出：**
    ```
    ✅ 自动装配：自定义线程池已创建
@@ -99,7 +100,7 @@ mvn spring-boot:run
    ```bash
    curl http://localhost:8082/test/pool-status
    ```
-   
+
    **预期响应：**
    ```
    线程池状态 -> 核心线程数：10, 当前线程数：5, 活跃线程数：5, 队列大小：0, 已完成任务数：5
@@ -144,11 +145,13 @@ interview-provider/                         # 使用示例项目
 **作用：** 自定义线程池实现类
 
 **核心功能：**
+
 - 继承 `ThreadPoolExecutor`
 - 提供自定义线程命名工厂
 - 支持线程池状态监控
 
 **关键代码：**
+
 ```java
 public class CustomThreadPoolExecutor extends ThreadPoolExecutor {
     
@@ -170,20 +173,21 @@ public class CustomThreadPoolExecutor extends ThreadPoolExecutor {
 **作用：** 配置属性绑定类
 
 **核心注解：**
+
 ```java
 @ConfigurationProperties(prefix = "custom.thread-pool")
 ```
 
 **绑定的配置项：**
 
-| 配置项 | Java 字段 | 默认值 | 说明 |
-| :--- | :--- | :---: | :--- |
-| `core-pool-size` | `corePoolSize` | `5` | 核心线程数 |
-| `max-pool-size` | `maxPoolSize` | `10` | 最大线程数 |
-| `queue-capacity` | `queueCapacity` | `100` | 队列容量 |
-| `keep-alive-time` | `keepAliveTime` | `60` | 空闲存活时间（秒） |
-| `name-prefix` | `namePrefix` | `custom-pool` | 线程名前缀 |
-| `rejected-policy` | `rejectedPolicy` | `ABORT` | 拒绝策略 |
+| 配置项               | Java 字段          |      默认值      | 说明        |
+|:------------------|:-----------------|:-------------:|:----------|
+| `core-pool-size`  | `corePoolSize`   |      `5`      | 核心线程数     |
+| `max-pool-size`   | `maxPoolSize`    |     `10`      | 最大线程数     |
+| `queue-capacity`  | `queueCapacity`  |     `100`     | 队列容量      |
+| `keep-alive-time` | `keepAliveTime`  |     `60`      | 空闲存活时间（秒） |
+| `name-prefix`     | `namePrefix`     | `custom-pool` | 线程名前缀     |
+| `rejected-policy` | `rejectedPolicy` |    `ABORT`    | 拒绝策略      |
 
 ---
 
@@ -220,11 +224,13 @@ public class ThreadPoolAutoConfiguration {
 **位置：** `src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports`
 
 **内容：**
+
 ```properties
 cn.itxiao.starter.ThreadPoolAutoConfiguration
 ```
 
 **优势：**
+
 - ✅ Spring Boot 2.7+ 官方推荐的新标准
 - ✅ 文件结构更清晰，按功能分类组织
 - ✅ 支持 `@AutoConfiguration` 注解的完整特性
@@ -239,6 +245,7 @@ cn.itxiao.starter.ThreadPoolAutoConfiguration
 **位置：** `src/main/resources/META-INF/spring.factories`
 
 **内容：**
+
 ```properties
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
 cn.itxiao.starter.ThreadPoolAutoConfiguration
@@ -298,22 +305,23 @@ cn.itxiao.starter.ThreadPoolAutoConfiguration
 Spring Boot Starter 的自动装配基于以下机制：
 
 1. **spring.factories 文件**
-   - 位于 `META-INF/spring.factories`
-   - 指定自动配置类的全限定名
+    - 位于 `META-INF/spring.factories`
+    - 指定自动配置类的全限定名
 
 2. **@EnableAutoConfiguration 注解**
-   - 扫描 classpath 下所有 jar 包的 spring.factories
-   - 加载其中的自动配置类
+    - 扫描 classpath 下所有 jar 包的 spring.factories
+    - 加载其中的自动配置类
 
 3. **条件注解**
-   - `@ConditionalOnClass`：类路径存在某类时才生效
-   - `@ConditionalOnProperty`：配置满足条件时才生效
-   - `@ConditionalOnMissingBean`：容器中没有某 Bean 时才创建
+    - `@ConditionalOnClass`：类路径存在某类时才生效
+    - `@ConditionalOnProperty`：配置满足条件时才生效
+    - `@ConditionalOnMissingBean`：容器中没有某 Bean 时才创建
 
 4. **配置属性绑定**
-   - `@ConfigurationProperties` 将 yml 配置绑定到 JavaBean
+    - `@ConfigurationProperties` 将 yml 配置绑定到 JavaBean
 
 **执行流程：**
+
 ```
 启动 → 扫描 spring.factories → 读取自动配置类 → 
 检查条件注解 → 加载配置类 → 创建 Bean → 注册到容器
@@ -328,6 +336,7 @@ Spring Boot Starter 的自动装配基于以下机制：
 **三步走：**
 
 **Step 1：创建 Maven 项目**
+
 ```xml
 <groupId>cn.itxiao</groupId>
 <artifactId>interview-threadpool-starter</artifactId>
@@ -360,12 +369,14 @@ Spring Boot Starter 的自动装配基于以下机制：
    ```
 
 **Step 3：创建 spring.factories**
+
 ```properties
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
 cn.itxiao.starter.ThreadPoolAutoConfiguration
 ```
 
 **Step 4：发布到 Maven 仓库**
+
 ```bash
 mvn clean install
 ```
@@ -379,15 +390,17 @@ mvn clean install
 **作用：** 当 Spring 容器中**不存在**指定类型的 Bean 时，才创建当前 Bean。
 
 **使用场景：**
+
 1. **允许用户覆盖默认配置**
-   - Starter 提供默认的 Bean 实现
-   - 用户可以自定义同名/同类型的 Bean 来覆盖
+    - Starter 提供默认的 Bean 实现
+    - 用户可以自定义同名/同类型的 Bean 来覆盖
 
 2. **避免 Bean 冲突**
-   - 多个 Starter 可能都定义了同类型的 Bean
-   - 使用此注解确保只有一个被创建
+    - 多个 Starter 可能都定义了同类型的 Bean
+    - 使用此注解确保只有一个被创建
 
 **示例：**
+
 ```java
 // Starter 中的默认配置
 @Bean
@@ -407,6 +420,7 @@ public class MyConfig {
 ```
 
 **优先级规则：**
+
 - 用户自定义的 Bean 优先级 > Starter 自动配置的 Bean
 
 ---
@@ -418,10 +432,12 @@ public class MyConfig {
 ### 练习 1：添加线程池监控
 
 **需求：**
+
 - 定时输出线程池状态（每 30 秒）
 - 当活跃线程数超过阈值时告警
 
 **提示：**
+
 ```java
 @Bean
 public ScheduledExecutorService monitorScheduler(
@@ -446,10 +462,12 @@ public ScheduledExecutorService monitorScheduler(
 ### 练习 2：支持多数据源 Starter
 
 **需求：**
+
 - 支持配置多个数据源
 - 通过注解切换数据源
 
 **提示：**
+
 ```yaml
 custom:
   datasource:
@@ -470,10 +488,12 @@ custom:
 ### 练习 3：分布式锁 Starter
 
 **需求：**
+
 - 基于 Redis 实现分布式锁
 - 支持看门狗自动续期
 
 **提示：**
+
 ```java
 @DistributedLock(key = "order:#orderId", expire = 30)
 public void createOrder(String orderId) {

@@ -9,6 +9,7 @@
 **实现机制：** Undo Log（回滚日志）
 
 **示例：**
+
 ```sql
 BEGIN;
   UPDATE account SET balance = balance - 100 WHERE id = 1;
@@ -22,10 +23,12 @@ COMMIT;
 **定义：** 事务前后数据保持一致
 
 **包括：**
+
 - **约束一致**：主键、外键、唯一等约束不被破坏
 - **业务一致**：如转账总额不变
 
 **示例：**
+
 ```sql
 -- 转账前：A(500) + B(500) = 1000
 BEGIN;
@@ -58,6 +61,7 @@ COMMIT;
 **定义：** 读到其他事务**未提交**的数据
 
 **示例：**
+
 ```
 时间    事务 A                事务 B
 T1     BEGIN
@@ -76,6 +80,7 @@ T4             ROLLBACK;  -- B 回滚，age 实际还是 20
 **原因：** 其他事务**修改并提交**
 
 **示例：**
+
 ```
 时间    事务 A                事务 B
 T1     BEGIN                 BEGIN
@@ -94,6 +99,7 @@ T5     SELECT age=18  -- 两次读取不一致
 **原因：** 其他事务**插入或删除**
 
 **示例：**
+
 ```
 时间    事务 A                事务 B
 T1     BEGIN                 BEGIN
@@ -111,12 +117,12 @@ T5     SELECT COUNT(*)=11  -- 出现"幻觉"
 
 ### 3.1 隔离级别对比
 
-| 隔离级别 | 脏读 | 不可重复读 | 幻读 | 性能 |
-|----------|------|------------|------|------|
-| READ UNCOMMITTED | ✓ 可能 | ✓ 可能 | ✓ 可能 | 最高 |
-| READ COMMITTED | ✗ 避免 | ✓ 可能 | ✓ 可能 | 高 |
-| REPEATABLE READ | ✗ 避免 | ✗ 避免 | △ 基本避免 | 中 |
-| SERIALIZABLE | ✗ 避免 | ✗ 避免 | ✗ 避免 | 最低 |
+| 隔离级别             | 脏读   | 不可重复读 | 幻读     | 性能 |
+|------------------|------|-------|--------|----|
+| READ UNCOMMITTED | ✓ 可能 | ✓ 可能  | ✓ 可能   | 最高 |
+| READ COMMITTED   | ✗ 避免 | ✓ 可能  | ✓ 可能   | 高  |
+| REPEATABLE READ  | ✗ 避免 | ✗ 避免  | △ 基本避免 | 中  |
+| SERIALIZABLE     | ✗ 避免 | ✗ 避免  | ✗ 避免   | 最低 |
 
 > 注：MySQL 的 REPEATABLE READ 通过 MVCC+Next-Key Lock 基本避免幻读
 
@@ -138,12 +144,12 @@ SET GLOBAL TRANSACTION ISOLATION LEVEL REPEATABLE READ;
 
 ### 3.3 各数据库默认隔离级别
 
-| 数据库 | 默认隔离级别 |
-|--------|--------------|
-| MySQL | REPEATABLE READ |
-| Oracle | READ COMMITTED |
-| SQL Server | READ COMMITTED |
-| PostgreSQL | READ COMMITTED |
+| 数据库        | 默认隔离级别          |
+|------------|-----------------|
+| MySQL      | REPEATABLE READ |
+| Oracle     | READ COMMITTED  |
+| SQL Server | READ COMMITTED  |
+| PostgreSQL | READ COMMITTED  |
 
 ---
 
@@ -154,12 +160,14 @@ SET GLOBAL TRANSACTION ISOLATION LEVEL REPEATABLE READ;
 **定义：** Multi-Version Concurrency Control，实现非阻塞读
 
 **优势：**
+
 - 读写不冲突（读不加锁）
 - 提升并发性能
 
 ### 4.2 实现原理
 
 **三个隐藏列：**
+
 1. **DB_TRX_ID**：最近修改事务 ID
 2. **DB_ROLL_PTR**：回滚指针（指向 Undo Log）
 3. **DB_ROW_ID**：行 ID（没有主键时使用）
@@ -171,10 +179,11 @@ SET GLOBAL TRANSACTION ISOLATION LEVEL REPEATABLE READ;
 **作用：** 判断数据版本对当前事务是否可见
 
 **规则：**
+
 1. 未提交的事务，不可见
 2. 已提交的事务：
-   - **RC 级别**：每次 SELECT 都生成新 Read View
-   - **RR 级别**：第一次 SELECT 生成 Read View，后续复用
+    - **RC 级别**：每次 SELECT 都生成新 Read View
+    - **RR 级别**：第一次 SELECT 生成 Read View，后续复用
 
 ### 4.4 可见性判断
 
@@ -193,22 +202,26 @@ SET GLOBAL TRANSACTION ISOLATION LEVEL REPEATABLE READ;
 ### 5.1 锁的粒度分类
 
 #### 表级锁（Table-Level Lock）
+
 - 锁定整张表，开销小
 - 容易冲突，并发度低
 - MyISAM 使用
 
 #### 行级锁（Row-Level Lock）
+
 - 只锁定某一行，开销大
 - 不易冲突，并发度高
 - InnoDB 使用
 
 #### 页级锁（Page-Level Lock）
+
 - 锁定一页数据（介于表和行之间）
 - Berkeley DB 使用
 
 ### 5.2 InnoDB 行锁算法
 
 #### Record Lock（记录锁）
+
 - 锁定单条记录
 - 基于索引实现（必须走索引）
 
@@ -221,6 +234,7 @@ SELECT * FROM users WHERE id = 1 FOR UPDATE;
 ```
 
 #### Gap Lock（间隙锁）
+
 - 锁定记录之间的间隙
 - 防止其他事务插入
 - 解决幻读问题
@@ -231,6 +245,7 @@ SELECT * FROM users WHERE id > 10 AND id < 20 FOR UPDATE;
 ```
 
 #### Next-Key Lock（临键锁）
+
 - Record Lock + Gap Lock
 - 锁定记录 + 间隙
 - RR 级别下默认使用
@@ -238,6 +253,7 @@ SELECT * FROM users WHERE id > 10 AND id < 20 FOR UPDATE;
 ### 5.3 共享锁 vs 排他锁
 
 #### 共享锁（S 锁，读锁）
+
 - 允许其他事务加 S 锁
 - 不允许加 X 锁
 - `SELECT ... LOCK IN SHARE MODE`
@@ -254,6 +270,7 @@ UPDATE users SET age = 18 WHERE id = 1;  -- ❌ 阻塞
 ```
 
 #### 排他锁（X 锁，写锁）
+
 - 不允许其他事务加任何锁
 - INSERT、UPDATE、DELETE 自动加 X 锁
 - `SELECT ... FOR UPDATE`
@@ -269,10 +286,10 @@ UPDATE users SET age = 18 WHERE id = 1;  -- ❌ 阻塞
 
 ### 5.4 锁兼容性矩阵
 
-|      | S 锁 | X 锁 |
-|------|------|------|
-| S 锁 | ✓    | ✗    |
-| X 锁 | ✗    | ✗    |
+|     | S 锁 | X 锁 |
+|-----|-----|-----|
+| S 锁 | ✓   | ✗   |
+| X 锁 | ✗   | ✗   |
 
 ---
 
@@ -284,6 +301,7 @@ UPDATE users SET age = 18 WHERE id = 1;  -- ❌ 阻塞
 2. 形成循环等待
 
 **示例：**
+
 ```
 时间    事务 A                事务 B
 T1     UPDATE users WHERE id=1;  -- 持有 id=1 的 X 锁
@@ -296,15 +314,18 @@ T4                             UPDATE users WHERE id=1;  -- 等待 id=1 的锁
 ### 6.2 死锁解决方案
 
 **1. 超时**
+
 ```sql
 -- 设置锁等待超时（秒）
 SET innodb_lock_wait_timeout = 50;
 ```
 
 **2. 主动回滚**
+
 - 选择代价小的事务回滚
 
 **3. 预防**
+
 - 按固定顺序访问资源
 
 ### 6.3 查看死锁信息
@@ -351,6 +372,7 @@ SELECT * FROM information_schema.INNODB_LOCK_WAITS;
 **默认级别：** REPEATABLE READ
 
 **原因：**
+
 1. 避免了脏读和不可重复读
 2. 通过 MVCC+Next-Key Lock 基本避免幻读
 3. 性能较好（相比 SERIALIZABLE）
@@ -362,6 +384,7 @@ SELECT * FROM information_schema.INNODB_LOCK_WAITS;
 **MVCC：** 多版本并发控制，实现非阻塞读
 
 **实现原理：**
+
 1. **隐藏列**：事务 ID、回滚指针、删除标志
 2. **Undo Log**：构建历史版本链
 3. **Read View**：判断版本可见性
@@ -380,12 +403,12 @@ SELECT * FROM information_schema.INNODB_LOCK_WAITS;
 
 **答：**
 
-| 对比项 | 共享锁（S） | 排他锁（X） |
-|--------|------------|------------|
-| 别名 | 读锁 | 写锁 |
-| 兼容性 | 可与 S 锁共存 | 不与任何锁共存 |
+| 对比项  | 共享锁（S）             | 排他锁（X）           |
+|------|--------------------|------------------|
+| 别名   | 读锁                 | 写锁               |
+| 兼容性  | 可与 S 锁共存           | 不与任何锁共存          |
 | 获取方式 | LOCK IN SHARE MODE | FOR UPDATE / DML |
-| 权限 | 可读不可写 | 可读可写 |
+| 权限   | 可读不可写              | 可读可写             |
 
 **问题 7：什么是死锁？如何解决？**
 
@@ -394,6 +417,7 @@ SELECT * FROM information_schema.INNODB_LOCK_WAITS;
 **死锁：** 两个事务互相持有对方需要的锁，形成循环等待
 
 **解决方案：**
+
 1. **超时**：`innodb_lock_wait_timeout`
 2. **主动回滚**：选择代价小的事务
 3. **预防**：按固定顺序访问资源
@@ -402,13 +426,13 @@ SELECT * FROM information_schema.INNODB_LOCK_WAITS;
 
 **答：**
 
-| 对比项 | RC（读已提交） | RR（可重复读） |
-|--------|---------------|---------------|
-| 脏读 | 避免 | 避免 |
-| 不可重复读 | 可能 | 避免 |
-| 幻读 | 可能 | 基本避免 |
-| Read View | 每次 SELECT 生成 | 第一次 SELECT 生成后复用 |
-| 默认级别 | Oracle/SQL Server | MySQL |
+| 对比项       | RC（读已提交）          | RR（可重复读）         |
+|-----------|-------------------|------------------|
+| 脏读        | 避免                | 避免               |
+| 不可重复读     | 可能                | 避免               |
+| 幻读        | 可能                | 基本避免             |
+| Read View | 每次 SELECT 生成      | 第一次 SELECT 生成后复用 |
+| 默认级别      | Oracle/SQL Server | MySQL            |
 
 ---
 

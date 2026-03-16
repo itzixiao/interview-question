@@ -2,7 +2,7 @@ package cn.itzixiao.interview.springboot;
 
 /**
  * Spring Boot 嵌入式容器详解
- *
+ * <p>
  * Spring Boot 2.x vs 3.x 容器变化：
  * ┌─────────────────────────────────────────────────────────────┐
  * │  Spring Boot 2.x                                             │

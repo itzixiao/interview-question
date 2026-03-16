@@ -4,44 +4,40 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Java 泛型深入详解
- * 
+ * <p>
  * 【一、泛型概述】
  * 泛型是 JDK5 引入的特性，允许在定义类、接口、方法时使用类型参数。
  * 核心作用：
  * 1. 类型安全：编译期检查类型，避免 ClassCastException
  * 2. 代码复用：一套代码适用于多种类型
  * 3. 消除强制转换：编译器自动插入类型转换
- * 
+ * <p>
  * 【二、类型擦除（Type Erasure）】
  * Java 泛型是通过类型擦除实现的伪泛型：
  * - 编译期：泛型信息存在，进行类型检查
  * - 运行期：泛型信息被擦除，只保留原始类型（Raw Type）
- * 
+ * <p>
  * 【三、擦除规则】
  * 1. <T> 无界类型参数 → 擦除为 Object
  * 2. <T extends Number> 有界类型参数 → 擦除为边界类型 Number
  * 3. <T extends Comparable<T>> 多边界 → 擦除为第一个边界类型
- * 
+ * <p>
  * 【四、PECS原则】
  * Producer Extends, Consumer Super
  * - 生产者（? extends T）：集合给你数据 → 你只能读
  * - 消费者（? super T）：集合接受数据 → 你只能写
- * 
+ *
  * @author interview-question
  */
 public class GenericDeepDiveDemo {
 
     /**
      * 用于演示通过反射获取字段泛型信息的示例字段
-     * 
+     * <p>
      * 运行时可以通过 Field.getGenericType() 获取到 Map<String, Integer>
      * 这是因为字段的泛型信息被 Signature 属性保留在字节码中
      */
@@ -80,12 +76,12 @@ public class GenericDeepDiveDemo {
 
     /**
      * 1. 泛型基础演示
-     * 
+     * <p>
      * 展示泛型的三种使用方式：
      * - 泛型类：类定义时指定类型参数，如 Box<T>
      * - 泛型方法：方法定义时指定类型参数，如 <T> T identity(T t)
      * - 泛型接口：接口定义时指定类型参数，如 Repository<T>
-     * 
+     * <p>
      * 同时展示原始类型（Raw Type）的风险：
      * - 失去类型安全保护
      * - 编译器只能给出警告，无法完全阻止类型错误
@@ -133,16 +129,16 @@ public class GenericDeepDiveDemo {
 
     /**
      * 2. 类型擦除演示
-     * 
+     * <p>
      * 【核心概念】
      * Java 泛型是"伪泛型"，通过类型擦除实现：
      * - 编译期：泛型信息完整保留，进行严格的类型检查
      * - 运行期：泛型信息被擦除，只保留原始类型（Raw Type）
-     * 
+     * <p>
      * 【为什么这样设计？】
      * 为了向后兼容 JDK5 之前的代码，Java 选择在字节码层面擦除泛型信息。
      * 这与 C++ 的模板（真泛型）有本质区别。
-     * 
+     * <p>
      * 【擦除后的影响】
      * 1. List<String> 和 List<Integer> 运行时是同一个类
      * 2. 不能用 instanceof 检查泛型类型
@@ -165,8 +161,8 @@ public class GenericDeepDiveDemo {
         System.out.println("验证类型擦除：");
         System.out.println("  stringList.getClass() = " + stringList.getClass().getName());
         System.out.println("  intList.getClass() = " + intList.getClass().getName());
-        System.out.println("  stringList.getClass() == intList.getClass(): " 
-            + (stringList.getClass() == intList.getClass()));
+        System.out.println("  stringList.getClass() == intList.getClass(): "
+                + (stringList.getClass() == intList.getClass()));
         System.out.println("  结论：运行时 List<String> 和 List<Integer> 是同一个类！\n");
 
         // ==================== 编译器插入的类型转换 ====================
@@ -180,16 +176,16 @@ public class GenericDeepDiveDemo {
 
     /**
      * 3. 查看运行时实际的泛型信息
-     * 
+     * <p>
      * 虽然类型擦除会擦除大部分泛型信息，但以下地方保留了泛型签名（Signature 属性）：
      * 1. 父类泛型信息：通过 getGenericSuperclass() 获取
      * 2. 字段泛型信息：通过 Field.getGenericType() 获取
      * 3. 方法泛型信息：通过 Method.getGenericReturnType() 等获取
-     * 
+     * <p>
      * 【为什么能保留？】
      * 编译器在字节码中通过 Signature 属性记录了泛型签名。
      * 这是反射API能够获取泛型信息的基础。
-     * 
+     * <p>
      * 【局限】
      * 局部变量的泛型信息在运行时完全丢失，无法获取。
      */
@@ -199,12 +195,13 @@ public class GenericDeepDiveDemo {
         // ==================== 1. 通过父类获取泛型信息 ====================
         // 创建一个有具体泛型类型的子类
         // 关键：通过继承保留泛型信息
-        class StringList extends ArrayList<String> {}
-        
+        class StringList extends ArrayList<String> {
+        }
+
         System.out.println("1. 通过 getGenericSuperclass() 查看父类泛型：");
         Type genericSuperclass = StringList.class.getGenericSuperclass();
         System.out.println("   StringList 的父类类型: " + genericSuperclass);
-        
+
         if (genericSuperclass instanceof ParameterizedType) {
             ParameterizedType pt = (ParameterizedType) genericSuperclass;
             Type[] actualTypeArguments = pt.getActualTypeArguments();
@@ -217,7 +214,7 @@ public class GenericDeepDiveDemo {
         System.out.println("2. 通过字段查看泛型类型：");
         Field mapField = GenericDeepDiveDemo.class.getDeclaredField("genericField");
         System.out.println("   字段声明: " + mapField.getGenericType());
-        
+
         if (mapField.getGenericType() instanceof ParameterizedType) {
             ParameterizedType pt = (ParameterizedType) mapField.getGenericType();
             System.out.println("   原始类型: " + pt.getRawType());
@@ -250,7 +247,7 @@ public class GenericDeepDiveDemo {
 
     /**
      * 4. 泛型的编译期检查
-     * 
+     * <p>
      * 【泛型的工作时机】
      * | 阶段 | 泛型信息 | 操作 |
      * |------|----------|------|
@@ -258,7 +255,7 @@ public class GenericDeepDiveDemo {
      * | 编译阶段 | 部分擦除 | 插入类型转换、桥接方法 |
      * | 字节码阶段 | 仅保留签名 | Signature 属性记录 |
      * | 运行阶段 | 完全擦除 | 只知道原始类型 |
-     * 
+     * <p>
      * 【原始类型的危险】
      * 使用原始类型会失去类型安全保护，编译器只能给出警告。
      */
@@ -290,20 +287,20 @@ public class GenericDeepDiveDemo {
 
     /**
      * 5. 泛型边界与擦除规则
-     * 
+     * <p>
      * 【擦除规则】
      * 1. 无界类型参数 <T> → 擦除为 Object
-     *    - 编译后 T 被替换为 Object
-     *    - 所有对 T 的操作都变成了对 Object 的操作
-     * 
+     * - 编译后 T 被替换为 Object
+     * - 所有对 T 的操作都变成了对 Object 的操作
+     * <p>
      * 2. 有界类型参数 <T extends Number> → 擦除为边界类型 Number
-     *    - 编译后 T 被替换为 Number
-     *    - 可以调用 Number 的方法
-     * 
+     * - 编译后 T 被替换为 Number
+     * - 可以调用 Number 的方法
+     * <p>
      * 3. 多边界 <T extends Number & Comparable> → 擦除为第一个边界
-     *    - 编译后 T 被替换为第一个边界类型
-     *    - 用于保证类型安全和方法调用
-     * 
+     * - 编译后 T 被替换为第一个边界类型
+     * - 用于保证类型安全和方法调用
+     * <p>
      * 【桥接方法】
      * 当子类泛型实现父类泛型接口时，编译器会生成桥接方法保证多态正确性。
      */
@@ -326,10 +323,10 @@ public class GenericDeepDiveDemo {
         // 虽然使用时指定了不同的类型参数，但运行时是同一个类
         NumberBox<Integer> intNumBox = new NumberBox<>();
         NumberBox<Double> doubleNumBox = new NumberBox<>();
-        
+
         System.out.println("验证擦除后的类型：");
-        System.out.println("  NumberBox<Integer>.class == NumberBox<Double>.class: " 
-            + (intNumBox.getClass() == doubleNumBox.getClass()) + "\n");
+        System.out.println("  NumberBox<Integer>.class == NumberBox<Double>.class: "
+                + (intNumBox.getClass() == doubleNumBox.getClass()) + "\n");
 
         // ==================== 桥接方法演示 ====================
         // 桥接方法：编译器生成的合成方法，用于保证多态的正确性
@@ -337,20 +334,20 @@ public class GenericDeepDiveDemo {
         System.out.println("桥接方法（Bridge Method）：");
         System.out.println("  当子类泛型实现父类泛型接口时，编译器会生成桥接方法");
         for (Method m : StringRepository.class.getDeclaredMethods()) {
-            System.out.println("    " + m.getName() + " -> " + m.getReturnType().getName() 
-                + (m.isBridge() ? " (桥接方法)" : ""));
+            System.out.println("    " + m.getName() + " -> " + m.getReturnType().getName()
+                    + (m.isBridge() ? " (桥接方法)" : ""));
         }
         System.out.println();
     }
 
     /**
      * 6. 泛型通配符
-     * 
+     * <p>
      * 【三种通配符】
      * 1. <?> 无界通配符：表示未知类型
      * 2. <? extends T> 上界通配符：表示 T 或 T 的子类（生产者）
      * 3. <? super T> 下界通配符：表示 T 或 T 的父类（消费者）
-     * 
+     * <p>
      * 【核心原则：PECS】
      * Producer Extends, Consumer Super
      * - 生产者（只读）：使用 ? extends T
@@ -384,24 +381,24 @@ public class GenericDeepDiveDemo {
 
     /**
      * PECS 原则详细演示
-     * 
+     * <p>
      * 【PECS = Producer Extends, Consumer Super】
-     * 
+     * <p>
      * 这是泛型通配符使用的核心原则，理解的关键在于视角转换：
      * - "生产者/消费者"是从【集合的视角】来看的，不是从"你的视角"
-     * 
+     * <p>
      * 【生产者 = ? extends T】
      * - 集合生产数据给你的代码消费
      * - 你的代码 ← 数据 ← 集合
      * - 你只能从集合中读取数据
      * - 为什么不能写？因为无法保证类型安全（可能写入不兼容的类型）
-     * 
+     * <p>
      * 【消费者 = ? super T】
      * - 集合消费你代码产生的数据
      * - 你的代码 → 数据 → 集合
      * - 你只能向集合中写入数据
      * - 为什么不能读？因为读取类型不确定（可能是任何父类）
-     * 
+     * <p>
      * 【记忆口诀】
      * 餐厅类比：
      * - 厨师（生产者）：做菜给你吃 → 你只能读取/消费他的菜品 → ? extends T
@@ -502,19 +499,19 @@ public class GenericDeepDiveDemo {
 
     /**
      * 生产者方法：从集合中读取数据
-     * 
+     * <p>
      * 【为什么使用 ? extends Number？】
      * 因为这个方法的目的是从集合中"读取"数据进行计算。
      * 集合作为"生产者"，向我们提供数据。
-     * 
+     * <p>
      * 【使用 ? extends Number 的好处】
      * 1. 可以接受 List<Integer>、List<Double>、List<Long> 等任何 Number 子类列表
      * 2. 读取出来的元素可以安全地当作 Number 使用
-     * 
+     * <p>
      * 【限制】
      * - 不能向 producer 添加任何元素（除了 null）
      * - 因为编译器无法确定 producer 实际指向的是什么类型的列表
-     * 
+     *
      * @param producer 数据生产者，可以是任何 Number 子类的列表
      * @return 列表中所有元素的和
      */
@@ -530,21 +527,21 @@ public class GenericDeepDiveDemo {
 
     /**
      * 消费者方法：向集合中写入数据
-     * 
+     * <p>
      * 【为什么使用 ? super Integer？】
      * 因为这个方法的目的是向集合中"写入"数据。
      * 集合作为"消费者"，接受我们产生的数据。
-     * 
+     * <p>
      * 【使用 ? super Integer 的好处】
      * 1. 可以向 List<Integer>、List<Number>、List<Object> 等任何 Integer 父类列表写入
      * 2. Integer 可以安全地添加到任何 Integer 或其父类的列表中
-     * 
+     * <p>
      * 【限制】
      * - 从 consumer 读取的元素只能当作 Object 使用
      * - 因为编译器无法确定 consumer 实际指向的是什么类型的列表
-     * 
+     *
      * @param consumer 数据消费者，可以是任何 Integer 父类的列表
-     * @param values 要写入的 Integer 值
+     * @param values   要写入的 Integer 值
      */
     @SafeVarargs
     private static void writeToConsumer(List<? super Integer> consumer, Integer... values) {
@@ -558,7 +555,7 @@ public class GenericDeepDiveDemo {
 
     /**
      * 辅助方法：使用上界通配符的求和方法
-     * 
+     * <p>
      * 这是 PECS 中 Producer（生产者）的典型应用
      */
     private static double sumOfList(List<? extends Number> list) {
@@ -569,7 +566,7 @@ public class GenericDeepDiveDemo {
 
     /**
      * 辅助方法：使用下界通配符的添加方法
-     * 
+     * <p>
      * 这是 PECS 中 Consumer（消费者）的典型应用
      */
     private static void addNumbers(List<? super Integer> list, int n) {
@@ -578,12 +575,12 @@ public class GenericDeepDiveDemo {
 
     /**
      * 7. 泛型方法的类型推断
-     * 
+     * <p>
      * 【类型推断的三种方式】
      * 1. 显式指定类型参数：GenericDeepDiveDemo.<String>method()
      * 2. 编译器根据参数类型推断：根据传入参数推断
      * 3. 目标类型推断：根据赋值或返回类型推断
-     * 
+     * <p>
      * 【Java 7 之后】
      * 菱形语法 <> 允许编译器自动推断类型参数
      * List<String> list = new ArrayList<>();  // 编译器推断为 ArrayList<String>
@@ -612,31 +609,35 @@ public class GenericDeepDiveDemo {
     /**
      * 泛型方法示例：返回传入的值
      */
-    private static <T> T identity(T t) { return t; }
-    
+    private static <T> T identity(T t) {
+        return t;
+    }
+
     /**
      * 泛型方法示例：创建空列表
      */
-    private static <T> List<T> createList() { return new ArrayList<>(); }
+    private static <T> List<T> createList() {
+        return new ArrayList<>();
+    }
 
     /**
      * 8. 泛型与数组
-     * 
+     * <p>
      * 【为什么不能创建泛型数组？】
-     * 
+     * <p>
      * 核心原因：数组是协变的，泛型是不变的
-     * 
+     * <p>
      * 【协变 vs 不变】
      * - 协变：Object[] 可以存储 String[]（如果允许泛型数组会出问题）
      * - 不变：List<Object> 不能存储 List<String>
-     * 
+     * <p>
      * 【类型安全问题】
      * 假设允许创建泛型数组：
      * List<String>[] stringLists = new List<String>[1];  // 假设合法
      * Object[] objects = stringLists;  // 数组协变，合法
      * objects[0] = new ArrayList<Integer>();  // 泛型擦除，运行时通过
      * String s = stringLists[0].get(0);  // ClassCastException!
-     * 
+     * <p>
      * 【解决方案】
      * 1. 使用 List 代替数组：List<List<String>>
      * 2. 使用原始类型数组 + @SuppressWarnings（不推荐）
@@ -663,7 +664,7 @@ public class GenericDeepDiveDemo {
 
     /**
      * 9. 高频面试题
-     * 
+     * <p>
      * 总结泛型相关的核心面试问题，涵盖：
      * 1. 类型擦除原理
      * 2. 泛型运行时特性
@@ -719,26 +720,32 @@ public class GenericDeepDiveDemo {
 
     /**
      * 泛型类示例：一个简单的盒子类
-     * 
+     *
      * <T> 是类型参数，可以在使用时指定任意类型
-     * 
+     * <p>
      * 使用示例：
      * - Box<String> stringBox = new Box<>();
      * - Box<Integer> intBox = new Box<>();
      */
     static class Box<T> {
         private T value;
-        public void setValue(T value) { this.value = value; }
-        public T getValue() { return value; }
+
+        public void setValue(T value) {
+            this.value = value;
+        }
+
+        public T getValue() {
+            return value;
+        }
     }
 
     /**
      * 有界泛型类示例：只能存储 Number 及其子类
-     * 
+     * <p>
      * <T extends Number> 限定了类型参数的上界
      * - 只能使用 Number 或其子类（Integer、Double、Long 等）
      * - 擦除后类型变为 Number，而不是 Object
-     * 
+     * <p>
      * 使用示例：
      * - NumberBox<Integer> intBox = new NumberBox<>();  // 正确
      * - NumberBox<Double> doubleBox = new NumberBox<>();  // 正确
@@ -746,34 +753,46 @@ public class GenericDeepDiveDemo {
      */
     static class NumberBox<T extends Number> {
         private T value;
-        public void setValue(T value) { this.value = value; }
-        public T getValue() { return value; }
+
+        public void setValue(T value) {
+            this.value = value;
+        }
+
+        public T getValue() {
+            return value;
+        }
     }
 
     /**
      * 泛型接口示例：仓库接口
-     * 
+     * <p>
      * 定义了一个简单的泛型接口，返回指定类型的数据
      */
-    interface Repository<T> { T get(); }
+    interface Repository<T> {
+        T get();
+    }
 
     /**
      * 泛型接口实现示例
-     * 
+     * <p>
      * StringRepository 实现了 Repository<String>，指定了具体类型
-     * 
+     * <p>
      * 【桥接方法说明】
      * 编译器会为这个类生成一个桥接方法：
      * - public Object get() { return get(); }  // 桥接方法
      * - public String get() { return "..."; }  // 实际方法
-     * 
+     * <p>
      * 桥接方法保证了多态的正确性，使得 Repository<Object>.get() 可以正确调用
      */
     static class StringRepository implements Repository<String> {
         @Override
-        public String get() { return "Hello from StringRepository"; }
+        public String get() {
+            return "Hello from StringRepository";
+        }
     }
 
     @SafeVarargs
-    private static <T> String arrayToString(T... array) { return Arrays.toString(array); }
+    private static <T> String arrayToString(T... array) {
+        return Arrays.toString(array);
+    }
 }

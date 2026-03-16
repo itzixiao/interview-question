@@ -4,15 +4,15 @@ import org.springframework.stereotype.Component;
 
 /**
  * Service C - 演示 setter 注入解决循环依赖
- * 
+ *
  * @author itzixiao
  * @since 2026-03-13
  */
 @Component
 public class ServiceC {
-    
+
     private ServiceD serviceD;
-    
+
     /**
      * Setter 注入 ServiceD
      * Spring 先创建 ServiceC 实例，然后创建 ServiceD，最后通过 setter 注入
@@ -22,7 +22,7 @@ public class ServiceC {
         this.serviceD = serviceD;
         System.out.println("===== ServiceC Setter 注入完成 =====");
     }
-    
+
     /**
      * C 调用 D 的方法
      */
@@ -32,7 +32,7 @@ public class ServiceC {
             serviceD.doSomethingElse();
         }
     }
-    
+
     /**
      * C 的其他方法
      */

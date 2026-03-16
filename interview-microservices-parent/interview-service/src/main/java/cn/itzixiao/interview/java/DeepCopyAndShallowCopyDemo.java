@@ -6,28 +6,28 @@ import java.io.*;
  * =====================================================================================
  * 深拷贝与浅拷贝详解
  * =====================================================================================
- * 
+ * <p>
  * 一、什么是拷贝？
  * -------------------------------------------------------------------------------------
  * 拷贝就是创建一个对象的副本。根据副本与原对象的关系，分为深拷贝和浅拷贝。
- * 
+ * <p>
  * 二、浅拷贝（Shallow Copy）
  * -------------------------------------------------------------------------------------
  * - 创建一个新对象，复制基本类型属性的值
  * - 对于引用类型属性，只复制引用（地址），不复制对象本身
  * - 原对象和副本的引用类型属性指向同一个对象
  * - 实现：实现 Cloneable 接口，重写 clone() 方法
- * 
+ * <p>
  * 三、深拷贝（Deep Copy）
  * -------------------------------------------------------------------------------------
  * - 创建一个新对象，复制所有属性
  * - 对于引用类型属性，也创建新对象（递归拷贝）
  * - 原对象和副本完全独立，互不影响
  * - 实现方式：
- *   1. 序列化/反序列化（推荐）
- *   2. 手动复制（构造方法或工具方法）
- *   3. 重写 clone() 方法递归拷贝
- * 
+ * 1. 序列化/反序列化（推荐）
+ * 2. 手动复制（构造方法或工具方法）
+ * 3. 重写 clone() 方法递归拷贝
+ * <p>
  * 四、内存结构对比
  * -------------------------------------------------------------------------------------
  * 浅拷贝内存结构：
@@ -38,12 +38,12 @@ import java.io.*;
  * │ age: 25      │     │ age: 25      │
  * │ address ─────┼──┬──┼─→ address    │ ← 引用类型：引用复制
  * └──────────────┘  │  └──────────────┘
- *                   ↓
- *              ┌──────────────┐
- *              │ Address 对象 │ ← 同一个对象，共享！
- *              │ city: "北京" │
- *              └──────────────┘
- * 
+ * ↓
+ * ┌──────────────┐
+ * │ Address 对象 │ ← 同一个对象，共享！
+ * │ city: "北京" │
+ * └──────────────┘
+ * <p>
  * 深拷贝内存结构：
  * ┌──────────────┐     ┌──────────────┐
  * │ 原对象       │     │ 副本对象     │
@@ -52,12 +52,12 @@ import java.io.*;
  * │ age: 25      │     │ age: 25      │
  * │ address ─────┼──┐  │ address ─────┼──┐
  * └──────────────┘  │  └──────────────┘  │
- *                   ↓                    ↓
- *              ┌──────────────┐    ┌──────────────┐
- *              │ Address 对象1│    │ Address 对象2│ ← 两个独立对象！
- *              │ city: "北京" │    │ city: "北京" │
- *              └──────────────┘    └──────────────┘
- * 
+ * ↓                    ↓
+ * ┌──────────────┐    ┌──────────────┐
+ * │ Address 对象1│    │ Address 对象2│ ← 两个独立对象！
+ * │ city: "北京" │    │ city: "北京" │
+ * └──────────────┘    └──────────────┘
+ * <p>
  * 五、Java 中的拷贝
  * -------------------------------------------------------------------------------------
  * - Object.clone()：默认是浅拷贝
@@ -92,7 +92,7 @@ public class DeepCopyAndShallowCopyDemo {
         System.out.println("【一、浅拷贝演示】\n");
 
         // 创建原对象
-        PersonShallow original = new PersonShallow("张三", 25, 
+        PersonShallow original = new PersonShallow("张三", 25,
                 new AddressShallow("北京", "朝阳区"));
         System.out.println("原对象: " + original);
 
@@ -112,7 +112,7 @@ public class DeepCopyAndShallowCopyDemo {
         // 对比引用
         System.out.println("\n【引用对比】:");
         System.out.println("  original == copy: " + (original == copy));
-        System.out.println("  original.address == copy.address: " + 
+        System.out.println("  original.address == copy.address: " +
                 (original.getAddress() == copy.getAddress()));
         System.out.println("  → 地址引用相同，说明是同一个对象");
     }
@@ -124,7 +124,7 @@ public class DeepCopyAndShallowCopyDemo {
         System.out.println("\n【二、深拷贝演示】\n");
 
         // 创建原对象
-        PersonDeep original = new PersonDeep("李四", 30, 
+        PersonDeep original = new PersonDeep("李四", 30,
                 new AddressDeep("广州", "天河区"));
         System.out.println("原对象: " + original);
 
@@ -144,7 +144,7 @@ public class DeepCopyAndShallowCopyDemo {
         // 对比引用
         System.out.println("\n【引用对比】:");
         System.out.println("  original == copy: " + (original == copy));
-        System.out.println("  original.address == copy.address: " + 
+        System.out.println("  original.address == copy.address: " +
                 (original.getAddress() == copy.getAddress()));
         System.out.println("  → 地址引用不同，说明是独立对象");
     }
@@ -186,7 +186,7 @@ public class DeepCopyAndShallowCopyDemo {
         java.util.List<AddressShallow> list1 = new java.util.ArrayList<>();
         list1.add(new AddressShallow("北京", "朝阳"));
         java.util.List<AddressShallow> list1Copy = new java.util.ArrayList<>(list1);
-        
+
         list1.get(0).setCity("上海");
         System.out.println("  原集合元素: " + list1.get(0));
         System.out.println("  副本集合元素: " + list1Copy.get(0));
@@ -196,12 +196,12 @@ public class DeepCopyAndShallowCopyDemo {
         System.out.println("\n2. 集合深拷贝（手动复制每个元素）:");
         java.util.List<AddressDeep> list2 = new java.util.ArrayList<>();
         list2.add(new AddressDeep("广州", "天河"));
-        
+
         java.util.List<AddressDeep> list2DeepCopy = new java.util.ArrayList<>();
         for (AddressDeep addr : list2) {
             list2DeepCopy.add(new AddressDeep(addr.getCity(), addr.getDistrict()));
         }
-        
+
         list2.get(0).setCity("深圳");
         System.out.println("  原集合元素: " + list2.get(0));
         System.out.println("  副本集合元素: " + list2DeepCopy.get(0));
@@ -297,7 +297,7 @@ class PersonShallow implements Cloneable {
 
     @Override
     public String toString() {
-        return "Person{name='" + name + "', age=" + age + 
+        return "Person{name='" + name + "', age=" + age +
                 ", address=" + address + "}";
     }
 }
@@ -369,7 +369,7 @@ class PersonDeep implements Serializable {
     public PersonDeep manualCopy() {
         // 手动创建新对象，复制所有属性
         AddressDeep addressCopy = new AddressDeep(
-                this.address.getCity(), 
+                this.address.getCity(),
                 this.address.getDistrict());
         return new PersonDeep(this.name, this.age, addressCopy);
     }
@@ -380,7 +380,7 @@ class PersonDeep implements Serializable {
 
     @Override
     public String toString() {
-        return "Person{name='" + name + "', age=" + age + 
+        return "Person{name='" + name + "', age=" + age +
                 ", address=" + address + "}";
     }
 }

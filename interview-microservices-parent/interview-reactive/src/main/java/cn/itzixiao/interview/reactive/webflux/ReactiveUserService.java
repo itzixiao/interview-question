@@ -12,36 +12,36 @@ import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Spring WebFlux 响应式服务层
- * 
+ * <p>
  * 特点：
  * - 非阻塞 I/O
  * - 响应式数据流
  * - 背压支持
- * 
+ *
  * @author itzixiao
  * @date 2026-03-15
  */
 @Service
 @RequiredArgsConstructor
 public class ReactiveUserService {
-    
+
     private final ConcurrentHashMap<Long, User> database = new ConcurrentHashMap<>();
     private final AtomicLong idGenerator = new AtomicLong(1);
-    
+
     /**
      * 根据 ID 查询用户（返回 Mono）
      */
     public Mono<User> getUserById(Long id) {
         return Mono.justOrEmpty(database.get(id));
     }
-    
+
     /**
      * 查询所有用户（返回 Flux）
      */
     public Flux<User> getAllUsers() {
         return Flux.fromIterable(database.values());
     }
-    
+
     /**
      * 创建用户
      */
@@ -51,7 +51,7 @@ public class ReactiveUserService {
         database.put(newId, user);
         return Mono.just(user);
     }
-    
+
     /**
      * 更新用户
      */
@@ -64,7 +64,7 @@ public class ReactiveUserService {
                     return Mono.just(existingUser);
                 });
     }
-    
+
     /**
      * 删除用户
      */
@@ -72,7 +72,7 @@ public class ReactiveUserService {
         database.remove(id);
         return Mono.empty();
     }
-    
+
     /**
      * 搜索用户（模拟异步操作）
      */

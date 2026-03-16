@@ -24,7 +24,7 @@ spring:
         dashboard: ${SENTINEL_DASHBOARD:localhost:8858}
       eager: true
 
-# 生产环境数据源（建议从 Nacos 配置中心读取）
+  # 生产环境数据源（建议从 Nacos 配置中心读取）
   datasource:
     url: ${MYSQL_URL:jdbc:mysql://localhost:3306/interview?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=Asia/Shanghai}
     username: ${MYSQL_USERNAME:root}
@@ -37,7 +37,7 @@ spring:
       max-lifetime: 1800000
       connection-timeout: 30000
 
-# 生产环境 Redis
+  # 生产环境 Redis
   redis:
     host: ${REDIS_HOST:localhost}
     port: ${REDIS_PORT:6379}

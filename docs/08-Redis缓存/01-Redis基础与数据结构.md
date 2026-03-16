@@ -40,11 +40,13 @@ struct sdshdr {
 ```
 
 **特点**：
+
 - 支持自动扩容
 - O(1) 获取字符串长度
 - 二进制安全（可存储图片、序列化对象等）
 
 **常用命令**：
+
 ```bash
 SET key value
 GET key
@@ -56,6 +58,7 @@ SETEX key 30 value  # 设置过期时间
 ```
 
 **使用场景**：
+
 - 缓存 Session、Token
 - 计数器（点赞数、浏览量）
 - 分布式锁
@@ -71,11 +74,13 @@ SETEX key 30 value  # 设置过期时间
 - Redis 7.0+：quicklist（结合了两者优点）
 
 **特点**：
+
 - 有序、可重复
 - 支持两端插入和弹出
 - 最大长度：2^32 - 1
 
 **常用命令**：
+
 ```bash
 LPUSH key value1 value2   # 左侧插入
 RPUSH key value1 value2   # 右侧插入
@@ -87,6 +92,7 @@ LLEN key                  # 获取列表长度
 ```
 
 **使用场景**：
+
 - 消息队列（LPUSH + BRPOP）
 - 最新列表（微博关注列表）
 - 栈和队列
@@ -98,11 +104,13 @@ LLEN key                  # 获取列表长度
 **底层实现**：ziplist（压缩列表）或 hashtable（哈希表）
 
 **特点**：
+
 - 适合存储对象
 - field 无序
 - 支持单个字段操作
 
 **常用命令**：
+
 ```bash
 HSET key field value       # 设置字段
 HGET key field             # 获取字段
@@ -115,6 +123,7 @@ HVALS key                  # 获取所有 value
 ```
 
 **使用场景**：
+
 - 对象存储（用户信息、商品信息）
 - 购物车
 - 配置项
@@ -126,10 +135,12 @@ HVALS key                  # 获取所有 value
 **底层实现**：intset（整数集合）或 hashtable
 
 **特点**：
+
 - 无序、不重复
 - 支持交集、并集、差集运算
 
 **常用命令**：
+
 ```bash
 SADD key member1 member2   # 添加元素
 SMEMBERS key               # 获取所有元素
@@ -141,6 +152,7 @@ SDIFF key1 key2            # 差集
 ```
 
 **使用场景**：
+
 - 标签系统
 - 共同好友/关注
 - 去重统计
@@ -153,6 +165,7 @@ SDIFF key1 key2            # 差集
 **底层实现**：ziplist 或 skiplist（跳表）+ hashtable
 
 **跳表结构**：
+
 ```
 Level 4: 1 ──────────────────────────────────> NULL
 Level 3: 1 ──────> 5 ────────────────────────> NULL
@@ -161,11 +174,13 @@ Level 1: 1 ──> 2 ──> 3 ──> 5 ──> 7 ──> 8 ────> NULL
 ```
 
 **特点**：
+
 - 有序、不重复
 - 每个元素关联一个 score（分数）
 - 支持范围查询
 
 **常用命令**：
+
 ```bash
 ZADD key score member1 score member2   # 添加元素
 ZRANGE key start stop [WITHSCORES]     # 升序获取
@@ -177,6 +192,7 @@ ZCOUNT key min max                     # 统计分数范围内的元素
 ```
 
 **使用场景**：
+
 - 排行榜（成绩、销量）
 - 延时队列（score = 执行时间戳）
 - 带权重的队列
@@ -190,10 +206,12 @@ ZCOUNT key min max                     # 统计分数范围内的元素
 **底层实现**：String
 
 **特点**：
+
 - 按 bit 存储，极度节省空间
 - 支持位运算
 
 **常用命令**：
+
 ```bash
 SETBIT key offset value    # 设置位
 GETBIT key offset          # 获取位
@@ -202,6 +220,7 @@ BITOP op destkey key [...] # 位运算
 ```
 
 **使用场景**：
+
 - 签到统计
 - 布隆过滤器
 - 状态标记
@@ -213,11 +232,13 @@ BITOP op destkey key [...] # 位运算
 **底层实现**：稀疏存储 / 稠密存储
 
 **特点**：
+
 - 占用空间固定（12KB）
 - 有误差（约 0.81%）
 - 适合大规模数据统计
 
 **常用命令**：
+
 ```bash
 PFADD key element1 element2   # 添加元素
 PFCOUNT key                   # 统计基数
@@ -225,6 +246,7 @@ PFMERGE destkey sourcekey [...]  # 合并多个 HLL
 ```
 
 **使用场景**：
+
 - UV 统计（网站访问量）
 - 海量数据去重
 
@@ -235,11 +257,13 @@ PFMERGE destkey sourcekey [...]  # 合并多个 HLL
 **底层实现**：Radix Tree（基数树）
 
 **特点**：
+
 - Redis 5.0+ 引入
 - 支持消费者组
 - 消息持久化
 
 **常用命令**：
+
 ```bash
 XADD key * field1 value1      # 添加消息
 XREAD COUNT 2 STREAMS key id  # 读取消息
@@ -248,6 +272,7 @@ XREADGROUP GROUP group consumer ...  # 消费者组读取
 ```
 
 **使用场景**：
+
 - 消息队列
 - 事件日志
 - 数据流处理
@@ -259,6 +284,7 @@ XREADGROUP GROUP group consumer ...  # 消费者组读取
 ### 3.1 事务基础
 
 **命令**：
+
 ```bash
 MULTI    # 开启事务
 EXEC     # 执行事务
@@ -267,11 +293,13 @@ WATCH    # 监视 key（乐观锁）
 ```
 
 **特点**：
+
 - **不支持回滚**：命令执行失败不会回滚已执行的命令
 - **原子性**：事务中的命令要么全部执行，要么全部不执行
 - **无隔离级别**：事务中的命令在 EXEC 之前不会被执行
 
 **示例**：
+
 ```bash
 MULTI
 SET name redis
@@ -284,11 +312,13 @@ EXEC
 ### 3.2 Lua 脚本
 
 **优势**：
+
 - 保证原子性（脚本执行期间不会被中断）
 - 减少网络开销
 - 实现复杂逻辑
 
 **示例 1：分布式锁释放**
+
 ```lua
 if redis.call('get', KEYS[1]) == ARGV[1] then
     return redis.call('del', KEYS[1])
@@ -298,6 +328,7 @@ end
 ```
 
 **示例 2：限流**
+
 ```lua
 local key = KEYS[1]
 local limit = tonumber(ARGV[1])
@@ -319,22 +350,23 @@ end
 
 **参考答案**：
 
-| 数据类型 | 底层实现 | 使用场景 |
-|----------|----------|----------|
-| String | SDS | 缓存、计数器、分布式锁 |
-| List | QuickList | 消息队列、最新列表 |
-| Hash | ziplist / hashtable | 对象存储、购物车 |
-| Set | intset / hashtable | 标签、共同好友、去重 |
-| ZSet | ziplist / skiplist | 排行榜、延时队列 |
-| Bitmap | String | 签到、布隆过滤器 |
-| HyperLogLog | 稀疏/稠密存储 | UV 统计 |
-| Stream | Radix Tree | 消息队列 |
+| 数据类型        | 底层实现                | 使用场景        |
+|-------------|---------------------|-------------|
+| String      | SDS                 | 缓存、计数器、分布式锁 |
+| List        | QuickList           | 消息队列、最新列表   |
+| Hash        | ziplist / hashtable | 对象存储、购物车    |
+| Set         | intset / hashtable  | 标签、共同好友、去重  |
+| ZSet        | ziplist / skiplist  | 排行榜、延时队列    |
+| Bitmap      | String              | 签到、布隆过滤器    |
+| HyperLogLog | 稀疏/稠密存储             | UV 统计       |
+| Stream      | Radix Tree          | 消息队列        |
 
 ---
 
 ### 问题 2：String 类型的最大存储容量是多少？
 
 **参考答案**：
+
 - 最大存储：512MB
 - 实际建议：不要超过 10KB，避免网络传输慢
 
@@ -345,11 +377,13 @@ end
 **参考答案**：
 
 **跳表特点**：
+
 1. 多层链表结构，高层节点跨度大
 2. 查找时从高层开始，逐步下降
 3. 平均时间复杂度：O(log n)
 
 **查找过程**：
+
 ```
 1. 从最高层开始查找
 2. 如果当前节点 < 目标，向右移动
@@ -358,6 +392,7 @@ end
 ```
 
 **为什么不用红黑树？**
+
 - 跳表实现更简单
 - 范围查找效率更高
 - 并发性能更好
@@ -382,15 +417,18 @@ end
 **参考答案**：
 
 **背景**：
+
 - Redis 瓶颈不在 CPU，而在网络 IO
 - 单线程处理大量网络请求时 CPU 利用率不高
 
 **多线程设计**：
+
 - 仅 IO 线程多线程（读取请求、发送响应）
 - **命令执行仍是单线程**
 - 避免了加锁，保持简单性
 
 **开启方式**：
+
 ```bash
 io-threads 4
 io-threads-do-reads yes
@@ -436,12 +474,12 @@ SETEX key $((3600 + RANDOM % 300)) value
 
 ## 六、总结
 
-| 知识点 | 核心内容 |
-|--------|----------|
-| 数据类型 | String、List、Set、Hash、ZSet 及底层实现 |
-| 高性能原因 | 内存操作、单线程、IO 多路复用、高效数据结构 |
-| 事务 | MULTI/EXEC、不支持回滚、Lua 脚本保证原子性 |
-| 应用场景 | 缓存、计数器、消息队列、排行榜、分布式锁 |
+| 知识点   | 核心内容                            |
+|-------|---------------------------------|
+| 数据类型  | String、List、Set、Hash、ZSet 及底层实现 |
+| 高性能原因 | 内存操作、单线程、IO 多路复用、高效数据结构         |
+| 事务    | MULTI/EXEC、不支持回滚、Lua 脚本保证原子性    |
+| 应用场景  | 缓存、计数器、消息队列、排行榜、分布式锁            |
 
 ---
 

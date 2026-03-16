@@ -1,6 +1,9 @@
 package cn.itzixiao.interview.mybatis;
 
-import org.apache.ibatis.annotations.*;
+import org.apache.ibatis.annotations.InsertProvider;
+import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.SelectProvider;
+import org.apache.ibatis.annotations.UpdateProvider;
 import org.apache.ibatis.jdbc.SQL;
 
 import java.util.List;
@@ -8,9 +11,9 @@ import java.util.Map;
 
 /**
  * MyBatis 动态 SQL 详解
- *
+ * <p>
  * 动态 SQL 是 MyBatis 的强大特性之一，可以基于不同条件动态生成 SQL 语句
- *
+ * <p>
  * 主要标签：
  * ┌─────────────────────────────────────────────────────────────┐
  * │  <if>          - 条件判断                                    │
@@ -28,21 +31,21 @@ public class MyBatisDynamicSqlDemo {
 
     /**
      * 1. 动态查询 - 使用 XML Mapper
-     *
+     * <p>
      * <!-- UserMapper.xml -->
      * <select id="findByCondition" resultType="User">
-     *     SELECT * FROM user
-     *     <where>
-     *         <if test="username != null">
-     *             AND username LIKE CONCAT('%', #{username}, '%')
-     *         </if>
-     *         <if test="status != null">
-     *             AND status = #{status}
-     *         </if>
-     *         <if test="startTime != null and endTime != null">
-     *             AND create_time BETWEEN #{startTime} AND #{endTime}
-     *         </if>
-     *     </where>
+     * SELECT * FROM user
+     * <where>
+     * <if test="username != null">
+     * AND username LIKE CONCAT('%', #{username}, '%')
+     * </if>
+     * <if test="status != null">
+     * AND status = #{status}
+     * </if>
+     * <if test="startTime != null and endTime != null">
+     * AND create_time BETWEEN #{startTime} AND #{endTime}
+     * </if>
+     * </where>
      * </select>
      */
     public interface UserMapper {
@@ -263,14 +266,37 @@ public class MyBatisDynamicSqlDemo {
         private Integer status;
 
         // Getters and Setters
-        public Long getId() { return id; }
-        public void setId(Long id) { this.id = id; }
-        public String getUsername() { return username; }
-        public void setUsername(String username) { this.username = username; }
-        public String getEmail() { return email; }
-        public void setEmail(String email) { this.email = email; }
-        public Integer getStatus() { return status; }
-        public void setStatus(Integer status) { this.status = status; }
+        public Long getId() {
+            return id;
+        }
+
+        public void setId(Long id) {
+            this.id = id;
+        }
+
+        public String getUsername() {
+            return username;
+        }
+
+        public void setUsername(String username) {
+            this.username = username;
+        }
+
+        public String getEmail() {
+            return email;
+        }
+
+        public void setEmail(String email) {
+            this.email = email;
+        }
+
+        public Integer getStatus() {
+            return status;
+        }
+
+        public void setStatus(Integer status) {
+            this.status = status;
+        }
     }
 
     /**

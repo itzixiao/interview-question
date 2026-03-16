@@ -2,18 +2,16 @@ package cn.itzixiao.interview.java;
 
 import java.io.*;
 import java.nio.ByteBuffer;
-import java.nio.channels.*;
+import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
-import java.net.*;
 import java.util.*;
-import java.util.concurrent.*;
 
 /**
  * Java IO/NIO 深入理解 - 教学型详解
- *
+ * <p>
  * 本示例从底层原理到实际应用，系统性地讲解 Java IO 的各个方面
- *
+ * <p>
  * ┌─────────────────────────────────────────────────────────────────────────────┐
  * │                          Java IO 体系总览                                   │
  * │                                                                             │
@@ -127,7 +125,7 @@ public class IODeepDiveDemo {
         try (BufferedInputStream bis = new BufferedInputStream(
                 new FileInputStream(TEST_FILE));
              BufferedOutputStream bos = new BufferedOutputStream(
-                new FileOutputStream("copy.txt"))) {
+                     new FileOutputStream("copy.txt"))) {
 
             byte[] buffer = new byte[1024];
             int len;
@@ -350,7 +348,7 @@ public class IODeepDiveDemo {
             for (Path entry : stream) {
                 if (count++ < 5) {
                     System.out.println("    " + entry.getFileName() +
-                        (Files.isDirectory(entry) ? " [目录]" : " [文件]"));
+                            (Files.isDirectory(entry) ? " [目录]" : " [文件]"));
                 }
             }
         }
@@ -552,7 +550,7 @@ public class IODeepDiveDemo {
         Thread reader = new Thread(() -> {
             try {
                 BufferedReader br = new BufferedReader(
-                    new InputStreamReader(pis, StandardCharsets.UTF_8));
+                        new InputStreamReader(pis, StandardCharsets.UTF_8));
                 String line;
                 while ((line = br.readLine()) != null) {
                     System.out.println("  接收: " + line);
@@ -616,8 +614,8 @@ public class IODeepDiveDemo {
         System.out.println("\n【使用 Enumeration 合并两个流】");
         try (SequenceInputStream sis = new SequenceInputStream(
                 Collections.enumeration(Arrays.asList(
-                    new ByteArrayInputStream("A".getBytes()),
-                    new ByteArrayInputStream("B".getBytes()))))) {
+                        new ByteArrayInputStream("A".getBytes()),
+                        new ByteArrayInputStream("B".getBytes()))))) {
             System.out.println("  合并结果: " + (char) sis.read() + (char) sis.read());
         }
         System.out.println();
@@ -782,7 +780,7 @@ public class IODeepDiveDemo {
         start = System.currentTimeMillis();
         try (FileChannel srcChannel = FileChannel.open(testFile, StandardOpenOption.READ);
              FileChannel destChannel = FileChannel.open(Paths.get("copy3.txt"),
-                 StandardOpenOption.CREATE, StandardOpenOption.WRITE)) {
+                     StandardOpenOption.CREATE, StandardOpenOption.WRITE)) {
             destChannel.transferFrom(srcChannel, 0, srcChannel.size());
         }
         end = System.currentTimeMillis();

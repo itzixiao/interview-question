@@ -6,7 +6,7 @@ server:
 spring:
   application:
     name: interview-algorithm
-    
+
   # Nacos 配置（如需要可启用）
   cloud:
     nacos:

@@ -9,47 +9,51 @@
 ## 📖 文档列表
 
 ### 1. MySQL 字段类型与存储引擎
+
 - **文件路径：** [`docs/MySQL 字段类型与存储引擎.md`](./MySQL 字段类型与存储引擎.md)
 - **内容概要：**
-  - 数值类型（TINYINT ~ BIGINT、FLOAT/DOUBLE/DECIMAL）
-  - 字符串类型（CHAR/VARCHAR、TEXT 系列、BLOB）
-  - 日期时间类型（DATE、TIME、DATETIME、TIMESTAMP、YEAR）
-  - 四大存储引擎详解（InnoDB、MyISAM、Memory、Archive）
+    - 数值类型（TINYINT ~ BIGINT、FLOAT/DOUBLE/DECIMAL）
+    - 字符串类型（CHAR/VARCHAR、TEXT 系列、BLOB）
+    - 日期时间类型（DATE、TIME、DATETIME、TIMESTAMP、YEAR）
+    - 四大存储引擎详解（InnoDB、MyISAM、Memory、Archive）
 - **面试题数量：** 5 道
 - **适合阶段：** 基础入门
 
 ### 2. MySQL 索引原理详解
+
 - **文件路径：** [`docs/MySQL 索引原理详解.md`](./MySQL 索引原理详解.md)
 - **内容概要：**
-  - B+Tree 数据结构图解
-  - 聚簇索引 vs 二级索引
-  - 索引分类与创建管理
-  - 索引失效 7 大场景
-  - 索引优化 6 大策略
+    - B+Tree 数据结构图解
+    - 聚簇索引 vs 二级索引
+    - 索引分类与创建管理
+    - 索引失效 7 大场景
+    - 索引优化 6 大策略
 - **面试题数量：** 6 道
 - **适合阶段：** 进阶提升
 
 ### 3. MySQL 事务与锁机制详解
+
 - **文件路径：** [`docs/MySQL 事务与锁机制详解.md`](./MySQL 事务与锁机制详解.md)
 - **内容概要：**
-  - ACID 四大特性
-  - 并发一致性问题（脏读、不可重复读、幻读）
-  - 四种隔离级别对比
-  - MVCC 多版本并发控制
-  - 锁机制（表锁、行锁、死锁）
-  - InnoDB 行锁算法
+    - ACID 四大特性
+    - 并发一致性问题（脏读、不可重复读、幻读）
+    - 四种隔离级别对比
+    - MVCC 多版本并发控制
+    - 锁机制（表锁、行锁、死锁）
+    - InnoDB 行锁算法
 - **面试题数量：** 8 道
 - **适合阶段：** 高级深入
 
 ### 4. MySQL 日志与性能优化详解
+
 - **文件路径：** [`docs/MySQL 日志与性能优化详解.md`](./MySQL 日志与性能优化详解.md)
 - **内容概要：**
-  - Redo Log vs Binlog vs Undo Log
-  - 两阶段提交
-  - Slow Query Log
-  - EXPLAIN 分析 SQL
-  - SQL 语句优化技巧
-  - 表结构优化策略
+    - Redo Log vs Binlog vs Undo Log
+    - 两阶段提交
+    - Slow Query Log
+    - EXPLAIN 分析 SQL
+    - SQL 语句优化技巧
+    - 表结构优化策略
 - **面试题数量：** 8 道
 - **适合阶段：** 实战调优
 
@@ -58,19 +62,21 @@
 ## 💻 示例代码
 
 ### MySQLCorePrincipleDemo.java
+
 - **文件路径：** `interview-service/src/main/java/cn/itzixiao/interview/mysql/MySQLCorePrincipleDemo.java`
 - **代码规模：** 617 行
 - **功能模块：**
-  1. 字段类型演示
-  2. 存储引擎对比
-  3. 索引原理讲解
-  4. 日志系统介绍
-  5. 事务特性展示
-  6. 锁机制演示
-  7. 性能优化示例
-  8. 高频面试题汇总
+    1. 字段类型演示
+    2. 存储引擎对比
+    3. 索引原理讲解
+    4. 日志系统介绍
+    5. 事务特性展示
+    6. 锁机制演示
+    7. 性能优化示例
+    8. 高频面试题汇总
 
 **运行方式：**
+
 ```bash
 # 编译项目
 mvn clean compile -pl interview-service -am
@@ -135,17 +141,20 @@ MySQL 核心知识体系
 ## 🎯 学习路径推荐
 
 ### 初级工程师
+
 1. ✅ 字段类型与存储引擎
 2. ✅ 索引基础（创建、使用）
 3. ✅ 简单 SQL 编写
 
 ### 中级工程师
+
 1. ✅ 索引原理与优化
 2. ✅ 事务基础（ACID、隔离级别）
 3. ✅ SQL 性能分析（EXPLAIN）
 4. ✅ 常见锁机制
 
 ### 高级工程师
+
 1. ✅ MVCC 实现原理
 2. ✅ InnoDB 行锁算法
 3. ✅ 日志系统（Redo/Bin/Undo）
@@ -153,6 +162,7 @@ MySQL 核心知识体系
 5. ✅ 死锁分析与预防
 
 ### 架构师
+
 1. ✅ 主从复制原理
 2. ✅ 读写分离方案
 3. ✅ 分库分表策略
@@ -162,15 +172,16 @@ MySQL 核心知识体系
 
 ## 🔥 高频面试题统计
 
-| 文档 | 面试题数量 | 重要程度 |
-|------|------------|----------|
-| 字段类型与存储引擎 | 5 道 | ⭐⭐⭐ |
-| 索引原理详解 | 6 道 | ⭐⭐⭐⭐⭐ |
-| 事务与锁机制 | 8 道 | ⭐⭐⭐⭐⭐ |
-| 日志与优化 | 8 道 | ⭐⭐⭐⭐⭐ |
-| **总计** | **27 道** | - |
+| 文档        | 面试题数量    | 重要程度  |
+|-----------|----------|-------|
+| 字段类型与存储引擎 | 5 道      | ⭐⭐⭐   |
+| 索引原理详解    | 6 道      | ⭐⭐⭐⭐⭐ |
+| 事务与锁机制    | 8 道      | ⭐⭐⭐⭐⭐ |
+| 日志与优化     | 8 道      | ⭐⭐⭐⭐⭐ |
+| **总计**    | **27 道** | -     |
 
 **最高频考点：**
+
 1. InnoDB vs MyISAM
 2. B+Tree 索引结构
 3. 聚簇索引 vs 二级索引
@@ -192,16 +203,19 @@ MySQL 核心知识体系
 ## 📝 配套资源
 
 ### 官方文档
+
 - [MySQL 8.0 Reference Manual](https://dev.mysql.com/doc/refman/8.0/en/)
 - [InnoDB Storage Engine](https://dev.mysql.com/doc/refman/8.0/en/innodb-storage-engine.html)
 
 ### 实践工具
+
 - **MySQL Workbench**：可视化数据库管理工具
 - **Percona Toolkit**：高性能运维工具集
 - **pt-query-digest**：慢查询分析工具
 - **mysqltuner.pl**：性能调优建议脚本
 
 ### 推荐书籍
+
 - 《高性能 MySQL》
 - 《MySQL 技术内幕：InnoDB 存储引擎》
 - 《深入理解 MySQL 主从复制》
@@ -211,6 +225,7 @@ MySQL 核心知识体系
 ## 🚀 快速开始
 
 ### 1. 查看字段类型
+
 ```bash
 # 阅读文档
 cat docs/MySQL 字段类型与存储引擎.md
@@ -220,6 +235,7 @@ java cn.itzixiao.interview.mysql.MySQLCorePrincipleDemo
 ```
 
 ### 2. 学习索引原理
+
 ```bash
 # 阅读文档
 cat docs/MySQL 索引原理详解.md
@@ -230,6 +246,7 @@ mysql> EXPLAIN SELECT * FROM users WHERE name = 'Tom';
 ```
 
 ### 3. 理解事务与锁
+
 ```bash
 # 阅读文档
 cat docs/MySQL 事务与锁机制详解.md
@@ -242,6 +259,7 @@ mysql> COMMIT;
 ```
 
 ### 4. 性能优化实战
+
 ```bash
 # 开启慢查询日志
 mysql> SET GLOBAL slow_query_log = 'ON';

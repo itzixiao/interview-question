@@ -42,35 +42,48 @@ SHOW VARIABLES LIKE 'transaction_isolation';
 #### 实验步骤
 
 ##### 第一步：会话 A - 读取初始数据
+
 ```sql
 SET SESSION TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
 START TRANSACTION;
-SELECT * FROM test_account WHERE id = 1;
+SELECT *
+FROM test_account
+WHERE id = 1;
 -- 结果：balance = 1000.00
 ```
 
 ##### 第二步：会话 B - 修改但不提交
+
 ```sql
 SET SESSION TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
 START TRANSACTION;
-UPDATE test_account SET balance = 800.00 WHERE id = 1;
+UPDATE test_account
+SET balance = 800.00
+WHERE id = 1;
 -- 注意：不 COMMIT！
 ```
 
 ##### 第三步：会话 A - 读到脏数据
+
 ```sql
-SELECT * FROM test_account WHERE id = 1;
+SELECT *
+FROM test_account
+WHERE id = 1;
 -- 结果：balance = 800.00 ❌（脏读！）
 ```
 
 ##### 第四步：会话 B - 回滚
+
 ```sql
 ROLLBACK;
 ```
 
 ##### 第五步：会话 A - 数据又变了
+
 ```sql
-SELECT * FROM test_account WHERE id = 1;
+SELECT *
+FROM test_account
+WHERE id = 1;
 -- 结果：balance = 1000.00（验证了刚才读到的是脏数据）
 COMMIT;
 ```
@@ -113,46 +126,61 @@ T5           SELECT → 1000
 #### 实验 1：不可重复读
 
 ##### 第一步：会话 A - 第一次读取
+
 ```sql
 SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED;
 START TRANSACTION;
-SELECT * FROM test_account WHERE id = 1;
+SELECT *
+FROM test_account
+WHERE id = 1;
 -- 结果：balance = 1000.00
 ```
 
 ##### 第二步：会话 B - 修改并提交
+
 ```sql
 SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED;
 START TRANSACTION;
-UPDATE test_account SET balance = 700.00 WHERE id = 1;
-COMMIT;  -- 提交！
+UPDATE test_account
+SET balance = 700.00
+WHERE id = 1;
+COMMIT; -- 提交！
 ```
 
 ##### 第三步：会话 A - 第二次读取（不一样了！）
+
 ```sql
-SELECT * FROM test_account WHERE id = 1;
+SELECT *
+FROM test_account
+WHERE id = 1;
 -- 结果：balance = 700.00 ❌（不可重复读！）
 ```
 
 #### 实验 2：幻读演示
 
 ##### 第一步：会话 A - 查询所有账户
+
 ```sql
 START TRANSACTION;
-SELECT * FROM test_account;
+SELECT *
+FROM test_account;
 -- 结果：2 条记录
 ```
 
 ##### 第二步：会话 B - 插入新记录并提交
+
 ```sql
 START TRANSACTION;
-INSERT INTO test_account VALUES (3, '王五', 1000.00);
+INSERT INTO test_account
+VALUES (3, '王五', 1000.00);
 COMMIT;
 ```
 
 ##### 第三步：会话 A - 再次查询（记录变多了！）
+
 ```sql
-SELECT * FROM test_account;
+SELECT *
+FROM test_account;
 -- 结果：3 条记录 ❌（幻读！）
 COMMIT;
 ```
@@ -171,20 +199,26 @@ COMMIT;
 ```
 
 **MVCC 可见性判断**：
+
 ```java
 // 伪代码展示 RC 的 Read View 逻辑
-for each SELECT statement:
-    readView = createNewReadView();  // 每次都新建
+for each SELECT
+statement:
+readView =
+
+createNewReadView();  // 每次都新建
     
-    if (trx_id < readView.min_trx_id) {
+    if(trx_id<readView.min_trx_id){
         return true;  // 可见（已提交）
-    } else if (trx_id >= readView.max_trx_id) {
+        }else if(trx_id >=readView.max_trx_id){
         return false; // 不可见（未开始）
-    } else if (!readView.m_ids.contains(trx_id)) {
+        }else if(!readView.m_ids.
+
+contains(trx_id)){
         return true;  // 可见（不在活跃列表中，已提交）
-    } else {
+        }else{
         return false; // 不可见（在活跃列表中，未提交）
-    }
+        }
 ```
 
 #### 核心结论
@@ -205,70 +239,98 @@ for each SELECT statement:
 #### 实验 1：可重复读验证
 
 ##### 第一步：会话 A - 第一次读取
+
 ```sql
 SET SESSION TRANSACTION ISOLATION LEVEL REPEATABLE READ;
 START TRANSACTION;
-SELECT * FROM test_account WHERE id = 1;
+SELECT *
+FROM test_account
+WHERE id = 1;
 -- 结果：balance = 1000.00
 ```
 
 ##### 第二步：会话 B - 修改并提交
+
 ```sql
 SET SESSION TRANSACTION ISOLATION LEVEL REPEATABLE READ;
 START TRANSACTION;
-UPDATE test_account SET balance = 600.00 WHERE id = 1;
+UPDATE test_account
+SET balance = 600.00
+WHERE id = 1;
 COMMIT;
 ```
 
 ##### 第三步：会话 A - 第二次读取（还是一样！）
+
 ```sql
-SELECT * FROM test_account WHERE id = 1;
+SELECT *
+FROM test_account
+WHERE id = 1;
 -- 结果：balance = 1000.00 ✅（可重复读！）
 ```
 
 ##### 第四步：会话 A - 提交后再读
+
 ```sql
 COMMIT;
 
 -- 重新开启事务
 START TRANSACTION;
-SELECT * FROM test_account WHERE id = 1;
+SELECT *
+FROM test_account
+WHERE id = 1;
 -- 结果：balance = 600.00（现在能看到最新数据了）
 ```
 
 #### 实验 2：转账场景对比
 
 **RC 隔离级别的问题**：
+
 ```sql
 -- 会话 A
 START TRANSACTION;
-SELECT SUM(balance) as total FROM test_account; -- 2000
+SELECT SUM(balance) as total
+FROM test_account;
+-- 2000
 
 -- 会话 B（此时提交）
 START TRANSACTION;
-UPDATE test_account SET balance = balance - 200 WHERE id = 1;
-UPDATE test_account SET balance = balance + 200 WHERE id = 2;
+UPDATE test_account
+SET balance = balance - 200
+WHERE id = 1;
+UPDATE test_account
+SET balance = balance + 200
+WHERE id = 2;
 COMMIT;
 
 -- 会话 A（再次统计）
-SELECT SUM(balance) as total FROM test_account; 
+SELECT SUM(balance) as total
+FROM test_account;
 -- 结果：2000（但中间状态被看到了）
 ```
 
 **RR 隔离级别的优势**：
+
 ```sql
 -- 会话 A
 START TRANSACTION;
-SELECT SUM(balance) as total FROM test_account; -- 2000
+SELECT SUM(balance) as total
+FROM test_account;
+-- 2000
 
 -- 会话 B（提交）
 START TRANSACTION;
-UPDATE test_account SET balance = balance - 300 WHERE id = 1;
-UPDATE test_account SET balance = balance + 300 WHERE id = 2;
+UPDATE test_account
+SET balance = balance - 300
+WHERE id = 1;
+UPDATE test_account
+SET balance = balance + 300
+WHERE id = 2;
 COMMIT;
 
 -- 会话 A（再次统计）
-SELECT SUM(balance) as total FROM test_account; 
+SELECT SUM(balance) as total
+FROM test_account;
 -- 结果：2000 ✅（整个事务内数据一致）
 ```
 
@@ -286,20 +348,26 @@ SELECT SUM(balance) as total FROM test_account;
 ```
 
 **MVCC 可见性判断**：
+
 ```java
 // 伪代码展示 RR 的 Read View 逻辑
 ReadView readView = null;
 
-for each transaction:
-    if (readView == null) {
-        readView = createReadView();  // 只创建一次！
+for
+each transaction:
+        if(readView ==null){
+readView =
+
+createReadView();  // 只创建一次！
     }
-    
-    // 使用同一个 readView 判断可见性
-    if (isVisible(readView, trx_id)) {
+
+            // 使用同一个 readView 判断可见性
+            if(
+
+isVisible(readView, trx_id)){
         return currentVersion;
-    } else {
-        return historicalVersion;  // 读历史版本
+    }else{
+            return historicalVersion;  // 读历史版本
     }
 ```
 
@@ -312,14 +380,20 @@ InnoDB 通过以下机制解决幻读：
 
 ```sql
 -- 快照读：不会幻读
-SELECT * FROM test_account WHERE id > 1;
+SELECT *
+FROM test_account
+WHERE id > 1;
 
 -- 当前读：加 Next-Key Lock
-SELECT * FROM test_account WHERE id > 1 FOR UPDATE;
+SELECT *
+FROM test_account
+WHERE id > 1 FOR
+UPDATE;
 -- 锁定范围，阻止其他事务插入
 ```
 
 **Next-Key Lock 示意图**：
+
 ```
 假设有记录：id = 1, 5, 10
 
@@ -354,27 +428,35 @@ SELECT * FROM test_account WHERE id = 5 FOR UPDATE;
 #### 实验演示
 
 ##### 第一步：会话 A - 查询
+
 ```sql
 SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE;
 START TRANSACTION;
-SELECT * FROM test_account WHERE id = 1;
+SELECT *
+FROM test_account
+WHERE id = 1;
 -- 正常返回
 ```
 
 ##### 第二步：会话 B - 尝试更新（被阻塞！）
+
 ```sql
 SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE;
 START TRANSACTION;
-UPDATE test_account SET balance = 500.00 WHERE id = 1;
+UPDATE test_account
+SET balance = 500.00
+WHERE id = 1;
 -- ⏳ 等待...（被阻塞）
 ```
 
 ##### 第三步：会话 A - 提交
+
 ```sql
 COMMIT;
 ```
 
 ##### 第四步：会话 B - 继续执行
+
 ```sql
 -- 现在可以执行了
 COMMIT;
@@ -400,21 +482,31 @@ COMMIT;
 ```sql
 -- 事务 A
 START TRANSACTION;
-SELECT * FROM account WHERE id = 1; -- 1000
+SELECT *
+FROM account
+WHERE id = 1;
+-- 1000
 
 -- 事务 B
 START TRANSACTION;
-UPDATE account SET balance = 800 WHERE id = 1;
+UPDATE account
+SET balance = 800
+WHERE id = 1;
 -- 不提交
 
 -- 事务 A
-SELECT * FROM account WHERE id = 1; -- 800 ❌（脏读）
+SELECT *
+FROM account
+WHERE id = 1;
+-- 800 ❌（脏读）
 
 -- 事务 B
 ROLLBACK;
 
 -- 事务 A
-SELECT * FROM account WHERE id = 1; -- 1000（恢复原状）
+SELECT *
+FROM account
+WHERE id = 1; -- 1000（恢复原状）
 ```
 
 ### 2. 不可重复读（Non-Repeatable Read）
@@ -426,15 +518,22 @@ SELECT * FROM account WHERE id = 1; -- 1000（恢复原状）
 ```sql
 -- 事务 A
 START TRANSACTION;
-SELECT * FROM account WHERE id = 1; -- 1000
+SELECT *
+FROM account
+WHERE id = 1;
+-- 1000
 
 -- 事务 B
 START TRANSACTION;
-UPDATE account SET balance = 700 WHERE id = 1;
+UPDATE account
+SET balance = 700
+WHERE id = 1;
 COMMIT;
 
 -- 事务 A
-SELECT * FROM account WHERE id = 1; -- 700 ❌（不可重复读）
+SELECT *
+FROM account
+WHERE id = 1; -- 700 ❌（不可重复读）
 ```
 
 ### 3. 幻读（Phantom Read）
@@ -446,15 +545,19 @@ SELECT * FROM account WHERE id = 1; -- 700 ❌（不可重复读）
 ```sql
 -- 事务 A
 START TRANSACTION;
-SELECT COUNT(*) FROM account; -- 2 条
+SELECT COUNT(*)
+FROM account;
+-- 2 条
 
 -- 事务 B
 START TRANSACTION;
-INSERT INTO account VALUES (3, '王五', 1000);
+INSERT INTO account
+VALUES (3, '王五', 1000);
 COMMIT;
 
 -- 事务 A
-SELECT COUNT(*) FROM account; -- 3 条 ❌（幻读）
+SELECT COUNT(*)
+FROM account; -- 3 条 ❌（幻读）
 ```
 
 ---
@@ -468,16 +571,26 @@ SELECT COUNT(*) FROM account; -- 3 条 ❌（幻读）
 ```sql
 -- 会话 A
 START TRANSACTION;
-SELECT stock FROM inventory WHERE product_id = 1; -- 10
+SELECT stock
+FROM inventory
+WHERE product_id = 1;
+-- 10
 -- 应用层判断：stock > 0，可以扣减
-UPDATE inventory SET stock = stock - 1 WHERE product_id = 1;
+UPDATE inventory
+SET stock = stock - 1
+WHERE product_id = 1;
 COMMIT;
 
 -- 会话 B（并发）
 START TRANSACTION;
-SELECT stock FROM inventory WHERE product_id = 1; -- 10
+SELECT stock
+FROM inventory
+WHERE product_id = 1;
+-- 10
 -- 应用层判断：stock > 0，可以扣减
-UPDATE inventory SET stock = stock - 1 WHERE product_id = 1;
+UPDATE inventory
+SET stock = stock - 1
+WHERE product_id = 1;
 COMMIT;
 
 -- 结果：stock = 8（正确，因为 UPDATE 是原子操作）
@@ -488,13 +601,18 @@ COMMIT;
 ```sql
 -- 会话 A
 START TRANSACTION;
-SELECT stock FROM inventory WHERE product_id = 1; -- 8
+SELECT stock
+FROM inventory
+WHERE product_id = 1;
+-- 8
 -- 循环扣减 8 次...
 COMMIT;
 
 -- 会话 B（基于缓存的 8）
 START TRANSACTION;
-UPDATE inventory SET stock = stock - 1 WHERE product_id = 1;
+UPDATE inventory
+SET stock = stock - 1
+WHERE product_id = 1;
 COMMIT;
 
 -- 结果：stock = -1 ❌（超卖！）
@@ -504,14 +622,18 @@ COMMIT;
 
 ```sql
 -- 方案 1：乐观锁
-UPDATE inventory 
-SET stock = stock - 1, version = version + 1 
-WHERE product_id = 1 AND stock > 0 AND version = old_version;
+UPDATE inventory
+SET stock   = stock - 1,
+    version = version + 1
+WHERE product_id = 1
+  AND stock > 0
+  AND version = old_version;
 
 -- 方案 2：条件扣减
-UPDATE inventory 
-SET stock = stock - 1 
-WHERE product_id = 1 AND stock - 1 >= 0;
+UPDATE inventory
+SET stock = stock - 1
+WHERE product_id = 1
+  AND stock - 1 >= 0;
 
 -- 检查影响行数
 -- 如果 affected_rows = 0，说明库存不足
@@ -525,29 +647,45 @@ WHERE product_id = 1 AND stock - 1 >= 0;
 -- RC 隔离级别
 -- 事务 A
 START TRANSACTION;
-SELECT SUM(balance) FROM account; -- 2000
+SELECT SUM(balance)
+FROM account;
+-- 2000
 
 -- 事务 B（提交）
-UPDATE account SET balance = balance - 200 WHERE id = 1;
-UPDATE account SET balance = balance + 200 WHERE id = 2;
+UPDATE account
+SET balance = balance - 200
+WHERE id = 1;
+UPDATE account
+SET balance = balance + 200
+WHERE id = 2;
 COMMIT;
 
 -- 事务 A
-SELECT SUM(balance) FROM account; -- 2000
+SELECT SUM(balance)
+FROM account;
+-- 2000
 -- 问题：虽然总额一致，但可能读到中间状态
 
 -- RR 隔离级别
 -- 事务 A
 START TRANSACTION;
-SELECT SUM(balance) FROM account; -- 2000
+SELECT SUM(balance)
+FROM account;
+-- 2000
 
 -- 事务 B（提交）
-UPDATE account SET balance = balance - 300 WHERE id = 1;
-UPDATE account SET balance = balance + 300 WHERE id = 2;
+UPDATE account
+SET balance = balance - 300
+WHERE id = 1;
+UPDATE account
+SET balance = balance + 300
+WHERE id = 2;
 COMMIT;
 
 -- 事务 A
-SELECT SUM(balance) FROM account; -- 2000 ✅
+SELECT SUM(balance)
+FROM account;
+-- 2000 ✅
 -- 优势：整个事务内看到一致的数据视图
 ```
 
@@ -557,24 +695,26 @@ SELECT SUM(balance) FROM account; -- 2000 ✅
 
 ### 隔离级别对比表
 
-| 隔离级别 | 脏读 | 不可重复读 | 幻读 | 性能 | 适用场景 |
-|---------|------|-----------|------|------|---------|
-| READ UNCOMMITTED | ✓ | ✓ | ✓ | ⭐⭐⭐⭐ | 几乎不用 |
-| READ COMMITTED | ✗ | ✓ | ✓ | ⭐⭐⭐ | Oracle 默认，日志分析等 |
-| REPEATABLE READ | ✗ | ✗ | ~✓ | ⭐⭐ | **MySQL 默认，推荐** |
-| SERIALIZABLE | ✗ | ✗ | ✗ | ⭐ | 特殊场景 |
+| 隔离级别             | 脏读 | 不可重复读 | 幻读 | 性能   | 适用场景            |
+|------------------|----|-------|----|------|-----------------|
+| READ UNCOMMITTED | ✓  | ✓     | ✓  | ⭐⭐⭐⭐ | 几乎不用            |
+| READ COMMITTED   | ✗  | ✓     | ✓  | ⭐⭐⭐  | Oracle 默认，日志分析等 |
+| REPEATABLE READ  | ✗  | ✗     | ~✓ | ⭐⭐   | **MySQL 默认，推荐** |
+| SERIALIZABLE     | ✗  | ✗     | ✗  | ⭐    | 特殊场景            |
 
 ### 选型建议
 
 #### 推荐使用：REPEATABLE READ（MySQL 默认）
 
 **理由**：
+
 1. ✅ 解决脏读、不可重复读
 2. ✅ 基本解决幻读（MVCC + Next-Key Lock）
 3. ✅ 性能适中，适合大多数业务场景
 4. ✅ MySQL 深度优化
 
 **适用场景**：
+
 - 电商订单系统
 - 金融转账系统
 - 库存管理系统
@@ -583,11 +723,13 @@ SELECT SUM(balance) FROM account; -- 2000 ✅
 #### 可选：READ COMMITTED
 
 **理由**：
+
 1. ✅ 更高的并发性能
 2. ✅ 及时看到其他事务的修改
 3. ❌ 需要处理不可重复读
 
 **适用场景**：
+
 - 日志记录系统
 - 统计分析系统
 - 对实时性要求高的场景
@@ -622,10 +764,12 @@ SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED;
 SET GLOBAL TRANSACTION ISOLATION LEVEL REPEATABLE READ;
 
 -- 查看活跃事务
-SELECT * FROM information_schema.INNODB_TRX;
+SELECT *
+FROM information_schema.INNODB_TRX;
 
 -- 查看锁等待
-SELECT * FROM performance_schema.data_lock_waits;
+SELECT *
+FROM performance_schema.data_lock_waits;
 
 -- 终止事务
 KILL <thread_id>;
@@ -638,11 +782,14 @@ KILL <thread_id>;
 SHOW ENGINE INNODB STATUS;
 
 -- 查看事务信息
-SELECT * FROM information_schema.INNODB_TRX;
+SELECT *
+FROM information_schema.INNODB_TRX;
 
 -- 查看锁信息
-SELECT * FROM information_schema.INNODB_LOCKS;
-SELECT * FROM information_schema.INNODB_LOCK_WAITS;
+SELECT *
+FROM information_schema.INNODB_LOCKS;
+SELECT *
+FROM information_schema.INNODB_LOCK_WAITS;
 ```
 
 ### C. 调试技巧

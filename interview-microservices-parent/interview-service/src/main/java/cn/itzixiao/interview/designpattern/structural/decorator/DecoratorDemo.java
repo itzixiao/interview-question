@@ -4,18 +4,18 @@ package cn.itzixiao.interview.designpattern.structural.decorator;
  * =====================================================================================
  * 装饰器模式（Decorator Pattern）
  * =====================================================================================
- * 
+ * <p>
  * 一、定义
  * -------------------------------------------------------------------------------------
  * 动态地给一个对象添加一些额外的职责。就增加功能来说，装饰器模式比生成子类更为灵活。
- * 
+ * <p>
  * 二、核心思想
  * -------------------------------------------------------------------------------------
  * 1. 组件接口（Component）：定义对象接口
  * 2. 具体组件（Concrete Component）：实现组件接口的原始对象
  * 3. 装饰器基类（Decorator）：实现组件接口，持有组件引用
  * 4. 具体装饰器（Concrete Decorator）：添加具体功能
- * 
+ * <p>
  * 三、装饰器模式 vs 继承
  * -------------------------------------------------------------------------------------
  * | 特性       | 继承                     | 装饰器模式                 |
@@ -24,11 +24,11 @@ package cn.itzixiao.interview.designpattern.structural.decorator;
  * | 灵活性     | 低（类爆炸）             | 高（自由组合）             |
  * | 扩展时机   | 编译时                   | 运行时                     |
  * | 多功能组合 | 需要创建大量子类         | 装饰器自由组合             |
- * 
+ * <p>
  * 四、装饰器链
  * -------------------------------------------------------------------------------------
  * 装饰器可以嵌套使用，形成装饰器链：
- * 
+ * <p>
  * ┌─────────────────────────────────────────────────────────────────────┐
  * │  new DecoratorB(                                                    │
  * │      new DecoratorA(                                                │
@@ -39,11 +39,11 @@ package cn.itzixiao.interview.designpattern.structural.decorator;
  * │  调用顺序：DecoratorB → DecoratorA → ConcreteComponent              │
  * │  执行顺序：ConcreteComponent → DecoratorA → DecoratorB              │
  * └─────────────────────────────────────────────────────────────────────┘
- * 
+ * <p>
  * 五、应用场景
  * -------------------------------------------------------------------------------------
  * - Java I/O：InputStream、Reader 等都是装饰器模式
- *   new BufferedReader(new InputStreamReader(new FileInputStream("file")))
+ * new BufferedReader(new InputStreamReader(new FileInputStream("file")))
  * - Spring Session：包装 HttpSession
  * - Servlet API：HttpServletRequestWrapper
  */

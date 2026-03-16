@@ -22,13 +22,13 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
         </dependency>
-        
+
         <!-- Spring Boot Web (可选，如需提供 REST API) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
-        
+
         <!-- Spring Boot Actuator (监控端点) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

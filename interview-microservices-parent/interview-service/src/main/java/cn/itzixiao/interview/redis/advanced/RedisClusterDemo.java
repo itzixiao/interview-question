@@ -1,12 +1,10 @@
 package cn.itzixiao.interview.redis.advanced;
 
-import java.util.*;
-
 /**
  * Redis Cluster 详解
- *
+ * <p>
  * Redis Cluster 是 Redis 的分布式解决方案，提供数据分片、高可用和自动故障转移功能。
- *
+ * <p>
  * ┌─────────────────────────────────────────────────────────────────────────────┐
  * │                          Redis Cluster 架构                                 │
  * │                                                                             │
@@ -771,11 +769,11 @@ public class RedisClusterDemo {
         int start = key.indexOf('{');
         int end = key.indexOf('}', start + 1);
         String hashKey = key;
-        
+
         if (start != -1 && end != -1 && end > start + 1) {
             hashKey = key.substring(start + 1, end);
         }
-        
+
         // 简化的 CRC16 模拟（实际 Redis 使用标准 CRC16）
         int crc = hashKey.hashCode() & 0xFFFF;
         return crc % HASH_SLOTS;

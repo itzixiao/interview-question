@@ -22,37 +22,37 @@
             <groupId>cn.itzixiao</groupId>
             <artifactId>interview-common</artifactId>
         </dependency>
-    
+
         <!-- Spring Boot Web -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
-    
+
         <!-- Spring Boot Actuator - 监控和管理功能 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
-    
+
         <!-- Micrometer Prometheus 注册器（用于 GC 等 JVM 指标监控） -->
         <dependency>
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-registry-prometheus</artifactId>
         </dependency>
-    
+
         <!-- Nacos 服务发现 -->
         <dependency>
             <groupId>com.alibaba.cloud</groupId>
             <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
         </dependency>
-    
+
         <!-- Nacos 配置中心 -->
         <dependency>
             <groupId>com.alibaba.cloud</groupId>
             <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
         </dependency>
-    
+
         <!-- JWT 依赖 -->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
@@ -68,32 +68,32 @@
             <artifactId>jjwt-jackson</artifactId>
             <scope>runtime</scope>
         </dependency>
-    
+
         <!-- 自定义线程池 Starter -->
         <dependency>
             <groupId>cn.itzixiao</groupId>
             <artifactId>interview-threadpool-starter</artifactId>
         </dependency>
-    
+
         <!-- MyBatis-Plus -->
         <dependency>
             <groupId>com.baomidou</groupId>
             <artifactId>mybatis-plus-boot-starter</artifactId>
         </dependency>
-    
+
         <!-- EasyExcel - Excel 导出 -->
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>easyexcel</artifactId>
         </dependency>
-    
+
         <!-- MySQL 驱动 -->
         <dependency>
             <groupId>com.mysql</groupId>
             <artifactId>mysql-connector-j</artifactId>
             <scope>runtime</scope>
         </dependency>
-    
+
         <!-- ShardingSphere-JDBC（用于分库分表） -->
         <dependency>
             <groupId>org.apache.shardingsphere</groupId>
@@ -132,7 +132,7 @@
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
-    
+
         <!-- Test -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

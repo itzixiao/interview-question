@@ -3,16 +3,19 @@
 ## 📚 文档列表
 
 #### 1. [01-Spring-Boot 自动装配.md](./01-Spring-Boot%E8%87%AA%E5%8A%A8%E8%A3%85%E9%85%8D.md)
+
 - **内容:** @SpringBootApplication、@EnableAutoConfiguration、spring.factories 机制
 - **面试题：** 15+ 道
 - **重要程度：** ⭐⭐⭐⭐⭐
 
 #### 2. [02-自定义线程池 Starter 详解.md](./02-%E8%87%AA%E5%AE%9A%E4%B9%89%E7%BA%BF%E7%A8%8B%E6%B1%A0Starter%E8%AF%A6%E8%A7%A3.md)
+
 - **内容:** 自定义 Starter、自动配置、@ConfigurationProperties
 - **面试题：** 8+ 道
 - **重要程度：** ⭐⭐⭐⭐
 
 #### 3. [03-Spring-Boot-Actuator 完全指南.md](./03-Spring-Boot-Actuator%E5%AE%8C%E5%85%A8%E6%8C%87%E5%8D%97.md) ⭐新增
+
 - **内容:** Actuator 监控端点、健康检查、性能指标、自定义端点、安全配置
 - **面试题：** 10+ 道
 - **重要程度：** ⭐⭐⭐⭐⭐
@@ -24,6 +27,7 @@
     - ✅ 高频面试题与参考答案
 
 #### 4. [04-SpringBoot整合Elasticsearch完全指南.md](./04-SpringBoot%E6%95%B4%E5%90%88Elasticsearch%E5%AE%8C%E5%85%A8%E6%8C%87%E5%8D%97.md) ⭐新增
+
 - **内容**: Spring Boot整合 ES、倒排索引、全文检索、批量索引优化、数据同步策略
 - **面试题**: 7+ 道
 - **重要程度**: ⭐⭐⭐⭐⭐
@@ -40,13 +44,15 @@
 
 - **文档数：** 4 个核心文档
 - **面试题总数：** 40+ 道
-- **代码示例：** 配套 Java 代码在 `interview-starters-parent/interview-threadpool-starter/`、`interview-service/actuator/`、`interview-microservices-parent/interview-provider/`（ES 整合）目录
+- **代码示例：** 配套 Java 代码在 `interview-starters-parent/interview-threadpool-starter/`、
+  `interview-service/actuator/`、`interview-microservices-parent/interview-provider/`（ES 整合）目录
 
 ---
 
 ## 🎯 学习建议
 
 ### Spring Boot 自动装配（2 天）
+
 1. **核心注解**
     - @SpringBootApplication
     - @EnableAutoConfiguration
@@ -58,6 +64,7 @@
     - 覆盖默认配置
 
 ### 自定义 Starter（1-2 天）
+
 1. **Starter 结构**
     - META-INF/spring.factories
     - 自动配置类
@@ -69,6 +76,7 @@
     - MyBatis Starter
 
 ### Actuator 监控（1 天） ⭐新增
+
 1. **内置端点**
     - /actuator/health 健康检查
     - /actuator/info 应用信息
@@ -95,21 +103,24 @@
 ## 🔗 跨模块关联
 
 ### 前置知识
+
 - ✅ **[Spring框架](../04-Spring框架/README.md)** - IOC、AOP、Bean 生命周期
 - ✅ **[Java并发编程](../02-Java并发编程/README.md)** - 线程池基础
 
 ### 后续进阶
+
 - 📚 **[微服务架构](../06-SpringCloud 微服务/README.md)** - 服务监控、链路追踪
 - 📚 **[DevOps](../13-DevOps/README.md)** - CI/CD、容器化部署
 
 ### 知识点对应
-| Spring Boot 技术 | 应用场景 |
-|-----------------|---------|
-| 自动装配 | Starter 开发、框架集成 |
-| 自定义 Starter | 中间件封装、通用组件 |
-| Actuator | 微服务监控、K8s 集成 |
-| 外部化配置 | 多环境配置、配置中心 |
-| Profile | 环境隔离、灰度发布 |
+
+| Spring Boot 技术 | 应用场景            |
+|----------------|-----------------|
+| 自动装配           | Starter 开发、框架集成 |
+| 自定义 Starter    | 中间件封装、通用组件      |
+| Actuator       | 微服务监控、K8s 集成    |
+| 外部化配置          | 多环境配置、配置中心      |
+| Profile        | 环境隔离、灰度发布       |
 
 ---
 
@@ -254,6 +265,7 @@ Actuator 监控 ⭐新增
 ## 📈 更新日志
 
 ### v2.1 - 2026-03-09 ⭐新增
+
 - ✅ 新增 [03-Spring-Boot-Actuator 完全指南.md](03-Spring-Boot-Actuator完全指南.md)
 - ✅ 提供完整的 Actuator 示例代码（可运行）
 - ✅ 自定义 HealthIndicator、InfoContributor、Endpoint
@@ -262,6 +274,7 @@ Actuator 监控 ⭐新增
 - ✅ 10+ 道高频面试题与参考答案
 
 ### v2.0 - 早期版本
+
 - ✅ Spring Boot 自动装配核心知识点
 - ✅ 自定义 Starter 实现
 

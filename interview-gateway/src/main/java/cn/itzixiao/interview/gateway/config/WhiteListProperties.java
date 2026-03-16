@@ -17,8 +17,8 @@ public class WhiteListProperties {
     /**
      * 白名单路径列表，支持前缀匹配（以 ** 结尾）和精确包含匹配
      * 示例：
-     *   - /api/interview/**  → 前缀匹配，/api/interview/ 开头的所有路径
-     *   - /login             → 包含匹配，路径中含有 /login 的请求
+     * - /api/interview/**  → 前缀匹配，/api/interview/ 开头的所有路径
+     * - /login             → 包含匹配，路径中含有 /login 的请求
      */
     private List<String> paths = Arrays.asList("/login", "/register", "/api/interview/**");
 

@@ -5,21 +5,21 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * CountDownLatch 实现线程顺序执行
- *
+ * <p>
  * 原理：
  * CountDownLatch 是一个同步辅助类，它允许一个或多个线程等待，
  * 直到在其他线程中执行的一组操作完成。
- *
+ * <p>
  * 核心方法：
  * - await(): 等待计数器归零
  * - countDown(): 计数器减1
  * - getCount(): 获取当前计数
- *
+ * <p>
  * 线程顺序执行方案：
  * 使用两个 CountDownLatch，计数器都设为 1
  * - latchAB: 控制 A -> B 的顺序
  * - latchBC: 控制 B -> C 的顺序
- *
+ * <p>
  * 执行流程：
  * Thread A: 执行 -> countDown(latchAB)
  * Thread B: await(latchAB) -> 执行 -> countDown(latchBC)
@@ -54,7 +54,7 @@ public class CountDownLatchSequentialDemo {
      * ============================================
      * 基础示例：ABC 顺序执行
      * ============================================
-     *
+     * <p>
      * 使用两个 CountDownLatch 实现 A -> B -> C 顺序
      */
     private static void basicSequentialExample() {
@@ -141,7 +141,7 @@ public class CountDownLatchSequentialDemo {
      * ============================================
      * 扩展示例：多阶段顺序执行
      * ============================================
-     *
+     * <p>
      * 场景：数据加载分为多个阶段，每个阶段有多个并行任务
      * 阶段1：加载基础数据（并行加载配置、字典、权限）
      * 阶段2：加载业务数据（依赖阶段1完成）
@@ -246,7 +246,7 @@ public class CountDownLatchSequentialDemo {
      * ============================================
      * 实际应用场景：数据加载顺序
      * ============================================
-     *
+     * <p>
      * 场景：系统启动时需要按顺序加载数据
      * 1. 先加载数据库连接池
      * 2. 再加载缓存
@@ -326,7 +326,7 @@ public class CountDownLatchSequentialDemo {
  * ============================================
  * 进阶示例：动态线程顺序控制
  * ============================================
- *
+ * <p>
  * 使用数组实现任意数量的线程顺序执行
  */
 class DynamicSequentialExecutor {
@@ -335,6 +335,7 @@ class DynamicSequentialExecutor {
 
     /**
      * 创建顺序执行器
+     *
      * @param threadCount 线程数量
      */
     public DynamicSequentialExecutor(int threadCount) {
@@ -347,8 +348,9 @@ class DynamicSequentialExecutor {
 
     /**
      * 提交任务
+     *
      * @param index 线程索引（从0开始）
-     * @param task 任务
+     * @param task  任务
      */
     public void submit(int index, Runnable task) {
         new Thread(() -> {
@@ -424,16 +426,16 @@ class SynchronizationComparison {
      * - 一次性，计数器归零后不能重置
      * - 一个或多个线程等待其他线程完成
      * - 适用于：任务分组、多阶段任务
-     *
+     * <p>
      * CyclicBarrier 特点：
      * - 可循环使用
      * - 多个线程互相等待，同时到达屏障
      * - 适用于：分阶段计算、并行迭代
-     *
+     * <p>
      * Semaphore 特点：
      * - 控制同时访问的线程数量
      * - 适用于：资源池、限流
-     *
+     * <p>
      * Phaser 特点：
      * - 更灵活的分阶段控制
      * - 支持动态注册/注销参与者

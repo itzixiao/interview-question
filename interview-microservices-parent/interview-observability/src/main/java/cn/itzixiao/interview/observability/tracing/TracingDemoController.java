@@ -8,18 +8,18 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * 链路追踪演示 Controller - SkyWalking / Sleuth
- * 
+ * <p>
  * 链路追踪原理：
  * 1. Trace ID - 整个请求链路的唯一标识
  * 2. Span ID - 单个操作的标识
  * 3. Parent Span ID - 父子操作关系
- * 
+ * <p>
  * SkyWalking 功能：
  * 1. 自动探针 - 无侵入式采集
  * 2. 拓扑图生成 - 服务依赖可视化
  * 3. 性能分析 - 慢调用定位
  * 4. 指标监控 - QPS、响应时间等
- * 
+ *
  * @author itzixiao
  * @date 2026-03-15
  */
@@ -27,27 +27,27 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/tracing")
 public class TracingDemoController {
-    
+
     /**
      * 模拟订单查询链路
      */
     @GetMapping("/order/{orderId}")
     public String queryOrder(@PathVariable String orderId) {
         log.info("开始查询订单：{}", orderId);
-        
+
         // Span 1: 查询用户信息
         String userInfo = queryUserInfo(orderId);
-        
+
         // Span 2: 查询订单详情
         String orderDetail = queryOrderDetail(orderId);
-        
+
         // Span 3: 计算推荐商品
         String recommendation = calculateRecommendation(orderId);
-        
-        return String.format("订单 %s 查询完成：%s, %s, %s", 
+
+        return String.format("订单 %s 查询完成：%s, %s, %s",
                 orderId, userInfo, orderDetail, recommendation);
     }
-    
+
     /**
      * 模拟用户服务调用
      */
@@ -60,7 +60,7 @@ public class TracingDemoController {
         }
         return "用户信息";
     }
-    
+
     /**
      * 模拟订单服务调用
      */
@@ -73,7 +73,7 @@ public class TracingDemoController {
         }
         return "订单详情";
     }
-    
+
     /**
      * 模拟推荐服务调用
      */

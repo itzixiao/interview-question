@@ -1,10 +1,8 @@
 package cn.itzixiao.interview.redis;
 
-import java.util.*;
-
 /**
  * Redis 数据结构与使用场景
- *
+ * <p>
  * Redis 数据类型：
  * ┌─────────────────────────────────────────────────────────────┐
  * │  String - 字符串，最基础类型                                  │

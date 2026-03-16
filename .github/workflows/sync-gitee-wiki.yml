@@ -1,8 +1,8 @@
 name: Sync Gitee Wiki
 on:
   push:
-    branches: [master]
-    paths: ['README.md', 'docs/**/*.md']
+    branches: [ master ]
+    paths: [ 'README.md', 'docs/**/*.md' ]
   workflow_dispatch:
 
 jobs:

@@ -4,7 +4,13 @@
 POST http://localhost:8082/sharding/test/insert
 Content-Type: application/x-www-form-urlencoded
 
-deviceCode=DEV006&deviceName=数控机床 F&operationType=1&operationTime=2026-10-15T09:30:00&operationValue=380.5&operator=刘八&remark=新设备投入使用
+deviceCode = DEV006 &
+deviceName = 数控机床 F &
+operationType = 1 &
+operationTime = 2026-10-15T09:30:00 &
+operationValue = 380.5 &
+operator = 刘八 &
+remark = 新设备投入使用
 
 ###
 
@@ -12,7 +18,13 @@ deviceCode=DEV006&deviceName=数控机床 F&operationType=1&operationTime=2026-1
 POST http://localhost:8082/sharding/test/insert
 Content-Type: application/x-www-form-urlencoded
 
-deviceCode=DEV007&deviceName=包装机 G&operationType=1&operationTime=2026-02-20T14:15:00&operationValue=220.0&operator=周九&remark=春节后开机
+deviceCode = DEV007 &
+deviceName = 包装机 G &
+operationType = 1 &
+operationTime = 2026-02-20T14:15:00 &
+operationValue = 220.0 &
+operator = 周九 &
+remark = 春节后开机
 
 ###
 
@@ -20,7 +32,13 @@ deviceCode=DEV007&deviceName=包装机 G&operationType=1&operationTime=2026-02-2
 POST http://localhost:8082/sharding/test/insert
 Content-Type: application/x-www-form-urlencoded
 
-deviceCode=DEV006&deviceName=数控机床 F&operationType=2&operationTime=2026-03-10T17:45:00&operationValue=380.0&operator=刘八&remark=正常关机
+deviceCode = DEV006 &
+deviceName = 数控机床 F &
+operationType = 2 &
+operationTime = 2026-03-10T17:45:00 &
+operationValue = 380.0 &
+operator = 刘八 &
+remark = 正常关机
 
 ###
 
@@ -28,7 +46,13 @@ deviceCode=DEV006&deviceName=数控机床 F&operationType=2&operationTime=2026-0
 POST http://localhost:8082/sharding/test/insert
 Content-Type: application/x-www-form-urlencoded
 
-deviceCode=DEV008&deviceName=机器人 H&operationType=3&operationTime=2026-06-18T10:20:00&operationValue=450.2&operator=系统&remark=电压异常告警
+deviceCode = DEV008 &
+deviceName = 机器人 H &
+operationType = 3 &
+operationTime = 2026-06-18T10:20:00 &
+operationValue = 450.2 &
+operator = 系统 &
+remark = 电压异常告警
 
 ###
 
@@ -36,7 +60,12 @@ deviceCode=DEV008&deviceName=机器人 H&operationType=3&operationTime=2026-06-1
 POST http://localhost:8082/sharding/test/insert
 Content-Type: application/x-www-form-urlencoded
 
-deviceCode=DEV007&deviceName=包装机 G&operationType=4&operationTime=2026-12-25T11:00:00&operator=周九&remark=圣诞节保养
+deviceCode = DEV007 &
+deviceName = 包装机 G &
+operationType = 4 &
+operationTime = 2026-12-25T11:00:00 &
+operator = 周九 &
+remark = 圣诞节保养
 
 ###
 
@@ -44,7 +73,10 @@ deviceCode=DEV007&deviceName=包装机 G&operationType=4&operationTime=2026-12-2
 POST http://localhost:8082/sharding/test/insert
 Content-Type: application/x-www-form-urlencoded
 
-deviceCode=DEV009&deviceName=测试设备&operationType=1&operationTime=2026-05-01T08:00:00
+deviceCode = DEV009 &
+deviceName = 测试设备 &
+operationType = 1 &
+operationTime = 2026-05-01T08:00:00
 
 ###
 
@@ -62,7 +94,8 @@ GET http://localhost:8082/sharding/test/all-year
 POST http://localhost:8082/sharding/test/insert
 Content-Type: application/x-www-form-urlencoded
 
-deviceCode=DEV010&deviceName=测试设备
+deviceCode = DEV010 &
+deviceName = 测试设备
 
 ###
 
@@ -70,6 +103,9 @@ deviceCode=DEV010&deviceName=测试设备
 POST http://localhost:8082/sharding/test/insert
 Content-Type: application/x-www-form-urlencoded
 
-deviceCode=DEV010&deviceName=测试设备&operationType=1&operationTime=invalid-time
+deviceCode = DEV010 &
+deviceName = 测试设备 &
+operationType = 1 &
+operationTime = invalid-time
 
 ###

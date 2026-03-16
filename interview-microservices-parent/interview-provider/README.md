@@ -215,16 +215,16 @@ public class CustomInfoContributor implements InfoContributor {
 
 ### 1.6 可用的 Actuator 端点
 
-| 端点 | 路径 | 说明 | 开发环境 | 生产环境 |
-|------|------|------|---------|---------|
-| health | /actuator/health | 健康检查 | ✅ | ✅ |
-| info | /actuator/info | 应用信息 | ✅ | ✅ |
-| metrics | /actuator/metrics | 性能指标 | ✅ | ❌ |
-| env | /actuator/env | 环境变量 | ✅ | ❌ |
-| beans | /actuator/beans | Spring Bean 列表 | ✅ | ❌ |
-| threaddump | /actuator/threaddump | 线程快照 | ✅ | ❌ |
-| httpexchanges | /actuator/httpexchanges | HTTP 请求追踪 | ✅ | ❌ |
-| prometheus | /actuator/prometheus | Prometheus 指标 | ✅ | ✅ |
+| 端点            | 路径                      | 说明             | 开发环境 | 生产环境 |
+|---------------|-------------------------|----------------|------|------|
+| health        | /actuator/health        | 健康检查           | ✅    | ✅    |
+| info          | /actuator/info          | 应用信息           | ✅    | ✅    |
+| metrics       | /actuator/metrics       | 性能指标           | ✅    | ❌    |
+| env           | /actuator/env           | 环境变量           | ✅    | ❌    |
+| beans         | /actuator/beans         | Spring Bean 列表 | ✅    | ❌    |
+| threaddump    | /actuator/threaddump    | 线程快照           | ✅    | ❌    |
+| httpexchanges | /actuator/httpexchanges | HTTP 请求追踪      | ✅    | ❌    |
+| prometheus    | /actuator/prometheus    | Prometheus 指标  | ✅    | ✅    |
 
 ### 1.7 端点访问示例
 
@@ -292,6 +292,7 @@ jwt:
 ```
 
 **安全加固措施：**
+
 - ✅ 从环境变量 `JWT_SECRET_KEY` 读取密钥
 - ✅ 缩短 token 过期时间（2 小时）
 - ✅ 提供默认值防止启动失败
@@ -572,6 +573,7 @@ curl -X POST http://localhost:8082/api/auth/login \
 ```
 
 **响应示例：**
+
 ```json
 {
   "code": 200,
@@ -594,6 +596,7 @@ curl -X GET "http://localhost:8082/api/auth/verify?token=eyJhbGciOiJIUzI1NiJ9...
 ```
 
 **响应示例：**
+
 ```json
 {
   "code": 200,
@@ -620,6 +623,7 @@ curl -X GET http://localhost:8082/api/auth/info \
 ```
 
 **响应示例：**
+
 ```json
 {
   "code": 200,
@@ -721,11 +725,11 @@ public Map<String, SecretKey> jwtSecretKeys() {
 
 **答案：**
 
-| 算法 | 最小密钥长度 | 推荐密钥长度 |
-|------|-------------|-------------|
-| HS256 | 256 位（32 字节） | 256 位 |
-| HS384 | 384 位（48 字节） | 384 位 |
-| HS512 | 512 位（64 字节） | 512 位 |
+| 算法    | 最小密钥长度       | 推荐密钥长度 |
+|-------|--------------|--------|
+| HS256 | 256 位（32 字节） | 256 位  |
+| HS384 | 384 位（48 字节） | 384 位  |
+| HS512 | 512 位（64 字节） | 512 位  |
 
 本示例使用的密钥长度为 64 字节，满足所有算法要求。
 
@@ -743,6 +747,7 @@ public Map<String, SecretKey> jwtSecretKeys() {
 **答案：**
 
 检查以下几点：
+
 1. Token 是否完整（没有截断）
 2. 密钥是否正确（开发/生产环境区分）
 3. Token 是否过期（检查 expiration 字段）
@@ -784,33 +789,33 @@ spec:
 ✅ **已完成的功能：**
 
 1. ✅ Spring Boot Actuator 完整集成
-   - 健康检查（含自定义数据库检查）
-   - 应用信息（含 JVM、OS、内存信息）
-   - 性能指标（JVM、HTTP 请求）
-   - Prometheus 监控集成
+    - 健康检查（含自定义数据库检查）
+    - 应用信息（含 JVM、OS、内存信息）
+    - 性能指标（JVM、HTTP 请求）
+    - Prometheus 监控集成
 
 2. ✅ JWT 完整功能实现
-   - Token 生成
-   - Token 解析
-   - Token 验证
-   - 三个 RESTful API 接口
+    - Token 生成
+    - Token 解析
+    - Token 验证
+    - 三个 RESTful API 接口
 
 3. ✅ 生产环境安全加固
-   - 端点最小化暴露
-   - 环境变量注入密钥
-   - 网络隔离方案
-   - 安全认证配置
+    - 端点最小化暴露
+    - 环境变量注入密钥
+    - 网络隔离方案
+    - 安全认证配置
 
 ✅ **可访问的接口：**
 
-| 类型 | 接口路径 | 说明 |
-|------|---------|------|
-| Actuator | `/actuator/health` | 健康检查 |
-| Actuator | `/actuator/info` | 应用信息 |
+| 类型       | 接口路径                   | 说明            |
+|----------|------------------------|---------------|
+| Actuator | `/actuator/health`     | 健康检查          |
+| Actuator | `/actuator/info`       | 应用信息          |
 | Actuator | `/actuator/prometheus` | Prometheus 指标 |
-| JWT | `POST /api/auth/login` | 登录获取 token |
-| JWT | `GET /api/auth/verify` | 验证 token |
-| JWT | `GET /api/auth/info` | 获取用户信息 |
+| JWT      | `POST /api/auth/login` | 登录获取 token    |
+| JWT      | `GET /api/auth/verify` | 验证 token      |
+| JWT      | `GET /api/auth/info`   | 获取用户信息        |
 
 ---
 

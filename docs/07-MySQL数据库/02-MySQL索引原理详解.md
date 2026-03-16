@@ -13,6 +13,7 @@
 ```
 
 **B+Tree 特点：**
+
 1. **非叶子节点只存索引**：不存数据，容纳更多索引项
 2. **所有数据在叶子节点**：查询稳定 O(log N)
 3. **叶子节点链表连接**：适合范围查询和排序
@@ -20,12 +21,12 @@
 
 ### 1.2 B+Tree vs B-Tree
 
-| 特性 | B-Tree | B+Tree |
-|------|--------|--------|
-| 数据存储 | 所有节点都存 | 只在叶子节点 |
-| 查询稳定性 | 不稳定 | 稳定 O(log N) |
-| 范围查询 | 需中序遍历 | 直接链表遍历 |
-| 磁盘 IO | 较多 | 较少 |
+| 特性    | B-Tree | B+Tree      |
+|-------|--------|-------------|
+| 数据存储  | 所有节点都存 | 只在叶子节点      |
+| 查询稳定性 | 不稳定    | 稳定 O(log N) |
+| 范围查询  | 需中序遍历  | 直接链表遍历      |
+| 磁盘 IO | 较多     | 较少          |
 
 ---
 
@@ -34,11 +35,13 @@
 ### 2.1 聚簇索引（主键索引）
 
 **特点：**
+
 - 叶子节点存储**完整数据行**
 - 一张表只有**一个**聚簇索引
 - InnoDB 的**主键**就是聚簇索引
 
 **示例：**
+
 ```sql
 CREATE TABLE users (
     id INT PRIMARY KEY,  -- 聚簇索引
@@ -50,11 +53,13 @@ CREATE TABLE users (
 ### 2.2 二级索引（辅助索引）
 
 **特点：**
+
 - 叶子节点存储**主键值 + 索引列**
 - 可以有**多个**二级索引
 - 需要**回表查询**（先查主键，再查聚簇索引）
 
 **示例：**
+
 ```sql
 CREATE INDEX idx_email ON users(email);
 -- 叶子节点存储：email + id（主键）
@@ -65,6 +70,7 @@ CREATE INDEX idx_email ON users(email);
 **定义：** 二级索引包含所有查询字段，无需回表
 
 **示例：**
+
 ```sql
 -- 创建联合索引
 CREATE INDEX idx_name_age ON users(name, age);
@@ -79,32 +85,32 @@ SELECT id, name, age FROM users WHERE name = 'Tom' AND age > 18;
 
 ### 3.1 按数据结构分
 
-| 类型 | 说明 | 适用场景 |
-|------|------|----------|
-| B+Tree 索引 | 最常用 | 等值、范围查询 |
-| Hash 索引 | 等值查询 O(1) | Memory 引擎 |
-| Full-Text 全文索引 | 文本搜索 | MyISAM/InnoDB |
+| 类型             | 说明        | 适用场景          |
+|----------------|-----------|---------------|
+| B+Tree 索引      | 最常用       | 等值、范围查询       |
+| Hash 索引        | 等值查询 O(1) | Memory 引擎     |
+| Full-Text 全文索引 | 文本搜索      | MyISAM/InnoDB |
 
 ### 3.2 按物理存储分
 
-| 类型 | 说明 | 数量限制 |
-|------|------|----------|
-| 聚簇索引 | 数据与索引在一起 | 1 个 |
-| 二级索引 | 独立的索引结构 | 多个 |
+| 类型   | 说明       | 数量限制 |
+|------|----------|------|
+| 聚簇索引 | 数据与索引在一起 | 1 个  |
+| 二级索引 | 独立的索引结构  | 多个   |
 
 ### 3.3 按字段数量分
 
-| 类型 | 说明 | 注意事项 |
-|------|------|----------|
-| 单列索引 | 一个字段 | 简单高效 |
+| 类型   | 说明   | 注意事项       |
+|------|------|------------|
+| 单列索引 | 一个字段 | 简单高效       |
 | 联合索引 | 多个字段 | **最左匹配原则** |
 
 ### 3.4 按唯一性分
 
-| 类型 | 说明 | 约束 |
-|------|------|------|
+| 类型   | 说明    | 约束     |
+|------|-------|--------|
 | 唯一索引 | 不允许重复 | UNIQUE |
-| 普通索引 | 允许重复 | - |
+| 普通索引 | 允许重复  | -      |
 
 ---
 
@@ -156,6 +162,7 @@ EXPLAIN SELECT * FROM users WHERE name = 'Tom';
 ### 5.1 常见失效情况
 
 **1. 模糊查询以%开头**
+
 ```sql
 -- ❌ 索引失效
 SELECT * FROM users WHERE name LIKE '%Tom';
@@ -165,6 +172,7 @@ SELECT * FROM users WHERE name LIKE 'Tom%';
 ```
 
 **2. 函数操作**
+
 ```sql
 -- ❌ 索引失效
 SELECT * FROM users WHERE YEAR(create_time) = 2024;
@@ -174,6 +182,7 @@ SELECT * FROM users WHERE create_time >= '2024-01-01';
 ```
 
 **3. 类型转换**
+
 ```sql
 -- ❌ 索引失效（phone 是字符串）
 SELECT * FROM users WHERE phone = 13800138000;
@@ -183,6 +192,7 @@ SELECT * FROM users WHERE phone = '13800138000';
 ```
 
 **4. OR 连接条件**
+
 ```sql
 -- ❌ 索引失效（name 无索引）
 SELECT * FROM users WHERE email = 'test@example.com' OR name = 'Tom';
@@ -192,6 +202,7 @@ SELECT * FROM users WHERE email = 'test@example.com' OR email = 'test2@example.c
 ```
 
 **5. 违反最左匹配原则**
+
 ```sql
 -- 联合索引 idx_name_age (name, age)
 
@@ -203,6 +214,7 @@ SELECT * FROM users WHERE name = 'Tom' AND age = 18;
 ```
 
 **6. IS NULL/IS NOT NULL**
+
 ```sql
 -- ❌ 可能失效
 SELECT * FROM users WHERE name IS NULL;
@@ -212,6 +224,7 @@ ALTER TABLE users MODIFY name VARCHAR(50) NOT NULL DEFAULT '';
 ```
 
 **7. != 或 <>**
+
 ```sql
 -- ❌ 可能全表扫描
 SELECT * FROM users WHERE status != 1;
@@ -236,6 +249,7 @@ SELECT * FROM users WHERE status = 0 OR status = 2;
 ### 6.2 索引设计技巧
 
 **1. 选择区分度高的字段**
+
 ```sql
 -- ✅ 好索引（区分度高）
 CREATE INDEX idx_email ON users(email);
@@ -245,6 +259,7 @@ CREATE INDEX idx_gender ON users(gender);  -- 只有男/女
 ```
 
 **2. 利用覆盖索引**
+
 ```sql
 -- 创建联合索引
 CREATE INDEX idx_name_age ON users(name, age);
@@ -254,6 +269,7 @@ SELECT id, name, age FROM users WHERE name = 'Tom';
 ```
 
 **3. 扩展已有索引**
+
 ```sql
 -- 已有索引
 CREATE INDEX idx_name ON users(name);
@@ -276,6 +292,7 @@ CREATE INDEX idx_name_age ON users(name, age);
 4. **减少 IO 次数**：树高度通常 3-4 层，IO 次数少
 
 **对比：**
+
 - 二叉树：树太高，IO 次数多
 - B-Tree：范围查询需中序遍历
 - Hash：只支持等值查询，不支持范围查询
@@ -284,12 +301,12 @@ CREATE INDEX idx_name_age ON users(name, age);
 
 **答：**
 
-| 对比项 | 聚簇索引 | 二级索引 |
-|--------|----------|----------|
-| 存储内容 | 完整数据行 | 主键值 + 索引列 |
-| 数量限制 | 1 个 | 多个 |
-| 查询方式 | 直接获取数据 | 需要回表 |
-| 适用场景 | 主键查询 | 条件查询 |
+| 对比项  | 聚簇索引   | 二级索引      |
+|------|--------|-----------|
+| 存储内容 | 完整数据行  | 主键值 + 索引列 |
+| 数量限制 | 1 个    | 多个        |
+| 查询方式 | 直接获取数据 | 需要回表      |
+| 适用场景 | 主键查询   | 条件查询      |
 
 **回表：** 通过二级索引找到主键后，再到聚簇索引查询完整数据
 
@@ -302,6 +319,7 @@ CREATE INDEX idx_name_age ON users(name, age);
 - `WHERE b=2` 或 `WHERE c=3` **无法使用索引**
 
 **示例：**
+
 ```sql
 -- 联合索引 idx_name_age_city (name, age, city)
 
@@ -322,10 +340,12 @@ WHERE city = 'Beijing';
 **覆盖索引：** 二级索引包含所有查询字段，无需回表
 
 **优势：**
+
 1. **避免回表**：减少 IO 次数
 2. **提升性能**：直接返回数据
 
 **示例：**
+
 ```sql
 -- 创建联合索引
 CREATE INDEX idx_name_age ON users(name, age);

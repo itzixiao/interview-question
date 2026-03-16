@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * 容器化示例应用主启动类
- * 
+ *
  * @author itzixiao
  * @since 2026-03-15
  */

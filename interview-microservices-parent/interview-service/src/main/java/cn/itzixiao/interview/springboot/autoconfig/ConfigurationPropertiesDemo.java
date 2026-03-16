@@ -12,14 +12,14 @@ import java.util.List;
 
 /**
  * @ConfigurationProperties 配置绑定详解
- *
+ * <p>
  * 作用：将配置文件中的属性绑定到 Java 对象
- *
+ * <p>
  * 使用方式：
  * 1. @Component + @ConfigurationProperties
  * 2. @EnableConfigurationProperties + @ConfigurationProperties
  * 3. @ConfigurationPropertiesScan (Spring Boot 2.2+)
- *
+ * <p>
  * 配置文件示例（application.yml）：
  * ┌─────────────────────────────────────────────────────────────┐
  * │  myapp:                                                      │
@@ -80,18 +80,53 @@ public class ConfigurationPropertiesDemo {
         private List<DatabaseProperties> databases = new ArrayList<>();
 
         // Getters and Setters
-        public String getName() { return name; }
-        public void setName(String name) { this.name = name; }
-        public String getVersion() { return version; }
-        public void setVersion(String version) { this.version = version; }
-        public boolean isDebug() { return debug; }
-        public void setDebug(boolean debug) { this.debug = debug; }
-        public ServerProperties getServer() { return server; }
-        public void setServer(ServerProperties server) { this.server = server; }
-        public List<String> getFeatures() { return features; }
-        public void setFeatures(List<String> features) { this.features = features; }
-        public List<DatabaseProperties> getDatabases() { return databases; }
-        public void setDatabases(List<DatabaseProperties> databases) { this.databases = databases; }
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getVersion() {
+            return version;
+        }
+
+        public void setVersion(String version) {
+            this.version = version;
+        }
+
+        public boolean isDebug() {
+            return debug;
+        }
+
+        public void setDebug(boolean debug) {
+            this.debug = debug;
+        }
+
+        public ServerProperties getServer() {
+            return server;
+        }
+
+        public void setServer(ServerProperties server) {
+            this.server = server;
+        }
+
+        public List<String> getFeatures() {
+            return features;
+        }
+
+        public void setFeatures(List<String> features) {
+            this.features = features;
+        }
+
+        public List<DatabaseProperties> getDatabases() {
+            return databases;
+        }
+
+        public void setDatabases(List<DatabaseProperties> databases) {
+            this.databases = databases;
+        }
     }
 
     /**
@@ -117,12 +152,29 @@ public class ConfigurationPropertiesDemo {
         private int timeout = 30;
 
         // Getters and Setters
-        public String getHost() { return host; }
-        public void setHost(String host) { this.host = host; }
-        public int getPort() { return port; }
-        public void setPort(int port) { this.port = port; }
-        public int getTimeout() { return timeout; }
-        public void setTimeout(int timeout) { this.timeout = timeout; }
+        public String getHost() {
+            return host;
+        }
+
+        public void setHost(String host) {
+            this.host = host;
+        }
+
+        public int getPort() {
+            return port;
+        }
+
+        public void setPort(int port) {
+            this.port = port;
+        }
+
+        public int getTimeout() {
+            return timeout;
+        }
+
+        public void setTimeout(int timeout) {
+            this.timeout = timeout;
+        }
     }
 
     /**
@@ -151,19 +203,42 @@ public class ConfigurationPropertiesDemo {
         private String password;
 
         // Getters and Setters
-        public String getName() { return name; }
-        public void setName(String name) { this.name = name; }
-        public String getUrl() { return url; }
-        public void setUrl(String url) { this.url = url; }
-        public String getUsername() { return username; }
-        public void setUsername(String username) { this.username = username; }
-        public String getPassword() { return password; }
-        public void setPassword(String password) { this.password = password; }
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getUrl() {
+            return url;
+        }
+
+        public void setUrl(String url) {
+            this.url = url;
+        }
+
+        public String getUsername() {
+            return username;
+        }
+
+        public void setUsername(String username) {
+            this.username = username;
+        }
+
+        public String getPassword() {
+            return password;
+        }
+
+        public void setPassword(String password) {
+            this.password = password;
+        }
     }
 
     /**
      * 松散绑定示例
-     *
+     * <p>
      * 以下配置都可以绑定到 myAppName：
      * - myapp.my-app-name
      * - myapp.myAppName
@@ -174,13 +249,18 @@ public class ConfigurationPropertiesDemo {
     public static class RelaxedBindingExample {
         private String myAppName;
 
-        public String getMyAppName() { return myAppName; }
-        public void setMyAppName(String myAppName) { this.myAppName = myAppName; }
+        public String getMyAppName() {
+            return myAppName;
+        }
+
+        public void setMyAppName(String myAppName) {
+            this.myAppName = myAppName;
+        }
     }
 
     /**
      * 配置元数据
-     *
+     * <p>
      * 在 resources/META-INF/additional-spring-configuration-metadata.json
      * 中添加配置提示信息，IDE 会显示自动补全
      */

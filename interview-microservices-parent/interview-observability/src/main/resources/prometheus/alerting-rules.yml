@@ -95,8 +95,8 @@ groups:
         annotations:
           summary: "应用 {{ $labels.instance }} 数据库连接池即将耗尽"
           description: "数据库连接池使用率超过 90%，当前值：{{ $value | humanizePercentage }}"
-      
-      # 10. 磁盘空间不足告警
+
+        # 10. 磁盘空间不足告警
         # 注意：需要 node_exporter 提供磁盘指标
       - alert: DiskSpaceLow
         expr: node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"} < 0.1

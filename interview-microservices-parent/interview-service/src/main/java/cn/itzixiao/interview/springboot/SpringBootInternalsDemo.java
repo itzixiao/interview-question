@@ -12,7 +12,7 @@ import java.time.Duration;
 
 /**
  * Spring Boot 核心组件详解
- *
+ * <p>
  * 核心扩展点：
  * ┌─────────────────────────────────────────────────────────────┐
  * │  1. ApplicationContextInitializer                            │

@@ -1,6 +1,5 @@
 package cn.itzixiao.interview.spring.transaction;
 
-import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -9,24 +8,19 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.sql.DataSource;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
 /**
  * Spring 事务完全指南 - 失效场景 + 传播机制 + 隔离级别 + 最佳实践
- *
+ * <p>
  * 本示例包含：
  * 1. 8 种事务失效场景详解
  * 2. 7 种事务传播行为演示
@@ -796,96 +790,96 @@ class BestPracticeService {
 
 /**
  * ========================================
- *           Spring 事务高频面试题目
+ * Spring 事务高频面试题目
  * ========================================
- *
+ * <p>
  * 【问题 1】Spring 事务失效的常见场景有哪些？
- *
+ * <p>
  * 【答案】
- *
+ * <p>
  * 1. 非 public 方法
- *    - @Transactional 只能用于 public 方法
- *    - Spring AOP 基于动态代理，非 public 方法无法被代理
- *    - 解决：改为 public 方法
- *
+ * - @Transactional 只能用于 public 方法
+ * - Spring AOP 基于动态代理，非 public 方法无法被代理
+ * - 解决：改为 public 方法
+ * <p>
  * 2. 自调用问题（最常见）
- *    - 同类内部调用不走代理，this 调用绕过事务切面
- *    - 解决：
- *      a. 注入自身代理对象：@Autowired @Lazy SelfService self;
- *      b. 使用 AopContext.currentProxy()
- *      c. 拆分到另一个 Service
- *
+ * - 同类内部调用不走代理，this 调用绕过事务切面
+ * - 解决：
+ * a. 注入自身代理对象：@Autowired @Lazy SelfService self;
+ * b. 使用 AopContext.currentProxy()
+ * c. 拆分到另一个 Service
+ * <p>
  * 3. 异常被捕获未抛出
- *    - 事务回滚依赖于异常抛出
- *    - 解决：捕获后继续抛出或手动设置 rollbackOnly
- *
+ * - 事务回滚依赖于异常抛出
+ * - 解决：捕获后继续抛出或手动设置 rollbackOnly
+ * <p>
  * 4. 异常类型不匹配
- *    - 默认只回滚 RuntimeException 和 Error
- *    - checked Exception 不会触发回滚
- *    - 解决：@Transactional(rollbackFor = Exception.class)
- *
+ * - 默认只回滚 RuntimeException 和 Error
+ * - checked Exception 不会触发回滚
+ * - 解决：@Transactional(rollbackFor = Exception.class)
+ * <p>
  * 5. 数据库引擎不支持
- *    - MySQL MyISAM 引擎不支持事务
- *    - 解决：使用 InnoDB 引擎
- *
+ * - MySQL MyISAM 引擎不支持事务
+ * - 解决：使用 InnoDB 引擎
+ * <p>
  * 6. 异步方法
- *    - 新线程不在 Spring 事务管理范围内
- *    - 解决：使用 @Async 时配置事务管理器
- *
+ * - 新线程不在 Spring 事务管理范围内
+ * - 解决：使用 @Async 时配置事务管理器
+ * <p>
  * 7. 传播行为配置错误
- *    - NOT_SUPPORTED 会挂起事务
- *    - 解决：理解各种传播行为的含义
- *
+ * - NOT_SUPPORTED 会挂起事务
+ * - 解决：理解各种传播行为的含义
+ * <p>
  * 8. 多个数据源
- *    - 未指定正确的事务管理器
- *    - 解决：@Transactional(transactionManager = "xxx")
- *
- *
+ * - 未指定正确的事务管理器
+ * - 解决：@Transactional(transactionManager = "xxx")
+ * <p>
+ * <p>
  * 【问题 2】Spring 事务传播行为有哪些？分别适用于什么场景？
- *
+ * <p>
  * 【答案】
- *
+ * <p>
  * 1. REQUIRED（默认）
- *    - 规则：当前有事务则加入，无则新建
- *    - 场景：大多数业务场景，保证原子性
- *    - 示例：订单创建 + 库存扣减
- *
+ * - 规则：当前有事务则加入，无则新建
+ * - 场景：大多数业务场景，保证原子性
+ * - 示例：订单创建 + 库存扣减
+ * <p>
  * 2. REQUIRES_NEW
- *    - 规则：挂起当前事务，新建独立事务
- *    - 场景：日志记录、审计操作
- *    - 示例：无论业务成功失败，都要记录日志
- *
+ * - 规则：挂起当前事务，新建独立事务
+ * - 场景：日志记录、审计操作
+ * - 示例：无论业务成功失败，都要记录日志
+ * <p>
  * 3. NESTED
- *    - 规则：在当前事务中创建嵌套事务（savepoint）
- *    - 场景：部分回滚需求
- *    - 示例：批量处理，单条失败不影响其他
- *    - 注意：仅 DataSourceTransactionManager 支持
- *
+ * - 规则：在当前事务中创建嵌套事务（savepoint）
+ * - 场景：部分回滚需求
+ * - 示例：批量处理，单条失败不影响其他
+ * - 注意：仅 DataSourceTransactionManager 支持
+ * <p>
  * 4. SUPPORTS
- *    - 规则：当前有事务则加入，无则以非事务执行
- *    - 场景：查询操作，可有可无的事务
- *    - 示例：根据 ID 查询用户信息
- *
+ * - 规则：当前有事务则加入，无则以非事务执行
+ * - 场景：查询操作，可有可无的事务
+ * - 示例：根据 ID 查询用户信息
+ * <p>
  * 5. NOT_SUPPORTED
- *    - 规则：挂起当前事务，以非事务执行
- *    - 场景：不需要事务的操作（如文件 IO）
- *    - 示例：导出 Excel 文件
- *
+ * - 规则：挂起当前事务，以非事务执行
+ * - 场景：不需要事务的操作（如文件 IO）
+ * - 示例：导出 Excel 文件
+ * <p>
  * 6. MANDATORY
- *    - 规则：当前必须有事务，否则抛出异常
- *    - 场景：强制要求事务的方法
- *    - 示例：核心业务逻辑，必须在事务中执行
- *
+ * - 规则：当前必须有事务，否则抛出异常
+ * - 场景：强制要求事务的方法
+ * - 示例：核心业务逻辑，必须在事务中执行
+ * <p>
  * 7. NEVER
- *    - 规则：当前必须无事务，否则抛出异常
- *    - 场景：绝对不能有事务的操作
- *    - 示例：某些特定的批处理任务
- *
- *
+ * - 规则：当前必须无事务，否则抛出异常
+ * - 场景：绝对不能有事务的操作
+ * - 示例：某些特定的批处理任务
+ * <p>
+ * <p>
  * 【问题 3】REQUIRED 和 REQUIRES_NEW 有什么区别？
- *
+ * <p>
  * 【答案】
- *
+ * <p>
  * | 对比维度    | REQUIRED                      | REQUIRES_NEW                |
  * |------------|-------------------------------|-----------------------------|
  * | 事务关系    | 加入当前事务                   | 创建新事务，独立于当前事务     |
@@ -893,53 +887,52 @@ class BestPracticeService {
  * | 锁持有时间  | 整个事务期间                   | 仅内层事务期间                 |
  * | 性能        | 较好（单个事务）               | 较差（多个事务）               |
  * | 使用场景    | 大多数业务场景                 | 日志、审计等独立操作           |
- *
+ * <p>
  * 示例对比：
- *
+ * <p>
  * ```java
  * // REQUIRED 场景
- * @Transactional
- * public void createOrder() {
- *     orderMapper.insert(order);      // 同事务
- *     inventoryMapper.reduce();       // 同事务
- *     // 一个失败，全部回滚
- * }
  *
+ * @Transactional public void createOrder() {
+ * orderMapper.insert(order);      // 同事务
+ * inventoryMapper.reduce();       // 同事务
+ * // 一个失败，全部回滚
+ * }
+ * <p>
  * // REQUIRES_NEW 场景
- * @Transactional
- * public void createOrder() {
- *     orderMapper.insert(order);
- *     try {
- *         logService.log();  // REQUIRES_NEW，独立提交
- *     } catch (Exception e) {
- *         // 日志失败不影响订单
- *     }
+ * @Transactional public void createOrder() {
+ * orderMapper.insert(order);
+ * try {
+ * logService.log();  // REQUIRES_NEW，独立提交
+ * } catch (Exception e) {
+ * // 日志失败不影响订单
+ * }
  * }
  * ```
- *
- *
+ * <p>
+ * <p>
  * 【问题 4】NESTED 和 REQUIRES_NEW 有什么区别？
- *
+ * <p>
  * 【答案】
- *
+ * <p>
  * 1. 事务关系不同
- *    - NESTED: 嵌套事务，是外层事务的一部分（savepoint）
- *    - REQUIRES_NEW: 全新事务，完全独立于外层
- *
+ * - NESTED: 嵌套事务，是外层事务的一部分（savepoint）
+ * - REQUIRES_NEW: 全新事务，完全独立于外层
+ * <p>
  * 2. 回滚影响不同
- *    - NESTED: 外层回滚，内层也回滚
- *    - REQUIRES_NEW: 外层回滚，内层已提交的不受影响
- *
+ * - NESTED: 外层回滚，内层也回滚
+ * - REQUIRES_NEW: 外层回滚，内层已提交的不受影响
+ * <p>
  * 3. 实现机制不同
- *    - NESTED: 基于 JDBC savepoint 实现
- *    - REQUIRES_NEW: 挂起当前事务，创建新事务
- *
+ * - NESTED: 基于 JDBC savepoint 实现
+ * - REQUIRES_NEW: 挂起当前事务，创建新事务
+ * <p>
  * 4. 支持程度不同
- *    - NESTED: 仅 DataSourceTransactionManager 支持
- *    - REQUIRES_NEW: 所有事务管理器都支持
- *
+ * - NESTED: 仅 DataSourceTransactionManager 支持
+ * - REQUIRES_NEW: 所有事务管理器都支持
+ * <p>
  * 示意图：
- *
+ * <p>
  * ```
  * NESTED:
  * ┌─────────────────────┐
@@ -950,7 +943,7 @@ class BestPracticeService {
  * │                     │
  * │  Outer 回滚 → Inner 也回滚
  * └─────────────────────┘
- *
+ * <p>
  * REQUIRES_NEW:
  * ┌─────────────────────┐
  * │  Outer Transaction  │ (暂停)
@@ -960,305 +953,290 @@ class BestPracticeService {
  * └─────────────────────┘
  * Outer 回滚 ≠ New 回滚
  * ```
- *
- *
+ * <p>
+ * <p>
  * 【问题 5】如何正确地在事务中记录日志？
- *
+ * <p>
  * 【答案】
- *
+ * <p>
  * 错误做法：
  * ```java
- * @Transactional
- * public void business() {
- *     logMapper.insert("业务开始");  // ❌ 同事务，回滚时日志也消失
- *     // 业务逻辑
+ * @Transactional public void business() {
+ * logMapper.insert("业务开始");  // ❌ 同事务，回滚时日志也消失
+ * // 业务逻辑
  * }
  * ```
- *
+ * <p>
  * 正确做法：
  * ```java
- * @Service
- * public class BusinessService {
- *
- *     @Autowired
- *     private LogService logService;
- *
- *     @Transactional
- *     public void business() {
- *         try {
- *             // 业务逻辑
- *             logService.logSuccess("业务成功");  // ✓ REQUIRES_NEW
- *         } catch (Exception e) {
- *             logService.logError("业务失败");   // ✓ REQUIRES_NEW
- *             throw e;
- *         }
- *     }
+ * @Service public class BusinessService {
+ * @Autowired private LogService logService;
+ * @Transactional public void business() {
+ * try {
+ * // 业务逻辑
+ * logService.logSuccess("业务成功");  // ✓ REQUIRES_NEW
+ * } catch (Exception e) {
+ * logService.logError("业务失败");   // ✓ REQUIRES_NEW
+ * throw e;
  * }
- *
- * @Service
- * public class LogService {
- *     @Transactional(propagation = Propagation.REQUIRES_NEW)
- *     public void logSuccess(String msg) {
- *         // 独立事务，不受业务回滚影响
- *     }
- *
- *     @Transactional(propagation = Propagation.REQUIRES_NEW)
- *     public void logError(String msg) {
- *         // 独立事务，不受业务回滚影响
- *     }
+ * }
+ * }
+ * @Service public class LogService {
+ * @Transactional(propagation = Propagation.REQUIRES_NEW)
+ * public void logSuccess(String msg) {
+ * // 独立事务，不受业务回滚影响
+ * }
+ * @Transactional(propagation = Propagation.REQUIRES_NEW)
+ * public void logError(String msg) {
+ * // 独立事务，不受业务回滚影响
+ * }
  * }
  * ```
- *
+ * <p>
  * 关键点：
  * 1. 日志服务使用 REQUIRES_NEW 传播行为
  * 2. 日志操作在 try-catch 块之外调用
  * 3. 确保日志服务是独立的 Bean（通过代理调用）
- *
- *
+ * <p>
+ * <p>
  * 【问题 6】事务隔离级别有哪些？MySQL 默认是什么？
- *
+ * <p>
  * 【答案】
- *
+ * <p>
  * SQL 标准定义的隔离级别（从低到高）：
- *
+ * <p>
  * 1. READ_UNCOMMITTED（读未提交）
- *    - 问题：脏读、不可重复读、幻读
- *    - 性能：最好
- *    - 适用：对数据一致性要求不高的统计场景
- *
+ * - 问题：脏读、不可重复读、幻读
+ * - 性能：最好
+ * - 适用：对数据一致性要求不高的统计场景
+ * <p>
  * 2. READ_COMMITTED（读已提交）
- *    - 避免：脏读
- *    - 问题：不可重复读、幻读
- *    - 性能：较好
- *    - 适用：Oracle 默认，大多数场景够用
- *
+ * - 避免：脏读
+ * - 问题：不可重复读、幻读
+ * - 性能：较好
+ * - 适用：Oracle 默认，大多数场景够用
+ * <p>
  * 3. REPEATABLE_READ（可重复读）
- *    - 避免：脏读、不可重复读
- *    - 问题：幻读（InnoDB 通过 MVCC+Next-Key Lock 基本解决）
- *    - 性能：一般
- *    - 适用：MySQL 默认，推荐选择
- *
+ * - 避免：脏读、不可重复读
+ * - 问题：幻读（InnoDB 通过 MVCC+Next-Key Lock 基本解决）
+ * - 性能：一般
+ * - 适用：MySQL 默认，推荐选择
+ * <p>
  * 4. SERIALIZABLE（串行化）
- *    - 避免：脏读、不可重复读、幻读
- *    - 实现：强制事务串行执行
- *    - 性能：最差
- *    - 适用：对数据一致性要求极高的金融场景
- *
+ * - 避免：脏读、不可重复读、幻读
+ * - 实现：强制事务串行执行
+ * - 性能：最差
+ * - 适用：对数据一致性要求极高的金融场景
+ * <p>
  * MySQL InnoDB 的特殊优化：
  * - 在 REPEATABLE_READ 隔离级别下，通过 Next-Key Lock 基本解决了幻读问题
  * - 因此 MySQL 默认使用 REPEATABLE_READ 而非 READ_COMMITTED
- *
+ * <p>
  * 选择建议：
  * - 互联网应用：REPEATABLE_READ（MySQL 默认）
  * - 金融系统：考虑 SERIALIZABLE 或应用层加锁
  * - 数据分析：READ_UNCOMMITTED（允许脏读）
- *
- *
+ * <p>
+ * <p>
  * 【问题 7】@Transactional 的原理是什么？
- *
+ * <p>
  * 【答案】
- *
+ * <p>
  * 核心原理：AOP（面向切面编程）+ 动态代理
- *
+ * <p>
  * 1. 扫描阶段
- *    - Spring 扫描带有@Transactional 的 Bean
- *    - 创建 TransactionInterceptor（事务拦截器）
- *
+ * - Spring 扫描带有@Transactional 的 Bean
+ * - 创建 TransactionInterceptor（事务拦截器）
+ * <p>
  * 2. 代理创建
- *    - JDK 动态代理（接口）或 CGLIB（类）
- *    - 生成代理对象，包裹目标对象
- *
+ * - JDK 动态代理（接口）或 CGLIB（类）
+ * - 生成代理对象，包裹目标对象
+ * <p>
  * 3. 方法调用流程
- *    ```
- *    客户端调用
- *      ↓
- *    代理对象
- *      ↓
- *    TransactionInterceptor.invoke()
- *      ↓
- *    PlatformTransactionManager.getTransaction()
- *      ↓
- *    执行目标方法
- *      ↓
- *    成功：commit()
- *    异常：rollback()
- *    ```
- *
+ * ```
+ * 客户端调用
+ * ↓
+ * 代理对象
+ * ↓
+ * TransactionInterceptor.invoke()
+ * ↓
+ * PlatformTransactionManager.getTransaction()
+ * ↓
+ * 执行目标方法
+ * ↓
+ * 成功：commit()
+ * 异常：rollback()
+ * ```
+ * <p>
  * 关键源码：
  * ```java
  * // TransactionInterceptor.java
- * @Override
- * public Object invoke(MethodInvocation invocation) throws Throwable {
- *     // 1. 获取事务属性
- *     TransactionAttributeSource tas = getTransactionAttributeSource();
- *     TransactionAttribute txAttr = tas.getTransactionAttribute(method, targetClass);
- *
- *     // 2. 获取事务管理器
- *     PlatformTransactionManager tm = determineTransactionManager(txAttr);
- *
- *     // 3. 创建事务
- *     TransactionStatus status = tm.getTransaction(txAttr);
- *
- *     try {
- *         // 4. 执行目标方法
- *         Object result = invocation.proceed();
- *
- *         // 5. 提交事务
- *         tm.commit(status);
- *         return result;
- *     } catch (Throwable ex) {
- *         // 6. 回滚事务
- *         completeTransactionAfterThrowing(status, ex);
- *         throw ex;
- *     }
+ * @Override public Object invoke(MethodInvocation invocation) throws Throwable {
+ * // 1. 获取事务属性
+ * TransactionAttributeSource tas = getTransactionAttributeSource();
+ * TransactionAttribute txAttr = tas.getTransactionAttribute(method, targetClass);
+ * <p>
+ * // 2. 获取事务管理器
+ * PlatformTransactionManager tm = determineTransactionManager(txAttr);
+ * <p>
+ * // 3. 创建事务
+ * TransactionStatus status = tm.getTransaction(txAttr);
+ * <p>
+ * try {
+ * // 4. 执行目标方法
+ * Object result = invocation.proceed();
+ * <p>
+ * // 5. 提交事务
+ * tm.commit(status);
+ * return result;
+ * } catch (Throwable ex) {
+ * // 6. 回滚事务
+ * completeTransactionAfterThrowing(status, ex);
+ * throw ex;
+ * }
  * }
  * ```
- *
+ * <p>
  * 注意事项：
  * 1. 只有外部调用代理对象才生效
  * 2. 自调用（this 调用）不经过代理
  * 3. 必须是 public 方法
  * 4. 异常必须抛出才能触发回滚
- *
- *
+ * <p>
+ * <p>
  * 【问题 8】如何手动回滚事务？
- *
+ * <p>
  * 【答案】
- *
+ * <p>
  * 方法 1: 抛出异常（推荐）
  * ```java
- * @Transactional
- * public void method() {
- *     if (error) {
- *         throw new RuntimeException("业务失败"); // ✓ 自动回滚
- *     }
+ * @Transactional public void method() {
+ * if (error) {
+ * throw new RuntimeException("业务失败"); // ✓ 自动回滚
+ * }
  * }
  * ```
- *
+ * <p>
  * 方法 2: 手动设置 rollbackOnly
  * ```java
- * @Transactional
- * public void method() {
- *     try {
- *         // 业务逻辑
- *     } catch (Exception e) {
- *         TransactionAspectSupport.currentTransactionStatus()
- *             .setRollbackOnly(); // ✓ 手动回滚
- *         throw e;
- *     }
+ * @Transactional public void method() {
+ * try {
+ * // 业务逻辑
+ * } catch (Exception e) {
+ * TransactionAspectSupport.currentTransactionStatus()
+ * .setRollbackOnly(); // ✓ 手动回滚
+ * throw e;
+ * }
  * }
  * ```
- *
+ * <p>
  * 方法 3: 编程式事务
  * ```java
  * transactionTemplate.execute(status -> {
- *     try {
- *         // 业务逻辑
- *         return result;
- *     } catch (Exception e) {
- *         status.setRollbackOnly(); // ✓ 标记回滚
- *         throw e;
- *     }
+ * try {
+ * // 业务逻辑
+ * return result;
+ * } catch (Exception e) {
+ * status.setRollbackOnly(); // ✓ 标记回滚
+ * throw e;
+ * }
  * });
  * ```
- *
- *
+ * <p>
+ * <p>
  * 【问题 9】事务超时如何配置？有什么作用？
- *
+ * <p>
  * 【答案】
- *
+ * <p>
  * 配置方式：
  * ```java
  * @Transactional(timeout = 30)  // 超时时间 30 秒
  * public void longRunningMethod() {
- *     // 超过 30 秒未完成，自动回滚
+ * // 超过 30 秒未完成，自动回滚
  * }
  * ```
- *
+ * <p>
  * 作用：
  * 1. 防止长事务占用数据库资源
  * 2. 避免死锁长时间不释放
  * 3. 快速失败，提高系统可用性
- *
+ * <p>
  * 底层实现：
  * - Spring 注册 TransactionSynchronization
  * - 到达超时时间后抛出 TimeoutException
  * - 触发事务回滚
- *
+ * <p>
  * 使用建议：
  * - 查询操作：timeout = 5-10 秒
  * - 简单业务：timeout = 30 秒
  * - 复杂业务：timeout = 60 秒
  * - 批处理：根据数据量合理设置
- *
- *
+ * <p>
+ * <p>
  * 【问题 10】什么是大事务？有什么危害？如何优化？
- *
+ * <p>
  * 【答案】
- *
+ * <p>
  * 大事务定义：
  * - 执行时间长
  * - 操作数据量大
  * - 持有锁时间久
- *
+ * <p>
  * 危害：
  * 1. 锁竞争加剧，并发性能下降
  * 2. 可能导致死锁
  * 3. 数据库连接占用时间长
  * 4. 回滚时间长，影响系统可用性
- *
+ * <p>
  * 优化方案：
- *
+ * <p>
  * 1. 事务拆分
  * ```java
  * // ❌ 大事务
- * @Transactional
- * public void process() {
- *     validate();      // 参数校验（非事务）
- *     saveOrder();     // 保存订单（事务）
- *     sendEmail();     // 发送邮件（非事务）
- *     saveLog();       // 保存日志（事务）
+ * @Transactional public void process() {
+ * validate();      // 参数校验（非事务）
+ * saveOrder();     // 保存订单（事务）
+ * sendEmail();     // 发送邮件（非事务）
+ * saveLog();       // 保存日志（事务）
  * }
- *
+ * <p>
  * // ✓ 拆分事务
  * public void process() {
- *     validate();          // 非事务
- *     saveOrder();         // @Transactional
- *     sendEmail();         // 非事务
- *     saveLog();           // @Transactional
+ * validate();          // 非事务
+ * saveOrder();         // @Transactional
+ * sendEmail();         // 非事务
+ * saveLog();           // @Transactional
  * }
  * ```
- *
+ * <p>
  * 2. 异步处理
  * ```java
- * @Transactional
- * public void createOrder() {
- *     orderMapper.insert(order);
- *     asyncService.sendEmail(order); // @Async
+ * @Transactional public void createOrder() {
+ * orderMapper.insert(order);
+ * asyncService.sendEmail(order); // @Async
  * }
  * ```
- *
+ * <p>
  * 3. 批量操作分批提交
  * ```java
- * @Transactional
- * public void batchInsert(List<Data> list) {
- *     int batchSize = 100;
- *     for (int i = 0; i < list.size(); i += batchSize) {
- *         List<Data> batch = list.subList(i, Math.min(i + batchSize, list.size()));
- *         batchMapper.insert(batch);
- *         // 每批提交一次，减少锁持有时间
- *     }
+ * @Transactional public void batchInsert(List<Data> list) {
+ * int batchSize = 100;
+ * for (int i = 0; i < list.size(); i += batchSize) {
+ * List<Data> batch = list.subList(i, Math.min(i + batchSize, list.size()));
+ * batchMapper.insert(batch);
+ * // 每批提交一次，减少锁持有时间
+ * }
  * }
  * ```
- *
+ * <p>
  * 4. 只读事务优化
  * ```java
  * @Transactional(readOnly = true)
  * public List<Data> query() {
- *     // readOnly=true，Spring 优化处理
+ * // readOnly=true，Spring 优化处理
  * }
  * ```
- *
- *
+ * <p>
+ * <p>
  * ========================================
  */

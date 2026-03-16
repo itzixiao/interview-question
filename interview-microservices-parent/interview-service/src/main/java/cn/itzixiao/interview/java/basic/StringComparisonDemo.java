@@ -2,7 +2,7 @@ package cn.itzixiao.interview.java.basic;
 
 /**
  * String、StringBuffer、StringBuilder 对比详解
- *
+ * <p>
  * ┌─────────────────────────────────────────────────────────────┐
  * │  String                                                      │
  * │  - 不可变（final char[] / byte[]）                            │
