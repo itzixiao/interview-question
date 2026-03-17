@@ -79,12 +79,18 @@
 - **面试题：** 6+ 道
 - **重要程度：** ⭐⭐⭐
 
+#### 13. [13-AI工程化与LLM应用开发.md](./13-AI%E5%B7%A5%E7%A8%8B%E5%8C%96%E4%B8%8ELLM%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91.md) ⭐ NEW
+
+- **内容：** RAG架构、AI Agent、向量数据库、Spring AI、模型部署
+- **面试题：** 4+ 道
+- **重要程度：** ⭐⭐⭐⭐
+
 ---
 
 ## 📊 统计信息
 
-- **文档数：** 12 个
-- **面试题总数：** 116+ 道
+- **文档数：** 13 个
+- **面试题总数：** 120+ 道
 - **代码示例：** 配套 Java 代码在 `interview-service/rpc/`、`interview-rabbitmq/`、`interview-kafka/`、
   `interview-provider/hbase/`、`interview-provider/elasticsearch/`、`interview-provider/netty/` 等目录（~10,000 行代码）
 
