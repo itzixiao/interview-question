@@ -56,13 +56,24 @@
 - **面试题：** 10+ 道
 - **重要程度：** ⭐⭐⭐⭐⭐
 
+#### 10. [10-CompletableFuture详解.md](./10-CompletableFuture%E8%AF%A6%E8%A7%A3.md) ⭐新增
+
+- **内容：** CompletableFuture 异步编程、任务编排、异常处理、实战案例
+- **面试题：** 8+ 道
+- **重要程度：** ⭐⭐⭐⭐⭐
+- **配套代码：** `interview-microservices-parent/interview-service/src/main/java/cn/itzixiao/interview/service/concurrency/`
+  - `CompletableFutureBasicDemo.java` - 基础用法示例
+  - `CompletableFutureChainDemo.java` - 任务编排示例
+  - `CompletableFutureExceptionDemo.java` - 异常处理示例
+  - `EcommerceOrderQueryDemo.java` - 电商订单查询实战
+
 ---
 
 ## 📊 统计信息
 
-- **文档数：** 9 个
-- **面试题总数：** 98+ 道
-- **代码示例：** 配套 Java 代码在 `interview-service/concurrency/` 目录（11 个文件，~6,000 行代码）
+- **文档数：** 10 个
+- **面试题总数：** 106+ 道
+- **代码示例：** 配套 Java 代码在 `interview-microservices-parent/interview-service/src/main/java/cn/itzixiao/interview/service/concurrency/` 目录（15 个文件，~8,000 行代码）
 
 ---
 
@@ -96,7 +107,7 @@
     - AtomicInteger、AtomicReference
     - LongAdder 高性能原子类
 
-### 第三阶段：并发工具（2-3 天）
+### 第四阶段：并发工具（2-3 天）
 
 1. **JUC 工具类**
     - CountDownLatch（倒计时门闩）
@@ -106,6 +117,26 @@
 2. **ConcurrentHashMap**
     - JDK7 vs JDK8 实现差异
     - Segment 分段锁到 CAS+synchronized
+
+### 第五阶段：CompletableFuture（2-3 天）⭐重点
+
+1. **基础概念**
+    - supplyAsync/runAsync 创建异步任务
+    - 自定义线程池
+
+2. **任务编排**
+    - thenApply/thenAccept/thenRun
+    - thenCompose（串联任务）
+    - thenCombine（合并任务）
+    - allOf/anyOf（多任务组合）
+
+3. **异常处理**
+    - exceptionally/handle/whenComplete
+    - 超时控制
+
+4. **实战应用**
+    - 电商订单查询
+    - 数据聚合报表
 
 ### 第四阶段：线程池与实战（3-4 天）
 
@@ -117,6 +148,11 @@
 2. **生产者消费者模式**
     - BlockingQueue 应用
     - 等待通知机制
+
+3. **CompletableFuture 实战**
+    - 异步任务编排
+    - 多服务并行查询
+    - 异常处理最佳实践
 
 ---
 
@@ -142,6 +178,7 @@
 | ReentrantLock      | 复杂同步控制       |
 | CAS                | 无锁编程、乐观锁     |
 | CountDownLatch     | 批量任务等待完成     |
+| **CompletableFuture** | **异步编排、多服务调用** |
 
 ---
 
@@ -162,6 +199,11 @@
 13. **BlockingQueue 有哪些实现类？**
 14. **什么是死锁？如何预防和排查？**
 15. **如何优雅地关闭线程池？**
+16. **CompletableFuture 和 Future 的区别？** ⭐新增
+17. **thenApply、thenAccept、thenRun 的区别？** ⭐新增
+18. **thenCompose 和 thenCombine 的区别？** ⭐新增
+19. **allOf 和 anyOf 的应用场景？** ⭐新增
+20. **如何优雅地处理 CompletableFuture 的异常？** ⭐新增
 
 ---
 
@@ -221,6 +263,14 @@ ConcurrentHashMap
 ---
 
 ## 📈 更新日志
+
+### v2.2 - 2026-03-17 ⭐新增
+
+- ✅ 新增 10-CompletableFuture详解文档
+- ✅ 补充 8+ 道高频面试题
+- ✅ 新增 4 个配套代码示例（基础、编排、异常、实战）
+- ✅ 更新统计信息（10 个文档，106+ 面试题）
+- ✅ 完善学习建议（增加 CompletableFuture 章节）
 
 ### v2.1 - 2026-03-15
 
