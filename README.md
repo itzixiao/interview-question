@@ -147,7 +147,7 @@ mvn spring-boot:run
 - [为什么使用 B+Tree 索引？](./docs/07-MySQL数据库/02-MySQL索引原理详解.md)
 - [MySQL索引与MVCC](docs/07-MySQL数据库/05-MySQL索引与MVCC.md)
 - [如何防止 SQL注入？](./docs/07-MySQL数据库/04-MySQL日志与性能优化详解.md)
-- [ShardingSphere 分库分表实战](./docs/07-MySQL数据库/09-ShardingSphere 整合实战指南.md)
+- [ShardingSphere 分库分表实战](./docs/07-MySQL数据库/09-ShardingSphere整合实战指南.md)
 - [MyBatis核心原理？](./docs/09-中间件/03-MyBatis核心原理与面试题.md)
 
 ### Redis（30+ 道）
@@ -190,10 +190,16 @@ mvn spring-boot:run
 
 ### JavaIO模型（22+ 道）
 
-- [BIO、NIO、AIO 的区别？](./docs/14-JavaIO模型/README.md#九 - 三种 io-模型对比)
-- [NIO 的核心组件？](docs/14-JavaIO模型/02-NIO非阻塞IO详解.md)
-- [Reactor模式的三种变体？](docs/14-JavaIO模型/02-NIO非阻塞IO详解.md#73-reactor-模式)
-- [Netty 为什么性能高？](./docs/14-JavaIO模型/README.md#十二 - 主流框架)
+- [BIO、NIO、AIO 三者之间的区别？](docs/14-JavaIO模型/README.md#1-bionioaio-三者之间的区别)
+- [如何选择合适的 IO模型？](docs/14-JavaIO模型/README.md#2-如何选择合适的-io模型)
+- [NIO 的核心组件有哪些？Selector的作用？](docs/14-JavaIO模型/README.md#3-nio-的核心组件有哪些)
+- [什么是 IO 多路复用？Select、Poll、Epoll 的区别？](docs/14-JavaIO模型/README.md#4-什么是-io-多路复用selectpollepoll的区别)
+- [Reactor模式的三种变体？](docs/14-JavaIO模型/README.md#5-reactor模式的三种变体)
+- [Netty为什么性能高？采用的是哪种 IO模型？](docs/14-JavaIO模型/README.md#6-netty-为什么性能高)
+- [零拷贝技术的原理？](docs/14-JavaIO模型/README.md#7-零拷贝技术的原理)
+- [直接内存 vs 堆内存的区别？](docs/14-JavaIO模型/README.md#8-直接内存-vs-堆内存的区别)
+- [Linux 下 Epoll 的实现原理？](docs/14-JavaIO模型/README.md#9-linux-下-epoll-的实现原理)
+- [Windows 的 IOCP 是什么？](docs/14-JavaIO模型/README.md#10-windows-的-iocp-是什么)
 
 ### SPI机制（4+ 道） ⭐新增
 
