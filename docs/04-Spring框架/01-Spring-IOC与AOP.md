@@ -355,11 +355,12 @@ public class UserRequestContext {
 Spring 通过**三级缓存**机制解决 Setter/字段循环依赖，但无法解决构造器循环依赖。
 
 **三级缓存结构：**
-| 缓存级别 | 名称 | 存储内容 |
-|----------|------|----------|
-| 一级 | singletonObjects | 成品 Bean（已完成初始化） |
-| 二级 | earlySingletonObjects | 半成品 Bean（已实例化，未注入） |
-| 三级 | singletonFactories | Bean 工厂（用于创建早期引用） |
+
+| 缓存级别 | 名称                    | 存储内容               |
+|------|-----------------------|--------------------|
+| 一级   | singletonObjects      | 成品 Bean（已完成初始化）    |
+| 二级   | earlySingletonObjects | 半成品 Bean（已实例化，未注入） |
+| 三级   | singletonFactories    | Bean 工厂（用于创建早期引用）  |
 
 **解决流程（A 依赖 B，B 依赖 A）：**
 

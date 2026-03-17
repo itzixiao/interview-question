@@ -380,12 +380,7 @@ String s2 = s1.concat(" World");
 
 ```java
 StringBuilder sb = new StringBuilder();
-sb.
-
-append("Hello").
-
-append(" World");
-
+sb.append("Hello").append(" World");
 String s = sb.toString();
 ```
 
@@ -407,40 +402,27 @@ String s = String.format("%s %s", "Hello", "World");
 ```java
 // ❌ String + - 约 5000ms
 String s = "";
-for(
-int i = 0;
-i< 100000;i++){
-s +=i;
-}
+        for (int i = 0; i < 100000; i++) {
+s += i;
+        }
 
 // ⚠️ concat() - 约 4000ms
 String s = "";
-for(
-int i = 0;
-i< 100000;i++){
-s =s.
-
-concat(String.valueOf(i));
+        for (int i = 0; i < 100000; i++) {
+s = s.concat(String.valueOf(i));
         }
 
 // ✅ StringBuilder - 约 3ms
 StringBuilder sb = new StringBuilder();
-for(
-int i = 0;
-i< 100000;i++){
-        sb.
-
-append(i);
-}
+        for (int i = 0; i < 100000; i++) {
+        sb.append(i);
+        }
 
 // ✅ StringJoiner - 约 4ms
 StringJoiner sj = new StringJoiner(",");
-for(
-int i = 0;
-i< 100000;i++){
-        sj.
-
-add(String.valueOf(i));
+        for (int i = 0; i < 100000; i++) {
+        sj.add(String.valueOf(i));
+        }
         }
 ```
 
@@ -458,19 +440,14 @@ String s = new StringBuilder().append("a").append("b").append("c").toString();
 
 ```java
 // ❌ 错误 - 每次都创建 StringBuilder
-for(int i = 0;
-i< 1000;i++){
+for(int i = 0;i< 1000;i++){
 String s = "" + i;  // 相当于 new StringBuilder().append(i).toString()
 }
 
 // ✅ 正确 - 复用 StringBuilder
 StringBuilder sb = new StringBuilder();
-for(
-int i = 0;
-i< 1000;i++){
-        sb.
-
-append(i);
+for(int i = 0;i< 1000;i++){
+        sb.append(i);
 }
 ```
 
@@ -482,84 +459,48 @@ append(i);
 
 ```java
 String s = "Hello World";
-s.
-
-length();           // 11
-s.
-
-charAt(0);          // 'H'
-s.
-
-indexOf("World");   // 6
-s.
-
-lastIndexOf("o");   // 7
-s.
-
-contains("World");  // true
-s.
-
-startsWith("Hello");// true
-s.
-
-endsWith("d");      // true
+s.length();           // 11
+s.charAt(0);          // 'H'
+s.indexOf("World");   // 6
+s.lastIndexOf("o");   // 7
+s.contains("World");  // true
+s.startsWith("Hello");// true
+s.endsWith("d");      // true
 ```
 
 **转换类：**
 
 ```java
 s.toLowerCase();      // "hello world"
-s.
-
-toUpperCase();      // "HELLO WORLD"
-s.
-
-trim();             // "Hello World"（去首尾空格）
-s.
-
-getBytes();         // byte[]
-s.
-
-toCharArray();      // char[]
+s.toUpperCase();      // "HELLO WORLD"
+s.trim();             // "Hello World"（去首尾空格）
+s.getBytes();         // byte[]
+s.toCharArray();      // char[]
 ```
 
 **分割和替换：**
 
 ```java
 s.split(" ");         // ["Hello", "World"]
-s.
-
-replace("l","L");  // "HeLLo WorLd"
-s.
-
-replaceAll("\\w+","*"); // "* *"
-s.
-
-substring(6);       // "World"
-s.
-
-substring(0,5);    // "Hello"
+s.replace("l","L");  // "HeLLo WorLd"
+s.replaceAll("\\w+","*"); // "* *"
+s.substring(6);       // "World"
+s.substring(0,5);    // "Hello"
 ```
 
 **比较类：**
 
 ```java
 s.equals("Hello World");     // true
-s.
-
-equalsIgnoreCase("hello"); // false
-s.
-
-compareTo("abc");          // 按字典序比较
+s.equalsIgnoreCase("hello"); // false
+s.compareTo("abc");          // 按字典序比较
 ```
 
 **格式化：**
 
 ```java
 String.format("%d %s",123,"abc"); // "123 abc"
-"%d %s".
-
-formatted(123,"abc");      // Java 15+
+"%d %s".formatted(123,"abc");      // Java 15+
 ```
 
 **问题 6：== 和 equals() 在 String 中的区别？**
@@ -580,12 +521,8 @@ s1 ==s2;  // true，同一常量池对象
 s1 ==s3;  // false，不同对象
 
 // equals() 比较
-s1.
-
-equals(s2);  // true，内容相同
-s1.
-
-equals(s3);  // true，内容相同
+s1.equals(s2);  // true，内容相同
+s1.equals(s3);  // true，内容相同
 ```
 
 **内存图：**
@@ -602,13 +539,10 @@ equals(s3);  // true，内容相同
 ```java
 // ✅ 正确 - 比较内容用 equals
 if(str.equals("expected")){}
-
 // ❌ 错误 - == 比较的是地址
         if(str =="expected"){}  // 可能失败
-
 // ✅ 防止 NPE
         if("expected".
-
 equals(str)){}  // 常量在前
 ```
 
@@ -631,30 +565,16 @@ String s3 = "   ";       // 空白字符串
 if(s ==null){}
 
 // 2. 判断是否为空字符串
-        if(s.
-
-equals("")){}
-        if(s.
-
-isEmpty()){}  // Java 6+
+        if(s.equals("")){}
+        if(s.isEmpty()){}  // Java 6+
 
 // 3. 判断是否为 null 或空
-        if(s ==null||s.
-
-isEmpty()){}
-        if(StringUtils.
-
-isEmpty(s)){}  // Apache Commons
+        if(s ==null||s.isEmpty()){}
+        if(StringUtils.isEmpty(s)){}  // Apache Commons
 
 // 4. 判断是否为 null、空或空白
-        if(s ==null||s.
-
-trim().
-
-isEmpty()){}
-        if(StringUtils.
-
-isBlank(s)){}  // Apache Commons
+        if(s ==null||s.trim().isEmpty()){}
+        if(StringUtils.isBlank(s)){}  // Apache Commons
 ```
 
 **推荐工具类：**
@@ -662,20 +582,12 @@ isBlank(s)){}  // Apache Commons
 ```java
 // Spring StringUtils
 StringUtils.hasText("abc");  // true，非 null 且有内容
-StringUtils.
-
-hasLength("");   // false，长度为 0
+StringUtils.hasLength("");   // false，长度为 0
 
 // Apache Commons
-StringUtils.
-
-isNotEmpty("abc"); // true
-StringUtils.
-
-isBlank("   ");     // true，空白也算空
-StringUtils.
-
-isNotBlank("abc"); // true
+StringUtils.isNotEmpty("abc"); // true
+StringUtils.isBlank("   ");     // true，空白也算空
+StringUtils.isNotBlank("abc"); // true
 ```
 
 **最佳实践：**
@@ -687,11 +599,7 @@ if(StringUtils.isNotBlank(str)){
         }
 
 // ✅ 手动判断
-        if(str !=null&&!str.
-
-trim().
-
-isEmpty()){
+        if(str !=null&&!str.trim().isEmpty()){
         // 处理业务
         }
 ```

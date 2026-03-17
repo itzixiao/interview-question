@@ -102,19 +102,11 @@ public T take() throws InterruptedException {
 
 ```java
 synchronized (lock){
-        while(queue.
-
-isFull()){
-        lock.
-
-wait();  // 只有一个等待队列
-    }
-            queue.
-
-add(item);
-    lock.
-
-notifyAll();  // 唤醒所有线程（效率低）
+        while(queue.isFull()){
+            lock.wait();  // 只有一个等待队列
+          }
+        queue.add(item);
+        lock.notifyAll();  // 唤醒所有线程（效率低）
 }
 ```
 
@@ -123,23 +115,13 @@ notifyAll();  // 唤醒所有线程（效率低）
 ```java
 lock.lock();
 try{
-        while(queue.
-
-isFull()){
-        notFull.
-
-await();  // 生产者独立等待队列
+        while(queue.isFull()){
+        notFull.await();  // 生产者独立等待队列
     }
-            queue.
-
-add(item);
-    notEmpty.
-
-signal();  // 精准唤醒消费者
+            queue.add(item);
+    notEmpty.signal();  // 精准唤醒消费者
 }finally{
-        lock.
-
-unlock();
+        lock.unlock();
 }
 ```
 
@@ -292,17 +274,13 @@ LinkedBlockingQueue 是 Java 并发包提供的阻塞队列实现，是生产者
 BlockingQueue<String> queue = new LinkedBlockingQueue<>(5);
 
 // 生产者
-queue.
-
-put(item);  // 队列满时阻塞
+queue.put(item);  // 队列满时阻塞
 
 // 消费者
 String item = queue.take();  // 队列空时阻塞
 
 // 带超时的操作
-queue.
-
-offer(item, 1,TimeUnit.SECONDS);  // 超时插入
+queue.offer(item, 1,TimeUnit.SECONDS);  // 超时插入
 
 String item = queue.poll(1, TimeUnit.SECONDS);  // 超时获取
 ```

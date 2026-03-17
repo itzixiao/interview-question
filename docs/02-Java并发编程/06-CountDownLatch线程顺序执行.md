@@ -173,12 +173,8 @@ public class MainWaitForWorkers {
 ```java
 // CountDownLatch 是一次性的
 CountDownLatch latch = new CountDownLatch(1);
-latch.
-
-countDown();
-latch.
-
-await();  // 立即通过
+latch.countDown();
+latch.await();  // 立即通过
 
 // 不能重置，再次使用需要创建新的
 // latch = new CountDownLatch(1);  // 需要重新创建
@@ -190,15 +186,9 @@ await();  // 立即通过
 // 错误：countDown() 在 await() 之后，且在同一线程
 CountDownLatch latch = new CountDownLatch(1);
 
-new
-
-Thread(() ->{
-        latch.
-
-await();      // 永远等待
-    latch.
-
-countDown();  // 永远不会执行
+new Thread(() ->{
+        latch.await();      // 永远等待
+        latch.countDown();  // 永远不会执行
 }).
 
 start();
@@ -210,17 +200,11 @@ start();
 CountDownLatch latch = new CountDownLatch(1);
 
 try{
-        latch.
-
-await();
+        latch.await();
 }catch(
 InterruptedException e){
         // 恢复中断状态
-        Thread.
-
-currentThread().
-
-interrupt();
+        Thread.currentThread().interrupt();
 // 或者处理中断
 }
 ```
@@ -254,12 +238,8 @@ CountDownLatch 实例。
 
 ```java
 CountDownLatch[] latches = new CountDownLatch[n - 1];
-for(
-int i = 0;
-i<n-1;i++){
-latches[i]=new
-
-CountDownLatch(1);
+for(int i = 0;i<n-1;i++){
+latches[i]=new CountDownLatch(1);
 }
 
 // 线程 i 等待 latches[i-1]，完成后调用 latches[i].countDown()
@@ -281,12 +261,9 @@ CountDownLatch(1);
 CountDownLatch latch = new CountDownLatch(1);
 
 try{
-
 doWork();
 }finally{
-        latch.
-
-countDown();  // 确保一定会执行
+        latch.countDown();  // 确保一定会执行
 }
 ```
 
@@ -314,27 +291,15 @@ CountDownLatch latch = new CountDownLatch(taskCount);
 ExecutorService executor = Executors.newFixedThreadPool(4);
 CountDownLatch latch = new CountDownLatch(tasks.size());
 
-for(
-Task task :tasks){
-        executor.
-
-submit(() ->{
+for(Task task :tasks){
+        executor.submit(() ->{
         try{
-        task.
-
-execute();
+            task.execute();
         }finally{
-                latch.
-
-countDown();
+            latch.countDown();
         }
-                });
-                }
-
-                latch.
-
-await();
-executor.
-
-shutdown();
+        });
+        }
+    latch.await();
+    executor.shutdown();
 ```

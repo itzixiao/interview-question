@@ -525,11 +525,12 @@ public void downloadWithResume(String url, File localFile) {
 - 适合：断点续传、文件分片、多线程下载
 
 **模式：**
-| 模式 | 说明 |
-|------|------|
-| r | 只读 |
-| rw | 读写，文件不存在则创建 |
-| rwd | 读写，同步更新到磁盘（内容） |
+
+| 模式  | 说明                 |
+|-----|--------------------|
+| r   | 只读                 |
+| rw  | 读写，文件不存在则创建        |
+| rwd | 读写，同步更新到磁盘（内容）     |
 | rws | 读写，同步更新到磁盘（内容+元数据） |
 
 **问题 15:NIO Selector 的作用是什么？**
@@ -537,12 +538,13 @@ public void downloadWithResume(String url, File localFile) {
 **作用：** 多路复用器，一个线程管理多个 Channel
 
 **SelectionKey 事件类型：**
-| 事件 | 说明 |
-|------|------|
-| OP_ACCEPT | 连接就绪，ServerSocketChannel 专用 |
-| OP_CONNECT | 连接就绪，SocketChannel 专用 |
-| OP_READ | 读就绪 |
-| OP_WRITE | 写就绪 |
+
+| 事件         | 说明                          |
+|------------|-----------------------------|
+| OP_ACCEPT  | 连接就绪，ServerSocketChannel 专用 |
+| OP_CONNECT | 连接就绪，SocketChannel 专用       |
+| OP_READ    | 读就绪                         |
+| OP_WRITE   | 写就绪                         |
 
 **优势：**
 
