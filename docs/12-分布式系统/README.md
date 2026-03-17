@@ -4,11 +4,11 @@
 
 #### 1. 分布式安全体系（3篇）
 
-| 序号 | 文档 | 内容 | 面试题 | 重要程度 |
-|:----:|------|------|:------:|:--------:|
-| 1 | [01-分布式幂等详解](./01-%E5%88%86%E5%B8%83%E5%BC%8F%E5%B9%82%E7%AD%89%E8%AF%A6%E8%A7%A3.md) | Token机制、指纹去重、AOP注解实现 | 5+ | ⭐⭐⭐⭐⭐ |
-| 2 | [02-接口防重放详解](./02-%E6%8E%A5%E5%8F%A3%E9%98%B2%E9%87%8D%E6%94%BE%E8%AF%A6%E8%A7%A3.md) | 时间戳、Nonce、签名验证 | 5+ | ⭐⭐⭐⭐⭐ |
-| 3 | [03-敏感数据加密详解](./03-%E6%95%8F%E6%84%9F%E6%95%B0%E6%8D%AE%E5%8A%A0%E5%AF%86%E8%AF%A6%E8%A7%A3.md) | AES/RSA加密、数据脱敏、密钥管理 | 5+ | ⭐⭐⭐⭐⭐ |
+| 序号 | 文档                                                                                              | 内容                   | 面试题 | 重要程度  |
+|:--:|-------------------------------------------------------------------------------------------------|----------------------|:---:|:-----:|
+| 1  | [01-分布式幂等详解](./01-%E5%88%86%E5%B8%83%E5%BC%8F%E5%B9%82%E7%AD%89%E8%AF%A6%E8%A7%A3.md)           | Token机制、指纹去重、AOP注解实现 | 5+  | ⭐⭐⭐⭐⭐ |
+| 2  | [02-接口防重放详解](./02-%E6%8E%A5%E5%8F%A3%E9%98%B2%E9%87%8D%E6%94%BE%E8%AF%A6%E8%A7%A3.md)           | 时间戳、Nonce、签名验证       | 5+  | ⭐⭐⭐⭐⭐ |
+| 3  | [03-敏感数据加密详解](./03-%E6%95%8F%E6%84%9F%E6%95%B0%E6%8D%AE%E5%8A%A0%E5%AF%86%E8%AF%A6%E8%A7%A3.md) | AES/RSA加密、数据脱敏、密钥管理  | 5+  | ⭐⭐⭐⭐⭐ |
 
 #### 2. [04-系统设计与架构详解.md](./04-%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1%E4%B8%8E%E6%9E%B6%E6%9E%84%E8%AF%A6%E8%A7%A3.md)
 
@@ -47,6 +47,12 @@
     - 最大努力通知：重试策略、人工介入
 - **代码示例：** `interview-microservices-parent/interview-transaction-demo/`
 - **面试题：** 28+ 道
+- **重要程度：** ⭐⭐⭐⭐⭐
+
+#### 5. [07-多活架构与容灾设计.md](./07-%E5%A4%9A%E6%B4%BB%E6%9E%B6%E6%9E%84%E4%B8%8E%E5%AE%B9%E7%81%BE%E8%AE%BE%E8%AE%A1.md) ⭐ NEW
+
+- **内容：** 同城双活、异地多活、单元化架构、RTO/RPO、故障切换
+- **面试题：** 4+ 道
 - **重要程度：** ⭐⭐⭐⭐⭐
 
 ---
@@ -192,16 +198,23 @@ public void checkToken(String token) {
 
 ```java
 RLock lock = redisson.getLock("order:" + orderId);
-if (lock.tryLock(0, 30, TimeUnit.SECONDS)) {
-    try {
+if(lock.
+
+tryLock(0,30,TimeUnit.SECONDS)){
+        try{
         // 检查是否已处理
-        if (!isProcessed(orderId)) {
-            processOrder(orderId);
+        if(!
+
+isProcessed(orderId)){
+
+processOrder(orderId);
         }
-    } finally {
-        lock.unlock();
+                }finally{
+                lock.
+
+unlock();
     }
-}
+            }
 ```
 
 ---
