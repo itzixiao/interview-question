@@ -112,11 +112,12 @@ channel.closeFuture().sync();
 ```
 
 **常见类型：**
-| 类型 | 用途 |
-|------|------|
+
+| 类型                         | 用途     |
+|----------------------------|--------|
 | **NioServerSocketChannel** | TCP服务端 |
-| **NioSocketChannel** | TCP客户端 |
-| **NioDatagramChannel** | UDP |
+| **NioSocketChannel**       | TCP客户端 |
+| **NioDatagramChannel**     | UDP    |
 
 #### 4. ChannelHandler（处理器）
 
@@ -146,12 +147,13 @@ public class MyHandler extends SimpleChannelInboundHandler<String> {
 ```
 
 **常用Handler：**
-| Handler | 作用 |
-|--------|------|
-| **SimpleChannelInboundHandler** | 处理入站消息 |
-| **ChannelInboundHandlerAdapter** | 入站适配器 |
-| **ChannelOutboundHandlerAdapter** | 出站适配器 |
-| **LengthFieldBasedFrameDecoder** | 长度字段解码 |
+
+| Handler                           | 作用     |
+|-----------------------------------|--------|
+| **SimpleChannelInboundHandler**   | 处理入站消息 |
+| **ChannelInboundHandlerAdapter**  | 入站适配器  |
+| **ChannelOutboundHandlerAdapter** | 出站适配器  |
+| **LengthFieldBasedFrameDecoder**  | 长度字段解码 |
 
 #### 5. Pipeline（责任链）
 
