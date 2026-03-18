@@ -79,20 +79,27 @@
 - **面试题：** 6+ 道
 - **重要程度：** ⭐⭐⭐
 
-#### 13. [13-AI工程化与LLM应用开发.md](./13-AI%E5%B7%A5%E7%A8%8B%E5%8C%96%E4%B8%8ELLM%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91.md) ⭐ NEW
+#### 13. [13-AI工程化与LLM应用开发.md](./13-AI%E5%B7%A5%E7%A8%8B%E5%8C%96%E4%B8%8ELLM%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91.md)
 
 - **内容：** RAG架构、AI Agent、向量数据库、Spring AI、模型部署
 - **面试题：** 4+ 道
 - **重要程度：** ⭐⭐⭐⭐
 
+#### 14. [14-Flowable工作流引擎详解.md](./14-Flowable%E5%B7%A5%E4%BD%9C%E6%B5%81%E5%BC%95%E6%93%8E%E8%AF%A6%E8%A7%A3.md) ⭐ NEW
+
+- **内容：** BPMN 2.0、流程定义、监听器、动态审批人、会签、历史数据
+- **面试题：** 10+ 道
+- **重要程度：** ⭐⭐⭐⭐⭐
+- **配套代码：** `interview-microservices-parent/interview-workflow/`
+
 ---
 
 ## 📊 统计信息
 
-- **文档数：** 13 个
-- **面试题总数：** 120+ 道
+- **文档数：** 14 个
+- **面试题总数：** 130+ 道
 - **代码示例：** 配套 Java 代码在 `interview-service/rpc/`、`interview-rabbitmq/`、`interview-kafka/`、
-  `interview-provider/hbase/`、`interview-provider/elasticsearch/`、`interview-provider/netty/` 等目录（~10,000 行代码）
+  `interview-provider/hbase/`、`interview-provider/elasticsearch/`、`interview-provider/netty/`、`interview-workflow/` 等目录（~12,000 行代码）
 
 ---
 
@@ -201,7 +208,7 @@
 | Sentinel | 高并发限流、熔断降级 |
 | MyBatis-Plus | 快速开发、通用 CRUD |
 | **RPC** | **微服务远程调用、高性能通信** |
-| **RabbitMQ** | **异步解耦、消息延迟处理、削峰填谷** |
+| **Flowable** | **工作流审批、流程编排、任务管理** |
 
 ---
 
@@ -236,6 +243,12 @@
 27. **延迟队列如何实现？**
 28. **死信队列有什么用？**
 29. **RabbitMQ 和 Kafka 的区别？**
+30. **什么是 Flowable？和 Activiti 有什么区别？**
+31. **Flowable 的核心表有哪些？**
+32. **ExecutionListener 和 TaskListener 的区别？**
+33. **如何实现动态审批人？**
+34. **如何实现会签（多人审批）？**
+35. **流程变量的作用域有哪些？**
 
 ---
 
@@ -363,6 +376,14 @@ RabbitMQ 基础
 
 ## 📈 更新日志
 
+### v2.4 - 2026-03-17
+
+- ✅ 新增《14-Flowable工作流引擎详解》文档（12+ 道面试题）
+- ✅ 包含完整的请假/报销审批流程图
+- ✅ 涵盖监听器、动态审批人、会签等高级特性
+- ✅ 配套代码：`interview-workflow/` 模块
+- ✅ 更新文档统计信息（14 个文档，130+ 面试题）
+
 ### v2.3 - 2026-03-15
 
 - ✅ 新增《10-Elasticsearch 进阶详解》文档（8+ 道面试题）
@@ -399,5 +420,5 @@ RabbitMQ 基础
 ---
 
 **维护者：** itzixiao  
-**最后更新：** 2026-03-15  
+**最后更新：** 2026-03-17  
 **问题反馈：** 欢迎提 Issue 或 PR
