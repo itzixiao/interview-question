@@ -1,0 +1,60 @@
+server:
+  port: 8088
+
+spring:
+  application:
+    name: interview-workflow
+  # 解决 Springfox/Knife4j 与 Spring Boot 2.6+ 的兼容性问题
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+  datasource:
+    url: jdbc:mysql://localhost:3306/workflow_db?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&nullCatalogMeansCurrent=true
+    username: root
+    password: ${MYSQL_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      idle-timeout: 300000
+      max-lifetime: 1200000
+      connection-timeout: 20000
+
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+
+# Flowable 配置
+flowable:
+  database-schema-update: true
+  async-executor-activate: true
+  # 历史数据级别
+  history-level: full
+  # 检查流程定义更新
+  check-process-definitions: true
+  # 流程定义文件路径
+  process-definition-location-prefix: classpath:/processes/
+  # 流程定义文件后缀（必须用 YAML 数组格式，逗号行内写法会导致空文件名错误）
+  process-definition-location-suffixes:
+    - '**.bpmn20.xml'
+    - '**.bpmn'
+
+# MyBatis Plus 配置
+mybatis-plus:
+  mapper-locations: classpath:/mapper/**/*.xml
+  type-aliases-package: cn.itzixiao.interview.workflow.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      id-type: auto
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+# 日志配置
+logging:
+  level:
+    org.flowable: debug
+    cn.itzixiao.interview.workflow: debug

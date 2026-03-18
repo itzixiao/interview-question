@@ -32,5 +32,6 @@
         <module>interview-reactive</module>
         <module>interview-bigdata</module>
         <module>interview-lowcode</module>
+        <module>interview-workflow</module>
     </modules>
 </project>

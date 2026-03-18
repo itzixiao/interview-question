@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:flowable="http://flowable.org/bpmn"
+             xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+             xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC"
+             typeLanguage="http://www.w3.org/2001/XMLSchema"
+             expressionLanguage="http://www.w3.org/1999/XPath"
+             targetNamespace="http://itzixiao.cn/workflow">
+
+    <process id="leave_process" name="请假审批流程" isExecutable="true">
+
+        <!-- 开始节点 -->
+        <startEvent id="startEvent" name="申请开始">
+            <extensionElements>
+                <flowable:executionListener event="start"
+                                            class="cn.itzixiao.interview.workflow.listener.LeaveStartListener"/>
+            </extensionElements>
+        </startEvent>
+
+        <!-- 部门经理审批节点 -->
+        <userTask id="deptManagerApproval" name="部门经理审批"
+                  flowable:assignee="${deptManagerUsername}"
+                  flowable:candidateGroups="DEPT_MANAGER">
+            <extensionElements>
+                <flowable:taskListener event="create"
+                                       class="cn.itzixiao.interview.workflow.listener.DeptManagerTaskListener"/>
+            </extensionElements>
+        </userTask>
+
+        <!-- 总经理审批节点 -->
+        <userTask id="gmApproval" name="总经理审批"
+                  flowable:assignee="${gmUsername}"
+                  flowable:candidateGroups="GENERAL_MANAGER">
+            <extensionElements>
+                <flowable:taskListener event="create"
+                                       class="cn.itzixiao.interview.workflow.listener.GmTaskListener"/>
+            </extensionElements>
+        </userTask>
+
+        <!-- 申请人修改节点（驳回重提） -->
+        <userTask id="applicantModify" name="申请人修改"
+                  flowable:assignee="${applicantUsername}">
+            <extensionElements>
+                <flowable:taskListener event="create"
+                                       class="cn.itzixiao.interview.workflow.listener.ApplicantModifyTaskListener"/>
+            </extensionElements>
+        </userTask>
+
+        <!-- 部门经理审批网关 -->
+        <exclusiveGateway id="deptApprovalGateway" name="部门经理审批结果"/>
+
+        <!-- 天数判断网关 -->
+        <exclusiveGateway id="daysGateway" name="请假天数判断"/>
+
+        <!-- 总经理审批网关 -->
+        <exclusiveGateway id="gmApprovalGateway" name="总经理审批结果"/>
+
+        <!-- 修改后网关 -->
+        <exclusiveGateway id="modifyGateway" name="修改后继续或撤回"/>
+
+        <!-- 通过结束节点 -->
+        <endEvent id="approvedEnd" name="审批通过">
+            <extensionElements>
+                <flowable:executionListener event="end"
+                                            class="cn.itzixiao.interview.workflow.listener.ApprovalEndListener"/>
+            </extensionElements>
+        </endEvent>
+
+        <!-- 拒绝结束节点 -->
+        <endEvent id="rejectedEnd" name="审批拒绝">
+            <extensionElements>
+                <flowable:executionListener event="end"
+                                            class="cn.itzixiao.interview.workflow.listener.RejectionEndListener"/>
+            </extensionElements>
+        </endEvent>
+
+        <!-- 流程连线 -->
+        <!-- 开始 -> 天数判断网关 -->
+        <sequenceFlow id="flow_start_to_days" sourceRef="startEvent" targetRef="daysGateway"/>
+
+        <!-- 天数 <= 3天 -> 部门经理审批 -->
+        <sequenceFlow id="flow_days_to_dept" name="不超过3天" sourceRef="daysGateway" targetRef="deptManagerApproval">
+            <conditionExpression xsi:type="tFormalExpression">
+                <![CDATA[${leaveDays <= 3}]]>
+            </conditionExpression>
+        </sequenceFlow>
+
+        <!-- 天数 > 3天 -> 部门经理审批（先过部门经理，再上报总经理） -->
+        <sequenceFlow id="flow_days_to_gm_dept" name="超过3天" sourceRef="daysGateway" targetRef="deptManagerApproval">
+            <conditionExpression xsi:type="tFormalExpression">
+                <![CDATA[${leaveDays > 3}]]>
+            </conditionExpression>
+        </sequenceFlow>
+
+        <!-- 部门经理审批 -> 部门经理审批网关 -->
+        <sequenceFlow id="flow_dept_to_gateway" sourceRef="deptManagerApproval" targetRef="deptApprovalGateway"/>
+
+        <!-- 部门经理审批网关 -> 通过 -->
+        <sequenceFlow id="flow_dept_approved_to_check" name="通过" sourceRef="deptApprovalGateway"
+                      targetRef="deptCheckGateway">
+            <conditionExpression xsi:type="tFormalExpression">
+                <![CDATA[${deptApproved == true}]]>
+            </conditionExpression>
+        </sequenceFlow>
+
+        <!-- 部门经理审批网关 -> 驳回 -->
+        <sequenceFlow id="flow_dept_rejected" name="驳回" sourceRef="deptApprovalGateway" targetRef="applicantModify">
+            <conditionExpression xsi:type="tFormalExpression">
+                <![CDATA[${deptApproved == false}]]>
+            </conditionExpression>
+        </sequenceFlow>
+
+        <!-- 二次天数判断网关 -->
+        <exclusiveGateway id="deptCheckGateway" name="判断是否需总经理审批"/>
+
+        <!-- 不需要总经理审批 -> 通过 -->
+        <sequenceFlow id="flow_dept_approved_final" name="3天内直接通过" sourceRef="deptCheckGateway"
+                      targetRef="approvedEnd">
+            <conditionExpression xsi:type="tFormalExpression">
+                <![CDATA[${leaveDays <= 3}]]>
+            </conditionExpression>
+        </sequenceFlow>
+
+        <!-- 需要总经理审批 -> 总经理审批 -->
+        <sequenceFlow id="flow_dept_to_gm" name="超过3天上总经理" sourceRef="deptCheckGateway" targetRef="gmApproval">
+            <conditionExpression xsi:type="tFormalExpression">
+                <![CDATA[${leaveDays > 3}]]>
+            </conditionExpression>
+        </sequenceFlow>
+
+        <!-- 总经理审批 -> 总经理审批网关 -->
+        <sequenceFlow id="flow_gm_to_gateway" sourceRef="gmApproval" targetRef="gmApprovalGateway"/>
+
+        <!-- 总经理审批通过 -> 通过结束 -->
+        <sequenceFlow id="flow_gm_approved" name="通过" sourceRef="gmApprovalGateway" targetRef="approvedEnd">
+            <conditionExpression xsi:type="tFormalExpression">
+                <![CDATA[${gmApproved == true}]]>
+            </conditionExpression>
+        </sequenceFlow>
+
+        <!-- 总经理驳回 -> 申请人修改 -->
+        <sequenceFlow id="flow_gm_rejected" name="驳回" sourceRef="gmApprovalGateway" targetRef="applicantModify">
+            <conditionExpression xsi:type="tFormalExpression">
+                <![CDATA[${gmApproved == false}]]>
+            </conditionExpression>
+        </sequenceFlow>
+
+        <!-- 申请人修改 -> 修改后网关 -->
+        <sequenceFlow id="flow_modify_to_gateway" sourceRef="applicantModify" targetRef="modifyGateway"/>
+
+        <!-- 修改后重新提交 -> 回到开始流程 -->
+        <sequenceFlow id="flow_resubmit" name="重新提交" sourceRef="modifyGateway" targetRef="daysGateway">
+            <conditionExpression xsi:type="tFormalExpression">
+                <![CDATA[${resubmit != null && resubmit == true}]]>
+            </conditionExpression>
+        </sequenceFlow>
+
+        <!-- 撤回 -> 拒绝结束（默认路径，当resubmit为null或false时走此路径） -->
+        <sequenceFlow id="flow_withdraw" name="撤回申请" sourceRef="modifyGateway" targetRef="rejectedEnd">
+            <conditionExpression xsi:type="tFormalExpression">
+                <![CDATA[${resubmit == null || resubmit == false}]]>
+            </conditionExpression>
+        </sequenceFlow>
+
+    </process>
+
+    <bpmndi:BPMNDiagram id="BPMNDiagram_leave_process">
+        <bpmndi:BPMNPlane id="BPMNPlane_leave_process" bpmnElement="leave_process">
+            <bpmndi:BPMNShape id="BPMNShape_startEvent" bpmnElement="startEvent">
+                <omgdc:Bounds x="100" y="250" width="30" height="30"/>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNShape id="BPMNShape_daysGateway" bpmnElement="daysGateway">
+                <omgdc:Bounds x="200" y="245" width="40" height="40"/>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNShape id="BPMNShape_deptManagerApproval" bpmnElement="deptManagerApproval">
+                <omgdc:Bounds x="300" y="230" width="120" height="60"/>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNShape id="BPMNShape_deptApprovalGateway" bpmnElement="deptApprovalGateway">
+                <omgdc:Bounds x="480" y="245" width="40" height="40"/>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNShape id="BPMNShape_deptCheckGateway" bpmnElement="deptCheckGateway">
+                <omgdc:Bounds x="580" y="245" width="40" height="40"/>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNShape id="BPMNShape_gmApproval" bpmnElement="gmApproval">
+                <omgdc:Bounds x="680" y="230" width="120" height="60"/>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNShape id="BPMNShape_gmApprovalGateway" bpmnElement="gmApprovalGateway">
+                <omgdc:Bounds x="860" y="245" width="40" height="40"/>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNShape id="BPMNShape_applicantModify" bpmnElement="applicantModify">
+                <omgdc:Bounds x="480" y="370" width="120" height="60"/>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNShape id="BPMNShape_modifyGateway" bpmnElement="modifyGateway">
+                <omgdc:Bounds x="660" y="385" width="40" height="40"/>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNShape id="BPMNShape_approvedEnd" bpmnElement="approvedEnd">
+                <omgdc:Bounds x="960" y="250" width="30" height="30"/>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNShape id="BPMNShape_rejectedEnd" bpmnElement="rejectedEnd">
+                <omgdc:Bounds x="760" y="385" width="30" height="30"/>
+            </bpmndi:BPMNShape>
+        </bpmndi:BPMNPlane>
+    </bpmndi:BPMNDiagram>
+
+</definitions>

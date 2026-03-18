@@ -1,0 +1,25 @@
+{
+  "name": "workflow-ui",
+  "version": "1.0.0",
+  "description": "Flowable 工作流审批系统前端",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "vue": "^3.3.0",
+    "vue-router": "^4.2.0",
+    "pinia": "^2.1.0",
+    "element-plus": "^2.3.0",
+    "@element-plus/icons-vue": "^2.1.0",
+    "axios": "^1.4.0",
+    "dayjs": "^1.11.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^4.2.0",
+    "vite": "^4.4.0",
+    "unplugin-auto-import": "^0.16.0",
+    "unplugin-vue-components": "^0.25.0"
+  }
+}

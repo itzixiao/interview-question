@@ -36,3 +36,6 @@ application-local.yml
 application-local.properties
 application-*.local.yml
 **/application-local.yml
+
+node_modules
+pnpm-lock.yaml

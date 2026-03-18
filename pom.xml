@@ -58,6 +58,10 @@
 
         <!-- JWT 版本 -->
         <jjwt.version>0.11.5</jjwt.version>
+        <jjwt-legacy.version>0.9.1</jjwt-legacy.version>
+
+        <!-- Flowable 工作流版本 -->
+        <flowable.version>6.8.0</flowable.version>
 
         <!-- API 文档版本 -->
         <knife4j.version>3.0.3</knife4j.version>
@@ -210,6 +214,25 @@
                 <groupId>com.github.xiaoymin</groupId>
                 <artifactId>knife4j-spring-boot-starter</artifactId>
                 <version>${knife4j.version}</version>
+            </dependency>
+
+            <!-- Flowable 工作流 -->
+            <dependency>
+                <groupId>org.flowable</groupId>
+                <artifactId>flowable-spring-boot-starter</artifactId>
+                <version>${flowable.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.flowable</groupId>
+                <artifactId>flowable-spring-boot-starter-rest</artifactId>
+                <version>${flowable.version}</version>
+            </dependency>
+
+            <!-- JWT 老版本 (兼容旧项目) -->
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt</artifactId>
+                <version>${jjwt-legacy.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
