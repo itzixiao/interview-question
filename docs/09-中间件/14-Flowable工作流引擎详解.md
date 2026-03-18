@@ -4,47 +4,39 @@
 
 ### 1.1 整体架构图
 
-```mermaid
-graph TB
-    subgraph Frontend
-        UI[Vue3 前端]
-    end
-    
-    subgraph Backend
-        Controller[Controller 层]
-        Service[Service 层]
-        Mapper[Mapper 层]
-    end
-    
-    subgraph Flowable
-        RuntimeService[RuntimeService]
-        TaskService[TaskService]
-        HistoryService[HistoryService]
-        RepositoryService[RepositoryService]
-    end
-    
-    subgraph Listeners
-        StartListener[StartListener]
-        TaskListener[TaskListener]
-        EndListener[EndListener]
-    end
-    
-    subgraph Database
-        BizTable[业务表]
-        FlowableTable[Flowable表]
-    end
-    
-    UI --> Controller
-    Controller --> Service
-    Service --> Mapper
-    Service --> RuntimeService
-    Service --> TaskService
-    Service --> HistoryService
-    RuntimeService --> StartListener
-    TaskService --> TaskListener
-    RuntimeService --> EndListener
-    Mapper --> BizTable
-    Flowable --> FlowableTable
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                         Frontend                                │
+│                     ┌──────────────┐                            │
+│                     │  Vue3 前端   │                            │
+│                     └──────┬───────┘                            │
+└────────────────────────────┼────────────────────────────────────┘
+                             │ HTTP
+┌────────────────────────────┼────────────────────────────────────┐
+│                      Backend│                                   │
+│  ┌──────────────┐    ┌─────┴──────┐    ┌──────────────┐         │
+│  │  Controller  │───▶│  Service   │───▶│   Mapper     │         │
+│  │     层       │    │    层      │    │    层        │         │
+│  └──────────────┘    └─────┬──────┘    └──────┬───────┘         │
+│                            │                   │                │
+│                            ▼                   ▼                │
+│                   ┌─────────────────┐    ┌──────────────┐       │
+│                   │   Flowable      │    │   业务表     │       │
+│                   │  ┌───────────┐  │    └──────────────┘       │
+│                   │  │ Runtime   │  │                           │
+│                   │  │  Service  │──┼──▶ StartListener         │
+│                   │  ├───────────┤  │                           │
+│                   │  │   Task    │──┼──▶ TaskListener          │
+│                   │  │  Service  │  │                           │
+│                   │  ├───────────┤  │                           │
+│                   │  │  History  │  │    ┌──────────────┐       │
+│                   │  │  Service  │  │    │ Flowable表   │       │
+│                   │  ├───────────┤  │    └──────────────┘       │
+│                   │  │ Repository│  │                           │
+│                   │  │  Service  │──┼──▶ EndListener           │
+│                   │  └───────────┘  │                           │
+│                   └─────────────────┘                           │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ### 1.2 核心组件说明
@@ -62,27 +54,56 @@ graph TB
 
 ### 2.1 流程图
 
-```mermaid
-graph TB
-    Start((开始)) --> DaysGateway{请假天数判断}
-    
-    DaysGateway -->|≤3天| DeptApproval[部门经理审批]
-    DaysGateway -->|>3天| DeptApproval
-    
-    DeptApproval --> DeptGateway{审批结果}
-    DeptGateway -->|通过| CheckGateway{是否需要总经理}
-    DeptGateway -->|驳回| Modify[申请人修改]
-    
-    CheckGateway -->|≤3天| ApprovedEnd((审批通过))
-    CheckGateway -->|>3天| GmApproval[总经理审批]
-    
-    GmApproval --> GmGateway{审批结果}
-    GmGateway -->|通过| ApprovedEnd
-    GmGateway -->|驳回| Modify
-    
-    Modify --> ModifyGateway{操作选择}
-    ModifyGateway -->|重新提交| DaysGateway
-    ModifyGateway -->|撤回| RejectedEnd((审批拒绝))
+```
+                              ┌──────────────┐
+                              │     开始     │
+                              └──────┬───────┘
+                                     │
+                                     ▼
+                         ┌───────────────────────┐
+                         │      请假天数判断      │
+                         └───────────┬───────────┘
+                                     │
+                    ┌────────────────┼────────────────┐
+                    │                                 │
+                 ≤3天                              >3天
+                    │                                 │
+                    ▼                                 ▼
+         ┌─────────────────────┐           ┌─────────────────────┐
+         │    部门经理审批     │           │    部门经理审批     │
+         └──────────┬──────────┘           └──────────┬──────────┘
+                    │                                 │
+                    ▼                                 ▼
+         ┌─────────────────────┐           ┌─────────────────────┐
+         │      审批结果       │           │      审批结果       │
+         └──────────┬──────────┘           └──────────┬──────────┘
+                    │                                 │
+        ┌───────────┴───────────┐                     │
+        │                       │                     │
+      通过                    驳回                  驳回
+        │                       │                     │
+        ▼                       ▼                     ▼
+┌─────────────────────┐ ┌─────────────────────┐ ┌─────────────────────┐
+│  是否需要总经理审批  │ │    申请人修改       │ │    申请人修改       │
+└──────────┬──────────┘ └──────────┬──────────┘ └──────────┬──────────┘
+           │                       │                     │
+    ┌──────┴──────┐                │                     │
+    │             │                │                     │
+  ≤3天         >3天                │                     │
+    │             │                │                     │
+    ▼             ▼                ▼                     ▼
+┌────────┐ ┌──────────────┐ ┌─────────────────────┐ ┌──────────────┐
+│ 已通过 │ │  总经理审批  │ │      操作选择       │ │    已撤回    │
+└────────┘ └──────┬───────┘ └──────────┬──────────┘ └──────────────┘
+                  │                    │
+         ┌────────┴────────┐  ┌────────┴────────┐
+         │                 │  │                 │
+       通过              驳回               重新提交
+         │                 │  │                 │
+         ▼                 │  ▼                 │
+    ┌────────┐             │  │                 │
+    │ 已通过 │             │  │                 │
+    └────────┘             └──┴─────────────────┘
 ```
 
 ### 2.2 流程规则
@@ -99,29 +120,61 @@ graph TB
 
 ### 3.1 流程图
 
-```mermaid
-graph TB
-    Start((开始)) --> AmountGateway{报销金额判断}
-    
-    AmountGateway -->|<1000元| DeptApproval[部门经理审批]
-    AmountGateway -->|1000-5000元| FinanceApproval[财务经理审批]
-    AmountGateway -->|>5000元| GmApproval[总经理审批]
-    
-    DeptApproval --> DeptGateway{审批结果}
-    DeptGateway -->|通过| ApprovedEnd((审批通过))
-    DeptGateway -->|驳回| Modify[申请人修改]
-    
-    FinanceApproval --> FinanceGateway{审批结果}
-    FinanceGateway -->|通过| ApprovedEnd
-    FinanceGateway -->|驳回| Modify
-    
-    GmApproval --> GmGateway{审批结果}
-    GmGateway -->|通过| ApprovedEnd
-    GmGateway -->|驳回| Modify
-    
-    Modify --> ModifyGateway{操作选择}
-    ModifyGateway -->|重新提交| AmountGateway
-    ModifyGateway -->|撤回| RejectedEnd((审批拒绝))
+```
+                              ┌──────────────┐
+                              │     开始     │
+                              └──────┬───────┘
+                                     │
+                                     ▼
+                         ┌───────────────────────┐
+                         │      报销金额判断      │
+                         └───────────┬───────────┘
+                                     │
+           ┌─────────────────────────┼─────────────────────────┐
+           │                         │                         │
+        <1000元              1000-5000元                 >5000元
+           │                         │                         │
+           ▼                         ▼                         ▼
+┌─────────────────────┐ ┌─────────────────────┐ ┌─────────────────────┐
+│    部门经理审批     │ │    财务经理审批     │ │    总经理审批       │
+└──────────┬──────────┘ └──────────┬──────────┘ └──────────┬──────────┘
+           │                       │                       │
+           ▼                       ▼                       ▼
+┌─────────────────────┐ ┌─────────────────────┐ ┌─────────────────────┐
+│      审批结果       │ │      审批结果       │ │      审批结果       │
+└──────────┬──────────┘ └──────────┬──────────┘ └──────────┬──────────┘
+           │                       │                       │
+    ┌──────┴──────┐         ┌──────┴──────┐         ┌──────┴──────┐
+    │             │         │             │         │             │
+  通过          驳回      通过          驳回      通过          驳回
+    │             │         │             │         │             │
+    ▼             │         ▼             │         ▼             │
+┌────────┐        │   ┌────────┐          │   ┌────────┐          │
+│ 已通过 │        │   │ 已通过 │          │   │ 已通过 │          │
+└────────┘        │   └────────┘          │   └────────┘          │
+                  │                       │                       │
+                  └───────────────────────┼───────────────────────┘
+                                          │
+                                          ▼
+                              ┌─────────────────────┐
+                              │    申请人修改       │
+                              └──────────┬──────────┘
+                                         │
+                                         ▼
+                              ┌─────────────────────┐
+                              │      操作选择       │
+                              └──────────┬──────────┘
+                                         │
+                              ┌──────────┴──────────┐
+                              │                     │
+                           重新提交               撤回
+                              │                     │
+                              ▼                     ▼
+                              │              ┌──────────────┐
+                              │              │    已撤回    │
+                              │              └──────────────┘
+                              │
+                    (返回金额判断)
 ```
 
 ### 3.2 流程规则
