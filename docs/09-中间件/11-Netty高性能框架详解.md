@@ -670,7 +670,7 @@ interview-microservices-parent/interview-provider/netty/
 
 - ➡️ **[RPC框架](./06-RPC核心原理与实战指南.md)** - 基于Netty实现RPC
 - ⬅️ **[NIO非阻塞IO](../14-JavaIO模型/02-NIO非阻塞IO详解.md)** - NIO基础原理
-- 📚 **[Reactor模式](../14-JavaIO模型/02-NIO非阻塞IO详解.md#五-Reactor模式)** - Reactor三种变体
+- 📚 **[Reactor模式](../14-JavaIO模型/02-NIO非阻塞IO详解.md#五Reactor模式)** - Reactor三种变体
 
 ---
 

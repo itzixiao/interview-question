@@ -176,62 +176,386 @@ public class NioServerDemo {
 
 ---
 
-## 五、Reactor模式
+## 五、Reactor模式详解
 
-### 5.1 单线程Reactor
+### 5.1 Reactor模式概述
 
-```
-┌─────────────────┐
-│   Selector      │ ← 单线程处理所有事件
-│   (主循环)      │
-└────────┬────────┘
-         │
-    ┌────┴────┐
-    │         │
-  读事件    写事件
-```
+**Reactor模式** 是一种基于事件驱动的设计模式，用于处理一个或多个客户端并发交付给应用程序的服务请求。它是NIO编程的核心架构模式，被广泛应用于高性能网络服务器框架（如Netty、Redis、Nginx）。
 
-**特点：**
+**核心思想：**
+- **事件驱动**：IO事件触发回调处理
+- **分离关注点**：IO操作与业务逻辑分离
+- **单线程多路复用**：一个线程管理多个连接
 
-- ✅ 简单，无线程切换
-- ❌ 性能低，一个线程处理所有
-- 适用：低并发场景
+**Reactor模式的五个核心角色：**
 
-### 5.2 多线程Reactor
+| 角色 | 职责 | 对应NIO组件 |
+|------|------|------------|
+| **Handle（句柄）** | 标识事件资源 | SocketChannel |
+| **Synchronous Event Demultiplexer** | 同步事件分离器 | Selector |
+| **Event Handler** | 事件处理器接口 | SelectionKey + Handler |
+| **Concrete Event Handler** | 具体事件处理器 | 自定义Handler |
+| **Initiation Dispatcher** | 初始分发器 | Reactor主循环 |
 
-```
-┌──────────────┐
-│ Main Reactor │ ← 主线程（accept）
-└──────┬───────┘
-       │
-   ┌───┴───┐
-   │       │
-Sub1     Sub2  ← 子线程池（read/write）
-```
-
-**特点：**
-
-- ✅ 性能提升
-- ❌ 线程同步复杂
-- 适用：中等并发
-
-### 5.3 主从Reactor（Netty采用）
+**工作流程：**
 
 ```
-┌──────────────┐     ┌──────────────┐
-│ Main Reactor │────>| Sub Reactor 1│
-│   (Boss)     │     ├──────────────┤
-└──────────────┘     │ Sub Reactor 2│
-                     ├──────────────┤
-                     │ Sub Reactor N│
-                     └──────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│                    Reactor 工作流程                          │
+├─────────────────────────────────────────────────────────────┤
+│  1. 注册Handler → 2. 轮询事件 → 3. 分发事件 → 4. 回调处理    │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-**特点：**
+---
 
-- ✅ 高性能，职责分离
-- ❌ 最复杂
-- 适用：高并发（Netty、Redis）
+### 5.2 单线程Reactor
+
+**架构图：**
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    单线程Reactor架构                         │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│   ┌─────────────────────────────────────────────────────┐  │
+│   │              Reactor Thread (单线程)                 │  │
+│   │  ┌─────────────────┐    ┌─────────────────────────┐ │  │
+│   │  │   Selector      │    │   Event Loop (while)    │ │  │
+│   │  │  (事件多路复用)  │←──→│  1. select() 阻塞等待    │ │  │
+│   │  └────────┬────────┘    │  2. 获取就绪Channel      │ │  │
+│   │           │             │  3. dispatch() 分发      │ │  │
+│   │    ┌──────┴──────┐      │  4. handle() 处理        │ │  │
+│   │    │             │      └─────────────────────────┘ │  │
+│   │  读事件        写事件                                  │  │
+│   │    │             │                                    │  │
+│   │    ▼             ▼                                    │  │
+│   │ ┌──────┐     ┌──────┐                                 │  │
+│   │ │Accept│     │ Read │                                 │  │
+│   │ │Handler│    │Handler│ ← 业务处理也在同一线程           │  │
+│   │ └──┬───┘     └──┬───┘                                 │  │
+│   │    │             │                                    │  │
+│   │    └──────┬──────┘                                    │  │
+│   │           ▼                                           │  │
+│   │      SocketChannel                                    │  │
+│   └─────────────────────────────────────────────────────┘  │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**实现代码示例：**
+
+```java
+public class SingleReactor {
+    private final Selector selector;
+    private final ServerSocketChannel serverChannel;
+    
+    public SingleReactor(int port) throws IOException {
+        selector = Selector.open();
+        serverChannel = ServerSocketChannel.open();
+        serverChannel.configureBlocking(false);
+        serverChannel.bind(new InetSocketAddress(port));
+        
+        // 注册Accept事件
+        SelectionKey key = serverChannel.register(selector, SelectionKey.OP_ACCEPT);
+        key.attach(new AcceptorHandler());
+    }
+    
+    public void run() {
+        while (!Thread.interrupted()) {
+            try {
+                selector.select(); // 阻塞等待事件
+                Set<SelectionKey> selected = selector.selectedKeys();
+                Iterator<SelectionKey> it = selected.iterator();
+                
+                while (it.hasNext()) {
+                    SelectionKey key = it.next();
+                    it.remove(); // 必须移除，否则重复处理
+                    dispatch(key); // 分发事件
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    
+    private void dispatch(SelectionKey key) {
+        Runnable handler = (Runnable) key.attachment();
+        if (handler != null) {
+            handler.run(); // 直接在当前线程执行
+        }
+    }
+}
+```
+
+**特点分析：**
+
+| 维度 | 说明 |
+|------|------|
+| **优点** | ✅ 实现简单，无线程切换开销<br>✅ 无锁编程，无并发问题<br>✅ 适用于IO密集型、业务逻辑简单的场景 |
+| **缺点** | ❌ 单线程处理所有IO和业务逻辑<br>❌ 一个Handler阻塞会影响整个系统<br>❌ 无法利用多核CPU |
+| **适用场景** | 低并发（<1000连接）、业务处理极快的场景<br>如：Redis早期版本、简单的代理服务 |
+
+---
+
+### 5.3 多线程Reactor
+
+**架构图：**
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                       多线程Reactor架构                                  │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│  ┌─────────────────────────────────────────────────────────────────┐   │
+│  │                    Main Reactor Thread (主线程)                  │   │
+│  │  ┌─────────────────┐         ┌───────────────────────────────┐  │   │
+│  │  │   Selector      │         │  只处理 ACCEPT 事件            │  │   │
+│  │  │  (监听新连接)    │←───────→│  - serverSocket.accept()      │  │   │
+│  │  └────────┬────────┘         │  - 将新连接交给Sub Reactor    │  │   │
+│  │           │                  └───────────────────────────────┘  │   │
+│  │           │                                                     │   │
+│  │           ▼                                                     │   │
+│  │    ┌──────────────┐                                             │   │
+│  │    │ 新连接Socket  │────────────────────────────────────────┐   │   │
+│  │    └──────────────┘                                        │   │   │
+│  └────────────────────────────────────────────────────────────┼───┘   │
+│                                                               │        │
+│  ┌────────────────────────────────────────────────────────────┼───┐   │
+│  │                    Worker Thread Pool (线程池)              │   │   │
+│  │                                                            ▼   │   │
+│  │  ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐ │
+│  │  │  Sub Reactor 1  │    │  Sub Reactor 2  │    │  Sub Reactor N  │ │
+│  │  │  ┌───────────┐  │    │  ┌───────────┐  │    │  ┌───────────┐  │ │
+│  │  │  │ Selector  │  │    │  │ Selector  │  │    │  │ Selector  │  │ │
+│  │  │  │ (子选择器) │  │    │  │ (子选择器) │  │    │  │ (子选择器) │  │ │
+│  │  │  └─────┬─────┘  │    │  └─────┬─────┘  │    │  └─────┬─────┘  │ │
+│  │  │        │        │    │        │        │    │        │        │ │
+│  │  │   ┌────┴────┐   │    │   ┌────┴────┐   │    │   ┌────┴────┐   │ │
+│  │  │   ▼         ▼   │    │   ▼         ▼   │    │   ▼         ▼   │ │
+│  │  │ Read/Write     │    │ Read/Write     │    │ Read/Write     │ │
+│  │  │ (IO操作+业务)   │    │ (IO操作+业务)   │    │ (IO操作+业务)   │ │
+│  │  └─────────────────┘    └─────────────────┘    └─────────────────┘ │
+│  └────────────────────────────────────────────────────────────────────┘
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+**实现代码示例：**
+
+```java
+public class MultiThreadReactor {
+    private final Selector mainSelector;
+    private final ExecutorService workerPool;
+    private final int workerCount;
+    
+    public MultiThreadReactor(int port, int workerCount) throws IOException {
+        this.workerCount = workerCount;
+        this.mainSelector = Selector.open();
+        this.workerPool = Executors.newFixedThreadPool(workerCount);
+        
+        ServerSocketChannel serverChannel = ServerSocketChannel.open();
+        serverChannel.configureBlocking(false);
+        serverChannel.bind(new InetSocketAddress(port));
+        serverChannel.register(mainSelector, SelectionKey.OP_ACCEPT);
+    }
+    
+    public void run() {
+        while (!Thread.interrupted()) {
+            try {
+                mainSelector.select();
+                Iterator<SelectionKey> it = mainSelector.selectedKeys().iterator();
+                
+                while (it.hasNext()) {
+                    SelectionKey key = it.next();
+                    it.remove();
+                    
+                    if (key.isAcceptable()) {
+                        // 主线程只处理accept
+                        handleAccept(key);
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    
+    private void handleAccept(SelectionKey key) throws IOException {
+        ServerSocketChannel server = (ServerSocketChannel) key.channel();
+        SocketChannel client = server.accept();
+        client.configureBlocking(false);
+        
+        // 提交给工作线程处理IO
+        workerPool.submit(new WorkerHandler(client));
+    }
+    
+    // 工作线程处理读写
+    class WorkerHandler implements Runnable {
+        private final SocketChannel client;
+        private final Selector selector;
+        
+        WorkerHandler(SocketChannel client) throws IOException {
+            this.client = client;
+            this.selector = Selector.open();
+            client.register(selector, SelectionKey.OP_READ, this);
+        }
+        
+        @Override
+        public void run() {
+            // 处理读写事件
+            try {
+                selector.select();
+                // ... 处理IO事件
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+}
+```
+
+**特点分析：**
+
+| 维度 | 说明 |
+|------|------|
+| **优点** | ✅ 主线程只处理accept，职责清晰<br>✅ 工作线程池处理IO，提升并发能力<br>✅ 可以充分利用多核CPU |
+| **缺点** | ❌ 线程切换开销增加<br>❌ 线程同步复杂，需要处理竞态条件<br>❌ 子Reactor与Handler仍可能在同一线程 |
+| **适用场景** | 中等并发（1000-10000连接）<br>业务处理有一定耗时，但不算复杂的场景 |
+
+---
+
+### 5.4 主从Reactor（Netty采用）
+
+**架构图：**
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         主从Reactor架构 (Netty模型)                          │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│   ┌─────────────────────────────────────────────────────────────────────┐  │
+│   │                     Boss Group (主Reactor组)                         │  │
+│   │  ┌─────────────────────────────────────────────────────────────┐   │  │
+│   │  │  Main Reactor (Boss) - 通常1个线程                           │   │  │
+│   │  │  ┌─────────────────┐         ┌───────────────────────────┐  │   │  │
+│   │  │  │   Selector      │         │  职责：                   │  │   │  │
+│   │  │  │  (监听连接事件)  │←───────→│  1. 监听端口              │  │   │  │
+│   │  │  └────────┬────────┘         │  2. 处理OP_ACCEPT         │  │   │  │
+│   │  │           │                  │  3. 将Socket注册到Worker  │  │   │  │
+│   │  │           ▼                  └───────────────────────────┘  │   │  │
+│   │  │    ┌──────────────┐                                         │   │  │
+│   │  │    │ 新连接Channel │────────────────────────────────────┐   │   │  │
+│   │  │    └──────────────┘                                    │   │   │  │
+│   │  └────────────────────────────────────────────────────────┼───┘   │  │
+│   └───────────────────────────────────────────────────────────┼───────┘  │
+│                                                               │           │
+│   ┌───────────────────────────────────────────────────────────┼───────┐  │
+│   │                     Worker Group (从Reactor组)             │       │  │
+│   │                                                           ▼       │  │
+│   │  ┌─────────────────────────────────────────────────────────────┐ │  │
+│   │  │  Sub Reactor 1          Sub Reactor 2          Sub Reactor N│ │  │
+│   │  │  (NIO EventLoop)        (NIO EventLoop)        (NIO EventLoop)│ │  │
+│   │  │  ┌─────────────────┐   ┌─────────────────┐   ┌─────────────────┐│ │  │
+│   │  │  │    Selector     │   │    Selector     │   │    Selector     ││ │  │
+│   │  │  │ (管理多个Socket) │   │ (管理多个Socket) │   │ (管理多个Socket) ││ │  │
+│   │  │  └────────┬────────┘   └────────┬────────┘   └────────┬────────┘│ │  │
+│   │  │           │                     │                     │         │ │  │
+│   │  │      ┌────┴────┐           ┌────┴────┐           ┌────┴────┐    │ │  │
+│   │  │      ▼         ▼           ▼         ▼           ▼         ▼    │ │  │
+│   │  │   Socket1   Socket2    Socket3   Socket4    Socket5   Socket6   │ │  │
+│   │  │      │         │          │         │          │         │      │ │  │
+│   │  │      ▼         ▼          ▼         ▼          ▼         ▼      │ │  │
+│   │  │   Handler   Handler    Handler   Handler    Handler   Handler   │ │  │
+│   │  │   (IO+业务)  (IO+业务)   (IO+业务)  (IO+业务)   (IO+业务)  (IO+业务)│ │  │
+│   │  │                                                                 │ │  │
+│   │  │  特点：每个Sub Reactor是独立线程，负责一组连接的IO读写+编解码    │ │  │
+│   │  │  优势：连接均匀分配，避免单个线程过载                            │ │  │
+│   │  └─────────────────────────────────────────────────────────────────┘ │  │
+│   └──────────────────────────────────────────────────────────────────────┘  │
+│                                                                             │
+│   实际部署建议：                                                             │
+│   - Boss Group: 1个线程（除非绑定多个端口）                                  │
+│   - Worker Group: CPU核心数 * 2（默认），可根据业务调整                       │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+**Netty中的实现对应：**
+
+```java
+// Netty主从Reactor模型配置
+public class NettyServer {
+    public static void main(String[] args) {
+        // Boss Group: 主Reactor，处理连接建立
+        EventLoopGroup bossGroup = new NioEventLoopGroup(1);
+        
+        // Worker Group: 从Reactor，处理IO读写
+        EventLoopGroup workerGroup = new NioEventLoopGroup(
+            Runtime.getRuntime().availableProcessors() * 2
+        );
+        
+        try {
+            ServerBootstrap bootstrap = new ServerBootstrap();
+            bootstrap.group(bossGroup, workerGroup)
+                .channel(NioServerSocketChannel.class)
+                .childHandler(new ChannelInitializer<SocketChannel>() {
+                    @Override
+                    protected void initChannel(SocketChannel ch) {
+                        ch.pipeline().addLast(
+                            new DecoderHandler(),   // 解码
+                            new BusinessHandler(),  // 业务处理
+                            new EncoderHandler()    // 编码
+                        );
+                    }
+                });
+            
+            ChannelFuture future = bootstrap.bind(8080).sync();
+            future.channel().closeFuture().sync();
+        } finally {
+            bossGroup.shutdownGracefully();
+            workerGroup.shutdownGracefully();
+        }
+    }
+}
+```
+
+**三种Reactor模式对比：**
+
+| 特性 | 单线程Reactor | 多线程Reactor | 主从Reactor |
+|------|-------------|--------------|------------|
+| **线程数** | 1 | 1+N | M+N（通常M=1） |
+| **Accept处理** | 主线程 | 主线程 | Boss线程 |
+| **IO处理** | 主线程 | 工作线程 | Worker线程 |
+| **业务处理** | 主线程 | 工作线程 | Worker线程（可再分发） |
+| **并发能力** | 低 | 中 | **高** |
+| **复杂度** | 低 | 中 | 高 |
+| **适用场景** | 低并发 | 中等并发 | **高并发** |
+| **代表框架** | Redis早期 | 自定义实现 | **Netty、Nginx** |
+
+**主从Reactor的核心优势：**
+
+1. **职责完全分离**
+   - Boss只关注连接建立，快速响应
+   - Worker专注IO处理，互不干扰
+
+2. **负载均衡**
+   - 新连接轮询分配到不同Worker
+   - 避免单个线程处理过多连接
+
+3. **水平扩展**
+   - 增加Worker线程即可提升处理能力
+   - 充分利用多核CPU
+
+4. **高可用性**
+   - 单个Worker异常不影响其他连接
+   - 可以动态调整线程数
+
+**适用场景：**
+- 高并发服务器（>10000连接）
+- 长连接应用（游戏、IM、推送服务）
+- 对延迟敏感的业务场景
+- **Netty、Redis、Nginx、Memcached** 均采用此模式
 
 ---
 
