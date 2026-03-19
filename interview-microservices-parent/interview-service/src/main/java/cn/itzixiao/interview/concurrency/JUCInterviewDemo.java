@@ -157,22 +157,87 @@ public class JUCInterviewDemo {
         System.out.println("║                   第二部分：JMM 与 volatile 关键字                        ║");
         System.out.println("╚════════════════════════════════════════════════════════════════════════╝\n");
 
-        System.out.println("【2.1 JMM 三大特性】\n");
+        System.out.println("【2.1 Java 内存模型（JMM）详解】\n");
+
+        System.out.println("JMM 是什么？");
+        System.out.println("JMM（Java Memory Model）是 Java 虚拟机规范定义的一套内存模型，");
+        System.out.println("用于规范多线程环境下共享变量的访问规则，确保并发程序的正确性。\n");
+
+        System.out.println("JMM 的核心抽象结构：");
+        System.out.println("┌─────────────────────────────────────────────────────────────────────────┐");
+        System.out.println("│                        主内存（Main Memory）                             │");
+        System.out.println("│                     所有共享变量的存储位置                                │");
+        System.out.println("└──────────────────┬──────────────────────────────────┬───────────────────┘");
+        System.out.println("                   │                                  │");
+        System.out.println("           read/load│                                  │store/write");
+        System.out.println("                   │                                  │");
+        System.out.println("┌──────────────────▼──────────────────┐  ┌───────────▼───────────────────┐");
+        System.out.println("│        工作内存（线程1）             │  │        工作内存（线程2）       │");
+        System.out.println("│  ┌──────────────────────────────┐   │  │  ┌──────────────────────────┐ │");
+        System.out.println("│  │    共享变量副本 x = ?        │   │  │  │    共享变量副本 x = ?    │ │");
+        System.out.println("│  │    共享变量副本 y = ?        │   │  │  │    共享变量副本 y = ?    │ │");
+        System.out.println("│  └──────────────────────────────┘   │  │  └──────────────────────────┘ │");
+        System.out.println("│          use/assign                 │  │          use/assign           │");
+        System.out.println("└─────────────────────────────────────┘  └───────────────────────────────┘\n");
+
+        System.out.println("JMM 定义的 8 种内存交互操作：");
+        System.out.println("┌────────────┬────────────────────────────────────────────────────────────┐");
+        System.out.println("│    操作    │                         说明                                │");
+        System.out.println("├────────────┼────────────────────────────────────────────────────────────┤");
+        System.out.println("│    lock    │  作用于主内存，将变量标识为线程独占（互斥）                   │");
+        System.out.println("│   unlock   │  作用于主内存，释放变量的锁定状态                             │");
+        System.out.println("│    read    │  作用于主内存，将变量值传输到工作内存                         │");
+        System.out.println("│    load    │  作用于工作内存，将 read 的值放入变量副本                     │");
+        System.out.println("│    use     │  作用于工作内存，将变量值传递给执行引擎                       │");
+        System.out.println("│   assign   │  作用于工作内存，将执行引擎值赋给变量副本                     │");
+        System.out.println("│   store    │  作用于工作内存，将变量值传送到主内存                         │");
+        System.out.println("│   write    │  作用于主内存，将 store 的值写入变量                          │");
+        System.out.println("└────────────┴────────────────────────────────────────────────────────────┘\n");
+
+        System.out.println("【2.2 JMM 三大特性】\n");
         System.out.println("┌─────────────────────────────────────────────────────────────────────────┐");
         System.out.println("│  1. 原子性（Atomicity）                                                   │");
         System.out.println("│     - 操作不可分割，要么全部成功，要么全部失败                           │");
-        System.out.println("│     - synchronized、Lock 保证原子性                                      │");
+        System.out.println("│     - 保证方式：synchronized、Lock、原子类                               │");
         System.out.println("│                                                                        │");
         System.out.println("│  2. 可见性（Visibility）                                                  │");
         System.out.println("│     - 一个线程修改共享变量，其他线程立即可见                             │");
-        System.out.println("│     - volatile、synchronized、Lock 保证可见性                           │");
+        System.out.println("│     - 保证方式：volatile、synchronized、Lock、final                      │");
         System.out.println("│                                                                        │");
         System.out.println("│  3. 有序性（Ordering）                                                    │");
-        System.out.println("│     - 程序执行顺序按照代码先后顺序                                     │");
-        System.out.println("│     - volatile 禁止指令重排序，happens-before 原则                       │");
+        System.out.println("│     - 程序执行顺序按照代码先后顺序                                       │");
+        System.out.println("│     - 保证方式：volatile（禁止重排）、synchronized、happens-before       │");
         System.out.println("└─────────────────────────────────────────────────────────────────────────┘\n");
 
-        System.out.println("【2.2 volatile 关键字】\n");
+        System.out.println("【2.3 happens-before 规则（JMM 核心规则）】\n");
+        System.out.println("如果操作 A happens-before 操作 B，那么 A 的结果对 B 可见。\n");
+        System.out.println("┌─────────────────────────────────────────────────────────────────────────┐");
+        System.out.println("│  规则1：程序顺序规则                                                      │");
+        System.out.println("│         同一个线程中，前面的操作 happens-before 后面的操作                 │");
+        System.out.println("│                                                                         │");
+        System.out.println("│  规则2：volatile 变量规则                                                  │");
+        System.out.println("│         volatile 写 happens-before volatile 读                            │");
+        System.out.println("│                                                                         │");
+        System.out.println("│  规则3：锁规则                                                            │");
+        System.out.println("│         unlock happens-before 后续对同一锁的 lock                         │");
+        System.out.println("│                                                                         │");
+        System.out.println("│  规则4：传递性                                                            │");
+        System.out.println("│         A happens-before B，B happens-before C，则 A happens-before C    │");
+        System.out.println("│                                                                         │");
+        System.out.println("│  规则5：线程启动规则                                                       │");
+        System.out.println("│         Thread.start() happens-before 线程内所有操作                       │");
+        System.out.println("│                                                                         │");
+        System.out.println("│  规则6：线程终止规则                                                       │");
+        System.out.println("│         线程内所有操作 happens-before 线程终止检测                         │");
+        System.out.println("│                                                                         │");
+        System.out.println("│  规则7：中断规则                                                          │");
+        System.out.println("│         interrupt() happens-before 检测到中断                              │");
+        System.out.println("│                                                                         │");
+        System.out.println("│  规则8：对象终结规则                                                       │");
+        System.out.println("│         构造函数执行 happens-before finalize()                             │");
+        System.out.println("└─────────────────────────────────────────────────────────────────────────┘\n");
+
+        System.out.println("【2.4 volatile 关键字】\n");
 
         VolatileCounter counter = new VolatileCounter();
 
