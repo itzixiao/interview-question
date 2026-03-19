@@ -33,5 +33,6 @@
         <module>interview-bigdata</module>
         <module>interview-lowcode</module>
         <module>interview-workflow</module>
+        <module>interview-xxljob</module>
     </modules>
 </project>

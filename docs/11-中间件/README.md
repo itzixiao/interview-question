@@ -92,14 +92,21 @@
 - **重要程度：** ⭐⭐⭐⭐⭐
 - **配套代码：** `interview-microservices-parent/interview-workflow/`
 
+#### 15. [15-XXL-JOB分布式任务调度详解.md](./15-XXL-JOB分布式任务调度详解.md) ⭐ NEW
+
+- **内容：** 分布式调度、弹性扩容、故障转移、任务分片、监控告警
+- **面试题：** 15+ 道
+- **重要程度：** ⭐⭐⭐⭐⭐
+- **配套代码：** `interview-microservices-parent/interview-xxljob/`
+
 ---
 
 ## 📊 统计信息
 
-- **文档数：** 14 个
-- **面试题总数：** 130+ 道
+- **文档数：** 15 个
+- **面试题总数：** 145+ 道
 - **代码示例：** 配套 Java 代码在 `interview-service/rpc/`、`interview-rabbitmq/`、`interview-kafka/`、
-  `interview-provider/hbase/`、`interview-provider/elasticsearch/`、`interview-provider/netty/`、`interview-workflow/` 等目录（~12,000 行代码）
+  `interview-provider/hbase/`、`interview-provider/elasticsearch/`、`interview-provider/netty/`、`interview-workflow/`、`interview-xxljob/` 等目录（~13,000 行代码）
 
 ---
 
@@ -202,7 +209,7 @@
 ### 知识点对应
 
 | 中间件 | 应用场景 |
-|--------|---------||
+|--------|---------|
 | MyBatis | ORM 映射、动态 SQL |
 | Nacos | 微服务注册发现、配置管理 |
 | Sentinel | 高并发限流、熔断降级 |
@@ -256,7 +263,7 @@
 
 ### MyBatis 动态 SQL 示例
 
-``xml
+```xml
 <select id="findUsers" resultType="User">
 SELECT * FROM users
 <where>
