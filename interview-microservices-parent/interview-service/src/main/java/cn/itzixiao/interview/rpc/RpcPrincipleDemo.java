@@ -1,15 +1,26 @@
 package cn.itzixiao.interview.rpc;
 
+// 导入 IO 异常类，处理网络/流操作中可能出现的 IO 错误
 import java.io.IOException;
+// 导入对象输入流，用于从网络字节流中反序列化 Java 对象（读操作）
 import java.io.ObjectInputStream;
+// 导入对象输出流，用于将 Java 对象序列化为字节流写入网络（写操作）
 import java.io.ObjectOutputStream;
+// 导入序列化接口，实现该接口的类才能被 ObjectOutputStream/ObjectInputStream 序列化传输
 import java.io.Serializable;
+// 导入动态代理的调用处理器接口，RPC 客户端代理的核心接口，所有方法调用都会被 invoke() 拦截
 import java.lang.reflect.InvocationHandler;
+// 导入反射 Method 类，用于在 invoke() 中获取被调用方法的名称、参数类型等元信息
 import java.lang.reflect.Method;
+// 导入动态代理工厂类，通过 Proxy.newProxyInstance() 在运行时动态生成接口的代理实现
 import java.lang.reflect.Proxy;
+// 导入服务端套接字，在指定端口监听客户端连接请求（服务器端使用）
 import java.net.ServerSocket;
+// 导入客户端套接字，用于建立 TCP 连接，进行双向通信（客户端和服务端都会用到）
 import java.net.Socket;
+// 导入线程池服务接口，用于管理和复用线程，避免每次请求都创建新线程
 import java.util.concurrent.ExecutorService;
+// 导入线程池工厂类，提供 newFixedThreadPool 等便捷方法创建线程池
 import java.util.concurrent.Executors;
 
 /**
@@ -36,80 +47,112 @@ import java.util.concurrent.Executors;
  */
 public class RpcPrincipleDemo {
 
+    // 程序入口，throws Exception 声明允许抛出受检异常（Socket、反射、序列化等都会抛出受检异常）
     public static void main(String[] args) throws Exception {
         System.out.println("========== RPC 核心原理演示 ==========\n");
 
-        // 启动 RPC 服务器
+        // 第一步：在后台线程启动 RPC 服务器，开始监听客户端连接
         startRpcServer();
 
-        // 等待服务器启动
+        // 第二步：主线程休眠 2 秒，等待服务器完成端口绑定和初始化，避免客户端提前连接导致 "Connection refused"
         Thread.sleep(2000);
 
-        // 创建 RPC 客户端代理并调用
+        // 第三步：通过 RpcClient 的工厂方法，利用 JDK 动态代理创建 UserService 的透明代理对象
+        // 调用 userService 的任何方法，实际上都会被拦截并通过网络发送到服务器执行
         UserService userService = RpcClient.createProxy(UserService.class, "localhost", 8888);
 
-        // 调用远程方法
+        // 第四步：像调用本地方法一样调用远程方法，RPC 的透明性在此体现
         System.out.println("\n【客户端调用】开始调用远程服务...");
+
+        // 调用远程 getUserById 方法，传入用户 ID=1L，实际执行在服务器端
         User user = userService.getUserById(1L);
+        // 打印从服务器返回并反序列化后的用户对象
         System.out.println("【客户端收到】用户信息：" + user);
 
+        // 调用远程 sayHello 方法，传入姓名参数
         String result = userService.sayHello("张三");
+        // 打印从服务器返回的问候字符串结果
         System.out.println("【客户端收到】问候结果：" + result);
     }
 
     /**
      * 启动 RPC 服务器
+     * 在独立的守护线程中运行，不阻塞主线程继续执行客户端逻辑
      */
     private static void startRpcServer() {
+        // 创建新线程运行服务器逻辑，使用 Lambda 表达式代替 Runnable 匿名类
         new Thread(() -> {
             try {
                 System.out.println("【服务器】正在启动 RPC 服务器，监听端口 8888...");
+                // 在 8888 端口创建 ServerSocket，操作系统完成端口绑定，开始接收 TCP 连接请求
                 ServerSocket serverSocket = new ServerSocket(8888);
+                // 创建固定大小为 10 的线程池，用于并发处理多个客户端请求，避免线程无限增长
                 ExecutorService executor = Executors.newFixedThreadPool(10);
 
+                // 服务器主循环：持续监听并接受客户端连接请求
                 while (true) {
+                    // accept() 是阻塞调用，挂起当前线程直到有客户端连接进来，返回与该客户端通信的 Socket
                     Socket clientSocket = serverSocket.accept();
+                    // 将请求处理任务提交给线程池，不在主循环线程中处理，保证服务器可以立即接受下一个连接
                     executor.submit(() -> handleRequest(clientSocket));
                 }
             } catch (Exception e) {
+                // 打印异常堆栈，便于定位端口占用、权限不足等启动问题
                 e.printStackTrace();
             }
-        }).start();
+        }).start(); // 启动线程，立即返回，不阻塞调用方
     }
 
     /**
-     * 处理客户端请求
+     * 处理单个客户端请求（服务端 Skeleton 的核心逻辑）
+     * 完整实现了：反序列化请求 → 反射调用 → 序列化响应 的服务端处理链
+     *
+     * @param socket 与客户端建立的 TCP 连接套接字
      */
     private static void handleRequest(Socket socket) {
+        // try-with-resources：自动关闭 ObjectInputStream 和 ObjectOutputStream，防止资源泄漏
+        // 注意：ObjectOutputStream 必须先于 ObjectInputStream 创建（否则可能死锁），
+        // 但这里利用 try-with-resources 同时声明，Java 会按声明顺序依次初始化
         try (ObjectInputStream input = new ObjectInputStream(socket.getInputStream());
              ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream())) {
 
-            // 反序列化请求
+            // 从输入流中读取对象并强转为 RpcRequest，这就是反序列化过程（字节流 → Java 对象）
             RpcRequest request = (RpcRequest) input.readObject();
+            // 打印接收到的请求信息，便于调试和追踪调用链路
             System.out.println("\n【服务器收到】请求方法：" + request.getMethodName()
                     + ", 参数类型：" + request.getParameterTypes()[0]
                     + ", 参数值：" + request.getParameters()[0]);
 
-            // 反射调用实际方法
+            // 在服务端实例化真正的业务实现类（生产环境中通常由 IoC 容器管理，这里简化为手动 new）
             UserServiceImpl userService = new UserServiceImpl();
+            // 用于保存方法调用结果，初始化为 null
             Object result = null;
 
+            // 根据请求中的方法名，路由到对应的实际方法调用（简化版服务端分发器）
+            // 生产级 RPC 框架会用反射 + 方法注册表实现通用分发，避免硬编码 if-else
             if ("getUserById".equals(request.getMethodName())) {
+                // 取出第一个参数并强转为 Long 类型，调用 getUserById 方法
                 result = userService.getUserById((Long) request.getParameters()[0]);
             } else if ("sayHello".equals(request.getMethodName())) {
+                // 取出第一个参数并强转为 String 类型，调用 sayHello 方法
                 result = userService.sayHello((String) request.getParameters()[0]);
             }
 
-            // 序列化响应
+            // 将业务方法的返回值封装到 RpcResponse 响应对象中
             RpcResponse response = new RpcResponse();
+            // 设置调用结果（如果方法抛出异常，应设置 error 字段而非 result）
             response.setResult(result);
+            // 将 RpcResponse 对象序列化写入输出流，通过 TCP 发回给客户端
             output.writeObject(response);
 
             System.out.println("【服务器返回】结果：" + result);
 
         } catch (Exception e) {
+            // 捕获反序列化、反射调用、网络 IO 等各类异常
             e.printStackTrace();
         } finally {
+            // finally 块确保 socket 一定被关闭，释放文件描述符等系统资源
+            // 注意：try-with-resources 只关闭了流，socket 本身需要手动关闭
             try {
                 socket.close();
             } catch (IOException e) {
@@ -122,70 +165,94 @@ public class RpcPrincipleDemo {
 // ==================== RPC 请求与响应 ====================
 
 /**
- * RPC 请求对象
+ * RPC 请求对象 - 封装客户端调用的所有元信息
+ * 该对象会被序列化后通过网络传输到服务端，因此必须实现 Serializable 接口
  */
 class RpcRequest implements Serializable {
+    // 序列化版本号，用于反序列化时校验类版本一致性，防止因类结构变更导致反序列化失败
     private static final long serialVersionUID = 1L;
 
-    private String className;          // 类名
-    private String methodName;         // 方法名
-    private Class<?>[] parameterTypes; // 参数类型
-    private Object[] parameters;       // 参数值
+    // 目标服务接口的全限定类名，服务端用来查找对应的服务实现（如 cn.itzixiao.interview.rpc.UserService）
+    private String className;
+    // 被调用的方法名称（如 "getUserById"），服务端据此路由到对应方法
+    private String methodName;
+    // 方法参数类型数组，与 parameters 配合使用，用于方法重载时精确匹配（Class 数组本身也可序列化）
+    private Class<?>[] parameterTypes;
+    // 方法实际参数值数组，与 parameterTypes 一一对应，传递真实的调用入参
+    private Object[] parameters;
 
+    // ---- 以下为标准 getter/setter，供序列化框架和业务代码读写字段 ----
+
+    // 获取目标类的全限定名
     public String getClassName() {
         return className;
     }
 
+    // 设置目标类的全限定名
     public void setClassName(String className) {
         this.className = className;
     }
 
+    // 获取被调用的方法名
     public String getMethodName() {
         return methodName;
     }
 
+    // 设置被调用的方法名
     public void setMethodName(String methodName) {
         this.methodName = methodName;
     }
 
+    // 获取参数类型数组（用于方法签名匹配）
     public Class<?>[] getParameterTypes() {
         return parameterTypes;
     }
 
+    // 设置参数类型数组
     public void setParameterTypes(Class<?>[] parameterTypes) {
         this.parameterTypes = parameterTypes;
     }
 
+    // 获取实际参数值数组
     public Object[] getParameters() {
         return parameters;
     }
 
+    // 设置实际参数值数组
     public void setParameters(Object[] parameters) {
         this.parameters = parameters;
     }
 }
 
 /**
- * RPC 响应对象
+ * RPC 响应对象 - 封装服务端方法的执行结果或异常信息
+ * 服务端处理完请求后，将结果封装到该对象并序列化返回给客户端
  */
 class RpcResponse implements Serializable {
+    // 序列化版本号，保证客户端和服务端使用同一版本的响应结构进行反序列化
     private static final long serialVersionUID = 1L;
 
-    private Object result;  // 返回结果
-    private Throwable error; // 异常信息
+    // 方法调用成功时的返回值，类型为 Object 以支持任意返回类型
+    private Object result;
+    // 方法调用抛出异常时的错误信息，正常情况下为 null；客户端收到后需判断是否重新抛出
+    private Throwable error;
 
+    // 获取方法调用成功的返回值
     public Object getResult() {
         return result;
     }
 
+    // 设置方法调用的返回值（服务端在业务方法执行后调用）
     public void setResult(Object result) {
         this.result = result;
     }
 
+    // 获取调用过程中发生的异常（客户端可根据此判断是否调用失败）
     public Throwable getError() {
         return error;
     }
 
+    // 设置调用过程中捕获的异常（服务端在 catch 块中调用）
     public void setError(Throwable error) {
         this.error = error;
     }
@@ -194,50 +261,71 @@ class RpcResponse implements Serializable {
 // ==================== 服务接口与实现 ====================
 
 /**
- * 用户服务接口
+ * 用户服务接口 - RPC 的服务契约（Service Contract）
+ * 客户端和服务端都依赖此接口，客户端持有其代理对象，服务端提供真实实现
+ * 在实际项目中，该接口通常放在独立的 API 模块中，供双方共同依赖
  */
 interface UserService {
+    // 根据用户 ID 查询用户信息，参数为 Long 类型的用户主键
     User getUserById(Long id);
 
+    // 向指定姓名的用户发送问候，返回问候字符串
     String sayHello(String name);
 }
 
 /**
- * 用户服务实现类（服务端）
+ * 用户服务实现类（服务端真实业务逻辑）
+ * 实现 UserService 接口，是 RPC 调用链中真正执行业务代码的一端
+ * 生产环境中通常标注 @Service 由 Spring 容器管理，此处简化为普通类
  */
 class UserServiceImpl implements UserService {
+
+    // 重写 getUserById，模拟从数据库查询用户，根据 ID 构造一个 User 对象返回
     @Override
     public User getUserById(Long id) {
+        // 打印日志，表明该方法在服务端被真实执行，而非客户端本地调用
         System.out.println("【服务端执行】getUserById, id=" + id);
+        // 模拟数据库查询：根据 ID 构造并返回一个 User 实体（真实场景中应查询 DB）
         return new User(id, "用户" + id, "user" + id + "@example.com");
     }
 
+    // 重写 sayHello，返回一个包含用户姓名的问候字符串
     @Override
     public String sayHello(String name) {
+        // 打印日志，确认方法在服务端执行
         System.out.println("【服务端执行】sayHello, name=" + name);
+        // 拼接并返回问候语，客户端将收到这个字符串
         return "Hello, " + name + "! 欢迎使用 RPC 服务";
     }
 }
 
 /**
- * 用户实体类
+ * 用户实体类 - 需要跨网络传输的领域对象
+ * 实现 Serializable 接口，才能被 Java 原生序列化机制转换为字节流在网络中传输
  */
 class User implements Serializable {
+    // 序列化版本号，客户端和服务端的 User 类版本必须一致，否则反序列化会抛出 InvalidClassException
     private static final long serialVersionUID = 1L;
 
+    // 用户唯一标识，使用包装类 Long（而非基本类型 long）以支持 null 值
     private Long id;
+    // 用户姓名
     private String name;
+    // 用户邮箱地址
     private String email;
 
+    // 无参构造器，Java 序列化机制在反序列化时需要通过无参构造器创建对象实例
     public User() {
     }
 
+    // 全参构造器，方便在服务端快速创建完整的 User 对象
     public User(Long id, String name, String email) {
-        this.id = id;
-        this.name = name;
-        this.email = email;
+        this.id = id;       // 设置用户 ID
+        this.name = name;   // 设置用户姓名
+        this.email = email; // 设置用户邮箱
     }
 
+    // 重写 toString，方便打印输出时直观展示用户信息，而非默认的内存地址格式
     @Override
     public String toString() {
         return "User{id=" + id + ", name='" + name + "', email='" + email + "'}";
@@ -247,7 +335,7 @@ class User implements Serializable {
 // ==================== RPC 客户端代理 ====================
 
 /**
- * RPC 客户端 - 动态代理实现
+ * RPC 客户端 - 动态代理实现（客户端 Stub）
  * <p>
  * 核心原理：
  * 1. 使用 JDK 动态代理创建接口代理对象
@@ -258,43 +346,64 @@ class User implements Serializable {
 class RpcClient {
 
     /**
-     * 创建 RPC 代理对象
+     * 创建 RPC 代理对象（工厂方法）
+     * 调用方拿到代理对象后，可以像使用本地接口实现一样调用远程服务
      *
-     * @param interfaceClass 服务接口
-     * @param host           服务器地址
-     * @param port           服务器端口
-     * @return 代理对象
+     * @param interfaceClass 服务接口的 Class 对象（如 UserService.class）
+     * @param host           RPC 服务器的 IP 地址或域名
+     * @param port           RPC 服务器监听的端口号
+     * @return 实现了 interfaceClass 接口的动态代理对象，类型为 T
      */
+    // 抑制"unchecked cast"编译警告，因为 Proxy.newProxyInstance 返回的是 Object，需要强转为 T
     @SuppressWarnings("unchecked")
     public static <T> T createProxy(final Class<T> interfaceClass,
                                     final String host,
                                     final int port) {
+        // Proxy.newProxyInstance 在运行时动态生成一个实现了 interfaceClass 的代理类并实例化
         return (T) Proxy.newProxyInstance(
+                // 参数1：类加载器，用于加载动态生成的代理类，通常与被代理接口使用同一个类加载器
                 interfaceClass.getClassLoader(),
+                // 参数2：代理对象需要实现的接口列表，这里只实现 interfaceClass 一个接口
                 new Class<?>[]{interfaceClass},
+                // 参数3：InvocationHandler 实现，每次调用代理对象的方法都会触发 invoke()
                 new InvocationHandler() {
                     @Override
+                    // proxy: 代理对象本身（很少直接使用）
+                    // method: 当前被调用的方法对象，包含方法名、参数类型等反射元信息
+                    // args: 调用方传入的实际参数数组
                     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                        // 1. 封装 RPC 请求
+
+                        // ---------- Step 1：将方法调用封装为可序列化的 RPC 请求对象 ----------
                         RpcRequest request = new RpcRequest();
+                        // 设置目标服务接口的全限定类名，服务端据此找到对应的服务实现
                         request.setClassName(interfaceClass.getName());
+                        // 从反射 Method 对象中提取方法名（如 "getUserById"）
                         request.setMethodName(method.getName());
+                        // 从反射 Method 对象中提取参数类型数组，用于服务端方法签名匹配
                         request.setParameterTypes(method.getParameterTypes());
+                        // 设置调用方传入的实际参数值
                         request.setParameters(args);
 
-                        // 2. 发送请求到服务器
+                        // ---------- Step 2：建立 TCP 连接，将序列化后的请求发送到服务器 ----------
+                        // 向指定 host:port 发起 TCP 连接（三次握手在此完成）
                         Socket socket = new Socket(host, port);
+                        // 包装 socket 输出流为对象输出流，支持直接写入 Java 对象（内部完成序列化）
                         ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
+                        // 将 RpcRequest 对象序列化写入网络字节流，发送到服务器
                         output.writeObject(request);
 
-                        // 3. 接收服务器响应
+                        // ---------- Step 3：等待并读取服务器的响应 ----------
+                        // 包装 socket 输入流为对象输入流，支持从字节流中反序列化 Java 对象
                         ObjectInputStream input = new ObjectInputStream(socket.getInputStream());
+                        // 阻塞等待服务器返回响应，并将字节流反序列化为 RpcResponse 对象
                         RpcResponse response = (RpcResponse) input.readObject();
 
-                        // 4. 关闭连接
+                        // ---------- Step 4：关闭 TCP 连接，释放系统资源 ----------
+                        // 生产级 RPC 框架会使用连接池复用连接，而非每次请求都新建/关闭连接
                         socket.close();
 
-                        // 5. 返回结果
+                        // ---------- Step 5：将响应结果返回给调用方 ----------
+                        // 生产级实现还应检查 response.getError()，如不为空则重新抛出异常
                         return response.getResult();
                     }
                 }
