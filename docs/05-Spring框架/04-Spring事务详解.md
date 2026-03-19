@@ -1,6 +1,6 @@
-# Spring事务完全指南 - 失效场景 + 传播行为 + 隔离级别
+# Spring 事务详解 - 从基础到源码
 
-## 一、Spring事务基础
+## 一、Spring 事务基础
 
 ### 1.1 什么是事务？
 
@@ -11,7 +11,7 @@
 - **隔离性（Isolation）**：多个事务并发执行时，彼此互不干扰
 - **持久性（Durability）**：事务一旦提交，对数据的改变是永久的
 
-### 1.2 Spring事务管理方式
+### 1.2 Spring 事务管理方式
 
 #### 声明式事务（推荐）
 
@@ -28,13 +28,11 @@ public void createOrder() {
 ```
 
 **优点：**
-
 - ✅ 非侵入式，业务代码与事务管理分离
 - ✅ 配置简单，易于维护
 - ✅ 基于 AOP 原理，自动代理
 
 **缺点：**
-
 - ❌ 只能用于 public 方法
 - ❌ 自调用会失效
 - ❌ 灵活性相对较低
@@ -59,19 +57,320 @@ public void createUser(String name) {
 ```
 
 **优点：**
-
 - ✅ 灵活，可以精确控制事务边界
 - ✅ 不受方法访问权限限制
 - ✅ 可以在代码中动态决定事务行为
 
 **缺点：**
-
 - ❌ 侵入式，业务代码与事务管理耦合
 - ❌ 代码冗长，维护成本高
 
 ---
 
-## 二、Spring事务失效的 8 大场景
+## 二、事务传播行为详解
+
+### 2.1 什么是传播行为？
+
+事务传播行为（Propagation Behavior）定义了当一个事务方法被另一个事务方法调用时，事务应该如何传播。
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                      事务传播行为对比表                          │
+├───────────────┬─────────────────────────────────────────────────┤
+│ 传播行为       │ 说明                                             │
+├───────────────┼─────────────────────────────────────────────────┤
+│ REQUIRED      │ 默认。当前有事务则加入，无则新建                   │
+│ REQUIRES_NEW  │ 挂起当前事务，新建独立事务                         │
+│ NESTED        │ 在当前事务中创建嵌套事务（savepoint）              │
+│ SUPPORTS      │ 当前有事务则加入，无则以非事务执行                 │
+│ NOT_SUPPORTED │ 挂起当前事务，以非事务执行                         │
+│ MANDATORY     │ 当前必须有事务，否则抛出异常                       │
+│ NEVER         │ 当前必须无事务，否则抛出异常                       │
+└───────────────┴─────────────────────────────────────────────────┘
+```
+
+### 2.2 REQUIRED（默认）
+
+**规则：** 当前有事务则加入，无则新建
+
+**适用场景：** 大多数业务场景，保证操作的原子性
+
+```java
+@Transactional(propagation = Propagation.REQUIRED)
+public void createOrder() {
+    // 1. 创建订单
+    orderMapper.insert(order);
+    
+    // 2. 扣减库存（加入同一事务）
+    inventoryMapper.reduce();
+    
+    // 一个失败，全部回滚
+}
+```
+
+**执行流程：**
+
+```
+外部方法（有事务）
+    ↓ 调用
+内部方法（REQUIRED）
+    ↓ 加入外部事务
+外部方法回滚 → 内部方法也回滚
+```
+
+### 2.3 REQUIRES_NEW
+
+**规则：** 挂起当前事务，新建独立事务
+
+**适用场景：** 日志记录、审计操作等需要独立提交的场景
+
+```java
+@Transactional(propagation = Propagation.REQUIRED)
+public void createOrder() {
+    orderMapper.insert(order);
+    
+    try {
+        logService.logSuccess("订单创建成功");  // REQUIRES_NEW
+    } catch (Exception e) {
+        // 日志失败不影响订单
+    }
+}
+
+@Transactional(propagation = Propagation.REQUIRES_NEW)
+public void logSuccess(String msg) {
+    // ✓ 独立事务，即使订单回滚，日志也会保留
+    logMapper.insert(msg);
+}
+```
+
+**执行流程：**
+
+```
+外部方法（事务A）
+    ↓ 调用
+    挂起事务A
+    创建事务B（REQUIRES_NEW）
+    ↓ 执行
+    提交/回滚事务B
+    恢复事务A
+```
+
+### 2.4 NESTED
+
+**规则：** 在当前事务中创建嵌套事务（savepoint）
+
+**适用场景：** 部分回滚需求
+
+```java
+@Transactional(propagation = Propagation.REQUIRED)
+public void batchProcess() {
+    for (Item item : items) {
+        try {
+            processSingleItem(item);  // NESTED
+        } catch (Exception e) {
+            // 单条失败不影响其他
+        }
+    }
+}
+
+@Transactional(propagation = Propagation.NESTED)
+public void processSingleItem(Item item) {
+    // 失败只回滚到 savepoint
+    itemMapper.insert(item);
+}
+```
+
+**注意事项：**
+- 仅 DataSourceTransactionManager 支持
+- 基于 JDBC savepoint 实现
+- 外层回滚，内层也会回滚
+
+### 2.5 REQUIRES_NEW vs NESTED 对比
+
+| 特性 | REQUIRES_NEW | NESTED |
+|------|-------------|--------|
+| 事务关系 | 完全独立的新事务 | 嵌套在外部事务中（savepoint） |
+| 回滚影响 | 内层回滚不影响外层 | 内层回滚到 savepoint，外层可继续 |
+| 提交时机 | 独立提交 | 随外部事务一起提交 |
+| 实现机制 | 挂起-创建-恢复 | JDBC savepoint |
+| 支持程度 | 所有事务管理器 | 仅 DataSourceTransactionManager |
+
+### 2.6 其他传播行为
+
+#### SUPPORTS
+
+**规则：** 当前有事务则加入，无则以非事务执行
+
+**适用场景：** 查询操作
+
+```java
+@Transactional(propagation = Propagation.SUPPORTS)
+public User getUserById(Long id) {
+    // 有事务则加入，没有也无所谓
+    return userMapper.selectById(id);
+}
+```
+
+#### NOT_SUPPORTED
+
+**规则：** 挂起当前事务，以非事务执行
+
+**适用场景：** 不需要事务的操作（如文件 IO、批量导入）
+
+```java
+@Transactional(propagation = Propagation.NOT_SUPPORTED)
+public void exportExcel() {
+    // ✓ 以非事务方式执行，提高性能
+    // 文件导出操作
+}
+```
+
+#### MANDATORY
+
+**规则：** 当前必须有事务，否则抛出异常
+
+**适用场景：** 强制要求事务的核心业务
+
+```java
+@Transactional(propagation = Propagation.MANDATORY)
+public void criticalBusiness() {
+    // 必须在事务中执行
+}
+```
+
+#### NEVER
+
+**规则：** 当前必须无事务，否则抛出异常
+
+**适用场景：** 绝对不能有事务的操作
+
+```java
+@Transactional(propagation = Propagation.NEVER)
+public void noTransactionMethod() {
+    // 必须在非事务环境下执行
+}
+```
+
+### 2.7 传播行为选择指南
+
+| 传播行为 | 外部有事务 | 外部无事务 | 典型场景 |
+|---------|-----------|-----------|---------|
+| **REQUIRED** | 加入 | 新建 | 默认选择，大多数业务 |
+| **REQUIRES_NEW** | 挂起，新建 | 新建 | 日志、审计、独立记录 |
+| **NESTED** | 嵌套 | 新建 | 部分回滚、批量处理 |
+| **SUPPORTS** | 加入 | 非事务 | 查询操作 |
+| **NOT_SUPPORTED** | 挂起 | 非事务 | 文件 IO、大数据导出 |
+| **MANDATORY** | 加入 | 抛异常 | 强制事务的核心业务 |
+| **NEVER** | 抛异常 | 非事务 | 特殊操作、禁止事务 |
+
+---
+
+## 三、事务隔离级别
+
+### 3.1 SQL 标准隔离级别
+
+从低到高：
+
+1. **READ_UNCOMMITTED（读未提交）**
+   - 可能脏读、不可重复读、幻读
+   - 性能最好
+   - 适用：统计分析等对一致性要求不高的场景
+
+2. **READ_COMMITTED（读已提交）**
+   - 避免脏读
+   - 可能不可重复读、幻读
+   - Oracle 默认隔离级别
+   - 适用：大多数业务场景
+
+3. **REPEATABLE_READ（可重复读）**
+   - 避免脏读、不可重复读
+   - 可能幻读（InnoDB 通过 Next-Key Lock 基本解决）
+   - MySQL 默认隔离级别
+   - 适用：推荐选择
+
+4. **SERIALIZABLE（串行化）**
+   - 避免所有并发问题
+   - 强制事务串行执行
+   - 性能最差
+   - 适用：金融等对一致性要求极高的场景
+
+### 3.2 并发问题详解
+
+#### 脏读（Dirty Read）
+
+```
+事务 A                          事务 B
+----------------------------------------
+读取 (余额=1000)                
+                              修改 (余额=800)
+读取 (余额=800)  ← 脏读        
+                              回滚
+实际余额还是 1000，A 读到的是脏数据
+```
+
+#### 不可重复读（Non-repeatable Read）
+
+```
+事务 A                          事务 B
+----------------------------------------
+读取 (余额=1000)                
+                              修改 (余额=800)
+                              提交
+再次读取 (余额=800)  ← 不一致
+```
+
+#### 幻读（Phantom Read）
+
+```
+事务 A                          事务 B
+----------------------------------------
+查询 (SELECT * FROM user WHERE age>10) 
+返回 3 条记录                    
+                              插入 (age=15)
+                              提交
+再次查询 (SELECT * FROM user WHERE age>10)
+返回 4 条记录  ← 出现"幻影"
+```
+
+### 3.3 MySQL InnoDB 的特殊优化
+
+MySQL InnoDB 在 REPEATABLE_READ 隔离级别下，通过以下技术基本解决了幻读问题：
+
+1. **MVCC（多版本并发控制）**
+   - 读操作不加锁，读取历史版本
+   - 提高并发性能
+
+2. **Next-Key Lock**
+   - 记录锁 + 间隙锁
+   - 防止其他事务在间隙中插入
+
+```sql
+-- 查看当前隔离级别
+SELECT @@transaction_isolation;
+
+-- 设置会话隔离级别
+SET SESSION TRANSACTION ISOLATION LEVEL REPEATABLE READ;
+```
+
+### 3.4 隔离级别选择建议
+
+```java
+// 互联网应用：使用默认 REPEATABLE_READ
+@Transactional(isolation = Isolation.REPEATABLE_READ)
+public void business() {}
+
+// 金融系统：考虑 SERIALIZABLE
+@Transactional(isolation = Isolation.SERIALIZABLE)
+public void transfer() {}
+
+// 数据分析：可使用 READ_UNCOMMITTED
+@Transactional(isolation = Isolation.READ_UNCOMMITTED, readOnly = true)
+public void analyze() {}
+```
+
+---
+
+## 四、Spring 事务失效的 8 大场景
 
 ### 场景 1：非 public 方法
 
@@ -324,259 +623,9 @@ public void orderBusinessMethod() {
 
 ---
 
-## 三、Spring事务传播行为详解
-
-### 3.1 REQUIRED（默认）
-
-**规则：** 当前有事务则加入，无则新建
-
-**适用场景：** 大多数业务场景，保证操作的原子性
-
-```java
-@Transactional(propagation = Propagation.REQUIRED)
-public void createOrder() {
-    // 1. 创建订单
-    orderMapper.insert(order);
-    
-    // 2. 扣减库存（加入同一事务）
-    inventoryMapper.reduce();
-    
-    // 一个失败，全部回滚
-}
-```
-
-### 3.2 REQUIRES_NEW
-
-**规则：** 挂起当前事务，新建独立事务
-
-**适用场景：** 日志记录、审计操作等需要独立提交的场景
-
-```java
-@Transactional(propagation = Propagation.REQUIRED)
-public void createOrder() {
-    orderMapper.insert(order);
-    
-    try {
-        logService.logSuccess("订单创建成功");  // REQUIRES_NEW
-    } catch (Exception e) {
-        // 日志失败不影响订单
-    }
-}
-
-@Transactional(propagation = Propagation.REQUIRES_NEW)
-public void logSuccess(String msg) {
-    // ✓ 独立事务，即使订单回滚，日志也会保留
-    logMapper.insert(msg);
-}
-```
-
-### 3.3 NESTED
-
-**规则：** 在当前事务中创建嵌套事务（savepoint）
-
-**适用场景：** 部分回滚需求
-
-```java
-@Transactional(propagation = Propagation.REQUIRED)
-public void batchProcess() {
-    for (Item item : items) {
-        try {
-            processSingleItem(item);  // NESTED
-        } catch (Exception e) {
-            // 单条失败不影响其他
-        }
-    }
-}
-
-@Transactional(propagation = Propagation.NESTED)
-public void processSingleItem(Item item) {
-    // 失败只回滚到 savepoint
-    itemMapper.insert(item);
-}
-```
-
-**注意事项：**
-
-- 仅 DataSourceTransactionManager 支持
-- 基于 JDBC savepoint 实现
-- 外层回滚，内层也会回滚
-
-### 3.4 SUPPORTS
-
-**规则：** 当前有事务则加入，无则以非事务执行
-
-**适用场景：** 查询操作
-
-```java
-@Transactional(propagation = Propagation.SUPPORTS)
-public User getUserById(Long id) {
-    // 有事务就加入，没有也无所谓
-    return userMapper.selectById(id);
-}
-```
-
-### 3.5 NOT_SUPPORTED
-
-**规则：** 挂起当前事务，以非事务执行
-
-**适用场景：** 不需要事务的操作（如文件 IO、批量导入）
-
-```java
-@Transactional(propagation = Propagation.NOT_SUPPORTED)
-public void exportExcel() {
-    // ✓ 以非事务方式执行，提高性能
-    // 文件导出操作
-}
-```
-
-### 3.6 MANDATORY
-
-**规则：** 当前必须有事务，否则抛出异常
-
-**适用场景：** 强制要求事务的核心业务
-
-```java
-@Transactional(propagation = Propagation.MANDATORY)
-public void criticalBusiness() {
-    // 必须在事务中执行
-}
-```
-
-### 3.7 NEVER
-
-**规则：** 当前必须无事务，否则抛出异常
-
-**适用场景：** 绝对不能有事务的操作
-
-```java
-@Transactional(propagation = Propagation.NEVER)
-public void noTransactionMethod() {
-    // 必须在非事务环境下执行
-}
-```
-
-### 3.8 传播行为对比表
-
-| 传播行为              | 外部有事务 | 外部无事务 | 典型场景  |
-|-------------------|-------|-------|-------|
-| **REQUIRED**      | 加入    | 新建    | 默认选择  |
-| **REQUIRES_NEW**  | 挂起，新建 | 新建    | 日志、审计 |
-| **NESTED**        | 嵌套事务  | 新建    | 部分回滚  |
-| **SUPPORTS**      | 加入    | 非事务   | 查询操作  |
-| **NOT_SUPPORTED** | 挂起    | 非事务   | 文件 IO |
-| **MANDATORY**     | 加入    | 抛异常   | 核心业务  |
-| **NEVER**         | 抛异常   | 非事务   | 特殊操作  |
-
----
-
-## 四、事务隔离级别
-
-### 4.1 SQL 标准隔离级别
-
-从低到高：
-
-1. **READ_UNCOMMITTED（读未提交）**
-    - 可能脏读、不可重复读、幻读
-    - 性能最好
-    - 适用：统计分析等对一致性要求不高的场景
-
-2. **READ_COMMITTED（读已提交）**
-    - 避免脏读
-    - 可能不可重复读、幻读
-    - Oracle 默认隔离级别
-    - 适用：大多数业务场景
-
-3. **REPEATABLE_READ（可重复读）**
-    - 避免脏读、不可重复读
-    - 可能幻读（InnoDB 通过 Next-Key Lock 基本解决）
-    - MySQL 默认隔离级别
-    - 适用：推荐选择
-
-4. **SERIALIZABLE（串行化）**
-    - 避免所有并发问题
-    - 强制事务串行执行
-    - 性能最差
-    - 适用：金融等对一致性要求极高的场景
-
-### 4.2 并发问题详解
-
-#### 脏读（Dirty Read）
-
-```
-事务 A                          事务 B
-----------------------------------------
-读取 (余额=1000)                
-                              修改 (余额=800)
-读取 (余额=800)  ← 脏读        
-                              回滚
-实际余额还是 1000，A 读到的是脏数据
-```
-
-#### 不可重复读（Non-repeatable Read）
-
-```
-事务 A                          事务 B
-----------------------------------------
-读取 (余额=1000)                
-                              修改 (余额=800)
-                              提交
-再次读取 (余额=800)  ← 不一致
-```
-
-#### 幻读（Phantom Read）
-
-```
-事务 A                          事务 B
-----------------------------------------
-查询 (SELECT * FROM user WHERE age>10) 
-返回 3 条记录                    
-                              插入 (age=15)
-                              提交
-再次查询 (SELECT * FROM user WHERE age>10)
-返回 4 条记录  ← 出现"幻影"
-```
-
-### 4.3 MySQL InnoDB 的特殊优化
-
-MySQL InnoDB 在 REPEATABLE_READ 隔离级别下，通过以下技术基本解决了幻读问题：
-
-1. **MVCC（多版本并发控制）**
-    - 读操作不加锁，读取历史版本
-    - 提高并发性能
-
-2. **Next-Key Lock**
-    - 记录锁 + 间隙锁
-    - 防止其他事务在间隙中插入
-
-```sql
--- 查看当前隔离级别
-SELECT @@transaction_isolation;
-
--- 设置会话隔离级别
-SET SESSION TRANSACTION ISOLATION LEVEL REPEATABLE READ;
-```
-
-### 4.4 隔离级别选择建议
-
-```java
-// 互联网应用：使用默认 REPEATABLE_READ
-@Transactional(isolation = Isolation.REPEATABLE_READ)
-public void business() {}
-
-// 金融系统：考虑 SERIALIZABLE
-@Transactional(isolation = Isolation.SERIALIZABLE)
-public void transfer() {}
-
-// 数据分析：可使用 READ_UNCOMMITTED
-@Transactional(isolation = Isolation.READ_UNCOMMITTED, readOnly = true)
-public void analyze() {}
-```
-
----
-
 ## 五、事务最佳实践
 
-### 5.1 声明式事务配置
+### 5.1 声明式事务配置模板
 
 ```java
 @Transactional(
@@ -722,9 +771,94 @@ public void batchProcess() {}
 
 ---
 
-## 六、高频面试题
+## 六、Spring 事务实现原理
 
-**问题 1：Spring事务失效的常见场景有哪些？**
+### 6.1 核心组件
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Spring 事务架构                           │
+├─────────────────────────────────────────────────────────────┤
+│  @Transactional                                              │
+│       ↓                                                      │
+│  TransactionInterceptor（AOP 拦截器）                         │
+│       ↓                                                      │
+│  TransactionAspectSupport（事务切面支持）                     │
+│       ↓                                                      │
+│  PlatformTransactionManager（事务管理器）                     │
+│       ↓                                                      │
+│  DataSourceTransactionManager / JtaTransactionManager        │
+│       ↓                                                      │
+│  JDBC Connection / JTA UserTransaction                       │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### 6.2 事务拦截器执行流程
+
+```java
+// TransactionInterceptor.java
+@Override
+public Object invoke(MethodInvocation invocation) throws Throwable {
+    // 1. 获取事务属性
+    TransactionAttribute txAttr = determineTransactionAttribute();
+    
+    // 2. 获取事务管理器
+    PlatformTransactionManager tm = getTransactionManager(txAttr);
+    
+    // 3. 创建事务
+    TransactionStatus status = tm.getTransaction(txAttr);
+    
+    try {
+        // 4. 执行目标方法
+        Object result = invocation.proceed();
+        
+        // 5. 提交事务
+        tm.commit(status);
+        return result;
+    } catch (Throwable ex) {
+        // 6. 回滚事务
+        completeTransactionAfterThrowing(status, ex);
+        throw ex;
+    }
+}
+```
+
+### 6.3 事务同步管理器
+
+```java
+// TransactionSynchronizationManager 维护线程本地的事务状态
+public abstract class TransactionSynchronizationManager {
+    // 线程本地存储：当前事务的资源（如 Connection）
+    private static final ThreadLocal<Map<Object, Object>> resources = 
+        new NamedThreadLocal<>("Transactional resources");
+    
+    // 线程本地存储：当前事务的同步回调
+    private static final ThreadLocal<Set<TransactionSynchronization>> synchronizations = 
+        new NamedThreadLocal<>("Transaction synchronizations");
+    
+    // 线程本地存储：当前事务的名称
+    private static final ThreadLocal<String> currentTransactionName = 
+        new NamedThreadLocal<>("Current transaction name");
+    
+    // 线程本地存储：当前事务是否只读
+    private static final ThreadLocal<Boolean> currentTransactionReadOnly = 
+        new NamedThreadLocal<>("Current transaction read-only status");
+    
+    // 线程本地存储：当前事务的隔离级别
+    private static final ThreadLocal<Integer> currentTransactionIsolationLevel = 
+        new NamedThreadLocal<>("Current transaction isolation level");
+    
+    // 线程本地存储：当前事务是否活跃
+    private static final ThreadLocal<Boolean> actualTransactionActive = 
+        new NamedThreadLocal<>("Actual transaction active");
+}
+```
+
+---
+
+## 七、高频面试题
+
+**问题 1：Spring 事务失效的常见场景有哪些？**
 
 **答：**
 
@@ -741,33 +875,33 @@ public void batchProcess() {}
 
 **答：**
 
-| 对比项   | REQUIRED | REQUIRES_NEW |
+| 对比项 | REQUIRED | REQUIRES_NEW |
 |-------|----------|--------------|
-| 事务关系  | 加入当前事务   | 创建新事务        |
-| 回滚影响  | 同成功或同失败  | 内层回滚不影响外层    |
-| 锁持有时间 | 整个事务期间   | 仅内层事务期间      |
-| 性能    | 较好       | 较差           |
-| 使用场景  | 大多数业务    | 日志、审计        |
+| 事务关系 | 加入当前事务 | 创建新事务 |
+| 回滚影响 | 同成功或同失败 | 内层回滚不影响外层 |
+| 锁持有时间 | 整个事务期间 | 仅内层事务期间 |
+| 性能 | 较好 | 较差 |
+| 使用场景 | 大多数业务 | 日志、审计 |
 
 **问题 3：NESTED 和 REQUIRES_NEW 有什么区别？**
 
 **答：**
 
 1. **事务关系不同**
-    - NESTED: 嵌套事务，是外层事务的一部分（savepoint）
-    - REQUIRES_NEW: 全新事务，完全独立于外层
+   - NESTED: 嵌套事务，是外层事务的一部分（savepoint）
+   - REQUIRES_NEW: 全新事务，完全独立于外层
 
 2. **回滚影响不同**
-    - NESTED: 外层回滚，内层也回滚
-    - REQUIRES_NEW: 外层回滚，内层已提交的不受影响
+   - NESTED: 外层回滚，内层也回滚
+   - REQUIRES_NEW: 外层回滚，内层已提交的不受影响
 
 3. **实现机制不同**
-    - NESTED: 基于 JDBC savepoint 实现
-    - REQUIRES_NEW: 挂起当前事务，创建新事务
+   - NESTED: 基于 JDBC savepoint 实现
+   - REQUIRES_NEW: 挂起当前事务，创建新事务
 
 4. **支持程度不同**
-    - NESTED: 仅 DataSourceTransactionManager 支持
-    - REQUIRES_NEW: 所有事务管理器都支持
+   - NESTED: 仅 DataSourceTransactionManager 支持
+   - REQUIRES_NEW: 所有事务管理器都支持
 
 **问题 4：如何正确地在事务中记录日志？**
 
@@ -870,36 +1004,6 @@ PlatformTransactionManager.getTransaction()
 异常：rollback()
 ```
 
-**关键源码：**
-
-```java
-// TransactionInterceptor.java
-@Override
-public Object invoke(MethodInvocation invocation) throws Throwable {
-    // 1. 获取事务属性
-    TransactionAttribute txAttr = determineTransactionAttribute();
-    
-    // 2. 获取事务管理器
-    PlatformTransactionManager tm = getTransactionManager(txAttr);
-    
-    // 3. 创建事务
-    TransactionStatus status = tm.getTransaction(txAttr);
-    
-    try {
-        // 4. 执行目标方法
-        Object result = invocation.proceed();
-        
-        // 5. 提交事务
-        tm.commit(status);
-        return result;
-    } catch (Throwable ex) {
-        // 6. 回滚事务
-        completeTransactionAfterThrowing(status, ex);
-        throw ex;
-    }
-}
-```
-
 **问题 8：如何手动回滚事务？**
 
 **答：**
@@ -947,5 +1051,5 @@ transactionTemplate.execute(status -> {
 ---
 
 **作者：** itzixiao  
-**版本：** 1.0  
-**最后更新：** 2026-03-08
+**版本：** 2.0  
+**最后更新：** 2026-03-19
