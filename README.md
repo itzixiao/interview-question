@@ -10,43 +10,60 @@
 
 ```
 interview-question/                              # 根目录
-│
 ├── interview-common/                            # 公共模块
-│   ├── exception/                               # 业务异常类
-│   ├── handler/                                 # 全局异常处理器
-│   └── result/                                  # 统一返回结果
+│   └── src/main/java/
+│       ├── exception/                           # 业务异常类
+│       ├── handler/                             # 全局异常处理器
+│       └── result/                              # 统一返回结果
 │
 ├── interview-gateway/                           # API 网关服务
-│   ├── config/                                  # 网关配置
-│   ├── filter/                                  # 自定义过滤器
-│   └── handler/                                 # 异常处理器
+│   └── src/main/java/
+│       ├── config/                              # 网关配置
+│       ├── filter/                              # 自定义过滤器
+│       └── handler/                             # 异常处理器
 │
-├── interview-microservices/                     # 微服务模块集合（父模块）
+├── interview-microservices-parent/              # 微服务模块集合（父模块）
 │   ├── interview-algorithm/                     # 算法面试题库
+│   ├── interview-bigdata/                       # 大数据技术栈
+│   ├── interview-containerization/              # 容器化技术
+│   ├── interview-kafka/                         # Kafka消息队列
+│   ├── interview-lowcode/                       # 低代码平台
+│   ├── interview-observability/                 # 可观测性
+│   ├── interview-performance-tuning/            # 性能调优
 │   ├── interview-provider/                      # 服务提供者
-│   └── interview-service/                       # 业务服务
+│   ├── interview-rabbitmq/                      # RabbitMQ消息队列
+│   ├── interview-reactive/                      # 响应式编程
+│   ├── interview-security/                      # 安全认证
+│   ├── interview-service/                       # 业务服务
+│   ├── interview-service-mesh/                  # 服务网格
+│   ├── interview-system-design/                 # 系统设计
+│   ├── interview-transaction-demo/              # 分布式事务演示
+│   ├── interview-workflow/                      # 工作流引擎
+│   └── interview-xxljob/                        # XXL-JOB分布式任务调度
 │
-├── interview-starters/                          # Starter 模块集合（父模块）
+├── interview-starters-parent/                   # Starter 模块集合（父模块）
 │   └── interview-threadpool-starter/            # 线程池Starter
 │
-├── docs/                                        # 面试知识点文档（17 个分类）
-│   ├── 01-Java基础/
-│   ├── 02-Java并发编程/
-│   ├── 03-JVM/
-│   ├── 04-JavaIO模型/        # BIO/NIO/AIO
-│   ├── 05-Spring框架/
+├── docs/                  
+│   ├── 01-Java基础/         
+│   ├── 02-Java并发编程/       
+│   ├── 03-JVM/            
+│   ├── 04-JavaIO模型/       
+│   ├── 05-Spring框架/       
 │   ├── 06-SpringBoot与自动装配/
-│   ├── 07-SpringCloud微服务/
-│   ├── 08-MySQL数据库/
-│   ├── 09-PostgreSQL数据库/
-│   ├── 10-Redis缓存/
-│   ├── 11-中间件/
-│   ├── 12-算法与数据结构/
-│   ├── 13-设计模式/
-│   ├── 14-分布式系统/
-│   ├── 15-DevOps/
-│   ├── 16-工程效能/
-│   └── 17-SPI机制/
+│   ├── 07-SpringCloud微服务/ 
+│   ├── 08-MySQL数据库/       
+│   ├── 09-PostgreSQL数据库/  
+│   ├── 10-Redis缓存/        
+│   ├── 11-中间件/            
+│   ├── 12-算法与数据结构/        
+│   ├── 13-设计模式/           
+│   ├── 14-分布式系统/          
+│   ├── 15-DevOps/         
+│   ├── 16-工程效能/           
+│   └── 17-SPI机制/          
+├── pom.xml                                      # 根POM文件
+└── README.md                                    # 项目说明文档
 ```
 
 ### 模块职责说明
@@ -55,11 +72,25 @@ interview-question/                              # 根目录
 |----------------------------------|-----------------|-------------------------------------|
 | **interview-common**             | 公共模块            | 提供统一的异常处理、返回结果等公共组件                 |
 | **interview-gateway**            | API 网关          | 基于 Spring Cloud Gateway，负责路由、过滤、限流等 |
-| **interview-microservices**      | 微服务集合（父模块）      | 包含所有业务微服务模块                         |
-| **interview-starters**           | Starter 集合（父模块） | 包含自定义的 Spring Boot Starter          |
+| **interview-microservices-parent** | 微服务集合（父模块）      | 包含所有业务微服务模块                         |
+| **interview-starters-parent**    | Starter 集合（父模块） | 包含自定义的 Spring Boot Starter          |
 | **interview-algorithm**          | 算法题库            | 包含常见算法面试题及实现                        |
+| **interview-bigdata**            | 大数据技术栈          | Hadoop、Spark、Flink等大数据组件示例          |
+| **interview-containerization**   | 容器化技术           | Docker、Kubernetes容器化部署示例              |
+| **interview-kafka**              | Kafka消息队列       | Kafka生产者消费者示例及配置                     |
+| **interview-lowcode**            | 低代码平台            | 动态表单、代码生成器等低代码实现                   |
+| **interview-observability**      | 可观测性             | 日志、监控、链路追踪等可观测性实现                  |
+| **interview-performance-tuning** | 性能调优             | JVM调优、SQL优化等性能优化示例                   |
 | **interview-provider**           | 服务提供者           | 提供 RESTful API 服务，演示 OpenFeign 调用   |
-| **interview-service**            | 业务服务            | 包含所有业务逻辑和技术点示例代码                    |
+| **interview-rabbitmq**           | RabbitMQ消息队列    | RabbitMQ消息发送与消费示例                     |
+| **interview-reactive**           | 响应式编程            | WebFlux、Reactor响应式编程示例               |
+| **interview-security**           | 安全认证             | JWT、OAuth2、Spring Security安全实现        |
+| **interview-service**            | 业务服务             | 包含所有业务逻辑和技术点示例代码                    |
+| **interview-service-mesh**       | 服务网格             | Istio等服务网格技术示例                        |
+| **interview-system-design**      | 系统设计             | 高并发、高可用系统设计方案                       |
+| **interview-transaction-demo**   | 分布式事务演示          | Seata分布式事务实现示例                        |
+| **interview-workflow**           | 工作流引擎            | Flowable工作流引擎集成与使用                    |
+| **interview-xxljob**             | 分布式任务调度          | XXL-JOB任务调度平台集成与使用                   |
 | **interview-threadpool-starter** | 线程池Starter      | 自定义线程池自动配置 Starter                  |
 
 ### 技术栈
@@ -138,7 +169,7 @@ mvn spring-boot:run
 
 - [Spring IOC 和 AOP 原理？](./docs/05-Spring框架/01-Spring-IOC与AOP.md)
 - [Spring Bean 的生命周期？](./docs/05-Spring框架/02-Spring-Bean生命周期详解.md)
-- [Spring事务传播行为？](./docs/05-Spring框架/04-Spring事务传播行为.md)
+- [Spring事务传播行为？](./docs/05-Spring框架/04-Spring事务详解.md)
 - [Spring Boot 自动装配原理？](./docs/06-SpringBoot与自动装配/01-Spring-Boot自动装配.md)
 - [Spring Cloud Gateway 原理？](./docs/07-SpringCloud微服务/01-Spring-Cloud-Gateway详解.md)
 - [OpenFeign 工作原理？](./docs/07-SpringCloud微服务/02-Spring-Cloud-OpenFeign详解.md)
@@ -152,7 +183,7 @@ mvn spring-boot:run
 - [ShardingSphere 分库分表实战](./docs/08-MySQL数据库/09-ShardingSphere整合实战指南.md)
 - [PostgreSQL vs MySQL 核心区别？](./docs/09-PostgreSQL数据库/01-PostgreSQL基础与核心特性.md)
 - [PostgreSQL JSONB 索引与查询优化](./docs/09-PostgreSQL数据库/02-PostgreSQL索引与查询优化.md)
-- [MyBatis核心原理？](./docs/09-中间件/03-MyBatis核心原理与面试题.md)
+- [MyBatis核心原理？](./docs/11-中间件/03-MyBatis核心原理与面试题.md)
 
 ### Redis（30+ 道）
 
