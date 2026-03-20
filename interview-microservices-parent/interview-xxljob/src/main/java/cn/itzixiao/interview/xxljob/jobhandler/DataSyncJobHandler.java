@@ -63,8 +63,9 @@ public class DataSyncJobHandler {
                 }
 
                 // 模拟查询数据
+                int finalTotalSync = totalSync;
                 List<String> userIds = IntStream.range(0, currentBatchSize)
-                        .mapToObj(i -> "USER_" + (startOffset + totalSync + i))
+                        .mapToObj(i -> "USER_" + (startOffset + finalTotalSync + i))
                         .collect(Collectors.toList());
 
                 // 模拟批量同步到ES
