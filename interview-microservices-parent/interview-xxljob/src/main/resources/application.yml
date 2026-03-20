@@ -1,5 +1,7 @@
 server:
-  port: 8088
+  port: 8091
+  servlet:
+    context-path: /xxljob
 
 spring:
   application:

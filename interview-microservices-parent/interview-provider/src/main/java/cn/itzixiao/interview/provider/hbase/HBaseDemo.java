@@ -40,7 +40,7 @@ import java.util.List;
 @Component
 public class HBaseDemo {
 
-    @Autowired
+    @Autowired(required = false)
     private Connection connection;
 
     /**

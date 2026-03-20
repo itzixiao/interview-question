@@ -23,7 +23,7 @@ import java.io.IOException;
  * </ul>
  */
 @Configuration
-@Profile("!test") // 测试环境不加载
+@Profile("!dev") // 测试环境不加载
 public class HBaseConfig {
 
     @Value("${hbase.zookeeper.quorum:localhost}")

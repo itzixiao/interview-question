@@ -49,6 +49,8 @@ spring:
 # 应用配置
 server:
   port: 8086  # 避免与 interview-provider 冲突
+  servlet:
+    context-path: /kafka
 
 # 日志配置
 logging:
