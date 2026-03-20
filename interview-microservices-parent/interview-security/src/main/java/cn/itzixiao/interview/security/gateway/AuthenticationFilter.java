@@ -1,117 +1,161 @@
 package cn.itzixiao.interview.security.gateway;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cloud.gateway.filter.GatewayFilterChain;
+import org.springframework.cloud.gateway.filter.GlobalFilter;
+import org.springframework.core.Ordered;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Component;
+import org.springframework.http.MediaType;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.WebFilter;
-import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
+
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * API 网关鉴权过滤器 - 统一认证授权
  * <p>
  * 功能：
  * 1. JWT Token 校验
- * 2. 黑名单/白名单管理
- * 3. 限流防刷
- * 4. 日志记录
+ * 2. 白名单路径管理
+ * 3. 用户信息传递给下游服务
+ * 4. 统一错误响应格式
  *
  * @author itzixiao
- * @date 2026-03-15
+ * @date 2026-03-20
  */
 @Slf4j
-@Component
-public class AuthenticationFilter implements WebFilter {
+public class AuthenticationFilter implements GlobalFilter, Ordered {
 
-    /**
-     * 不需要认证的白名单路径
-     */
-    private static final String[] WHITE_LIST = {
-            "/api/auth/login",
-            "/api/auth/register",
-            "/api/public/**",
-            "/actuator/health"
-    };
+    private final WhiteListProperties whiteListProperties;
+    private final GatewayJwtService jwtService;
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    public AuthenticationFilter(WhiteListProperties whiteListProperties, GatewayJwtService jwtService) {
+        this.whiteListProperties = whiteListProperties;
+        this.jwtService = jwtService;
+    }
 
     @Override
-    public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
-        String path = exchange.getRequest().getPath().value();
+    public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+        ServerHttpRequest request = exchange.getRequest();
+        String path = request.getURI().getPath();
 
-        // 白名单放行
-        if (isWhiteList(path)) {
-            log.debug("White list path: {}", path);
+        log.debug("【网关鉴权】请求路径: {}", path);
+
+        // 白名单路径，直接放行（无需鉴权）
+        if (isWhitePath(path)) {
+            log.debug("【网关鉴权】白名单路径，直接放行: {}", path);
             return chain.filter(exchange);
         }
 
-        // 获取 Token
-        String token = extractToken(exchange);
+        // 获取 Authorization header
+        String authorizationHeader = request.getHeaders().getFirst("Authorization");
 
-        if (token == null) {
-            log.warn("Missing authorization header for path: {}", path);
-            return unauthorized(exchange, "Missing authorization header");
+        // 检查 Authorization header 是否存在
+        if (!StringUtils.hasText(authorizationHeader)) {
+            log.warn("【网关鉴权】缺少 Authorization header, path: {}", path);
+            return buildUnauthorizedResponse(exchange, "缺少认证令牌");
         }
 
-        // 验证 Token（这里简化处理，实际应该调用认证服务）
-        if (!validateToken(token)) {
-            log.warn("Invalid token for path: {}", path);
-            return unauthorized(exchange, "Invalid or expired token");
+        // 检查 Bearer 前缀
+        if (!authorizationHeader.startsWith("Bearer ")) {
+            log.warn("【网关鉴权】Authorization header 格式错误, path: {}", path);
+            return buildUnauthorizedResponse(exchange, "认证令牌格式错误，需要 Bearer 前缀");
         }
 
-        log.debug("Authenticated request to path: {}", path);
-        return chain.filter(exchange);
+        // 提取 token（去掉 "Bearer " 前缀）
+        String token = authorizationHeader.substring(7);
+
+        // 验证 token 有效性
+        if (!jwtService.validateToken(token)) {
+            log.warn("【网关鉴权】Token 无效或已过期, path: {}", path);
+            return buildUnauthorizedResponse(exchange, "认证令牌无效或已过期");
+        }
+
+        // 从 token 中提取用户信息
+        String username = jwtService.getUsernameFromToken(token);
+        Object roles = jwtService.getRolesFromToken(token);
+        String userId = jwtService.getUserIdFromToken(token);
+
+        log.debug("【网关鉴权】Token 验证通过, username: {}, path: {}", username, path);
+
+        // 传递用户信息到下游服务
+        ServerHttpRequest mutableReq = request.mutate()
+                .header("X-User-Id", userId)
+                .header("X-User-Name", username)
+                .header("X-User-Roles", roles != null ? roles.toString() : "")
+                .header("X-Auth-Source", "gateway")
+                .build();
+        ServerWebExchange mutableExchange = exchange.mutate()
+                .request(mutableReq)
+                .build();
+
+        return chain.filter(mutableExchange);
+    }
+
+    @Override
+    public int getOrder() {
+        return 0;
     }
 
     /**
-     * 判断是否在白名单中
+     * 判断是否属于白名单路径
+     * <p>
+     * 支持两种匹配模式：
+     * 1. 前缀匹配：路径以 /** 结尾，如 /api/interview/**
+     * 2. 包含匹配：路径中包含该字符串，如 /login
      */
-    private boolean isWhiteList(String path) {
-        for (String whitePath : WHITE_LIST) {
-            if (whitePath.endsWith("**")) {
-                String prefix = whitePath.substring(0, whitePath.length() - 2);
-                if (path.startsWith(prefix)) {
-                    return true;
-                }
-            } else if (path.equals(whitePath)) {
-                return true;
+    private boolean isWhitePath(String path) {
+        List<String> paths = whiteListProperties.getPaths();
+        if (paths == null || paths.isEmpty()) {
+            return false;
+        }
+
+        return paths.stream().anyMatch(white -> {
+            if (white.endsWith("/**")) {
+                // 前缀匹配：去掉 ** 后判断路径是否以其开头
+                String prefix = white.substring(0, white.length() - 2);
+                return path.startsWith(prefix);
             }
+            // 包含匹配
+            return path.contains(white);
+        });
+    }
+
+    /**
+     * 构建未授权响应
+     *
+     * @param exchange ServerWebExchange
+     * @param message  错误消息
+     * @return Mono<Void>
+     */
+    private Mono<Void> buildUnauthorizedResponse(ServerWebExchange exchange, String message) {
+        ServerHttpResponse response = exchange.getResponse();
+        response.setStatusCode(HttpStatus.UNAUTHORIZED);
+        response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("code", 401);
+        result.put("message", message);
+        result.put("data", null);
+
+        String responseBody;
+        try {
+            responseBody = objectMapper.writeValueAsString(result);
+        } catch (JsonProcessingException e) {
+            responseBody = "{\"code\":401,\"message\":\"" + message + "\",\"data\":null}";
         }
-        return false;
-    }
 
-    /**
-     * 从请求头中提取 Token
-     */
-    private String extractToken(ServerWebExchange exchange) {
-        String authHeader = exchange.getRequest().getHeaders().getFirst("Authorization");
-
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            return authHeader.substring(7);
-        }
-
-        return null;
-    }
-
-    /**
-     * 验证 Token（示例代码，实际需要调用认证服务）
-     */
-    private boolean validateToken(String token) {
-        // TODO: 实际应该调用 OAuth2 认证服务或 JWT 验证
-        return token != null && !token.isEmpty();
-    }
-
-    /**
-     * 返回未授权响应
-     */
-    private Mono<Void> unauthorized(ServerWebExchange exchange, String message) {
-        exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
-        exchange.getResponse().getHeaders().set("Content-Type", "application/json;charset=UTF-8");
-
-        String body = String.format("{\"error\":\"unauthorized\",\"message\":\"%s\"}", message);
-        byte[] bytes = body.getBytes(java.nio.charset.StandardCharsets.UTF_8);
-
-        return exchange.getResponse().writeWith(Mono.just(exchange.getResponse()
-                .bufferFactory()
-                .wrap(bytes)));
+        DataBuffer buffer = response.bufferFactory().wrap(responseBody.getBytes(StandardCharsets.UTF_8));
+        return response.writeWith(Mono.just(buffer));
     }
 }

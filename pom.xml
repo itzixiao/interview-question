@@ -119,6 +119,13 @@
                 <version>${project.version}</version>
             </dependency>
 
+            <!-- 安全模块 -->
+            <dependency>
+                <groupId>cn.itzixiao</groupId>
+                <artifactId>interview-security</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
             <!-- MySQL 驱动 -->
             <dependency>
                 <groupId>com.mysql</groupId>
