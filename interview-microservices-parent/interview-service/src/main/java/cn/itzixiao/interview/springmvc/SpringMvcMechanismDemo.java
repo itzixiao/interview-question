@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
@@ -27,10 +28,10 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.lang.annotation.*;
+import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Spring MVC 运行机制详解
@@ -64,6 +65,8 @@ import java.util.Map;
  * - HandlerInterceptor: 拦截器，预处理和后处理
  * - ViewResolver: 视图解析器
  * - HandlerExceptionResolver: 异常处理器
+ * <p>
+ * 文档参考：docs/05-Spring框架/03-Spring-MVC运行机制.md
  */
 @SpringBootApplication
 public class SpringMvcMechanismDemo {
@@ -99,6 +102,856 @@ public class SpringMvcMechanismDemo {
                 resolvers.add(new CurrentUserArgumentResolver());
             }
         };
+    }
+}
+
+/**
+ * ============================================
+ * doDispatch() 核心流程模拟
+ * ============================================
+ * 这是 DispatcherServlet.doDispatch() 方法的模拟实现
+ * 用于理解 Spring MVC 请求处理的核心流程
+ * <p>
+ * 完整流程：
+ * 1. checkMultipart() - 检查文件上传
+ * 2. getHandler() - 获取处理器执行链
+ * 3. getHandlerAdapter() - 获取处理器适配器
+ * 4. applyPreHandle() - 执行拦截器前置处理
+ * 5. ha.handle() - 调用处理器方法
+ * 6. applyPostHandle() - 执行拦截器后置处理
+ * 7. processDispatchResult() - 处理结果
+ * 8. triggerAfterCompletion() - 执行拦截器完成处理
+ */
+class DoDispatchSimulator {
+
+    /**
+     * 模拟 DispatcherServlet.doDispatch() 核心流程
+     * <p>
+     * 源码参考：
+     * protected void doDispatch(HttpServletRequest request, HttpServletResponse response) {
+     *     HttpServletRequest processedRequest = request;
+     *     HandlerExecutionChain mappedHandler = null;
+     *     boolean multipartRequestParsed = false;
+     *
+     *     try {
+     *         ModelAndView mv = null;
+     *         Exception dispatchException = null;
+     *
+     *         try {
+     *             // 步骤 1：处理文件上传
+     *             processedRequest = checkMultipart(request);
+     *             multipartRequestParsed = (processedRequest != request);
+     *
+     *             // 步骤 2：获取 Handler
+     *             mappedHandler = getHandler(processedRequest);
+     *             if (mappedHandler == null) {
+     *                 noHandlerFound(processedRequest, response);
+     *                 return;
+     *             }
+     *
+     *             // 步骤 3：获取 HandlerAdapter
+     *             HandlerAdapter ha = getHandlerAdapter(mappedHandler.getHandler());
+     *
+     *             // 步骤 4：处理 Last-Modified
+     *             // ...
+     *
+     *             // 步骤 5：执行拦截器 preHandle
+     *             if (!mappedHandler.applyPreHandle(processedRequest, response)) {
+     *                 return;
+     *             }
+     *
+     *             // 步骤 6：调用 Handler
+     *             mv = ha.handle(processedRequest, response, mappedHandler.getHandler());
+     *
+     *             // 步骤 7：处理异步请求
+     *             // ...
+     *
+     *             // 步骤 8：处理默认视图名称
+     *             applyDefaultViewName(processedRequest, mv);
+     *
+     *             // 步骤 9：执行拦截器 postHandle
+     *             mappedHandler.applyPostHandle(processedRequest, response, mv);
+     *         }
+     *         catch (Exception ex) {
+     *             dispatchException = ex;
+     *         }
+     *
+     *         // 步骤 10：处理结果
+     *         processDispatchResult(processedRequest, response, mappedHandler, mv, dispatchException);
+     *     }
+     *     finally {
+     *         // 步骤 11-12：清理资源
+     *         if (multipartRequestParsed) {
+     *             cleanupMultipart(processedRequest);
+     *         }
+     *     }
+     * }
+     */
+    public void simulateDoDispatch(HttpServletRequest request, HttpServletResponse response) {
+        System.out.println("\n========== doDispatch() 核心流程模拟 ==========");
+
+        Object handler = null;
+        boolean multipartRequestParsed = false;
+
+        try {
+            ModelAndView mv = null;
+            Exception dispatchException = null;
+
+            try {
+                // ==================== 步骤 1：处理文件上传 ====================
+                System.out.println("\n【步骤 1】checkMultipart() - 检查是否为文件上传请求");
+                HttpServletRequest processedRequest = checkMultipart(request);
+                multipartRequestParsed = (processedRequest != request);
+                System.out.println("  结果: " + (multipartRequestParsed ? "是文件上传请求" : "普通请求"));
+
+                // ==================== 步骤 2：获取 Handler ====================
+                System.out.println("\n【步骤 2】getHandler() - 获取处理器执行链");
+                // 调用所有 HandlerMapping，找到能处理当前请求的 Handler
+                HandlerExecutionChainSimulator mappedHandler = getHandler(processedRequest);
+                if (mappedHandler == null) {
+                    System.out.println("  结果: 404 - 未找到处理器");
+                    return;
+                }
+                handler = mappedHandler.getHandler();
+                System.out.println("  结果: 找到处理器 " + handler.getClass().getSimpleName());
+
+                // ==================== 步骤 3：获取 HandlerAdapter ====================
+                System.out.println("\n【步骤 3】getHandlerAdapter() - 获取处理器适配器");
+                HandlerAdapterSimulator ha = getHandlerAdapter(handler);
+                System.out.println("  结果: " + ha.getClass().getSimpleName());
+
+                // ==================== 步骤 4：处理 Last-Modified ====================
+                System.out.println("\n【步骤 4】处理 Last-Modified 缓存检查");
+                String method = request.getMethod();
+                boolean isGet = "GET".equals(method);
+                if (isGet) {
+                    System.out.println("  GET 请求，检查 Last-Modified");
+                    // long lastModified = ha.getLastModified(request, handler);
+                    // 如果资源未修改，返回 304
+                }
+
+                // ==================== 步骤 5：执行拦截器 preHandle ====================
+                System.out.println("\n【步骤 5】applyPreHandle() - 执行拦截器前置处理");
+                // 按顺序执行所有拦截器的 preHandle 方法
+                // 如果任一拦截器返回 false，请求处理终止
+                boolean continueProcessing = applyPreHandle(mappedHandler, processedRequest, response);
+                if (!continueProcessing) {
+                    System.out.println("  结果: 拦截器中断请求");
+                    return;
+                }
+                System.out.println("  结果: 所有拦截器 preHandle 返回 true");
+
+                // ==================== 步骤 6：调用 Handler（核心） ====================
+                System.out.println("\n【步骤 6】ha.handle() - 调用处理器方法");
+                // HandlerAdapter 调用 Controller 方法
+                // 内部流程：参数解析 → 执行方法 → 返回值处理
+                mv = ha.handle(processedRequest, response, handler);
+                System.out.println("  结果: ModelAndView = " + (mv != null ? mv.getViewName() : "null (REST响应)"));
+
+                // ==================== 步骤 7：处理异步请求 ====================
+                System.out.println("\n【步骤 7】检查异步请求处理");
+                // if (asyncManager.isConcurrentHandlingStarted()) { return; }
+
+                // ==================== 步骤 8：处理默认视图名称 ====================
+                System.out.println("\n【步骤 8】applyDefaultViewName() - 处理默认视图名称");
+                // applyDefaultViewName(processedRequest, mv);
+
+                // ==================== 步骤 9：执行拦截器 postHandle ====================
+                System.out.println("\n【步骤 9】applyPostHandle() - 执行拦截器后置处理");
+                // 按逆序执行所有拦截器的 postHandle 方法
+                applyPostHandle(mappedHandler, processedRequest, response, mv);
+            } catch (Exception ex) {
+                dispatchException = ex;
+                System.out.println("\n【异常】请求处理异常: " + ex.getMessage());
+            }
+
+            // ==================== 步骤 10：处理结果 ====================
+            System.out.println("\n【步骤 10】processDispatchResult() - 处理结果");
+            // 渲染视图或写入响应，处理异常
+            processDispatchResult(request, response, handler, mv, dispatchException);
+
+        } finally {
+            // ==================== 步骤 11-12：清理资源 ====================
+            if (multipartRequestParsed) {
+                System.out.println("\n【清理】cleanupMultipart() - 清理文件上传资源");
+            }
+        }
+
+        System.out.println("\n========== doDispatch() 流程结束 ==========\n");
+    }
+
+    // 以下是模拟方法
+    private HttpServletRequest checkMultipart(HttpServletRequest request) {
+        String contentType = request.getContentType();
+        if (contentType != null && contentType.startsWith("multipart/")) {
+            return request; // 实际会包装为 MultipartHttpServletRequest
+        }
+        return request;
+    }
+
+    private HandlerExecutionChainSimulator getHandler(HttpServletRequest request) {
+        // 模拟：遍历所有 HandlerMapping 查找 Handler
+        return new HandlerExecutionChainSimulator(new Object(), new ArrayList<>());
+    }
+
+    private HandlerAdapterSimulator getHandlerAdapter(Object handler) {
+        return new HandlerAdapterSimulator();
+    }
+
+    private boolean applyPreHandle(HandlerExecutionChainSimulator chain, HttpServletRequest request, HttpServletResponse response) {
+        return true; // 模拟所有拦截器都通过
+    }
+
+    private void applyPostHandle(HandlerExecutionChainSimulator chain, HttpServletRequest request, HttpServletResponse response, ModelAndView mv) {
+        // 模拟执行 postHandle
+    }
+
+    private void processDispatchResult(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView mv, Exception ex) {
+        if (ex != null) {
+            System.out.println("  处理异常: " + ex.getMessage());
+        } else if (mv != null) {
+            System.out.println("  渲染视图: " + mv.getViewName());
+        } else {
+            System.out.println("  REST响应已写入");
+        }
+    }
+
+    // 模拟类
+    static class HandlerExecutionChainSimulator {
+        private final Object handler;
+        private final List<HandlerInterceptor> interceptors;
+
+        public HandlerExecutionChainSimulator(Object handler, List<HandlerInterceptor> interceptors) {
+            this.handler = handler;
+            this.interceptors = interceptors;
+        }
+
+        public Object getHandler() {
+            return handler;
+        }
+    }
+
+    static class HandlerAdapterSimulator {
+        public ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object handler) {
+            return null; // 模拟 REST 响应
+        }
+    }
+}
+
+/**
+ * ============================================
+ * HandlerMapping 匹配过程详解
+ * ============================================
+ * HandlerMapping 负责根据请求 URL 找到对应的处理器（Controller 方法）
+ * <p>
+ * 主要实现类：
+ * - RequestMappingHandlerMapping：处理 @RequestMapping 注解
+ * - BeanNameUrlHandlerMapping：根据 Bean 名称映射
+ * - SimpleUrlHandlerMapping：简单 URL 映射
+ * <p>
+ * 匹配过程：
+ * 1. 获取请求路径 lookupPath
+ * 2. 加读锁保证并发安全
+ * 3. 从映射注册表查找 HandlerMethod
+ * 4. 构建 HandlerExecutionChain（包含拦截器）
+ */
+class HandlerMappingSimulator {
+
+    /**
+     * 模拟 URL 映射注册表
+     * Key: URL 模式, Value: Handler 方法信息
+     */
+    private final Map<String, HandlerMethodInfo> urlHandlerMap = new ConcurrentHashMap<>();
+
+    public HandlerMappingSimulator() {
+        // 初始化：扫描 @RequestMapping 注册映射
+        registerHandlerMethod("/users", "list", "GET");
+        registerHandlerMethod("/users/{id}", "getById", "GET");
+        registerHandlerMethod("/users", "create", "POST");
+        registerHandlerMethod("/users/{id}", "update", "PUT");
+        registerHandlerMethod("/users/{id}", "delete", "DELETE");
+    }
+
+    /**
+     * 注册 Handler 方法
+     */
+    private void registerHandlerMethod(String pattern, String methodName, String httpMethod) {
+        HandlerMethodInfo info = new HandlerMethodInfo(pattern, methodName, httpMethod);
+        urlHandlerMap.put(pattern, info);
+        System.out.println("【HandlerMapping】注册映射: " + httpMethod + " " + pattern + " -> " + methodName + "()");
+    }
+
+    /**
+     * 模拟 getHandler() 方法
+     * <p>
+     * 源码参考：
+     * public final HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception {
+     *     // 1. 查找 HandlerMethod
+     *     Object handler = getHandlerInternal(request);
+     *     if (handler == null) {
+     *         handler = getDefaultHandler();
+     *     }
+     *     if (handler == null) {
+     *         return null;
+     *     }
+     *
+     *     // 2. 如果是 String，从容器获取 Bean
+     *     if (handler instanceof String) {
+     *         String handlerName = (String) handler;
+     *         handler = obtainApplicationContext().getBean(handlerName);
+     *     }
+     *
+     *     // 3. 构建 HandlerExecutionChain
+     *     HandlerExecutionChain executionChain = getHandlerExecutionChain(handler, request);
+     *
+     *     // 4. 处理 CORS
+     *     if (hasCorsConfigurationSource(handler)) {
+     *         CorsConfiguration corsConfig = getCorsConfiguration(handler, request);
+     *         executionChain = getCorsHandlerExecutionChain(request, executionChain, corsConfig);
+     *     }
+     *
+     *     return executionChain;
+     * }
+     */
+    public HandlerExecutionChainSimulator getHandler(HttpServletRequest request) {
+        System.out.println("\n========== HandlerMapping.getHandler() 流程 ==========");
+
+        // 步骤 1：获取请求路径
+        String lookupPath = request.getRequestURI();
+        System.out.println("【步骤 1】获取请求路径: " + lookupPath);
+
+        // 步骤 2：查找 HandlerMethod
+        HandlerMethodInfo handlerMethod = lookupHandlerMethod(lookupPath, request.getMethod());
+        if (handlerMethod == null) {
+            System.out.println("【结果】404 - 未找到匹配的处理器");
+            return null;
+        }
+        System.out.println("【步骤 2】找到处理器方法: " + handlerMethod.methodName + "()");
+
+        // 步骤 3：提取路径变量
+        Map<String, String> uriVariables = extractUriVariables(handlerMethod.pattern, lookupPath);
+        if (!uriVariables.isEmpty()) {
+            System.out.println("【步骤 3】提取路径变量: " + uriVariables);
+        }
+
+        // 步骤 4：构建 HandlerExecutionChain（包含拦截器）
+        HandlerExecutionChainSimulator chain = new HandlerExecutionChainSimulator(handlerMethod, new ArrayList<>());
+        System.out.println("【步骤 4】构建 HandlerExecutionChain");
+
+        System.out.println("========== HandlerMapping.getHandler() 结束 ==========\n");
+        return chain;
+    }
+
+    /**
+     * 查找 HandlerMethod
+     * <p>
+     * 源码参考：
+     * protected HandlerMethod getHandlerInternal(HttpServletRequest request) throws Exception {
+     *     // 1. 获取请求路径
+     *     String lookupPath = getUrlPathHelper().getLookupPathForRequest(request);
+     *
+     *     // 2. 加读锁
+     *     this.readWriteLock.readLock().lock();
+     *     try {
+     *         // 3. 从映射注册表查找
+     *         HandlerMethod handlerMethod = lookupHandlerMethod(lookupPath, request);
+     *         return (handlerMethod != null ? handlerMethod.createWithResolvedBean() : null);
+     *     }
+     *     finally {
+     *         this.readWriteLock.readLock().unlock();
+     *     }
+     * }
+     */
+    private HandlerMethodInfo lookupHandlerMethod(String lookupPath, String httpMethod) {
+        System.out.println("【lookupHandlerMethod】查找路径: " + lookupPath + ", 方法: " + httpMethod);
+
+        // 精确匹配
+        if (urlHandlerMap.containsKey(lookupPath)) {
+            HandlerMethodInfo info = urlHandlerMap.get(lookupPath);
+            if (info.httpMethod.equals(httpMethod)) {
+                return info;
+            }
+        }
+
+        // 模式匹配（如 /users/{id}）
+        for (Map.Entry<String, HandlerMethodInfo> entry : urlHandlerMap.entrySet()) {
+            String pattern = entry.getKey();
+            if (isPatternMatch(pattern, lookupPath, httpMethod)) {
+                return entry.getValue();
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * 模式匹配
+     * 使用 AntPathMatcher 匹配路径模式
+     */
+    private boolean isPatternMatch(String pattern, String lookupPath, String httpMethod) {
+        HandlerMethodInfo info = urlHandlerMap.get(pattern);
+        if (info == null || !info.httpMethod.equals(httpMethod)) {
+            return false;
+        }
+
+        // 简化匹配逻辑：检查路径变量模式
+        // 实际使用 AntPathMatcher.match()
+        if (pattern.contains("{") && pattern.contains("}")) {
+            String regex = pattern.replaceAll("\\{[^}]+\\}", "[^/]+");
+            return lookupPath.matches(regex);
+        }
+
+        return false;
+    }
+
+    /**
+     * 提取路径变量
+     * 例如：pattern="/users/{id}", lookupPath="/users/123"
+     * 结果：{id: "123"}
+     */
+    private Map<String, String> extractUriVariables(String pattern, String lookupPath) {
+        Map<String, String> variables = new LinkedHashMap<>();
+
+        if (!pattern.contains("{")) {
+            return variables;
+        }
+
+        String[] patternParts = pattern.split("/");
+        String[] pathParts = lookupPath.split("/");
+
+        for (int i = 0; i < patternParts.length && i < pathParts.length; i++) {
+            String patternPart = patternParts[i];
+            if (patternPart.startsWith("{") && patternPart.endsWith("}")) {
+                String variableName = patternPart.substring(1, patternPart.length() - 1);
+                variables.put(variableName, pathParts[i]);
+            }
+        }
+
+        return variables;
+    }
+
+    /**
+     * Handler 方法信息
+     */
+    static class HandlerMethodInfo {
+        String pattern;
+        String methodName;
+        String httpMethod;
+
+        public HandlerMethodInfo(String pattern, String methodName, String httpMethod) {
+            this.pattern = pattern;
+            this.methodName = methodName;
+            this.httpMethod = httpMethod;
+        }
+    }
+
+    static class HandlerExecutionChainSimulator {
+        private final Object handler;
+        private final List<HandlerInterceptor> interceptors;
+
+        public HandlerExecutionChainSimulator(Object handler, List<HandlerInterceptor> interceptors) {
+            this.handler = handler;
+            this.interceptors = interceptors;
+        }
+
+        public Object getHandler() {
+            return handler;
+        }
+    }
+}
+
+/**
+ * ============================================
+ * 参数解析详细流程模拟
+ * ============================================
+ * HandlerMethodArgumentResolver 负责解析 Controller 方法的参数值
+ * <p>
+ * 常见参数解析器：
+ * - @RequestParam → RequestParamMethodArgumentResolver
+ * - @PathVariable → PathVariableMethodArgumentResolver
+ * - @RequestBody → RequestResponseBodyMethodProcessor
+ * - @RequestHeader → RequestHeaderMethodArgumentResolver
+ * - @CookieValue → ServletCookieValueMethodArgumentResolver
+ * - HttpSession → SessionObjectMethodArgumentResolver
+ * <p>
+ * 解析流程：
+ * 1. getMethodArgumentValues() - 获取所有参数值
+ * 2. 遍历每个参数，查找支持的解析器
+ * 3. 调用解析器的 resolveArgument() 方法
+ * 4. 类型转换（如需要）
+ */
+class ArgumentResolverSimulator {
+
+    /**
+     * 模拟参数解析过程
+     * <p>
+     * 源码参考：
+     * protected Object[] getMethodArgumentValues(NativeWebRequest request,
+     *         ModelAndViewContainer mavContainer, Object... providedArgs) throws Exception {
+     *
+     *     // 1. 获取方法参数信息
+     *     MethodParameter[] parameters = getMethodParameters();
+     *     Object[] args = new Object[parameters.length];
+     *
+     *     for (int i = 0; i < parameters.length; i++) {
+     *         MethodParameter parameter = parameters[i];
+     *         parameter.initParameterNameDiscovery(this.parameterNameDiscoverer);
+     *
+     *         // 2. 检查是否提供了参数值
+     *         args[i] = findProvidedArgument(parameter, providedArgs);
+     *         if (args[i] != null) {
+     *             continue;
+     *         }
+     *
+     *         // 3. 检查是否有支持的参数解析器
+     *         if (!this.resolvers.supportsParameter(parameter)) {
+     *             throw new IllegalStateException("No suitable resolver");
+     *         }
+     *
+     *         // 4. 使用解析器解析参数值
+     *         args[i] = this.resolvers.resolveArgument(
+     *             parameter, mavContainer, request, this.dataBinderFactory);
+     *     }
+     *     return args;
+     * }
+     */
+    public Object[] resolveMethodArguments(Method method, HttpServletRequest request, Map<String, String> uriVariables) {
+        System.out.println("\n========== 参数解析流程 ==========");
+        System.out.println("【目标方法】" + method.getName() + "()");
+
+        java.lang.reflect.Parameter[] parameters = method.getParameters();
+        Object[] args = new Object[parameters.length];
+
+        for (int i = 0; i < parameters.length; i++) {
+            java.lang.reflect.Parameter parameter = parameters[i];
+            System.out.println("\n【参数 " + (i + 1) + "】" + parameter.getName() + ": " + parameter.getType().getSimpleName());
+
+            // 检查注解，选择对应的解析器
+            if (parameter.isAnnotationPresent(PathVariable.class)) {
+                args[i] = resolvePathVariable(parameter, uriVariables);
+            } else if (parameter.isAnnotationPresent(RequestParam.class)) {
+                args[i] = resolveRequestParam(parameter, request);
+            } else if (parameter.isAnnotationPresent(RequestBody.class)) {
+                args[i] = resolveRequestBody(parameter, request);
+            } else if (parameter.isAnnotationPresent(RequestHeader.class)) {
+                args[i] = resolveRequestHeader(parameter, request);
+            } else {
+                // 默认解析器
+                args[i] = resolveDefault(parameter, request);
+            }
+
+            System.out.println("  解析结果: " + args[i]);
+        }
+
+        System.out.println("\n========== 参数解析完成 ==========");
+        return args;
+    }
+
+    /**
+     * 解析 @PathVariable 参数
+     * <p>
+     * 源码参考 PathVariableMethodArgumentResolver：
+     * 1. 从 URI 模板变量中获取值
+     * 2. 类型转换（String → 目标类型）
+     */
+    private Object resolvePathVariable(java.lang.reflect.Parameter parameter, Map<String, String> uriVariables) {
+        System.out.println("  解析器: PathVariableMethodArgumentResolver");
+
+        PathVariable annotation = parameter.getAnnotation(PathVariable.class);
+        String name = annotation.value().isEmpty() ? parameter.getName() : annotation.value();
+
+        String value = uriVariables.get(name);
+        System.out.println("  从 URI 变量获取: " + name + " = " + value);
+
+        // 类型转换
+        return convertType(value, parameter.getType());
+    }
+
+    /**
+     * 解析 @RequestParam 参数
+     * <p>
+     * 源码参考 RequestParamMethodArgumentResolver：
+     * 1. 从请求参数中获取值
+     * 2. 处理 required 和 defaultValue
+     * 3. 类型转换
+     */
+    private Object resolveRequestParam(java.lang.reflect.Parameter parameter, HttpServletRequest request) {
+        System.out.println("  解析器: RequestParamMethodArgumentResolver");
+
+        RequestParam annotation = parameter.getAnnotation(RequestParam.class);
+        String name = annotation.value().isEmpty() ? parameter.getName() : annotation.value();
+
+        String value = request.getParameter(name);
+        if (value == null && !annotation.defaultValue().isEmpty()) {
+            value = annotation.defaultValue();
+        }
+        System.out.println("  从请求参数获取: " + name + " = " + value);
+
+        return convertType(value, parameter.getType());
+    }
+
+    /**
+     * 解析 @RequestBody 参数
+     * <p>
+     * 源码参考 RequestResponseBodyMethodProcessor：
+     * 1. 读取请求体
+     * 2. 根据 Content-Type 选择 HttpMessageConverter
+     * 3. 反序列化为 Java 对象
+     */
+    private Object resolveRequestBody(java.lang.reflect.Parameter parameter, HttpServletRequest request) {
+        System.out.println("  解析器: RequestResponseBodyMethodProcessor");
+        System.out.println("  Content-Type: " + request.getContentType());
+
+        // 模拟：读取请求体并反序列化
+        System.out.println("  选择消息转换器: MappingJackson2HttpMessageConverter");
+        System.out.println("  反序列化 JSON → " + parameter.getType().getSimpleName());
+
+        return null; // 实际会返回反序列化后的对象
+    }
+
+    /**
+     * 解析 @RequestHeader 参数
+     */
+    private Object resolveRequestHeader(java.lang.reflect.Parameter parameter, HttpServletRequest request) {
+        System.out.println("  解析器: RequestHeaderMethodArgumentResolver");
+
+        RequestHeader annotation = parameter.getAnnotation(RequestHeader.class);
+        String name = annotation.value().isEmpty() ? parameter.getName() : annotation.value();
+
+        String value = request.getHeader(name);
+        System.out.println("  从请求头获取: " + name + " = " + value);
+
+        return convertType(value, parameter.getType());
+    }
+
+    /**
+     * 默认解析器
+     */
+    private Object resolveDefault(java.lang.reflect.Parameter parameter, HttpServletRequest request) {
+        System.out.println("  解析器: 默认解析器（ServletModelAttributeMethodProcessor）");
+        return null;
+    }
+
+    /**
+     * 类型转换
+     */
+    private Object convertType(String value, Class<?> targetType) {
+        if (value == null) {
+            return null;
+        }
+
+        if (targetType == String.class) {
+            return value;
+        } else if (targetType == Long.class || targetType == long.class) {
+            return Long.parseLong(value);
+        } else if (targetType == Integer.class || targetType == int.class) {
+            return Integer.parseInt(value);
+        } else if (targetType == Boolean.class || targetType == boolean.class) {
+            return Boolean.parseBoolean(value);
+        }
+
+        return value;
+    }
+}
+
+/**
+ * ============================================
+ * 返回值处理详细流程模拟
+ * ============================================
+ * HandlerMethodReturnValueHandler 负责处理 Controller 方法的返回值
+ * <p>
+ * 常见返回值处理器：
+ * - @ResponseBody → RequestResponseBodyMethodProcessor
+ * - ModelAndView → ModelAndViewMethodReturnValueHandler
+ * - String → ViewNameMethodReturnValueHandler
+ * - void → VoidReturnValueHandler
+ * <p>
+ * 处理流程：
+ * 1. 选择返回值处理器
+ * 2. 调用 handleReturnValue() 方法
+ * 3. 如果是 REST 响应，使用 HttpMessageConverter 序列化
+ * 4. 如果是视图，使用 ViewResolver 解析
+ */
+class ReturnValueHandlerSimulator {
+
+    /**
+     * 模拟返回值处理过程
+     * <p>
+     * 源码参考：
+     * public void handleReturnValue(@Nullable Object returnValue, MethodParameter returnType,
+     *         ModelAndViewContainer mavContainer, NativeWebRequest webRequest) throws Exception {
+     *
+     *     // 1. 选择返回值处理器
+     *     HandlerMethodReturnValueHandler handler = selectHandler(returnValue, returnType);
+     *     if (handler == null) {
+     *         throw new IllegalArgumentException("Unknown return value type");
+     *     }
+     *
+     *     // 2. 处理返回值
+     *     handler.handleReturnValue(returnValue, returnType, mavContainer, webRequest);
+     * }
+     */
+    public void handleReturnValue(Object returnValue, Method method, HttpServletRequest request, HttpServletResponse response) {
+        System.out.println("\n========== 返回值处理流程 ==========");
+        System.out.println("【返回值类型】" + (returnValue != null ? returnValue.getClass().getSimpleName() : "null"));
+        System.out.println("【返回值】" + returnValue);
+
+        // 步骤 1：选择返回值处理器
+        ReturnValueHandler handler = selectHandler(returnValue, method);
+        System.out.println("【选择的处理器】" + handler.getClass().getSimpleName());
+
+        // 步骤 2：处理返回值
+        handler.handleReturnValue(returnValue, method, request, response);
+
+        System.out.println("========== 返回值处理完成 ==========\n");
+    }
+
+    /**
+     * 选择返回值处理器
+     */
+    private ReturnValueHandler selectHandler(Object returnValue, Method method) {
+        // 检查是否有 @ResponseBody 注解
+        if (method.isAnnotationPresent(ResponseBody.class) ||
+            method.getDeclaringClass().isAnnotationPresent(RestController.class)) {
+            return new RequestResponseBodyProcessor();
+        }
+
+        // 检查返回值类型
+        if (returnValue instanceof ModelAndView) {
+            return new ModelAndViewReturnValueHandler();
+        }
+
+        if (returnValue instanceof String) {
+            return new ViewNameReturnValueHandler();
+        }
+
+        if (returnValue == null || returnValue instanceof Void) {
+            return new VoidReturnValueHandler();
+        }
+
+        // 默认使用 REST 处理器
+        return new RequestResponseBodyProcessor();
+    }
+
+    /**
+     * 返回值处理器接口
+     */
+    interface ReturnValueHandler {
+        boolean supportsReturnType(Method method);
+        void handleReturnValue(Object returnValue, Method method, HttpServletRequest request, HttpServletResponse response);
+    }
+
+    /**
+     * RequestResponseBodyMethodProcessor 模拟
+     * <p>
+     * 源码参考：
+     * public void handleReturnValue(@Nullable Object returnValue, MethodParameter returnType,
+     *         ModelAndViewContainer mavContainer, NativeWebRequest webRequest) {
+     *
+     *     // 1. 标记请求已处理
+     *     mavContainer.setRequestHandled(true);
+     *
+     *     // 2. 获取原始请求和响应
+     *     ServletServerHttpRequest inputMessage = createInputMessage(webRequest);
+     *     ServletServerHttpResponse outputMessage = createOutputMessage(webRequest);
+     *
+     *     // 3. 使用消息转换器写入响应
+     *     writeWithMessageConverters(returnValue, returnType, inputMessage, outputMessage);
+     * }
+     */
+    static class RequestResponseBodyProcessor implements ReturnValueHandler {
+        @Override
+        public boolean supportsReturnType(Method method) {
+            return method.isAnnotationPresent(ResponseBody.class) ||
+                   method.getDeclaringClass().isAnnotationPresent(RestController.class);
+        }
+
+        @Override
+        public void handleReturnValue(Object returnValue, Method method, HttpServletRequest request, HttpServletResponse response) {
+            System.out.println("  【RequestResponseBodyProcessor】处理 REST 响应");
+
+            // 步骤 1：标记请求已处理
+            System.out.println("  步骤 1: mavContainer.setRequestHandled(true)");
+
+            // 步骤 2：获取 Content-Type
+            String accept = request.getHeader("Accept");
+            String contentType = accept != null ? accept : "application/json";
+            System.out.println("  步骤 2: Content-Type = " + contentType);
+
+            // 步骤 3：选择消息转换器
+            System.out.println("  步骤 3: 选择 MappingJackson2HttpMessageConverter");
+
+            // 步骤 4：序列化并写入响应
+            System.out.println("  步骤 4: 序列化对象 → JSON");
+            String json = simulateJsonSerialization(returnValue);
+            System.out.println("  JSON: " + json);
+
+            // 步骤 5：写入响应
+            System.out.println("  步骤 5: 写入 response.getOutputStream()");
+        }
+
+        private String simulateJsonSerialization(Object obj) {
+            if (obj == null) {
+                return "null";
+            }
+            if (obj instanceof Map) {
+                return obj.toString().replace("=", ":");
+            }
+            return "{\"data\":\"" + obj + "\"}";
+        }
+    }
+
+    /**
+     * ModelAndViewMethodReturnValueHandler 模拟
+     */
+    static class ModelAndViewReturnValueHandler implements ReturnValueHandler {
+        @Override
+        public boolean supportsReturnType(Method method) {
+            return ModelAndView.class.isAssignableFrom(method.getReturnType());
+        }
+
+        @Override
+        public void handleReturnValue(Object returnValue, Method method, HttpServletRequest request, HttpServletResponse response) {
+            System.out.println("  【ModelAndViewReturnValueHandler】处理视图响应");
+            ModelAndView mav = (ModelAndView) returnValue;
+            System.out.println("  视图名称: " + mav.getViewName());
+            System.out.println("  模型数据: " + mav.getModel());
+        }
+    }
+
+    /**
+     * ViewNameMethodReturnValueHandler 模拟
+     */
+    static class ViewNameReturnValueHandler implements ReturnValueHandler {
+        @Override
+        public boolean supportsReturnType(Method method) {
+            return String.class.isAssignableFrom(method.getReturnType());
+        }
+
+        @Override
+        public void handleReturnValue(Object returnValue, Method method, HttpServletRequest request, HttpServletResponse response) {
+            System.out.println("  【ViewNameReturnValueHandler】处理视图名称");
+            String viewName = (String) returnValue;
+            System.out.println("  视图名称: " + viewName);
+            System.out.println("  将由 ViewResolver 解析");
+        }
+    }
+
+    /**
+     * VoidReturnValueHandler 模拟
+     */
+    static class VoidReturnValueHandler implements ReturnValueHandler {
+        @Override
+        public boolean supportsReturnType(Method method) {
+            return void.class.isAssignableFrom(method.getReturnType()) ||
+                   Void.class.isAssignableFrom(method.getReturnType());
+        }
+
+        @Override
+        public void handleReturnValue(Object returnValue, Method method, HttpServletRequest request, HttpServletResponse response) {
+            System.out.println("  【VoidReturnValueHandler】无返回值");
+            System.out.println("  响应已由方法内部处理");
+        }
     }
 }
 

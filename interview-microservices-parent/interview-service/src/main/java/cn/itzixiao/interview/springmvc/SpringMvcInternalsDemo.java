@@ -33,6 +33,8 @@ import java.util.*;
  * 3. HandlerExceptionResolver - 异常解析器
  * 4. View/ViewResolver - 视图与视图解析器
  * 5. RequestMappingHandlerMapping 工作原理
+ * <p>
+ * 文档参考：docs/05-Spring框架/03-Spring-MVC运行机制.md
  */
 @RestController
 @RequestMapping("/mvc/internal")
@@ -462,5 +464,474 @@ class MvcInternalsConfig implements WebMvcConfigurer {
         registry.addConverter(new SpringMvcInternalsDemo.StringToUserConverter());
         registry.addFormatter(new SpringMvcInternalsDemo.MoneyFormatter());
         System.out.println("【配置】注册 Formatters 和 Converters");
+    }
+}
+
+/**
+ * ============================================
+ * 视图渲染流程模拟
+ * ============================================
+ * 当 Controller 返回视图名称时，Spring MVC 会进行视图渲染
+ * <p>
+ * 完整流程：
+ * 1. processDispatchResult() - 处理分发结果
+ * 2. render() - 渲染视图
+ * 3. resolveViewName() - ViewResolver 解析视图名称
+ * 4. View.render() - 视图渲染
+ * <p>
+ * 源码参考：
+ * protected void render(ModelAndView mv, HttpServletRequest request,
+ *         HttpServletResponse response) throws Exception {
+ *
+ *     // 1. 确定 Locale
+ *     Locale locale = (this.localeResolver != null ?
+ *         this.localeResolver.resolveLocale(request) : request.getLocale());
+ *     response.setLocale(locale);
+ *
+ *     View view;
+ *     String viewName = mv.getViewName();
+ *
+ *     // 2. 解析视图
+ *     if (viewName != null) {
+ *         view = resolveViewName(viewName, mv.getModelInternal(), locale, request);
+ *     } else {
+ *         view = mv.getView();
+ *     }
+ *
+ *     // 3. 渲染视图
+ *     view.render(mv.getModelInternal(), request, response);
+ * }
+ */
+class ViewRenderingSimulator {
+
+    /**
+     * 模拟视图解析器
+     * 类似 InternalResourceViewResolver
+     */
+    static class ViewResolverSimulator {
+        private String prefix = "/WEB-INF/views/";
+        private String suffix = ".jsp";
+
+        /**
+         * 解析视图名称
+         * <p>
+         * 源码参考 InternalResourceViewResolver：
+         * protected View createView(String viewName, Locale locale) throws Exception {
+         *     // 处理 redirect:
+         *     if (viewName.startsWith(REDIRECT_URL_PREFIX)) {
+         *         String redirectUrl = viewName.substring(REDIRECT_URL_PREFIX.length());
+         *         return new RedirectView(redirectUrl);
+         *     }
+         *
+         *     // 处理 forward:
+         *     if (viewName.startsWith(FORWARD_URL_PREFIX)) {
+         *         String forwardUrl = viewName.substring(FORWARD_URL_PREFIX.length());
+         *         return new InternalResourceView(forwardUrl);
+         *     }
+         *
+         *     // 默认：拼接前缀后缀
+         *     return super.createView(viewName, locale);
+         * }
+         */
+        public ViewSimulator resolveViewName(String viewName, Locale locale) {
+            System.out.println("\n========== ViewResolver 解析视图 ==========");
+            System.out.println("【输入】视图名称: " + viewName);
+
+            // 处理 redirect:
+            if (viewName.startsWith("redirect:")) {
+                String redirectUrl = viewName.substring("redirect:".length());
+                System.out.println("【类型】重定向视图");
+                System.out.println("【目标URL】" + redirectUrl);
+                return new RedirectViewSimulator(redirectUrl);
+            }
+
+            // 处理 forward:
+            if (viewName.startsWith("forward:")) {
+                String forwardUrl = viewName.substring("forward:".length());
+                System.out.println("【类型】转发视图");
+                System.out.println("【目标URL】" + forwardUrl);
+                return new ForwardViewSimulator(forwardUrl);
+            }
+
+            // 默认：拼接前缀后缀
+            String url = prefix + viewName + suffix;
+            System.out.println("【类型】JSP 视图");
+            System.out.println("【前缀】" + prefix);
+            System.out.println("【后缀】" + suffix);
+            System.out.println("【完整路径】" + url);
+
+            System.out.println("========== ViewResolver 解析完成 ==========\n");
+            return new JspViewSimulator(url);
+        }
+    }
+
+    /**
+     * 视图接口模拟
+     */
+    interface ViewSimulator {
+        void render(Map<String, Object> model, HttpServletRequest request, HttpServletResponse response) throws Exception;
+    }
+
+    /**
+     * JSP 视图模拟
+     * <p>
+     * 源码参考 InternalResourceView.render()：
+     * protected void renderMergedOutputModel(Map<String, Object> model,
+     *         HttpServletRequest request, HttpServletResponse response) throws Exception {
+     *
+     *     // 1. 合并 Model 数据到请求属性
+     *     exposeModelAsRequestAttributes(model, request);
+     *
+     *     // 2. 暴露 Spring Bean 到请求属性
+     *     exposeHelpers(request);
+     *
+     *     // 3. 转发到 JSP
+     *     RequestDispatcher rd = request.getRequestDispatcher(getUrl());
+     *     rd.forward(request, response);
+     * }
+     */
+    static class JspViewSimulator implements ViewSimulator {
+        private final String url;
+
+        public JspViewSimulator(String url) {
+            this.url = url;
+        }
+
+        @Override
+        public void render(Map<String, Object> model, HttpServletRequest request, HttpServletResponse response) throws Exception {
+            System.out.println("\n========== JSP 视图渲染 ==========");
+            System.out.println("【视图路径】" + url);
+
+            // 步骤 1：合并 Model 数据到请求属性
+            System.out.println("【步骤 1】合并 Model 数据到请求属性");
+            for (Map.Entry<String, Object> entry : model.entrySet()) {
+                System.out.println("  request.setAttribute(\"" + entry.getKey() + "\", " + entry.getValue() + ")");
+                // 实际代码：request.setAttribute(entry.getKey(), entry.getValue());
+            }
+
+            // 步骤 2：转发到 JSP
+            System.out.println("【步骤 2】转发到 JSP");
+            System.out.println("  RequestDispatcher dispatcher = request.getRequestDispatcher(\"" + url + "\")");
+            System.out.println("  dispatcher.forward(request, response)");
+
+            // 步骤 3：JSP 渲染
+            System.out.println("【步骤 3】JSP 渲染");
+            System.out.println("  JSP 模板执行，输出 HTML");
+
+            System.out.println("========== JSP 视图渲染完成 ==========\n");
+        }
+    }
+
+    /**
+     * 重定向视图模拟
+     */
+    static class RedirectViewSimulator implements ViewSimulator {
+        private final String redirectUrl;
+
+        public RedirectViewSimulator(String redirectUrl) {
+            this.redirectUrl = redirectUrl;
+        }
+
+        @Override
+        public void render(Map<String, Object> model, HttpServletRequest request, HttpServletResponse response) throws Exception {
+            System.out.println("\n========== 重定向视图 ==========");
+            System.out.println("【目标URL】" + redirectUrl);
+            System.out.println("【HTTP 状态】302 Found");
+            System.out.println("【Location 头】" + redirectUrl);
+            System.out.println("========== 重定向完成 ==========\n");
+        }
+    }
+
+    /**
+     * 转发视图模拟
+     */
+    static class ForwardViewSimulator implements ViewSimulator {
+        private final String forwardUrl;
+
+        public ForwardViewSimulator(String forwardUrl) {
+            this.forwardUrl = forwardUrl;
+        }
+
+        @Override
+        public void render(Map<String, Object> model, HttpServletRequest request, HttpServletResponse response) throws Exception {
+            System.out.println("\n========== 转发视图 ==========");
+            System.out.println("【目标URL】" + forwardUrl);
+            System.out.println("【方式】服务器端转发（RequestDispatcher.forward）");
+            System.out.println("========== 转发完成 ==========\n");
+        }
+    }
+
+    /**
+     * 模拟完整的视图渲染流程
+     */
+    public void simulateViewRendering(String viewName, Map<String, Object> model,
+                                       HttpServletRequest request, HttpServletResponse response) throws Exception {
+        System.out.println("\n=============== 视图渲染完整流程 ===============");
+
+        // 步骤 1：创建 ModelAndView
+        System.out.println("\n【步骤 1】创建 ModelAndView");
+        ModelAndView mav = new ModelAndView(viewName);
+        for (Map.Entry<String, Object> entry : model.entrySet()) {
+            mav.addObject(entry.getKey(), entry.getValue());
+        }
+        System.out.println("  视图名称: " + mav.getViewName());
+        System.out.println("  模型数据: " + mav.getModel());
+
+        // 步骤 2：确定 Locale
+        System.out.println("\n【步骤 2】确定 Locale");
+        Locale locale = request.getLocale();
+        System.out.println("  Locale: " + locale);
+
+        // 步骤 3：解析视图
+        System.out.println("\n【步骤 3】解析视图");
+        ViewResolverSimulator viewResolver = new ViewResolverSimulator();
+        ViewSimulator view = viewResolver.resolveViewName(viewName, locale);
+
+        // 步骤 4：渲染视图
+        System.out.println("\n【步骤 4】渲染视图");
+        view.render(model, request, response);
+
+        System.out.println("\n=============== 视图渲染流程结束 ===============\n");
+    }
+}
+
+/**
+ * ============================================
+ * 响应返回流程模拟
+ * ============================================
+ * 当请求处理完成后，响应会经过以下流程返回给客户端
+ * <p>
+ * 完整流程：
+ * 1. 设置响应状态码
+ * 2. 设置响应头
+ * 3. 写入响应体
+ * 4. 刷新缓冲区
+ * 5. Tomcat 处理响应
+ * 6. 浏览器接收响应
+ */
+class ResponseReturnSimulator {
+
+    /**
+     * 模拟响应构建过程
+     */
+    public void simulateResponseBuilding(HttpServletResponse response, Object responseBody) {
+        System.out.println("\n=============== 响应构建流程 ===============");
+
+        // 步骤 1：设置响应状态码
+        System.out.println("\n【步骤 1】设置响应状态码");
+        System.out.println("  response.setStatus(200)");
+        System.out.println("  HTTP/1.1 200 OK");
+
+        // 步骤 2：设置响应头
+        System.out.println("\n【步骤 2】设置响应头");
+        System.out.println("  Content-Type: application/json; charset=UTF-8");
+        System.out.println("  Content-Length: " + calculateContentLength(responseBody));
+        System.out.println("  Cache-Control: no-cache");
+
+        // 步骤 3：写入响应体
+        System.out.println("\n【步骤 3】写入响应体");
+        String json = convertToJson(responseBody);
+        System.out.println("  响应体: " + json);
+        System.out.println("  response.getOutputStream().write(bytes)");
+
+        // 步骤 4：刷新缓冲区
+        System.out.println("\n【步骤 4】刷新缓冲区");
+        System.out.println("  response.flushBuffer()");
+
+        System.out.println("\n=============== 响应构建完成 ===============\n");
+    }
+
+    /**
+     * 模拟 Tomcat 处理响应
+     */
+    public void simulateTomcatResponseHandling() {
+        System.out.println("\n=============== Tomcat 响应处理 ===============");
+
+        System.out.println("\n【步骤 1】CoyoteAdapter.afterService()");
+        System.out.println("  提交响应");
+        System.out.println("  更新统计信息");
+
+        System.out.println("\n【步骤 2】Http11Processor.process()");
+        System.out.println("  构建 HTTP 响应报文");
+        System.out.println("  HTTP/1.1 200 OK");
+        System.out.println("  Content-Type: application/json");
+        System.out.println("  Content-Length: 28");
+        System.out.println("  ");
+        System.out.println("  {\"id\":1,\"name\":\"张三\"}");
+
+        System.out.println("\n【步骤 3】NioEndpoint 发送数据");
+        System.out.println("  写入 Socket 缓冲区");
+        System.out.println("  TCP 发送给客户端");
+
+        System.out.println("\n=============== Tomcat 响应处理完成 ===============\n");
+    }
+
+    /**
+     * 模拟浏览器接收响应
+     */
+    public void simulateBrowserReceiveResponse() {
+        System.out.println("\n=============== 浏览器接收响应 ===============");
+
+        System.out.println("\n【步骤 1】解析 HTTP 响应");
+        System.out.println("  解析状态行: HTTP/1.1 200 OK");
+        System.out.println("  解析响应头");
+
+        System.out.println("\n【步骤 2】解析响应体");
+        System.out.println("  Content-Type: application/json");
+        System.out.println("  解析 JSON 数据");
+
+        System.out.println("\n【步骤 3】渲染或回调");
+        System.out.println("  如果是页面请求: 渲染 HTML");
+        System.out.println("  如果是 AJAX 请求: 执行回调函数");
+
+        System.out.println("\n=============== 浏览器处理完成 ===============\n");
+    }
+
+    private int calculateContentLength(Object body) {
+        return convertToJson(body).length();
+    }
+
+    private String convertToJson(Object obj) {
+        if (obj == null) {
+            return "null";
+        }
+        if (obj instanceof Map) {
+            StringBuilder sb = new StringBuilder("{");
+            Map<?, ?> map = (Map<?, ?>) obj;
+            boolean first = true;
+            for (Map.Entry<?, ?> entry : map.entrySet()) {
+                if (!first) sb.append(",");
+                sb.append("\"").append(entry.getKey()).append("\":");
+                if (entry.getValue() instanceof String) {
+                    sb.append("\"").append(entry.getValue()).append("\"");
+                } else {
+                    sb.append(entry.getValue());
+                }
+                first = false;
+            }
+            sb.append("}");
+            return sb.toString();
+        }
+        return "{\"data\":\"" + obj + "\"}";
+    }
+}
+
+/**
+ * ============================================
+ * 完整请求处理流程演示
+ * ============================================
+ * 演示从请求到达到响应返回的完整流程
+ */
+class CompleteRequestFlowDemo {
+
+    /**
+     * 演示完整请求处理流程
+     */
+    public void demonstrateCompleteFlow() {
+        System.out.println("\n" + repeat("=", 80));
+        System.out.println("                    Spring MVC 完整请求处理流程演示");
+        System.out.println(repeat("=", 80));
+
+        System.out.println("\n┌─────────────────────────────────────────────────────────────────────────────┐");
+        System.out.println("│                        1. 请求到达阶段                                        │");
+        System.out.println("├─────────────────────────────────────────────────────────────────────────────┤");
+        System.out.println("│  浏览器 → DNS解析 → TCP连接 → HTTP请求 → Tomcat → Servlet容器               │");
+        System.out.println("│  GET /users/123 HTTP/1.1                                                    │");
+        System.out.println("│  Host: localhost:8080                                                       │");
+        System.out.println("│  Content-Type: application/json                                             │");
+        System.out.println("└─────────────────────────────────────────────────────────────────────────────┘");
+
+        System.out.println("\n┌─────────────────────────────────────────────────────────────────────────────┐");
+        System.out.println("│                        2. DispatcherServlet 处理                             │");
+        System.out.println("├─────────────────────────────────────────────────────────────────────────────┤");
+        System.out.println("│  doDispatch() {                                                             │");
+        System.out.println("│    // 1. checkMultipart() - 检查文件上传                                      │");
+        System.out.println("│    // 2. getHandler() - 获取处理器执行链                                       │");
+        System.out.println("│    // 3. getHandlerAdapter() - 获取适配器                                     │");
+        System.out.println("│    // 4. applyPreHandle() - 执行拦截器前置                                     │");
+        System.out.println("│    // 5. ha.handle() - 调用处理器方法                                          │");
+        System.out.println("│    // 6. applyPostHandle() - 执行拦截器后置                                    │");
+        System.out.println("│    // 7. processDispatchResult() - 处理结果                                   │");
+        System.out.println("│  }                                                                          │");
+        System.out.println("└─────────────────────────────────────────────────────────────────────────────┘");
+
+        System.out.println("\n┌─────────────────────────────────────────────────────────────────────────────┐");
+        System.out.println("│                        3. HandlerMapping 匹配                                │");
+        System.out.println("├─────────────────────────────────────────────────────────────────────────────┤");
+        System.out.println("│  RequestMappingHandlerMapping.getHandler() {                                │");
+        System.out.println("│    // 遍历所有注册的映射                                                       │");
+        System.out.println("│    // /users/{id} → UserController.getById()                                │");
+        System.out.println("│    // 提取路径变量: id = 123                                                  │");
+        System.out.println("│    // 返回 HandlerExecutionChain                                             │");
+        System.out.println("│  }                                                                          │");
+        System.out.println("└─────────────────────────────────────────────────────────────────────────────┘");
+
+        System.out.println("\n┌─────────────────────────────────────────────────────────────────────────────┐");
+        System.out.println("│                        4. HandlerAdapter 调用                                │");
+        System.out.println("├─────────────────────────────────────────────────────────────────────────────┤");
+        System.out.println("│  RequestMappingHandlerAdapter.handle() {                                    │");
+        System.out.println("│    // 1. invokeHandlerMethod()                                              │");
+        System.out.println("│    //    - 参数解析 (ArgumentResolver)                                        │");
+        System.out.println("│    //    - 执行 Controller 方法                                               │");
+        System.out.println("│    //    - 返回值处理 (ReturnValueHandler)                                    │");
+        System.out.println("│    // 2. 返回 ModelAndView                                                   │");
+        System.out.println("│  }                                                                          │");
+        System.out.println("└─────────────────────────────────────────────────────────────────────────────┘");
+
+        System.out.println("\n┌─────────────────────────────────────────────────────────────────────────────┐");
+        System.out.println("│                        5. 参数解析流程                                        │");
+        System.out.println("├─────────────────────────────────────────────────────────────────────────────┤");
+        System.out.println("│  getMethodArgumentValues() {                                                │");
+        System.out.println("│    // 参数 1: @PathVariable Long id                                          │");
+        System.out.println("│    //   → PathVariableMethodArgumentResolver                                │");
+        System.out.println("│    //   → 从 URI 变量获取: id = 123                                          │");
+        System.out.println("│    //   → 类型转换: String \"123\" → Long 123                                  │");
+        System.out.println("│  }                                                                          │");
+        System.out.println("└─────────────────────────────────────────────────────────────────────────────┘");
+
+        System.out.println("\n┌─────────────────────────────────────────────────────────────────────────────┐");
+        System.out.println("│                        6. Controller 执行                                    │");
+        System.out.println("├─────────────────────────────────────────────────────────────────────────────┤");
+        System.out.println("│  @GetMapping(\"/users/{id}\")                                                 │");
+        System.out.println("│  public User getById(@PathVariable Long id) {                               │");
+        System.out.println("│      return userService.findById(id);  // 返回 User 对象                      │");
+        System.out.println("│  }                                                                          │");
+        System.out.println("└─────────────────────────────────────────────────────────────────────────────┘");
+
+        System.out.println("\n┌─────────────────────────────────────────────────────────────────────────────┐");
+        System.out.println("│                        7. 返回值处理流程                                      │");
+        System.out.println("├─────────────────────────────────────────────────────────────────────────────┤");
+        System.out.println("│  handleReturnValue() {                                                      │");
+        System.out.println("│    // 选择处理器: RequestResponseBodyMethodProcessor                         │");
+        System.out.println("│    // 选择转换器: MappingJackson2HttpMessageConverter                        │");
+        System.out.println("│    // 序列化: User → JSON                                                    │");
+        System.out.println("│    // 写入: response.getOutputStream()                                       │");
+        System.out.println("│  }                                                                          │");
+        System.out.println("└─────────────────────────────────────────────────────────────────────────────┘");
+
+        System.out.println("\n┌─────────────────────────────────────────────────────────────────────────────┐");
+        System.out.println("│                        8. 响应返回流程                                        │");
+        System.out.println("├─────────────────────────────────────────────────────────────────────────────┤");
+        System.out.println("│  HTTP/1.1 200 OK                                                            │");
+        System.out.println("│  Content-Type: application/json                                             │");
+        System.out.println("│  Content-Length: 28                                                         │");
+        System.out.println("│                                                                              │");
+        System.out.println("│  {\"id\":123,\"name\":\"张三\"}                                                  │");
+        System.out.println("└─────────────────────────────────────────────────────────────────────────────┘");
+
+        System.out.println("\n" + repeat("=", 80));
+        System.out.println("                              流程演示结束");
+        System.out.println(repeat("=", 80) + "\n");
+    }
+
+    /**
+     * Java 8 兼容的字符串重复方法
+     */
+    private String repeat(String str, int count) {
+        StringBuilder sb = new StringBuilder(str.length() * count);
+        for (int i = 0; i < count; i++) {
+            sb.append(str);
+        }
+        return sb.toString();
     }
 }
