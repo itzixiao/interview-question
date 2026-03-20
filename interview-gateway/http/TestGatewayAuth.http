@@ -1,0 +1,111 @@
+###
+### Gateway 鉴权测试
+### 
+### 测试流程：
+### 1. 直接访问受保护接口 → 401 未授权
+### 2. 登录获取 Token → 白名单接口，无需鉴权
+### 3. 携带 Token 访问受保护接口 → 200 成功
+### 4. 携带无效 Token 访问 → 401 未授权
+###
+### 路由说明：
+### - Provider 服务 context-path: /provider
+### - Controller 路径: /api/auth
+### - 完整路径: /provider/api/auth/login
+### - Gateway 使用 StripPrefix=1，去掉 /api 前缀
+### - 例如：/api/provider/api/auth/login → /provider/api/auth/login
+###
+
+@baseUrl = http://localhost:8080
+@providerUrl = http://localhost:8082
+
+### ========================================
+### 测试 1: 直接访问受保护接口（无 Token）
+### 预期结果: 401 未授权
+### ========================================
+GET {{baseUrl}}/api/provider/api/users/1
+Accept: application/json
+
+### ========================================
+### 测试 2: 登录获取 Token（白名单接口）
+### 预期结果: 200 成功，返回 token
+### ========================================
+POST {{baseUrl}}/api/provider/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "123456"
+}
+
+### ========================================
+### 测试 3: 携带 Token 访问受保护接口
+### 预期结果: 200 成功
+### 注意: 请将下面的 <TOKEN> 替换为上一步获取的实际 token
+### ========================================
+GET {{baseUrl}}/api/provider/api/users/1
+Accept: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6eyJyb2xlIjoiQURNSU4iLCJwZXJtaXNzaW9ucyI6WyJyZWFkIiwid3JpdGUiLCJkZWxldGUiXX0sInN1YiI6ImFkbWluIiwiaXNzIjoiaW50ZXJ2aWV3LXByb3ZpZGVyIiwiaWF0IjoxNzc0MDExMzU3LCJleHAiOjE3NzQwOTc3NTd9.wfcBtptboJcctWW_x_DzAscs-3Mx2YuidxKOlKwpNoY
+
+### ========================================
+### 测试 4: 携带无效 Token 访问
+### 预期结果: 401 未授权
+### ========================================
+GET {{baseUrl}}/api/provider/api/users/1
+Accept: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6eyJyb2xlIjoiQURNSU4iLCJwZXJtaXNzaW9ucyI6WyJyZWFkIiwid3JpdGUiLCJkZWxldGUiXX0sInN1YiI6ImFkbWluIiwiaXNzIjoiaW50ZXJ2aWV3LXByb3ZpZGVyIiwiaWF0IjoxNzc0MDExMzU3LCJleHAiOjE3NzQwOTc3NTd9.wfcBtptboJcctWW_x_DzAscs-3Mx2YuidxKOlKwpNoY
+
+### ========================================
+### 测试 5: 验证 Token 有效性（白名单接口）
+### 预期结果: 200 成功
+### ========================================
+GET {{baseUrl}}/api/provider/api/auth/verify?token=<TOKEN>
+Accept: application/json
+
+### ========================================
+### 测试 6: 获取用户信息（需要 Token）
+### 预期结果: 200 成功
+### ========================================
+GET {{baseUrl}}/api/provider/api/auth/info
+Accept: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6eyJyb2xlIjoiQURNSU4iLCJwZXJtaXNzaW9ucyI6WyJyZWFkIiwid3JpdGUiLCJkZWxldGUiXX0sInN1YiI6ImFkbWluIiwiaXNzIjoiaW50ZXJ2aWV3LXByb3ZpZGVyIiwiaWF0IjoxNzc0MDExMzU3LCJleHAiOjE3NzQwOTc3NTd9.wfcBtptboJcctWW_x_DzAscs-3Mx2YuidxKOlKwpNoY
+
+### ========================================
+### 测试 7: 访问用户列表（需要 Token）
+### 预期结果: 200 成功
+### ========================================
+GET {{baseUrl}}/api/provider/api/users/list?page=1&size=10
+Accept: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6eyJyb2xlIjoiQURNSU4iLCJwZXJtaXNzaW9ucyI6WyJyZWFkIiwid3JpdGUiLCJkZWxldGUiXX0sInN1YiI6ImFkbWluIiwiaXNzIjoiaW50ZXJ2aWV3LXByb3ZpZGVyIiwiaWF0IjoxNzc0MDExMzU3LCJleHAiOjE3NzQwOTc3NTd9.wfcBtptboJcctWW_x_DzAscs-3Mx2YuidxKOlKwpNoY
+
+### ========================================
+### 测试 8: 创建用户（需要 Token）
+### 预期结果: 200 成功
+### ========================================
+POST {{baseUrl}}/api/provider/api/users
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6eyJyb2xlIjoiQURNSU4iLCJwZXJtaXNzaW9ucyI6WyJyZWFkIiwid3JpdGUiLCJkZWxldGUiXX0sInN1YiI6ImFkbWluIiwiaXNzIjoiaW50ZXJ2aWV3LXByb3ZpZGVyIiwiaWF0IjoxNzc0MDExMzU3LCJleHAiOjE3NzQwOTc3NTd9.wfcBtptboJcctWW_x_DzAscs-3Mx2YuidxKOlKwpNoY
+
+{
+  "username": "testuser",
+  "email": "testuser@example.com",
+  "phone": "13800138000",
+  "status": 1
+}
+
+### ========================================
+### 直接访问 Provider 服务（绕过网关）
+### 用于对比测试
+### ========================================
+
+### 直接访问 Provider - 登录
+POST {{providerUrl}}/provider/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "123456"
+}
+
+### 直接访问 Provider - 获取用户列表（无需鉴权）
+GET {{providerUrl}}/provider/api/users/list
+Accept: application/json

@@ -12,7 +12,17 @@ gateway:
     paths:
       - /login
       - /register
-      - /api/interview/**
+      - /api/provider/api/auth/login   # JWT 登录接口
+      - /api/provider/api/auth/verify  # JWT 验证接口
+      - /api/service/**                 # 面试题服务所有接口
+      - /api/algorithm/**               # 算法服务所有接口
+      - /api/kafka/**                   # Kafka 服务所有接口
+      - /api/rabbitmq/**                # RabbitMQ 服务所有接口
+      - /api/transaction/**             # 事务演示服务所有接口
+      - /api/workflow/**                # 工作流服务所有接口
+      - /api/xxljob/**                  # XXL-JOB 服务所有接口
+      - /api/performance/**             # 性能调优服务所有接口
+      - /api/observability/**           # 可观测性服务所有接口
 
 # 日志配置
 logging:

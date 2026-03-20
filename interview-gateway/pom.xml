@@ -58,6 +58,12 @@
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
+
+        <!-- 安全模块（包含 JWT 验证和网关鉴权） -->
+        <dependency>
+            <groupId>cn.itzixiao</groupId>
+            <artifactId>interview-security</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
