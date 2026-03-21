@@ -48,6 +48,12 @@
 
         <!-- Redis 相关版本 -->
         <redisson.version>3.17.6</redisson.version>
+        
+        <!-- Memcached 版本 -->
+        <xmemcached.version>2.4.8</xmemcached.version>
+        
+        <!-- MongoDB 版本 -->
+        <mongodb-driver.version>4.11.0</mongodb-driver.version>
 
         <!-- 中间件版本 -->
         <shardingsphere.version>4.1.1</shardingsphere.version>
@@ -240,6 +246,27 @@
                 <groupId>io.jsonwebtoken</groupId>
                 <artifactId>jjwt</artifactId>
                 <version>${jjwt-legacy.version}</version>
+            </dependency>
+            
+            <!-- Xmemcached -->
+            <dependency>
+                <groupId>com.googlecode.xmemcached</groupId>
+                <artifactId>xmemcached</artifactId>
+                <version>${xmemcached.version}</version>
+            </dependency>
+            
+            <!-- MongoDB Driver -->
+            <dependency>
+                <groupId>org.mongodb</groupId>
+                <artifactId>mongodb-driver-sync</artifactId>
+                <version>${mongodb-driver.version}</version>
+            </dependency>
+            
+            <!-- Spring Data MongoDB -->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-data-mongodb</artifactId>
+                <version>${spring-boot.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

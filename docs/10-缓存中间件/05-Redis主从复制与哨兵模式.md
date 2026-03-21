@@ -490,7 +490,8 @@ sentinel down-after-milliseconds mymaster 5000
 1. 网络中断需重新全量复制（无本地 RDB 兜底）；
 
 > 2. 主节点 CPU/网络开销更大；
->   3. 无法生成 RDB 备份文件。
+     >
+3. 无法生成 RDB 备份文件。
 
 ---
 
