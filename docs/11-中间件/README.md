@@ -101,12 +101,21 @@
 
 ---
 
+#### 16. [16-MongoDB详解.md](./16-MongoDB详解.md) ⭐ NEW
+
+- **内容：** 文档模型、索引机制、聚合管道、副本集、分片集群、Spring Data MongoDB
+- **面试题：** 10+ 道
+- **重要程度：** ⭐⭐⭐⭐⭐
+- **配套代码：** `interview-microservices-parent/interview-service/src/main/java/cn/itzixiao/interview/mongodb/`
+
+---
+
 ## 📊 统计信息
 
-- **文档数：** 15 个
-- **面试题总数：** 145+ 道
+- **文档数：** 16 个
+- **面试题总数：** 155+ 道
 - **代码示例：** 配套 Java 代码在 `interview-service/rpc/`、`interview-rabbitmq/`、`interview-kafka/`、
-  `interview-provider/hbase/`、`interview-provider/elasticsearch/`、`interview-provider/netty/`、`interview-workflow/`、`interview-xxljob/` 等目录（~13,000 行代码）
+  `interview-provider/hbase/`、`interview-provider/elasticsearch/`、`interview-provider/netty/`、`interview-workflow/`、`interview-xxljob/`、`interview-service/mongodb/` 等目录（~15,000 行代码）
 
 ---
 
@@ -383,6 +392,13 @@ RabbitMQ 基础
 
 ## 📈 更新日志
 
+### v2.5 - 2026-03-21
+
+- ✅ 新增《16-MongoDB详解》文档（10+ 道面试题）
+- ✅ 包含文档模型、索引机制、聚合管道、副本集、分片集群
+- ✅ 配套代码：Spring Data MongoDB 完整示例
+- ✅ 更新文档统计信息（16 个文档，155+ 面试题）
+
 ### v2.4 - 2026-03-17
 
 - ✅ 新增《14-Flowable工作流引擎详解》文档（12+ 道面试题）
@@ -427,5 +443,5 @@ RabbitMQ 基础
 ---
 
 **维护者：** itzixiao  
-**最后更新：** 2026-03-17  
+**最后更新：** 2026-03-21  
 **问题反馈：** 欢迎提 Issue 或 PR
