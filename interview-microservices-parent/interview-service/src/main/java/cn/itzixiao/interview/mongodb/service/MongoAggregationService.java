@@ -3,6 +3,7 @@ package cn.itzixiao.interview.mongodb.service;
 import cn.itzixiao.interview.mongodb.entity.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.*;
@@ -27,6 +28,7 @@ import java.util.Map;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@ConditionalOnProperty(name = "mongodb.enabled", havingValue = "true")
 public class MongoAggregationService {
 
     private final MongoTemplate mongoTemplate;

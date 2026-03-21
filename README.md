@@ -54,7 +54,7 @@ interview-question/                              # 根目录
 │   ├── 07-SpringCloud微服务/ 
 │   ├── 08-MySQL数据库/       
 │   ├── 09-PostgreSQL数据库/  
-│   ├── 10-缓存中间件/        
+│   ├── 10-缓存与NoSQL数据库/        
 │   ├── 11-中间件/            
 │   ├── 12-算法与数据结构/        
 │   ├── 13-设计模式/           
@@ -131,7 +131,7 @@ mvn spring-boot:run
 | 🔹 **07-SpringCloud微服务**    | 2 篇  | 25+ 道  | [详细文档](./docs/07-SpringCloud微服务/README.md)    |
 | 🔹 **08-MySQL数据库**          | 11 篇 | 50+ 道  | [详细文档](./docs/08-MySQL数据库/README.md)          |
 | 🔹 **09-PostgreSQL数据库** ⭐新增 | 3 篇  | 11+ 道  | [详细文档](./docs/09-PostgreSQL数据库/README.md)     |
-| 🔹 **10-缓存中间件** | 9 篇 | 130+ 道 | [详细文档](./docs/10-缓存中间件/README.md) |
+| 🔹 **10-缓存与NoSQL数据库** | 10 篇 | 145+ 道 | [详细文档](./docs/10-缓存与NoSQL数据库/README.md) |
 | 🔹 **11-中间件**               | 14 篇 | 116+ 道 | [详细文档](./docs/11-中间件/README.md)               |
 | 🔹 **12-算法与数据结构**           | 4 篇  | 45+ 道  | [详细文档](./docs/12-算法与数据结构/README.md)           |
 | 🔹 **13-设计模式**              | 1 篇  | 20+ 道  | [详细文档](./docs/13-设计模式/README.md)              |
@@ -187,12 +187,13 @@ mvn spring-boot:run
 
 ### 缓存中间件（130+ 道）
 
-- [Redis 支持的数据类型？](./docs/10-缓存中间件/01-Redis基础与数据结构.md)
-- [Redis 哨兵和集群机制？](./docs/10-缓存中间件/05-Redis主从复制与哨兵模式.md)
-- [如何实现分布式锁？](./docs/10-缓存中间件/03-Redis分布式锁详解.md)
-- [Redis 持久化机制？](./docs/10-缓存中间件/04-Redis持久化机制详解.md)
-- [Memcached vs Redis 区别？](./docs/10-缓存中间件/08-Memcached详解.md)
-- [缓存中间件如何选型？](./docs/10-缓存中间件/09-缓存中间件对比详解.md)
+- [Redis 支持的数据类型？](./docs/10-缓存与NoSQL数据库/01-Redis基础与数据结构.md)
+- [Redis 哨兵和集群机制？](./docs/10-缓存与NoSQL数据库/05-Redis主从复制与哨兵模式.md)
+- [如何实现分布式锁？](./docs/10-缓存与NoSQL数据库/03-Redis分布式锁详解.md)
+- [Redis 持久化机制？](./docs/10-缓存与NoSQL数据库/04-Redis持久化机制详解.md)
+- [Memcached vs Redis 区别？](./docs/10-缓存与NoSQL数据库/08-Memcached详解.md)
+- [缓存中间件如何选型？](./docs/10-缓存与NoSQL数据库/09-缓存中间件对比详解.md)
+- [MongoDB 文档模型与索引？](./docs/10-缓存与NoSQL数据库/10-MongoDB详解.md)
 
 ### 中间件（35+ 道）
 
@@ -373,7 +374,7 @@ mvn spring-boot:run
 - [📘 07-SpringCloud微服务](./docs/07-SpringCloud微服务/README.md) - 2 篇文档，25+ 道面试题
 - [📘 08-MySQL数据库](./docs/08-MySQL数据库/README.md) - 11 篇文档，50+ 道面试题
 - [📘 09-PostgreSQL数据库](./docs/09-PostgreSQL数据库/README.md) - 3 篇文档，11+ 道面试题 ⭐新增
-- [📘 10-缓存中间件](./docs/10-缓存中间件/README.md) - 9 篇文档，130+ 道面试题
+- [📘 10-缓存与NoSQL数据库](./docs/10-缓存与NoSQL数据库/README.md) - 10 篇文档，145+ 道面试题
 - [📘 11-中间件](./docs/11-中间件/README.md) - 14 篇文档，116+ 道面试题
 - [📘 12-算法与数据结构](./docs/12-算法与数据结构/README.md) - 4 篇文档，45+ 道面试题
 - [📘 13-设计模式](./docs/13-设计模式/README.md) - 1 篇文档，20+ 道面试题

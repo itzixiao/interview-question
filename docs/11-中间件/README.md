@@ -59,40 +59,33 @@
 - **重要程度：** ⭐⭐⭐⭐⭐
 - **配套代码：** `interview-microservices-parent/interview-kafka/`
 
-#### 10. [10-Elasticsearch进阶详解.md](./10-Elasticsearch进阶详解.md)
-
-- **内容：** ES 核心概念、倒排索引、查询 DSL、聚合分析
-- **面试题：** 8+ 道
-- **重要程度：** ⭐⭐⭐⭐
-- **配套代码：** `interview-microservices-parent/interview-provider/elasticsearch/`
-
-#### 11. [11-Netty高性能框架详解.md](./11-Netty高性能框架详解.md) ⭐新增
+#### 10. [10-Netty高性能框架详解.md](./10-Netty高性能框架详解.md) ⭐新增
 
 - **内容：** NIO实战、Reactor模式、零拷贝、ByteBuf、编解码器
 - **面试题：** 10+ 道
 - **重要程度：** ⭐⭐⭐⭐⭐
 - **配套代码：** `interview-microservices-parent/interview-provider/netty/`
 
-#### 12. [12-大数据技术栈详解.md](./12-大数据技术栈详解.md)
+#### 11. [11-大数据技术栈详解.md](./11-大数据技术栈详解.md)
 
 - **内容：** Hadoop、Spark、Flink、Hive 等大数据技术
 - **面试题：** 6+ 道
 - **重要程度：** ⭐⭐⭐
 
-#### 13. [13-AI工程化与LLM应用开发.md](./13-AI%E5%B7%A5%E7%A8%8B%E5%8C%96%E4%B8%8ELLM%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91.md)
+#### 12. [12-AI工程化与LLM应用开发.md](./12-AI%E5%B7%A5%E7%A8%8B%E5%8C%96%E4%B8%8ELLM%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91.md)
 
 - **内容：** RAG架构、AI Agent、向量数据库、Spring AI、模型部署
 - **面试题：** 4+ 道
 - **重要程度：** ⭐⭐⭐⭐
 
-#### 14. [14-Flowable工作流引擎详解.md](./14-Flowable%E5%B7%A5%E4%BD%9C%E6%B5%81%E5%BC%95%E6%93%8E%E8%AF%A6%E8%A7%A3.md) ⭐ NEW
+#### 13. [13-Flowable工作流引擎详解.md](./13-Flowable%E5%B7%A5%E4%BD%9C%E6%B5%81%E5%BC%95%E6%93%8E%E8%AF%A6%E8%A7%A3.md) ⭐ NEW
 
 - **内容：** BPMN 2.0、流程定义、监听器、动态审批人、会签、历史数据
 - **面试题：** 10+ 道
 - **重要程度：** ⭐⭐⭐⭐⭐
 - **配套代码：** `interview-microservices-parent/interview-workflow/`
 
-#### 15. [15-XXL-JOB分布式任务调度详解.md](./15-XXL-JOB分布式任务调度详解.md) ⭐ NEW
+#### 14. [14-XXL-JOB分布式任务调度详解.md](./14-XXL-JOB分布式任务调度详解.md) ⭐ NEW
 
 - **内容：** 分布式调度、弹性扩容、故障转移、任务分片、监控告警
 - **面试题：** 15+ 道
@@ -101,21 +94,12 @@
 
 ---
 
-#### 16. [16-MongoDB详解.md](./16-MongoDB详解.md) ⭐ NEW
-
-- **内容：** 文档模型、索引机制、聚合管道、副本集、分片集群、Spring Data MongoDB
-- **面试题：** 10+ 道
-- **重要程度：** ⭐⭐⭐⭐⭐
-- **配套代码：** `interview-microservices-parent/interview-service/src/main/java/cn/itzixiao/interview/mongodb/`
-
----
-
 ## 📊 统计信息
 
-- **文档数：** 16 个
+- **文档数：** 14 个
 - **面试题总数：** 155+ 道
 - **代码示例：** 配套 Java 代码在 `interview-service/rpc/`、`interview-rabbitmq/`、`interview-kafka/`、
-  `interview-provider/hbase/`、`interview-provider/elasticsearch/`、`interview-provider/netty/`、`interview-workflow/`、`interview-xxljob/`、`interview-service/mongodb/` 等目录（~15,000 行代码）
+  `interview-provider/hbase/`、`interview-provider/elasticsearch/`、`interview-provider/netty/`、`interview-workflow/`、`interview-xxljob/` 等目录（~15,000 行代码）
 
 ---
 

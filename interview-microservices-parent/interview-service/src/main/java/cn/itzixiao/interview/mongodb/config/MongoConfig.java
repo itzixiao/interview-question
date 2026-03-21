@@ -38,7 +38,6 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
  * @since 2026-03-21
  */
 @Configuration
-@EnableMongoRepositories(basePackages = "cn.itzixiao.interview.mongodb.repository")
 @ConditionalOnProperty(name = "mongodb.enabled", havingValue = "true", matchIfMissing = false)
 public class MongoConfig extends AbstractMongoClientConfiguration {
 

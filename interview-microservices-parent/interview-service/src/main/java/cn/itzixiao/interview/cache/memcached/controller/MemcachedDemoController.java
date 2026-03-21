@@ -6,6 +6,7 @@ import cn.itzixiao.interview.cache.memcached.service.MemcachedService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -21,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 @RestController
 @RequestMapping("/api/memcached")
 @Api(tags = "Memcached 演示接口")
+@ConditionalOnProperty(name = "memcached.enabled", havingValue = "true")
 public class MemcachedDemoController {
 
     private final MemcachedService memcachedService;

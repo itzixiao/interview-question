@@ -3,11 +3,11 @@ package cn.itzixiao.interview.cache.memcached.service;
 import lombok.extern.slf4j.Slf4j;
 import net.rubyeye.xmemcached.MemcachedClient;
 import net.rubyeye.xmemcached.exception.MemcachedException;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
@@ -27,6 +27,7 @@ import java.util.concurrent.TimeoutException;
  */
 @Slf4j
 @Service
+@ConditionalOnProperty(name = "memcached.enabled", havingValue = "true")
 public class MemcachedService {
 
     private final MemcachedClient memcachedClient;

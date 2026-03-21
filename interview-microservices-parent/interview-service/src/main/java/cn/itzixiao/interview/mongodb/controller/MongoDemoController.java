@@ -6,6 +6,7 @@ import cn.itzixiao.interview.mongodb.service.MongoAggregationService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -25,6 +26,7 @@ import java.util.*;
 @RestController
 @RequestMapping("/api/mongodb")
 @Api(tags = "MongoDB 演示接口")
+@ConditionalOnProperty(name = "mongodb.enabled", havingValue = "true")
 public class MongoDemoController {
 
     private final UserRepository userRepository;

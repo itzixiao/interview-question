@@ -52,8 +52,8 @@
         <!-- Memcached 版本 -->
         <xmemcached.version>2.4.8</xmemcached.version>
         
-        <!-- MongoDB 版本 -->
-        <mongodb-driver.version>4.11.0</mongodb-driver.version>
+        <!-- MongoDB 版本 (与 Spring Boot 2.7.x 兼容) -->
+        <mongodb-driver.version>4.6.1</mongodb-driver.version>
 
         <!-- 中间件版本 -->
         <shardingsphere.version>4.1.1</shardingsphere.version>

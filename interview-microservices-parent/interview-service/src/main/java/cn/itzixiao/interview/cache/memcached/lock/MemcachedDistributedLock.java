@@ -2,6 +2,7 @@ package cn.itzixiao.interview.cache.memcached.lock;
 
 import cn.itzixiao.interview.cache.memcached.service.MemcachedService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import java.util.UUID;
@@ -52,6 +53,7 @@ import java.util.function.Supplier;
  */
 @Slf4j
 @Component
+@ConditionalOnProperty(name = "memcached.enabled", havingValue = "true")
 public class MemcachedDistributedLock {
 
     private final MemcachedService memcachedService;

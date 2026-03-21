@@ -26,7 +26,7 @@ spring:
 
   # 数据源配置（可从 Nacos 配置中心读取，也可本地覆盖）
   datasource:
-    url: jdbc:mysql://localhost:3306/interview?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://localhost:3306/interview?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
     username: root
     password: ${MYSQL_PASSWORD:}
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -48,3 +48,13 @@ spring:
         max-active: 8
         max-idle: 8
         min-idle: 0
+
+  # MongoDB 配置
+  data:
+    mongodb:
+      uri: mongodb://root:${MONGO_PASSWORD:root}@localhost:27017/interview_db?authSource=admin
+      database: interview_db
+
+# MongoDB 功能开关
+mongodb:
+  enabled: true
