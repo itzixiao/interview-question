@@ -1,0 +1,114 @@
+### Tomcat 监控接口测试
+### 基础 URL 配置
+@base_url = http://localhost:8080
+
+###
+
+### 一、线程状态监控
+
+# 获取线程状态
+GET {{base_url}}/monitor/tomcat/threads
+Accept: application/json
+
+###
+
+### 二、内存状态监控
+
+# 获取内存状态（堆内存 + 非堆内存）
+GET {{base_url}}/monitor/tomcat/memory
+Accept: application/json
+
+###
+
+### 三、运行时状态监控
+
+# 获取运行时状态（CPU、内存使用率）
+GET {{base_url}}/monitor/tomcat/runtime
+Accept: application/json
+
+###
+
+### 四、类加载状态监控
+
+# 获取类加载状态
+GET {{base_url}}/monitor/tomcat/classloading
+Accept: application/json
+
+###
+
+### 五、完整状态监控
+
+# 获取完整状态（包含所有指标）
+GET {{base_url}}/monitor/tomcat/status
+Accept: application/json
+
+###
+
+### 六、健康检查
+
+# 健康检查端点（用于负载均衡器）
+GET {{base_url}}/monitor/tomcat/health
+Accept: application/json
+
+###
+
+### 七、批量监控测试
+
+# 快速连续调用所有接口（性能测试）
+# 线程状态
+GET {{base_url}}/monitor/tomcat/threads
+
+###
+
+# 内存状态
+GET {{base_url}}/monitor/tomcat/memory
+
+###
+
+# 运行时状态
+GET {{base_url}}/monitor/tomcat/runtime
+
+###
+
+# 类加载状态
+GET {{base_url}}/monitor/tomcat/classloading
+
+###
+
+# 完整状态
+GET {{base_url}}/monitor/tomcat/status
+
+###
+
+### 八、监控数据分析示例
+
+# 1. 首先获取完整状态
+GET {{base_url}}/monitor/tomcat/status
+
+###
+
+# 2. 检查线程使用率是否正常（threadsPerCpu < 10 为正常）
+# 3. 检查内存使用率（usagePercent < 80% 为正常）
+# 4. 检查类加载数量是否持续增长（可能存在类泄漏）
+
+###
+
+### 九、生产环境监控建议
+
+# 定期健康检查（每分钟）
+GET {{base_url}}/monitor/tomcat/health
+
+###
+
+# 每小时完整状态检查
+GET {{base_url}}/monitor/tomcat/status
+
+###
+
+### 十、告警阈值参考
+
+# 线程数告警：peakThreadCount > maxThreads * 0.8
+# 内存告警：heap.usagePercent > 80%
+# 类加载告警：loadedClassCount 持续增长
+
+###
