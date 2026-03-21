@@ -10,6 +10,9 @@ import org.springframework.data.mongodb.config.AbstractMongoClientConfiguration;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
 /**
  * MongoDB 配置类
  * 
@@ -42,11 +45,34 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
 public class MongoConfig extends AbstractMongoClientConfiguration {
 
     /**
-     * MongoDB 连接字符串
-     * 支持单节点、副本集、分片集群等多种连接方式
+     * MongoDB 用户名
      */
-    @Value("${spring.data.mongodb.uri:mongodb://localhost:27017/interview_db}")
-    private String mongoUri;
+    @Value("${spring.data.mongodb.username:root}")
+    private String username;
+
+    /**
+     * MongoDB 密码
+     */
+    @Value("${spring.data.mongodb.password:root}")
+    private String password;
+
+    /**
+     * MongoDB 主机地址
+     */
+    @Value("${spring.data.mongodb.host:localhost}")
+    private String host;
+
+    /**
+     * MongoDB 端口
+     */
+    @Value("${spring.data.mongodb.port:27017}")
+    private int port;
+
+    /**
+     * MongoDB 认证数据库
+     */
+    @Value("${spring.data.mongodb.authentication-database:admin}")
+    private String authDatabase;
 
     /**
      * 数据库名称
@@ -68,19 +94,49 @@ public class MongoConfig extends AbstractMongoClientConfiguration {
      * <p>MongoClient 是线程安全的，可以全局共享</p>
      * <p>内部使用连接池管理连接</p>
      * 
+     * <p>连接字符串支持多种配置选项：</p>
+     * <ul>
+     *   <li>maxPoolSize: 连接池最大连接数</li>
+     *   <li>minPoolSize: 连接池最小连接数</li>
+     *   <li>connectTimeoutMS: 连接超时时间</li>
+     *   <li>socketTimeoutMS: Socket 超时时间</li>
+     *   <li>serverSelectionTimeoutMS: 服务器选择超时时间</li>
+     * </ul>
+     * 
      * @return MongoClient 实例
      */
     @Override
     @Bean(destroyMethod = "close")
     public MongoClient mongoClient() {
-        // 创建 MongoDB 客户端
-        // 连接字符串支持多种配置选项：
-        // - maxPoolSize: 连接池最大连接数
-        // - minPoolSize: 连接池最小连接数
-        // - connectTimeoutMS: 连接超时时间
-        // - socketTimeoutMS: Socket 超时时间
-        // - serverSelectionTimeoutMS: 服务器选择超时时间
-        return MongoClients.create(mongoUri);
+        // 构建连接字符串，自动对用户名和密码进行URL编码
+        // 这样可以正确处理包含特殊字符（如 : @ 等）的密码
+        String encodedUsername = urlEncode(username);
+        String encodedPassword = urlEncode(password);
+        
+        String connectionString = String.format(
+            "mongodb://%s:%s@%s:%d/%s?authSource=%s",
+            encodedUsername, encodedPassword, host, port, databaseName, authDatabase
+        );
+        
+        return MongoClients.create(connectionString);
+    }
+
+    /**
+     * 对字符串进行URL编码
+     * 
+     * <p>MongoDB连接字符串中，用户名和密码如果包含特殊字符（如 : @ / 等），
+     * 必须进行URL编码才能正确解析</p>
+     * 
+     * @param value 需要编码的字符串
+     * @return URL编码后的字符串
+     */
+    private String urlEncode(String value) {
+        try {
+            return URLEncoder.encode(value, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            // UTF-8 是标准编码，理论上不会抛出此异常
+            throw new RuntimeException("Failed to encode MongoDB credential", e);
+        }
     }
 
     /**
