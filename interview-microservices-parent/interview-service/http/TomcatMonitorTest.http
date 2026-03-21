@@ -1,6 +1,6 @@
 ### Tomcat 监控接口测试
 ### 基础 URL 配置
-@base_url = http://localhost:8080
+@base_url = http://localhost:8081/service
 
 ###
 

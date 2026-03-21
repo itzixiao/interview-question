@@ -9,6 +9,7 @@
         <groupId>cn.itzixiao</groupId>
         <artifactId>interview-microservices-parent</artifactId>
         <version>1.0.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>interview-service</artifactId>
@@ -159,7 +160,6 @@
         <dependency>
             <groupId>org.openjdk.jol</groupId>
             <artifactId>jol-core</artifactId>
-            <version>0.16</version>
         </dependency>
         
         <!-- Xmemcached - Memcached 客户端 -->
@@ -177,9 +177,22 @@
 
     <build>
         <plugins>
+            <!-- 配置Maven编译插件，压制Unsafe内部API警告（适配JDK8） -->
             <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
+                    <!-- 仅保留JDK8支持的参数 -->
+                    <compilerArgs>
+                        <arg>-Xlint:-deprecation</arg> <!-- 关闭废弃API警告 -->
+                        <arg>-Xlint:-unchecked</arg>   <!-- 关闭未检查类型警告 -->
+                        <arg>-XDignore.symbol.file</arg> <!-- 核心：压制Unsafe内部API警告 -->
+                    </compilerArgs>
+                    <fork>true</fork>
+                    <compilerVersion>${maven.compiler.source}</compilerVersion>
+                </configuration>
             </plugin>
         </plugins>
     </build>

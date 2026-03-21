@@ -45,6 +45,7 @@
         <mysql-connector.version>8.0.33</mysql-connector.version>
         <mybatis-plus.version>3.5.3.1</mybatis-plus.version>
         <mybatis-spring-boot.version>2.3.1</mybatis-spring-boot.version>
+        <druid.version>1.2.18</druid.version>
 
         <!-- Redis 相关版本 -->
         <redisson.version>3.17.6</redisson.version>
@@ -76,6 +77,31 @@
         <lombok.version>1.18.28</lombok.version>
         <guava.version>31.1-jre</guava.version>
         <caffeine.version>2.9.3</caffeine.version>
+
+        <!-- XXL-JOB 版本 -->
+        <xxl-job.version>2.4.0</xxl-job.version>
+
+        <!-- Axon Framework 版本 -->
+        <axon-framework.version>4.8.0</axon-framework.version>
+
+        <!-- Spring Cloud Sleuth 版本 -->
+        <spring-cloud-sleuth.version>3.1.9</spring-cloud-sleuth.version>
+
+        <!-- HBase 版本 -->
+        <hbase.version>2.4.18</hbase.version>
+
+        <!-- Seata 版本 -->
+        <seata.version>2021.0.5.0</seata.version>
+
+        <!-- RocketMQ 版本 -->
+        <rocketmq.version>2.2.3</rocketmq.version>
+
+        <!-- JOL 版本 -->
+        <jol.version>0.16</jol.version>
+
+        <!-- 工具类版本 -->
+        <fastjson2.version>2.0.40</fastjson2.version>
+        <hutool.version>5.8.22</hutool.version>
 
         <!-- Maven 插件版本 -->
         <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
@@ -159,6 +185,13 @@
                 <groupId>org.mybatis.spring.boot</groupId>
                 <artifactId>mybatis-spring-boot-starter</artifactId>
                 <version>${mybatis-spring-boot.version}</version>
+            </dependency>
+
+            <!-- Druid -->
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>druid</artifactId>
+                <version>${druid.version}</version>
             </dependency>
 
             <!-- Redisson -->
@@ -268,23 +301,117 @@
                 <artifactId>spring-boot-starter-data-mongodb</artifactId>
                 <version>${spring-boot.version}</version>
             </dependency>
+
+            <!-- XXL-JOB -->
+            <dependency>
+                <groupId>com.xuxueli</groupId>
+                <artifactId>xxl-job-core</artifactId>
+                <version>${xxl-job.version}</version>
+            </dependency>
+
+            <!-- Axon Framework -->
+            <dependency>
+                <groupId>org.axonframework</groupId>
+                <artifactId>axon-spring-boot-starter</artifactId>
+                <version>${axon-framework.version}</version>
+            </dependency>
+
+            <!-- Spring Cloud Sleuth -->
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-starter-sleuth</artifactId>
+                <version>${spring-cloud-sleuth.version}</version>
+            </dependency>
+
+            <!-- HBase -->
+            <dependency>
+                <groupId>org.apache.hbase</groupId>
+                <artifactId>hbase-client</artifactId>
+                <version>${hbase.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.hbase</groupId>
+                <artifactId>hbase-common</artifactId>
+                <version>${hbase.version}</version>
+            </dependency>
+
+            <!-- Seata -->
+            <dependency>
+                <groupId>com.alibaba.cloud</groupId>
+                <artifactId>spring-cloud-starter-alibaba-seata</artifactId>
+                <version>${seata.version}</version>
+            </dependency>
+
+            <!-- RocketMQ -->
+            <dependency>
+                <groupId>org.apache.rocketmq</groupId>
+                <artifactId>rocketmq-spring-boot-starter</artifactId>
+                <version>${rocketmq.version}</version>
+            </dependency>
+
+            <!-- JOL -->
+            <dependency>
+                <groupId>org.openjdk.jol</groupId>
+                <artifactId>jol-core</artifactId>
+                <version>${jol.version}</version>
+            </dependency>
+
+            <!-- FastJSON2 -->
+            <dependency>
+                <groupId>com.alibaba.fastjson2</groupId>
+                <artifactId>fastjson2</artifactId>
+                <version>${fastjson2.version}</version>
+            </dependency>
+
+            <!-- Hutool -->
+            <dependency>
+                <groupId>cn.hutool</groupId>
+                <artifactId>hutool-all</artifactId>
+                <version>${hutool.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
     <build>
+        <pluginManagement>
+            <plugins>
+                <!-- Maven Compiler Plugin -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${maven-compiler-plugin.version}</version>
+                    <configuration>
+                        <source>${maven.compiler.source}</source>
+                        <target>${maven.compiler.target}</target>
+                        <encoding>${project.build.sourceEncoding}</encoding>
+                    </configuration>
+                </plugin>
+
+                <!-- Spring Boot Maven Plugin -->
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                    <version>${spring-boot.version}</version>
+                    <configuration>
+                        <excludes>
+                            <exclude>
+                                <groupId>org.projectlombok</groupId>
+                                <artifactId>lombok</artifactId>
+                            </exclude>
+                        </excludes>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>${spring-boot.version}</version>
-                <configuration>
-                    <excludes>
-                        <exclude>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                        </exclude>
-                    </excludes>
-                </configuration>
             </plugin>
         </plugins>
     </build>

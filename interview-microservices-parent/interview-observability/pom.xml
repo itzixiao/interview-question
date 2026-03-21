@@ -9,6 +9,7 @@
         <groupId>cn.itzixiao</groupId>
         <artifactId>interview-microservices-parent</artifactId>
         <version>1.0.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>interview-observability</artifactId>
@@ -37,7 +38,6 @@
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-sleuth</artifactId>
-            <version>3.1.9</version>
         </dependency>
 
         <!-- Lombok -->

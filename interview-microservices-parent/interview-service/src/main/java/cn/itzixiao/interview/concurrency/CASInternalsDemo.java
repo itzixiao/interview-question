@@ -23,6 +23,7 @@ import java.util.concurrent.atomic.AtomicStampedReference;
  * │  }                                                          │
  * └─────────────────────────────────────────────────────────────┘
  */
+@SuppressWarnings("restriction")
 public class CASInternalsDemo {
 
     public static void main(String[] args) throws Exception {

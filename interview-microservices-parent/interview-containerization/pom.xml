@@ -9,6 +9,7 @@
         <groupId>cn.itzixiao</groupId>
         <artifactId>interview-microservices-parent</artifactId>
         <version>1.0.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>interview-containerization</artifactId>
