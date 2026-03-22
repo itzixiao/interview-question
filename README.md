@@ -69,30 +69,30 @@ interview-question/                              # 根目录
 
 ### 模块职责说明
 
-| 模块                               | 职责              | 说明                                  |
-|----------------------------------|-----------------|-------------------------------------|
-| **interview-common**             | 公共模块            | 提供统一的异常处理、返回结果等公共组件                 |
-| **interview-gateway**            | API 网关          | 基于 Spring Cloud Gateway，负责路由、过滤、限流等 |
+| 模块                                 | 职责              | 说明                                  |
+|------------------------------------|-----------------|-------------------------------------|
+| **interview-common**               | 公共模块            | 提供统一的异常处理、返回结果等公共组件                 |
+| **interview-gateway**              | API 网关          | 基于 Spring Cloud Gateway，负责路由、过滤、限流等 |
 | **interview-microservices-parent** | 微服务集合（父模块）      | 包含所有业务微服务模块                         |
-| **interview-starters-parent**    | Starter 集合（父模块） | 包含自定义的 Spring Boot Starter          |
-| **interview-algorithm**          | 算法题库            | 包含常见算法面试题及实现                        |
-| **interview-bigdata**            | 大数据技术栈          | Hadoop、Spark、Flink等大数据组件示例          |
-| **interview-containerization**   | 容器化技术           | Docker、Kubernetes容器化部署示例              |
-| **interview-kafka**              | Kafka消息队列       | Kafka生产者消费者示例及配置                     |
-| **interview-lowcode**            | 低代码平台            | 动态表单、代码生成器等低代码实现                   |
-| **interview-observability**      | 可观测性             | 日志、监控、链路追踪等可观测性实现                  |
-| **interview-performance-tuning** | 性能调优             | JVM调优、SQL优化等性能优化示例                   |
-| **interview-provider**           | 服务提供者           | 提供 RESTful API 服务，演示 OpenFeign 调用   |
-| **interview-rabbitmq**           | RabbitMQ消息队列    | RabbitMQ消息发送与消费示例                     |
-| **interview-reactive**           | 响应式编程            | WebFlux、Reactor响应式编程示例               |
-| **interview-security**           | 安全认证             | JWT、OAuth2、Spring Security安全实现        |
-| **interview-service**            | 业务服务             | 包含所有业务逻辑和技术点示例代码                    |
-| **interview-service-mesh**       | 服务网格             | Istio等服务网格技术示例                        |
-| **interview-system-design**      | 系统设计             | 高并发、高可用系统设计方案                       |
-| **interview-transaction-demo**   | 分布式事务演示          | Seata分布式事务实现示例                        |
-| **interview-workflow**           | 工作流引擎            | Flowable工作流引擎集成与使用                    |
-| **interview-xxljob**             | 分布式任务调度          | XXL-JOB任务调度平台集成与使用                   |
-| **interview-threadpool-starter** | 线程池Starter      | 自定义线程池自动配置 Starter                  |
+| **interview-starters-parent**      | Starter 集合（父模块） | 包含自定义的 Spring Boot Starter          |
+| **interview-algorithm**            | 算法题库            | 包含常见算法面试题及实现                        |
+| **interview-bigdata**              | 大数据技术栈          | Hadoop、Spark、Flink等大数据组件示例          |
+| **interview-containerization**     | 容器化技术           | Docker、Kubernetes容器化部署示例            |
+| **interview-kafka**                | Kafka消息队列       | Kafka生产者消费者示例及配置                    |
+| **interview-lowcode**              | 低代码平台           | 动态表单、代码生成器等低代码实现                    |
+| **interview-observability**        | 可观测性            | 日志、监控、链路追踪等可观测性实现                   |
+| **interview-performance-tuning**   | 性能调优            | JVM调优、SQL优化等性能优化示例                  |
+| **interview-provider**             | 服务提供者           | 提供 RESTful API 服务，演示 OpenFeign 调用   |
+| **interview-rabbitmq**             | RabbitMQ消息队列    | RabbitMQ消息发送与消费示例                   |
+| **interview-reactive**             | 响应式编程           | WebFlux、Reactor响应式编程示例              |
+| **interview-security**             | 安全认证            | JWT、OAuth2、Spring Security安全实现      |
+| **interview-service**              | 业务服务            | 包含所有业务逻辑和技术点示例代码                    |
+| **interview-service-mesh**         | 服务网格            | Istio等服务网格技术示例                      |
+| **interview-system-design**        | 系统设计            | 高并发、高可用系统设计方案                       |
+| **interview-transaction-demo**     | 分布式事务演示         | Seata分布式事务实现示例                      |
+| **interview-workflow**             | 工作流引擎           | Flowable工作流引擎集成与使用                  |
+| **interview-xxljob**               | 分布式任务调度         | XXL-JOB任务调度平台集成与使用                  |
+| **interview-threadpool-starter**   | 线程池Starter      | 自定义线程池自动配置 Starter                  |
 
 ### 技术栈
 
@@ -121,28 +121,28 @@ mvn spring-boot:run
 
 ### 完整模块导航
 
-| 模块                          | 文档数  | 面试题    | README 导航                                     |
-|-----------------------------|------|--------|-----------------------------------------------|
-| 🔹 **01-Java基础**            | 9 篇  | 45+ 道  | [详细文档](./docs/01-Java基础/README.md)            |
-| 🔹 **02-Java并发编程**          | 9 篇  | 98+ 道  | [详细文档](./docs/02-Java并发编程/README.md)          |
-| 🔹 **03-JVM**               | 4 篇  | 10+ 道  | [详细文档](./docs/03-JVM/README.md)               |
-| 🔹 **04-JavaIO模型**          | 4 篇  | 22+ 道  | [详细文档](./docs/04-JavaIO模型/README.md)          |
-| 🔹 **05-Spring框架**          | 9 篇  | 62+ 道  | [详细文档](./docs/05-Spring框架/README.md)          |
-| 🔹 **06-SpringBoot与自动装配**   | 4 篇  | 20+ 道  | [详细文档](./docs/06-SpringBoot与自动装配/README.md)   |
-| 🔹 **07-SpringCloud微服务**    | 2 篇  | 25+ 道  | [详细文档](./docs/07-SpringCloud微服务/README.md)    |
-| 🔹 **08-MySQL数据库**          | 11 篇 | 50+ 道  | [详细文档](./docs/08-MySQL数据库/README.md)          |
-| 🔹 **09-PostgreSQL数据库** ⭐新增 | 3 篇  | 11+ 道  | [详细文档](./docs/09-PostgreSQL数据库/README.md)     |
-| 🔹 **10-缓存与NoSQL数据库** | 10 篇 | 145+ 道 | [详细文档](./docs/10-缓存与NoSQL数据库/README.md) |
-| 🔹 **11-中间件**               | 14 篇 | 116+ 道 | [详细文档](./docs/11-中间件/README.md)               |
-| 🔹 **12-算法与数据结构**           | 4 篇  | 45+ 道  | [详细文档](./docs/12-算法与数据结构/README.md)           |
-| 🔹 **13-设计模式**              | 1 篇  | 20+ 道  | [详细文档](./docs/13-设计模式/README.md)              |
-| 🔹 **14-分布式系统**             | 7 篇  | 15+ 道  | [详细文档](./docs/14-分布式系统/README.md)             |
-| 🔹 **15-DevOps**            | 5 篇  | 25+ 道  | [详细文档](./docs/15-DevOps/README.md)            |
-| 🔹 **16-工程效能**              | 6 篇  | 26+ 道  | [详细文档](./docs/16-工程效能/README.md)              |
-| 🔹 **17-SPI机制**             | 1 篇  | 4+ 道   | [详细文档](./docs/17-SPI机制/README.md)             |
-| 🔹 **18-前端开发** ⭐新增      | 2 篇  | 20+ 道  | [详细文档](./docs/18-前端开发/README.md)            |
+| 模块                        | 文档数  | 面试题    | README 导航                                   |
+|---------------------------|------|--------|---------------------------------------------|
+| 🔹 **01-Java基础**          | 9 篇  | 45+ 道  | [详细文档](./docs/01-Java基础/README.md)          |
+| 🔹 **02-Java并发编程**        | 9 篇  | 98+ 道  | [详细文档](./docs/02-Java并发编程/README.md)        |
+| 🔹 **03-JVM**             | 4 篇  | 10+ 道  | [详细文档](./docs/03-JVM/README.md)             |
+| 🔹 **04-JavaIO模型**        | 4 篇  | 22+ 道  | [详细文档](./docs/04-JavaIO模型/README.md)        |
+| 🔹 **05-Spring框架**        | 9 篇  | 62+ 道  | [详细文档](./docs/05-Spring框架/README.md)        |
+| 🔹 **06-SpringBoot与自动装配** | 4 篇  | 20+ 道  | [详细文档](./docs/06-SpringBoot与自动装配/README.md) |
+| 🔹 **07-SpringCloud微服务**  | 2 篇  | 25+ 道  | [详细文档](./docs/07-SpringCloud微服务/README.md)  |
+| 🔹 **08-MySQL数据库**        | 11 篇 | 50+ 道  | [详细文档](./docs/08-MySQL数据库/README.md)        |
+| 🔹 **09-PostgreSQL数据库**   | 3 篇  | 11+ 道  | [详细文档](./docs/09-PostgreSQL数据库/README.md)   |
+| 🔹 **10-缓存与NoSQL数据库**     | 10 篇 | 145+ 道 | [详细文档](./docs/10-缓存与NoSQL数据库/README.md)     |
+| 🔹 **11-中间件**             | 14 篇 | 116+ 道 | [详细文档](./docs/11-中间件/README.md)             |
+| 🔹 **12-算法与数据结构**         | 4 篇  | 45+ 道  | [详细文档](./docs/12-算法与数据结构/README.md)         |
+| 🔹 **13-设计模式**            | 1 篇  | 20+ 道  | [详细文档](./docs/13-设计模式/README.md)            |
+| 🔹 **14-分布式系统**           | 7 篇  | 15+ 道  | [详细文档](./docs/14-分布式系统/README.md)           |
+| 🔹 **15-DevOps**          | 5 篇  | 25+ 道  | [详细文档](./docs/15-DevOps/README.md)          |
+| 🔹 **16-工程效能**            | 6 篇  | 26+ 道  | [详细文档](./docs/16-工程效能/README.md)            |
+| 🔹 **17-SPI机制**           | 1 篇  | 4+ 道   | [详细文档](./docs/17-SPI机制/README.md)           |
+| 🔹 **18-前端开发**            | 8 篇  | 49+ 道  | [详细文档](./docs/18-前端开发/README.md)            |
 
-**总计：** 68 篇文档 · 624+ 道面试题 · 配套 ~42,000 行示例代码
+**总计：** 74 篇文档 · 653+ 道面试题 · 配套 ~42,000 行示例代码
 
 ---
 
@@ -250,7 +250,9 @@ mvn spring-boot:run
 - [JDBC 是如何使用 SPI 的？](docs/17-SPI机制/01-SPI机制详解.md)
 - [Spring Boot自动装配与 SPI 的关系？](docs/17-SPI机制/01-SPI机制详解.md)
 
-### 前端开发（20+ 道） ⭐新增
+### 前端开发（49+ 道） ⭐新增
+
+**Vue2/Vue3**
 
 - [Vue2 的响应式原理是什么？](./docs/18-前端开发/01-Vue2核心原理详解.md)
 - [Vue2 的 Diff 算法原理是什么？](./docs/18-前端开发/01-Vue2核心原理详解.md)
@@ -259,6 +261,38 @@ mvn spring-boot:run
 - [Composition API 与 Options API 的区别？](./docs/18-前端开发/02-Vue3核心原理详解.md)
 - [ref 和 reactive 的区别？](./docs/18-前端开发/02-Vue3核心原理详解.md)
 - [Pinia 与 Vuex 的区别？](./docs/18-前端开发/02-Vue3核心原理详解.md)
+
+**前端工程化**
+
+- [Vite 为什么比 Webpack 快？](./docs/18-前端开发/03-前端工程化详解.md)
+- [Monorepo 的优势和挑战是什么？](./docs/18-前端开发/03-前端工程化详解.md)
+
+**TypeScript**
+
+- [TypeScript 与 Java 泛型的主要区别？](./docs/18-前端开发/04-TypeScript高级类型与实战.md)
+- [如何提取 Promise 的返回值类型？](./docs/18-前端开发/04-TypeScript高级类型与实战.md)
+
+**React**
+
+- [React Hooks 为什么不能放在条件语句中？](./docs/18-前端开发/05-React核心原理.md)
+- [React 的 Fiber 架构解决了什么问题？](./docs/18-前端开发/05-React核心原理.md)
+- [Redux 和 Context API 应该如何选择？](./docs/18-前端开发/05-React核心原理.md)
+
+**前后端联调**
+
+- [如何设计一个可扩展的 API 层？](./docs/18-前端开发/06-前后端联调最佳实践.md)
+- [如何防止重复提交？](./docs/18-前端开发/06-前后端联调最佳实践.md)
+
+**性能优化**
+
+- [如何优化首屏加载时间？](./docs/18-前端开发/07-前端性能优化全链路.md)
+- [虚拟列表的实现原理是什么？](./docs/18-前端开发/07-前端性能优化全链路.md)
+
+**微前端**
+
+- [微前端解决了什么问题？带来了什么挑战？](./docs/18-前端开发/08-微前端架构实战.md)
+- [qiankun 的 JS 沙箱是如何实现的？](./docs/18-前端开发/08-微前端架构实战.md)
+- [Module Federation 与 qiankun 有什么区别？](./docs/18-前端开发/08-微前端架构实战.md)
 
 ### 工程效能（26+ 道） ⭐新增
 
@@ -272,8 +306,8 @@ mvn spring-boot:run
 
 ## 📊 知识点覆盖统计
 
-| 分类              | 文档数    | 面试题数     | 重要程度      |
-|-----------------|--------|----------|-----------|
+| 分类                | 文档数    | 面试题数     | 重要程度      |
+|-------------------|--------|----------|-----------|
 | Java基础            | 9      | 45+      | ⭐⭐⭐⭐⭐     |
 | Java并发编程          | 9      | 98+      | ⭐⭐⭐⭐⭐     |
 | JVM               | 4      | 10+      | ⭐⭐⭐⭐      |
@@ -291,8 +325,8 @@ mvn spring-boot:run
 | DevOps            | 5      | 25+      | ⭐⭐⭐       |
 | 工程效能              | 6      | 26+      | ⭐⭐⭐⭐      |
 | SPI机制             | 1      | 4+       | ⭐⭐⭐⭐      |
-| 前端开发              | 2      | 20+      | ⭐⭐⭐⭐⭐     |
-| **总计**            | **68** | **624+** | -          |
+| 前端开发              | 8      | 49+      | ⭐⭐⭐⭐⭐     |
+| **总计**            | **74** | **653+** | -         |
 
 ---
 
@@ -395,4 +429,4 @@ mvn spring-boot:run
 - [📘 15-DevOps](./docs/15-DevOps/README.md) - 5 篇文档，25+ 道面试题
 - [📘 16-工程效能](./docs/16-工程效能/README.md) - 6 篇文档，26+ 道面试题
 - [📘 17-SPI机制](./docs/17-SPI机制/README.md) - 1 篇文档，4+ 道面试题
-- [📘 18-前端开发](./docs/18-前端开发/README.md) - 2 篇文档，20+ 道面试题 ⭐新增
+- [📘 18-前端开发](./docs/18-前端开发/README.md) - 8 篇文档，49+ 道面试题 ⭐新增
