@@ -30,12 +30,19 @@
 - **重要程度：** ⭐⭐⭐⭐
 - **难度：** 中级
 
+### 5. [05-Spring-AI智能体详解.md](./05-Spring-AI智能体详解.md)
+
+- **内容：** Spring AI 框架、Chat 聊天、RAG 知识库、Function Calling、Agent 编排
+- **面试题：** 8+ 道
+- **重要程度：** ⭐⭐⭐⭐⭐
+- **难度：** 中级 ~ 高级
+
 ---
 
 ## 📊 统计信息
 
-- **文档数：** 4 个
-- **面试题总数：** 30+ 道
+- **文档数：** 5 个
+- **面试题总数：** 38+ 道
 - **代码示例：** 配套 Java 代码在 `interview-microservices-parent/` 模块中
 
 ---
@@ -50,6 +57,8 @@ Spring Cloud Gateway（网关核心）
 Gateway 鉴权与路由实战（实战应用）
           ↓
 OpenFeign（服务调用）
+          ↓
+Spring AI（智能体）
           ↓
 Sentinel（限流熔断）
           ↓
@@ -81,6 +90,14 @@ Sleuth + Zipkin（链路追踪）
 3. **性能优化**：连接池、超时配置、日志级别
 4. **最佳实践**：参数传递、异常处理、降级策略
 
+### Spring AI
+
+1. **核心概念**：ChatClient、EmbeddingClient、VectorStore
+2. **对话聊天**：单轮/多轮对话、流式响应、系统提示词
+3. **RAG 知识库**：文档向量化、相似度检索、上下文增强
+4. **Function Calling**：工具调用、实时数据获取
+5. **Agent 编排**：任务规划、多步执行、自主决策
+
 ---
 
 ## 🔗 相关链接
@@ -89,10 +106,16 @@ Sleuth + Zipkin（链路追踪）
 - [Gateway 示例代码](../../../interview-gateway/)
 - [Provider 示例代码](../../../interview-microservices-parent/interview-provider/)
 - [Service 示例代码](../../../interview-microservices-parent/interview-service/)
+- [Spring AI 示例代码](../../../interview-microservices-parent/interview-spring-ai/)
 
 ---
 
 ## 📈 更新日志
+
+### v4.0 - 2026-03-23
+
+- ✅ 新增 05-Spring-AI智能体详解.md（Spring AI 框架、RAG、Function Calling、Agent）
+- ✅ 更新推荐学习顺序，添加 Spring AI 模块
 
 ### v3.0 - 2026-03-20
 
