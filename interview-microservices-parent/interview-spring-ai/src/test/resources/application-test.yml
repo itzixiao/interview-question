@@ -1,0 +1,19 @@
+# 测试环境配置
+spring:
+  ai:
+    openai:
+      api-key: test-key
+      chat:
+        options:
+          model: gpt-3.5-turbo
+      embedding:
+        options:
+          model: text-embedding-ada-002
+
+  main:
+    allow-bean-definition-overriding: true
+
+logging:
+  level:
+    root: WARN
+    org.springframework.ai: WARN

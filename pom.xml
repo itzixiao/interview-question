@@ -42,7 +42,7 @@
         <spring-cloud-alibaba.version>2023.0.1.0</spring-cloud-alibaba.version>
 
         <!-- Spring AI 版本 -->
-        <spring-ai.version>1.0.0-M4</spring-ai.version>
+        <spring-ai.version>0.8.1</spring-ai.version>
 
         <!-- 数据库相关版本 -->
         <mysql-connector.version>8.0.33</mysql-connector.version>
