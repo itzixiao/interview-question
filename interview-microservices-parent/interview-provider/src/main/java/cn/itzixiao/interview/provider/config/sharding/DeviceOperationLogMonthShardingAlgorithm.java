@@ -2,10 +2,9 @@ package cn.itzixiao.interview.provider.config.sharding;
 
 import com.google.common.collect.Range;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.shardingsphere.api.sharding.standard.PreciseShardingAlgorithm;
-import org.apache.shardingsphere.api.sharding.standard.PreciseShardingValue;
-import org.apache.shardingsphere.api.sharding.standard.RangeShardingAlgorithm;
-import org.apache.shardingsphere.api.sharding.standard.RangeShardingValue;
+import org.apache.shardingsphere.sharding.api.sharding.standard.StandardShardingAlgorithm;
+import org.apache.shardingsphere.sharding.api.sharding.standard.PreciseShardingValue;
+import org.apache.shardingsphere.sharding.api.sharding.standard.RangeShardingValue;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -21,7 +20,7 @@ import java.util.stream.IntStream;
  * 例如：2026-03-15 -> device_operation_log_202603
  */
 @Slf4j
-public class DeviceOperationLogMonthShardingAlgorithm implements PreciseShardingAlgorithm<Comparable<?>>, RangeShardingAlgorithm<Comparable<?>> {
+public class DeviceOperationLogMonthShardingAlgorithm implements StandardShardingAlgorithm<Comparable<?>> {
 
     private static final DateTimeFormatter MONTH_FORMATTER = DateTimeFormatter.ofPattern("yyyyMM");
 

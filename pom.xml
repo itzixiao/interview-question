@@ -28,83 +28,86 @@
     </modules>
 
     <properties>
-        <java.version>1.8</java.version>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <java.version>17</java.version>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!-- 项目模块版本 -->
         <project.version>1.0.0-SNAPSHOT</project.version>
 
-        <!-- Spring 全家桶版本 -->
-        <spring-boot.version>2.7.18</spring-boot.version>
-        <spring-cloud.version>2021.0.8</spring-cloud.version>
-        <spring-cloud-alibaba.version>2021.0.5.0</spring-cloud-alibaba.version>
+        <!-- Spring 全家桶版本 (JDK 17+) -->
+        <spring-boot.version>3.2.5</spring-boot.version>
+        <spring-cloud.version>2023.0.1</spring-cloud.version>
+        <spring-cloud-alibaba.version>2023.0.1.0</spring-cloud-alibaba.version>
+
+        <!-- Spring AI 版本 -->
+        <spring-ai.version>1.0.0-M4</spring-ai.version>
 
         <!-- 数据库相关版本 -->
         <mysql-connector.version>8.0.33</mysql-connector.version>
-        <mybatis-plus.version>3.5.3.1</mybatis-plus.version>
-        <mybatis-spring-boot.version>2.3.1</mybatis-spring-boot.version>
-        <druid.version>1.2.18</druid.version>
+        <mybatis-plus.version>3.5.5</mybatis-plus.version>
+        <mybatis-spring-boot.version>3.0.3</mybatis-spring-boot.version>
+        <druid.version>1.2.22</druid.version>
 
         <!-- Redis 相关版本 -->
-        <redisson.version>3.17.6</redisson.version>
-        
+        <redisson.version>3.27.2</redisson.version>
+
         <!-- Memcached 版本 -->
         <xmemcached.version>2.4.8</xmemcached.version>
-        
-        <!-- MongoDB 版本 (与 Spring Boot 2.7.x 兼容) -->
-        <mongodb-driver.version>4.6.1</mongodb-driver.version>
+
+        <!-- MongoDB 版本 -->
+        <mongodb-driver.version>4.11.1</mongodb-driver.version>
 
         <!-- 中间件版本 -->
-        <shardingsphere.version>4.1.1</shardingsphere.version>
-        <easyexcel.version>3.3.2</easyexcel.version>
+        <shardingsphere.version>5.4.1</shardingsphere.version>
+        <easyexcel.version>3.3.4</easyexcel.version>
 
         <!-- Elasticsearch 版本 -->
-        <elasticsearch.version>7.17.9</elasticsearch.version>
+        <elasticsearch.version>8.12.2</elasticsearch.version>
 
         <!-- JWT 版本 -->
-        <jjwt.version>0.11.5</jjwt.version>
+        <jjwt.version>0.12.5</jjwt.version>
         <jjwt-legacy.version>0.9.1</jjwt-legacy.version>
 
         <!-- Flowable 工作流版本 -->
-        <flowable.version>6.8.0</flowable.version>
+        <flowable.version>7.0.1</flowable.version>
 
         <!-- API 文档版本 -->
-        <knife4j.version>3.0.3</knife4j.version>
+        <knife4j.version>4.5.0</knife4j.version>
 
         <!-- 工具类版本 -->
-        <lombok.version>1.18.28</lombok.version>
-        <guava.version>31.1-jre</guava.version>
-        <caffeine.version>2.9.3</caffeine.version>
+        <lombok.version>1.18.30</lombok.version>
+        <guava.version>33.1.0-jre</guava.version>
+        <caffeine.version>3.1.8</caffeine.version>
 
         <!-- XXL-JOB 版本 -->
         <xxl-job.version>2.4.0</xxl-job.version>
 
         <!-- Axon Framework 版本 -->
-        <axon-framework.version>4.8.0</axon-framework.version>
+        <axon-framework.version>4.9.0</axon-framework.version>
 
-        <!-- Spring Cloud Sleuth 版本 -->
-        <spring-cloud-sleuth.version>3.1.9</spring-cloud-sleuth.version>
+        <!-- Micrometer Tracing (替代 Spring Cloud Sleuth) -->
+        <micrometer-tracing.version>1.3.0</micrometer-tracing.version>
 
         <!-- HBase 版本 -->
-        <hbase.version>2.4.18</hbase.version>
+        <hbase.version>2.6.0</hbase.version>
 
         <!-- Seata 版本 -->
-        <seata.version>2021.0.5.0</seata.version>
+        <seata.version>2023.0.1.0</seata.version>
 
         <!-- RocketMQ 版本 -->
         <rocketmq.version>2.2.3</rocketmq.version>
 
         <!-- JOL 版本 -->
-        <jol.version>0.16</jol.version>
+        <jol.version>0.17</jol.version>
 
         <!-- 工具类版本 -->
-        <fastjson2.version>2.0.40</fastjson2.version>
-        <hutool.version>5.8.22</hutool.version>
+        <fastjson2.version>2.0.47</fastjson2.version>
+        <hutool.version>5.8.26</hutool.version>
 
         <!-- Maven 插件版本 -->
-        <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
+        <maven-compiler-plugin.version>3.12.1</maven-compiler-plugin.version>
         <maven-compiler-plugin-starter.version>3.8.1</maven-compiler-plugin-starter.version>
     </properties>
 
@@ -133,6 +136,15 @@
                 <groupId>com.alibaba.cloud</groupId>
                 <artifactId>spring-cloud-alibaba-dependencies</artifactId>
                 <version>${spring-cloud-alibaba.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!-- Spring AI BOM -->
+            <dependency>
+                <groupId>org.springframework.ai</groupId>
+                <artifactId>spring-ai-bom</artifactId>
+                <version>${spring-ai.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -170,7 +182,7 @@
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
                 <version>${lombok.version}</version>
-                <optional>true</optional>
+                <scope>provided</scope>
             </dependency>
 
             <!-- MyBatis-Plus -->
@@ -234,10 +246,10 @@
                 <scope>runtime</scope>
             </dependency>
 
-            <!-- ShardingSphere -->
+            <!-- ShardingSphere (Spring Boot 3) -->
             <dependency>
                 <groupId>org.apache.shardingsphere</groupId>
-                <artifactId>sharding-jdbc-spring-boot-starter</artifactId>
+                <artifactId>shardingsphere-jdbc-core</artifactId>
                 <version>${shardingsphere.version}</version>
             </dependency>
 
@@ -255,10 +267,10 @@
                 <version>${spring-boot.version}</version>
             </dependency>
 
-            <!-- Knife4j API 文档 -->
+            <!-- Knife4j API 文档 (Spring Boot 3) -->
             <dependency>
                 <groupId>com.github.xiaoymin</groupId>
-                <artifactId>knife4j-spring-boot-starter</artifactId>
+                <artifactId>knife4j-openapi3-jakarta-spring-boot-starter</artifactId>
                 <version>${knife4j.version}</version>
             </dependency>
 
@@ -316,11 +328,16 @@
                 <version>${axon-framework.version}</version>
             </dependency>
 
-            <!-- Spring Cloud Sleuth -->
+            <!-- Micrometer Tracing (替代 Spring Cloud Sleuth) -->
             <dependency>
-                <groupId>org.springframework.cloud</groupId>
-                <artifactId>spring-cloud-starter-sleuth</artifactId>
-                <version>${spring-cloud-sleuth.version}</version>
+                <groupId>io.micrometer</groupId>
+                <artifactId>micrometer-tracing-bridge-brave</artifactId>
+                <version>${micrometer-tracing.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.micrometer</groupId>
+                <artifactId>micrometer-tracing-reporter-zipkin</artifactId>
+                <version>${micrometer-tracing.version}</version>
             </dependency>
 
             <!-- HBase -->
@@ -328,11 +345,23 @@
                 <groupId>org.apache.hbase</groupId>
                 <artifactId>hbase-client</artifactId>
                 <version>${hbase.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.apache.yetus</groupId>
+                        <artifactId>audience-annotations</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.apache.hbase</groupId>
                 <artifactId>hbase-common</artifactId>
                 <version>${hbase.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.apache.yetus</groupId>
+                        <artifactId>audience-annotations</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <!-- Seata -->
@@ -384,6 +413,13 @@
                         <source>${maven.compiler.source}</source>
                         <target>${maven.compiler.target}</target>
                         <encoding>${project.build.sourceEncoding}</encoding>
+                        <annotationProcessorPaths>
+                            <path>
+                                <groupId>org.projectlombok</groupId>
+                                <artifactId>lombok</artifactId>
+                                <version>${lombok.version}</version>
+                            </path>
+                        </annotationProcessorPaths>
                     </configuration>
                 </plugin>
 
@@ -415,4 +451,26 @@
             </plugin>
         </plugins>
     </build>
+
+    <!-- 仓库配置 -->
+    <repositories>
+        <!-- Spring Milestones 仓库（用于 Spring AI） -->
+        <repository>
+            <id>spring-milestones</id>
+            <name>Spring Milestones</name>
+            <url>https://repo.spring.io/milestone</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <!-- Spring Releases 仓库 -->
+        <repository>
+            <id>spring-releases</id>
+            <name>Spring Releases</name>
+            <url>https://repo.spring.io/release</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
 </project>

@@ -8,7 +8,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
+import org.springframework.data.elasticsearch.client.elc.ElasticsearchTemplate;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.IndexOperations;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.data.elasticsearch.core.query.IndexQuery;
@@ -29,21 +30,21 @@ public class DeviceOperationLogESService {
 
     private final DeviceOperationLogMapper deviceOperationLogMapper;
     private final DeviceOperationLogESRepository esRepository;
-    private final ElasticsearchRestTemplate elasticsearchRestTemplate;
+    private final ElasticsearchOperations elasticsearchOperations;
 
     public DeviceOperationLogESService(DeviceOperationLogMapper deviceOperationLogMapper,
                                        DeviceOperationLogESRepository esRepository,
-                                       ElasticsearchRestTemplate elasticsearchRestTemplate) {
+                                       ElasticsearchOperations elasticsearchOperations) {
         this.deviceOperationLogMapper = deviceOperationLogMapper;
         this.esRepository = esRepository;
-        this.elasticsearchRestTemplate = elasticsearchRestTemplate;
+        this.elasticsearchOperations = elasticsearchOperations;
     }
 
     /**
      * 创建索引（如果不存在）
      */
     public void createIndex() {
-        IndexOperations indexOps = elasticsearchRestTemplate.indexOps(DeviceOperationLogES.class);
+        IndexOperations indexOps = elasticsearchOperations.indexOps(DeviceOperationLogES.class);
 
         // 检查索引是否存在
         if (!indexOps.exists()) {
@@ -61,7 +62,7 @@ public class DeviceOperationLogESService {
      * 删除索引
      */
     public void deleteIndex() {
-        IndexOperations indexOps = elasticsearchRestTemplate.indexOps(DeviceOperationLogES.class);
+        IndexOperations indexOps = elasticsearchOperations.indexOps(DeviceOperationLogES.class);
         if (indexOps.exists()) {
             log.info("正在删除索引：device_operation_log");
             indexOps.delete();
@@ -115,7 +116,7 @@ public class DeviceOperationLogESService {
         }
 
         // 批量索引
-        elasticsearchRestTemplate.bulkIndex(indexQueries,
+        elasticsearchOperations.bulkIndex(indexQueries,
                 IndexCoordinates.of("device_operation_log"));
 
         log.info("【ES 数据加载】批次完成：共 {} 条，耗时 {}ms",
@@ -126,7 +127,7 @@ public class DeviceOperationLogESService {
 
         // 手动刷新索引，确保数据立即可搜索
         try {
-            elasticsearchRestTemplate.indexOps(DeviceOperationLogES.class).refresh();
+            elasticsearchOperations.indexOps(DeviceOperationLogES.class).refresh();
             log.info("【ES 数据加载】索引已刷新，数据立即可搜索");
         } catch (Exception e) {
             log.error("【ES 数据加载】刷新索引失败", e);

@@ -57,11 +57,11 @@ public class GatewayJwtService {
      * @return Claims - 包含所有声明信息
      */
     public Claims parseToken(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(secretKey)       // 设置签名密钥
+        return Jwts.parser()
+                .verifyWith(secretKey)          // 设置签名密钥
                 .build()
-                .parseClaimsJws(token)          // 解析并验证签名
-                .getBody();                     // 获取 claims body
+                .parseSignedClaims(token)       // 解析并验证签名
+                .getPayload();                  // 获取 claims payload
     }
 
     /**

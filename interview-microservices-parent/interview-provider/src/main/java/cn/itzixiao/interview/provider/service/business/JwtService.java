@@ -2,7 +2,6 @@ package cn.itzixiao.interview.provider.service.business;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -55,12 +54,12 @@ public class JwtService {
 
         // 使用 Jwts 构建器生成 token
         return Jwts.builder()
-                .setClaims(claims)                          // 自定义 claims
-                .setSubject(username)                       // 主题（用户名）
-                .setIssuer(issuer)                          // 签发者
-                .setIssuedAt(now)                           // 签发时间
-                .setExpiration(expiryDate)                  // 过期时间
-                .signWith(secretKey, SignatureAlgorithm.HS256)  // 签名算法
+                .claims(claims)                          // 自定义 claims
+                .subject(username)                       // 主题（用户名）
+                .issuer(issuer)                          // 签发者
+                .issuedAt(now)                           // 签发时间
+                .expiration(expiryDate)                  // 过期时间
+                .signWith(secretKey)                     // 签名算法
                 .compact();
     }
 
@@ -81,11 +80,11 @@ public class JwtService {
      * @return Claims - 包含所有声明信息
      */
     public Claims parseToken(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(secretKey)       // 设置签名密钥
+        return Jwts.parser()
+                .verifyWith(secretKey)          // 设置签名密钥
                 .build()
-                .parseClaimsJws(token)          // 解析并验证签名
-                .getBody();                     // 获取 claims body
+                .parseSignedClaims(token)       // 解析并验证签名
+                .getPayload();                  // 获取 claims payload
     }
 
     /**

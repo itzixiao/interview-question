@@ -1,7 +1,7 @@
 package cn.itzixiao.interview.provider.service.es;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -16,10 +16,10 @@ import java.util.*;
 @Service
 public class ElasticsearchAdvancedService {
 
-    private final ElasticsearchRestTemplate elasticsearchRestTemplate;
+    private final ElasticsearchOperations elasticsearchOperations;
 
-    public ElasticsearchAdvancedService(ElasticsearchRestTemplate elasticsearchRestTemplate) {
-        this.elasticsearchRestTemplate = elasticsearchRestTemplate;
+    public ElasticsearchAdvancedService(ElasticsearchOperations elasticsearchOperations) {
+        this.elasticsearchOperations = elasticsearchOperations;
     }
 
     /**

@@ -49,7 +49,7 @@ public class DeviceOperationLogES {
     /**
      * 操作时间
      */
-    @Field(type = FieldType.Date, format = DateFormat.custom, pattern = "yyyy-MM-dd HH:mm:ss")
+    @Field(type = FieldType.Date, format = DateFormat.date_time)
     private String operationTime;
 
     /**
@@ -67,6 +67,6 @@ public class DeviceOperationLogES {
     /**
      * 创建时间
      */
-    @Field(type = FieldType.Date, format = DateFormat.custom, pattern = "yyyy-MM-dd HH:mm:ss")
+    @Field(type = FieldType.Date, format = DateFormat.date_time)
     private String createTime;
 }

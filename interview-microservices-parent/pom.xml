@@ -34,5 +34,6 @@
         <module>interview-lowcode</module>
         <module>interview-workflow</module>
         <module>interview-xxljob</module>
+        <module>interview-spring-ai</module>
     </modules>
 </project>

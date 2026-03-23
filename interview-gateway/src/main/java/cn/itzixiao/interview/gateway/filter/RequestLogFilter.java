@@ -23,7 +23,7 @@ public class RequestLogFilter implements GlobalFilter, Ordered {
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
         String path = request.getURI().getPath();
-        String method = request.getMethodValue();
+        String method = request.getMethod().name();
         String ip = request.getRemoteAddress().getAddress().getHostAddress();
         String time = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 
