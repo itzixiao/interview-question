@@ -1,8 +1,6 @@
 package cn.itzixiao.interview.transaction.controller;
 
 import cn.itzixiao.interview.transaction.spi.PaymentService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -36,11 +34,9 @@ import java.util.ServiceLoader;
 @Slf4j
 @RestController
 @RequestMapping("/api/spi")
-@Api(tags = "SPI 机制演示")
 public class SpiController {
 
     @GetMapping("/demo")
-    @ApiOperation("SPI 机制演示")
     public List<String> spiDemo(@RequestParam(defaultValue = "ORDER001") String orderId,
                                 @RequestParam(defaultValue = "100.00") double amount) {
         log.info("========== SPI 机制演示开始 ==========");
@@ -66,7 +62,6 @@ public class SpiController {
     }
 
     @GetMapping("/explain")
-    @ApiOperation("SPI 机制详解")
     public String spiExplain() {
         StringBuilder explanation = new StringBuilder();
         explanation.append("=== SPI 机制详解 ===\n\n");

@@ -1,9 +1,6 @@
 package cn.itzixiao.interview.service.controller;
 
 import cn.itzixiao.interview.common.result.Result;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,7 +13,6 @@ import java.util.Map;
 /**
  * 面试题接口
  */
-@Api(tags = "面试题接口")
 @RestController
 @RequestMapping("/interview")
 @RefreshScope  // 支持配置动态刷新
@@ -36,7 +32,6 @@ public class InterviewController {
     /**
      * 服务信息
      */
-    @ApiOperation("获取服务信息")
     @GetMapping("/info")
     public Result<Map<String, String>> info() {
         Map<String, String> info = new HashMap<>();
@@ -49,10 +44,9 @@ public class InterviewController {
     /**
      * 获取面试题列表 - 带限流保护
      */
-    @ApiOperation("获取面试题列表")
     @GetMapping("/questions")
     public Result<String> getQuestions(
-            @ApiParam("分类") @RequestParam(required = false) String category) {
+            @RequestParam(required = false) String category) {
         log.info("获取面试题列表, category: {}", category);
         return Result.success("面试题列表 - 来自端口: " + serverPort);
     }
@@ -60,10 +54,9 @@ public class InterviewController {
     /**
      * 获取面试题详情 - 带限流保护
      */
-    @ApiOperation("获取面试题详情")
     @GetMapping("/question/{id}")
     public Result<String> getQuestion(
-            @ApiParam("题目ID") @PathVariable Long id) {
+            @PathVariable Long id) {
         log.info("获取面试题详情, id: {}", id);
         return Result.success("面试题详情 " + id + " - 来自端口: " + serverPort);
     }
@@ -71,7 +64,6 @@ public class InterviewController {
     /**
      * 健康检查
      */
-    @ApiOperation("健康检查")
     @GetMapping("/health")
     public Result<String> health() {
         return Result.success("UP");

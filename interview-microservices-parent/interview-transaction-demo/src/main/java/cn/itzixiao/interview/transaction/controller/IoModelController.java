@@ -1,7 +1,5 @@
 package cn.itzixiao.interview.transaction.controller;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,11 +19,9 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @RestController
 @RequestMapping("/api/io")
-@Api(tags = "Java IO 模型对比（BIO/NIO/AIO）")
 public class IoModelController {
 
     @GetMapping("/bio-summary")
-    @ApiOperation("1. BIO 模式详解")
     public String bioSummary() {
         StringBuilder explanation = new StringBuilder();
 
@@ -93,7 +89,6 @@ public class IoModelController {
     }
 
     @GetMapping("/nio-summary")
-    @ApiOperation("2. NIO 模式详解")
     public String nioSummary() {
         StringBuilder explanation = new StringBuilder();
 
@@ -168,7 +163,6 @@ public class IoModelController {
     }
 
     @GetMapping("/aio-summary")
-    @ApiOperation("3. AIO 模式详解")
     public String aioSummary() {
         StringBuilder explanation = new StringBuilder();
 
@@ -241,7 +235,6 @@ public class IoModelController {
     }
 
     @GetMapping("/compare-all")
-    @ApiOperation("4. 三种 IO 模型对比总结")
     public String compareAll() {
         StringBuilder comparison = new StringBuilder();
 

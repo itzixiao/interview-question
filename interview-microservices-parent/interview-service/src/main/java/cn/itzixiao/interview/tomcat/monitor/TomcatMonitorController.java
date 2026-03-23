@@ -1,7 +1,5 @@
 package cn.itzixiao.interview.tomcat.monitor;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -36,7 +34,6 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/monitor/tomcat")
-@Api(tags = "Tomcat 监控接口")
 public class TomcatMonitorController {
 
     /**
@@ -59,7 +56,6 @@ public class TomcatMonitorController {
      * @return 线程状态信息
      */
     @GetMapping("/threads")
-    @ApiOperation("获取线程状态")
     public Map<String, Object> getThreadStatus() {
         ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
         
@@ -103,7 +99,6 @@ public class TomcatMonitorController {
      * @return 内存状态信息
      */
     @GetMapping("/memory")
-    @ApiOperation("获取内存状态")
     public Map<String, Object> getMemoryStatus() {
         MemoryMXBean memoryMXBean = ManagementFactory.getMemoryMXBean();
         
@@ -153,7 +148,6 @@ public class TomcatMonitorController {
      * @return 运行时状态信息
      */
     @GetMapping("/runtime")
-    @ApiOperation("获取运行时状态")
     public Map<String, Object> getRuntimeStatus() {
         Runtime runtime = Runtime.getRuntime();
         
@@ -195,7 +189,6 @@ public class TomcatMonitorController {
      * @return 类加载状态信息
      */
     @GetMapping("/classloading")
-    @ApiOperation("获取类加载状态")
     public Map<String, Object> getClassLoadingStatus() {
         java.lang.management.ClassLoadingMXBean classLoadingMXBean = 
             ManagementFactory.getClassLoadingMXBean();
@@ -217,7 +210,6 @@ public class TomcatMonitorController {
      * @return 完整状态信息
      */
     @GetMapping("/status")
-    @ApiOperation("获取完整状态")
     public Map<String, Object> getFullStatus() {
         Map<String, Object> status = new HashMap<>();
         status.put("threads", getThreadStatus());
@@ -236,7 +228,6 @@ public class TomcatMonitorController {
      * @return 健康状态
      */
     @GetMapping("/health")
-    @ApiOperation("健康检查")
     public Map<String, Object> health() {
         Map<String, Object> health = new HashMap<>();
         health.put("status", "UP");

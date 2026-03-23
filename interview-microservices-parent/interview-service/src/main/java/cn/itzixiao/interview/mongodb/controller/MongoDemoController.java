@@ -3,8 +3,6 @@ package cn.itzixiao.interview.mongodb.controller;
 import cn.itzixiao.interview.mongodb.entity.User;
 import cn.itzixiao.interview.mongodb.repository.UserRepository;
 import cn.itzixiao.interview.mongodb.service.MongoAggregationService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.domain.Page;
@@ -25,7 +23,6 @@ import java.util.*;
 @Slf4j
 @RestController
 @RequestMapping("/api/mongodb")
-@Api(tags = "MongoDB 演示接口")
 @ConditionalOnProperty(name = "mongodb.enabled", havingValue = "true")
 public class MongoDemoController {
 
@@ -39,7 +36,6 @@ public class MongoDemoController {
     }
 
     @PostMapping("/users")
-    @ApiOperation("创建用户")
     public Map<String, Object> createUser(@RequestBody User user) {
         user.setCreatedAt(LocalDateTime.now());
         user.setUpdatedAt(LocalDateTime.now());
@@ -61,7 +57,6 @@ public class MongoDemoController {
     }
 
     @GetMapping("/users/{id}")
-    @ApiOperation("根据 ID 查询用户")
     public Map<String, Object> getUser(@PathVariable String id) {
         Optional<User> user = userRepository.findById(id);
         
@@ -73,7 +68,6 @@ public class MongoDemoController {
     }
 
     @GetMapping("/users")
-    @ApiOperation("查询所有用户")
     public Map<String, Object> getAllUsers() {
         List<User> users = userRepository.findAll();
         
@@ -85,7 +79,6 @@ public class MongoDemoController {
     }
 
     @GetMapping("/users/page")
-    @ApiOperation("分页查询用户")
     public Map<String, Object> getUsersByPage(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -111,7 +104,6 @@ public class MongoDemoController {
     }
 
     @PutMapping("/users/{id}")
-    @ApiOperation("更新用户")
     public Map<String, Object> updateUser(@PathVariable String id, @RequestBody User user) {
         Optional<User> existing = userRepository.findById(id);
         
@@ -141,7 +133,6 @@ public class MongoDemoController {
     }
 
     @DeleteMapping("/users/{id}")
-    @ApiOperation("删除用户")
     public Map<String, Object> deleteUser(@PathVariable String id) {
         Map<String, Object> result = new HashMap<>();
         if (!userRepository.existsById(id)) {
@@ -157,7 +148,6 @@ public class MongoDemoController {
     }
 
     @GetMapping("/users/status/{status}")
-    @ApiOperation("按状态查询用户")
     public Map<String, Object> getUsersByStatus(@PathVariable User.UserStatus status) {
         List<User> users = userRepository.findByStatus(status);
         
@@ -169,7 +159,6 @@ public class MongoDemoController {
     }
 
     @GetMapping("/users/tag/{tag}")
-    @ApiOperation("按标签查询用户")
     public Map<String, Object> getUsersByTag(@PathVariable String tag) {
         List<User> users = userRepository.findByTags(tag);
         
@@ -181,7 +170,6 @@ public class MongoDemoController {
     }
 
     @GetMapping("/stats/by-status")
-    @ApiOperation("按状态分组统计用户数量")
     public Map<String, Object> countByStatus() {
         List<Map<String, Object>> stats = aggregationService.countByStatus();
         
@@ -192,7 +180,6 @@ public class MongoDemoController {
     }
 
     @GetMapping("/stats/multi-dimension")
-    @ApiOperation("多维度统计分析")
     public Map<String, Object> multiDimensionAnalysis() {
         Map<String, Object> stats = aggregationService.multiDimensionAnalysis();
         
@@ -203,7 +190,6 @@ public class MongoDemoController {
     }
 
     @PostMapping("/users/batch-update-status")
-    @ApiOperation("批量更新用户状态")
     public Map<String, Object> batchUpdateStatus(
             @RequestBody List<String> userIds,
             @RequestParam User.UserStatus status) {
@@ -218,7 +204,6 @@ public class MongoDemoController {
     }
 
     @PostMapping("/users/{id}/balance/increment")
-    @ApiOperation("增加用户余额")
     public Map<String, Object> incrementBalance(
             @PathVariable String id,
             @RequestParam BigDecimal amount) {
@@ -232,7 +217,6 @@ public class MongoDemoController {
     }
 
     @PostMapping("/users/{id}/tags")
-    @ApiOperation("为用户添加标签")
     public Map<String, Object> addTag(
             @PathVariable String id,
             @RequestParam String tag) {
@@ -246,7 +230,6 @@ public class MongoDemoController {
     }
 
     @DeleteMapping("/users/{id}/tags")
-    @ApiOperation("移除用户标签")
     public Map<String, Object> removeTag(
             @PathVariable String id,
             @RequestParam String tag) {
@@ -260,7 +243,6 @@ public class MongoDemoController {
     }
 
     @GetMapping("/stats/overview")
-    @ApiOperation("获取用户统计概览")
     public Map<String, Object> getStatsOverview() {
         long total = userRepository.count();
         long active = userRepository.countByStatus(User.UserStatus.ACTIVE);

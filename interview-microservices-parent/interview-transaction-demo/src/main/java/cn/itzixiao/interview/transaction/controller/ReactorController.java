@@ -2,8 +2,6 @@ package cn.itzixiao.interview.transaction.controller;
 
 import cn.itzixiao.interview.transaction.reactor.ReactorCoreDemo;
 import cn.itzixiao.interview.transaction.reactor.ReactorIODemo;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,11 +31,9 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @RestController
 @RequestMapping("/api/reactor")
-@Api(tags = "Java Reactor 模式与反应式编程")
 public class ReactorController {
 
     @GetMapping("/core-demo")
-    @ApiOperation("Reactor Core 示例")
     public String reactorCoreDemo() throws InterruptedException {
         log.info("========== Reactor Core 示例开始 ==========");
 
@@ -56,7 +52,6 @@ public class ReactorController {
     }
 
     @GetMapping("/io-demo")
-    @ApiOperation("Reactor IO 示例")
     public String reactorIoDemo() throws InterruptedException {
         log.info("========== Reactor IO 示例开始 ==========");
 
@@ -75,7 +70,6 @@ public class ReactorController {
     }
 
     @GetMapping("/nio-reactor-demo")
-    @ApiOperation("NIO Reactor 模式示例")
     public String nioReactorDemo() {
         StringBuilder explanation = new StringBuilder();
 
@@ -128,7 +122,6 @@ public class ReactorController {
     }
 
     @GetMapping("/flux-stream")
-    @ApiOperation("Flux 数据流示例")
     public String fluxStream() throws InterruptedException {
         log.info("========== Flux 数据流示例开始 ==========");
 
@@ -164,7 +157,6 @@ public class ReactorController {
     }
 
     @GetMapping("/backpressure-demo")
-    @ApiOperation("背压机制演示")
     public String backpressureDemo() throws InterruptedException {
         StringBuilder explanation = new StringBuilder();
 

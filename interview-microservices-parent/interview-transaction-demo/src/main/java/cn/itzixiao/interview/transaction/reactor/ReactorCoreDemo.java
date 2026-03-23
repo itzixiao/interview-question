@@ -86,7 +86,7 @@ public class ReactorCoreDemo {
                     System.out.println("处理任务 " + i + ", 线程：" + Thread.currentThread().getName());
                     return "结果-" + i;
                 })
-                .publishOn(Schedulers.elastic())  // 切换到弹性调度器
+                .publishOn(Schedulers.boundedElastic())  // 切换到弹性调度器
                 .subscribe(
                         data -> System.out.println("收到：" + data + ", 线程：" + Thread.currentThread().getName()),
                         error -> error.printStackTrace(),

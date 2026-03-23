@@ -22,11 +22,11 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
+
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.lang.annotation.*;
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
@@ -965,7 +965,7 @@ class ReturnValueHandlerSimulator {
  * - afterCompletion: 视图渲染完成后
  */
 @Component
-class LoggingInterceptor extends HandlerInterceptorAdapter {
+class LoggingInterceptor implements HandlerInterceptor {
 
     private static final ThreadLocal<Long> startTime = new ThreadLocal<>();
 

@@ -3,8 +3,6 @@ package cn.itzixiao.interview.cache.memcached.controller;
 import cn.itzixiao.interview.cache.memcached.hash.ConsistentHash;
 import cn.itzixiao.interview.cache.memcached.lock.MemcachedDistributedLock;
 import cn.itzixiao.interview.cache.memcached.service.MemcachedService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.web.bind.annotation.*;
@@ -21,7 +19,6 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @RestController
 @RequestMapping("/api/memcached")
-@Api(tags = "Memcached 演示接口")
 @ConditionalOnProperty(name = "memcached.enabled", havingValue = "true")
 public class MemcachedDemoController {
 
@@ -35,7 +32,6 @@ public class MemcachedDemoController {
     }
 
     @PostMapping("/set")
-    @ApiOperation("存储数据到 Memcached")
     public Map<String, Object> set(
             @RequestParam String key,
             @RequestParam String value,
@@ -51,7 +47,6 @@ public class MemcachedDemoController {
     }
 
     @GetMapping("/get")
-    @ApiOperation("从 Memcached 获取数据")
     public Map<String, Object> get(@RequestParam String key) {
         String value = memcachedService.get(key);
         Map<String, Object> result = new HashMap<>();
@@ -62,7 +57,6 @@ public class MemcachedDemoController {
     }
 
     @DeleteMapping("/delete")
-    @ApiOperation("从 Memcached 删除数据")
     public Map<String, Object> delete(@RequestParam String key) {
         boolean success = memcachedService.delete(key);
         Map<String, Object> result = new HashMap<>();
@@ -73,7 +67,6 @@ public class MemcachedDemoController {
     }
 
     @PostMapping("/incr")
-    @ApiOperation("原子自增操作")
     public Map<String, Object> incr(
             @RequestParam String key,
             @RequestParam(defaultValue = "1") long delta) {
@@ -87,7 +80,6 @@ public class MemcachedDemoController {
     }
 
     @PostMapping("/lock/demo")
-    @ApiOperation("分布式锁演示")
     public Map<String, Object> lockDemo(
             @RequestParam String resourceId,
             @RequestParam(defaultValue = "30") int expireSeconds,
@@ -132,7 +124,6 @@ public class MemcachedDemoController {
     }
 
     @GetMapping("/hash/demo")
-    @ApiOperation("一致性哈希演示")
     public Map<String, Object> hashDemo(
             @RequestParam(defaultValue = "3") int nodeCount,
             @RequestParam(defaultValue = "150") int virtualNodes,
@@ -162,7 +153,6 @@ public class MemcachedDemoController {
     }
 
     @GetMapping("/stats")
-    @ApiOperation("获取 Memcached 统计信息")
     public Map<String, Object> getStats() {
         Map<String, String> stats = memcachedService.getStats();
         Map<String, Object> result = new LinkedHashMap<>();

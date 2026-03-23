@@ -3,8 +3,6 @@ package cn.itzixiao.interview.service.controller;
 import cn.itzixiao.interview.common.result.Result;
 import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import com.alibaba.csp.sentinel.slots.block.BlockException;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,7 +17,6 @@ import java.util.concurrent.TimeUnit;
  * Sentinel 限流测试接口
  */
 @Slf4j
-@Api(tags = "Sentinel限流测试")
 @RestController
 @RequestMapping("/sentinel")
 public class SentinelTestController {
@@ -27,7 +24,6 @@ public class SentinelTestController {
     /**
      * 简单限流测试 - 可通过控制台配置 QPS 限流
      */
-    @ApiOperation("简单限流测试")
     @GetMapping("/hello")
     @SentinelResource(value = "sentinelHello", blockHandler = "helloBlockHandler")
     public Result<String> hello() {
@@ -41,7 +37,6 @@ public class SentinelTestController {
     /**
      * 热点参数限流测试 - 针对特定参数值限流
      */
-    @ApiOperation("热点参数限流测试")
     @GetMapping("/hot")
     @SentinelResource(value = "sentinelHot", blockHandler = "hotBlockHandler")
     public Result<String> hotParam(
@@ -57,7 +52,6 @@ public class SentinelTestController {
     /**
      * 慢调用降级测试 - 模拟慢接口
      */
-    @ApiOperation("慢调用降级测试")
     @GetMapping("/slow")
     @SentinelResource(value = "sentinelSlow", blockHandler = "slowBlockHandler")
     public Result<String> slowRequest() {
@@ -77,7 +71,6 @@ public class SentinelTestController {
     /**
      * 异常比例降级测试 - 模拟随机异常
      */
-    @ApiOperation("异常比例降级测试")
     @GetMapping("/error")
     @SentinelResource(value = "sentinelError", blockHandler = "errorBlockHandler", fallback = "errorFallback")
     public Result<String> errorRequest(@RequestParam(value = "fail", defaultValue = "false") Boolean fail) {
@@ -98,7 +91,6 @@ public class SentinelTestController {
     /**
      * 获取 Sentinel 监控信息
      */
-    @ApiOperation("获取 Sentinel 规则信息")
     @GetMapping("/info")
     public Result<Map<String, Object>> info() {
         Map<String, Object> info = new HashMap<>();
