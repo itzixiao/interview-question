@@ -92,12 +92,19 @@
 - **重要程度：** ⭐⭐⭐⭐⭐
 - **配套代码：** `interview-microservices-parent/interview-xxljob/`
 
+#### 15. [15-Spring-Data-JPA详解.md](./15-Spring-Data-JPA详解.md) ⭐ NEW
+
+- **内容：** 实体映射、Repository 接口、方法名派生查询、@Query、Specification 动态查询、分页排序、N+1 问题、乐观锁/悲观锁、实体生命周期、审计功能
+- **面试题：** 10+ 道
+- **重要程度：** ⭐⭐⭐⭐⭐
+- **配套代码：** `interview-microservices-parent/interview-spring-ai/`（KnowledgeDocument 实战案例）
+
 ---
 
 ## 📊 统计信息
 
-- **文档数：** 14 个
-- **面试题总数：** 155+ 道
+- **文档数：** 15 个
+- **面试题总数：** 165+ 道
 - **代码示例：** 配套 Java 代码在 `interview-service/rpc/`、`interview-rabbitmq/`、`interview-kafka/`、
   `interview-provider/hbase/`、`interview-provider/elasticsearch/`、`interview-provider/netty/`、`interview-workflow/`、`interview-xxljob/` 等目录（~15,000 行代码）
 
@@ -202,13 +209,14 @@
 ### 知识点对应
 
 | 中间件 | 应用场景 |
-|--------|---------|
+|--------|------|
 | MyBatis | ORM 映射、动态 SQL |
 | Nacos | 微服务注册发现、配置管理 |
 | Sentinel | 高并发限流、熔断降级 |
 | MyBatis-Plus | 快速开发、通用 CRUD |
 | **RPC** | **微服务远程调用、高性能通信** |
 | **Flowable** | **工作流审批、流程编排、任务管理** |
+| **Spring Data JPA** | **ORM 标准规范、Repository 快速开发、审计** |
 
 ---
 
@@ -249,6 +257,13 @@
 33. **如何实现动态审批人？**
 34. **如何实现会签（多人审批）？**
 35. **流程变量的作用域有哪些？**
+36. **JPA 和 Hibernate 是什么关系？**
+37. **什么是 N+1 问题？如何解决？**
+38. **@Version 乐观锁原理是什么？**
+39. **JPA 一级缓存和二级缓存的区别？**
+40. **save() 与 saveAndFlush() 的区别？**
+41. **Hibernate 的脏检查是如何实现的？**
+42. **open-in-view 是什么？为什么推荐关闭？**
 
 ---
 
@@ -376,6 +391,13 @@ RabbitMQ 基础
 
 ## 📈 更新日志
 
+### v2.6 - 2026-03-24
+
+- ✅ 新增《15-Spring-Data-JPA详解》文档（10+ 道面试题）
+- ✅ 涵盖实体映射、Repository 方法派生、@Query、Specification、N+1 优化、乐观锁/悲观锁、审计功能
+- ✅ 配套本项目 KnowledgeDocument 实战案例
+- ✅ 更新文档统计信息（15 个文档，165+ 面试题）
+
 ### v2.5 - 2026-03-21
 
 - ✅ 新增《16-MongoDB详解》文档（10+ 道面试题）
@@ -427,5 +449,5 @@ RabbitMQ 基础
 ---
 
 **维护者：** itzixiao  
-**最后更新：** 2026-03-21  
+**最后更新：** 2026-03-24  
 **问题反馈：** 欢迎提 Issue 或 PR
