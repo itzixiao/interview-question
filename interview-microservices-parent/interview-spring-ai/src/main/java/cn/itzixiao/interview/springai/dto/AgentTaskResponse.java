@@ -61,6 +61,7 @@ public class AgentTaskResponse implements Serializable {
      * 执行状态枚举
      */
     public enum ExecutionStatus {
+        IN_PROGRESS,
         SUCCESS,
         PARTIAL_SUCCESS,
         FAILED,

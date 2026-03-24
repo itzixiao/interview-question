@@ -19,7 +19,7 @@ import java.util.Map;
 
 /**
  * AI 智能体控制器
- * 
+ *
  * <p>提供 AI 智能体的 REST API 接口，包括：</p>
  * <ul>
  *     <li>对话聊天接口</li>
@@ -27,7 +27,7 @@ import java.util.Map;
  *     <li>Agent 任务执行接口</li>
  *     <li>RAG 知识库问答接口</li>
  * </ul>
- * 
+ *
  * @author itzixiao
  * @since 2024-01-01
  */
@@ -91,12 +91,12 @@ public class AiAgentController {
     @PostMapping("/rag/ask")
     @Operation(summary = "RAG 知识库问答", description = "基于知识库进行检索增强问答")
     public ChatResponse ragAsk(
-            @RequestParam @Parameter(description = "问题") String question,
-            @RequestParam(required = false, defaultValue = "3") @Parameter(description = "检索文档数量") int topK) {
+            @RequestParam("question") @Parameter(description = "问题") String question,
+            @RequestParam(name = "topK", required = false, defaultValue = "3") @Parameter(description = "检索文档数量") int topK) {
         log.info("收到 RAG 问答请求: question={}, topK={}", question, topK);
-        
+
         String answer = ragService.answerQuestion(question, topK);
-        
+
         return ChatResponse.builder()
                 .content(answer)
                 .success(true)
@@ -109,13 +109,20 @@ public class AiAgentController {
     @PostMapping("/rag/load-text")
     @Operation(summary = "加载文本到知识库", description = "将文本内容加载到知识库中")
     public Map<String, Object> loadText(
-            @RequestParam @Parameter(description = "文本内容") String text,
-            @RequestParam(required = false) @Parameter(description = "文档标题") String title) {
+            @RequestBody @Parameter(description = "加载请求体") Map<String, String> body) {
+        String text = body.getOrDefault("text", "");
+        String title = body.get("title");
         log.info("加载文本到知识库: title={}", title);
-        
-        Map<String, Object> metadata = Map.of("title", title != null ? title : "未命名文档");
+
+        if (text.isBlank()) {
+            return Map.of("success", false, "message", "text 内容不能为空");
+        }
+
+        Map<String, Object> metadata = new java.util.HashMap<>();
+        metadata.put("title", title != null ? title : "未命名文档");
+        metadata.put("filename", title != null ? title : "未命名文档");
         ragService.loadText(text, metadata);
-        
+
         return Map.of(
                 "success", true,
                 "message", "文本已加载到知识库"
