@@ -19,7 +19,31 @@ Spring AI 是 Spring 官方推出的 AI 集成框架，旨在简化 AI 能力在
 
 > **本项目实际接入**：使用阿里云 DashScope OpenAI 兼容接口，模型 `qwen-plus`，Embedding 模型 `text-embedding-v3`。
 
-### 1.2 核心功能
+### 1.2 主流大语言模型对比
+
+| 模型             | 厂商        | 特点            | 适用场景      |
+|----------------|-----------|---------------|-----------|
+| **GPT-4o**     | OpenAI    | 能力强，多模态       | 复杂推理、代码生成 |
+| **Claude 3**   | Anthropic | 上下文长（200K）    | 长文档分析、写作  |
+| **Gemini**     | Google    | 多模态，Google 生态 | 图文混合任务    |
+| **通义千问（qwen）** | 阿里        | 开源可商用，中文优化    | 企业私有化部署   |
+| **文心一言**       | 百度        | 中文优化          | 国内应用      |
+| **Llama 3**    | Meta      | 完全开源免费        | 私有化本地部署   |
+| **ChatGLM**    | 智谱AI      | 中英双语，可本地部署    | 私有化中文场景   |
+
+**模型选择策略**：
+
+```
+是否需要私有化部署？
+  ├── 是 → 选择开源模型（Llama / ChatGLM / Qwen 开源版）
+  └── 否 → 预算充足？
+        ├── 是 → GPT-4 / Claude 3
+        └── 否 → 国产 API（通义千问 / 文心）
+```
+
+**LLM 与 Spring AI 的关系**：Spring AI 提供统一的 Java SDK 抽象层，无论底层使用哪家模型，代码逻辑完全一致，只需切换配置文件即可。
+
+### 1.3 核心功能
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
@@ -45,7 +69,7 @@ Spring AI 是 Spring 官方推出的 AI 集成框架，旨在简化 AI 能力在
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### 1.3 版本说明
+### 1.4 版本说明
 
 | Spring AI 版本 | Spring Boot 版本 | JDK 版本 | 状态    |
 |--------------|----------------|--------|-------|
@@ -1141,6 +1165,110 @@ Spring AI 依赖 Spring AOP，需要添加 AspectJ 依赖：
     - 明确指令约束
     - 添加来源引用要求
     - 设置回答边界
+
+---
+
+**问题 12：AI Agent 的类型有哪些？和传统自动化有什么区别？**
+
+**参考答案：**
+
+**Agent 类型对比**：
+
+| 类型                  | 特点               | 典型应用        |
+|---------------------|------------------|-------------|
+| **ReAct**           | 推理 + 行动迭代，边思考边执行 | 外部 API 工具调用 |
+| **Plan-and-Solve**  | 先规划整体步骤，再逐步执行    | 复杂多步任务      |
+| **Multi-Agent**     | 多 Agent 协作，角色分工  | 跨系统业务协同     |
+| **Self-Reflection** | 自我反思与修正          | 高精度要求场景     |
+
+**与传统自动化对比**：
+
+| 特性   | 传统自动化             | AI Agent   |
+|------|-------------------|------------|
+| 决策能力 | 基于规则              | 基于 LLM 推理  |
+| 适应性  | 固定流程              | 动态决策       |
+| 工具使用 | 预设调用              | 自主选择和调用    |
+| 异常处理 | 需上阶只车（hard-coded） | 可自主重试并调整策略 |
+
+**Spring AI Agent 实现示例**：
+
+```java
+
+@Service
+public class OrderAgent {
+
+    private final ChatClient chatClient;
+
+    // 定义工具函数（Function Calling）
+    @Bean
+    @Description("查询订单状态")
+    public Function<String, String> queryOrderStatus() {
+        return orderId -> orderService.getStatus(orderId);
+    }
+
+    @Bean
+    @Description("取消订单")
+    public Function<String, String> cancelOrder() {
+        return orderId -> orderService.cancel(orderId);
+    }
+
+    public String handle(String userInput) {
+        // Agent 根据用户输入自主决定调用哪个工具
+        OpenAiChatOptions options = OpenAiChatOptions.builder()
+                .withFunction("queryOrderStatus")
+                .withFunction("cancelOrder")
+                .build();
+        return chatClient.call(new Prompt(userInput, options))
+                .getResult().getOutput().getContent();
+    }
+}
+```
+
+---
+
+**问题 13：LLM 应用中有哪些常见安全风险？如何防护？**
+
+**参考答案：**
+
+| 风险                    | 描述               | 防护方案                        |
+|-----------------------|------------------|-----------------------------|
+| **Prompt 注入**         | 恶意指令覆盖系统提示词      | 输入过滤、输出校验、隔离 System/User 消息 |
+| **数据泄露**              | 敏感信息通过 Prompt 泄露 | 数据脱敏、RAG 权限控制、最小权限原则        |
+| **幻觉（Hallucination）** | 生成虚假内容           | RAG 增强、事实校验、设置低 temperature |
+| **内容滥用**              | 生成有害内容           | 内容审核、关键词过滤、输出审核层            |
+| **费用失控**              | Token 卖出导致费用暴跌   | API Key 限流、请求速率限制、密钥环境变量化   |
+
+**实践建议**：
+
+- API Key 必须通过环境变量注入，绝不写入代码或配置文件
+- 对所有用户输入进行长度限制和内容过滤
+- 启用 Token 消耗监控和预算告警
+- 放宽与收紧策略分离：内部系统 vs 对外开放 API
+
+---
+
+**问题 14：如何评估 RAG 系统的效果？**
+
+**参考答案：**
+
+**检索阶段指标**：
+
+- **召回率（Recall@K）**：相关文档是否被检索到
+- **精确率（Precision@K）**：检索结果中相关文档的比例
+- **MRR（Mean Reciprocal Rank）**：第一个相关结果的平均倒数排名
+
+**生成阶段指标**：
+
+- **回答准确性**：与事实的一致性
+- **回答相关性**：与问题的匹配度
+- **忠实性（Faithfulness）**：回答是否基于检索内容（键防幻觉）
+
+**评估方法**：
+
+- 主观评估：人工标注回答质量
+- 自动评估：使用 LLM 对回答打分（LLM-as-Judge）
+- A/B 测试：对比不同检索策略的效果
+- 工具：**RAGAS**（开源 RAG 评估框架）
 
 ---
 

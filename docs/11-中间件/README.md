@@ -8,7 +8,7 @@
 - **面试题：** 8+ 道
 - **重要程度：** ⭐⭐⭐
 
-#### 2. [02-MyBatis动态 SQL 与 SQL 注入防护.md](./02-MyBatis%E5%8A%A8%E6%80%81SQL%E4%B8%8ESQL%E6%B3%A8%E5%85%A5%E9%98%B2%E6%8A%A4.md)
+#### 2. [02-MyBatis动态SQL与SQL注入防护.md](./02-MyBatis%E5%8A%A8%E6%80%81SQL%E4%B8%8ESQL%E6%B3%A8%E5%85%A5%E9%98%B2%E6%8A%A4.md)
 
 - **内容：** #{}vs${}、SQL 注入原理、防护方案
 - **面试题：** 8+ 道
@@ -20,91 +20,85 @@
 - **面试题：** 10+ 道
 - **重要程度：** ⭐⭐⭐⭐
 
-#### 4. [04-Nacos核心知识点详解.md](./04-Nacos核心知识点详解.md)
-
-- **内容：** 服务发现、配置管理、服务注册与发现
-- **面试题：** 15+ 道
-- **重要程度：** ⭐⭐⭐⭐⭐
-
-#### 5. [05-Sentinel限流熔断详解.md](./05-Sentinel限流熔断详解.md)
-
-- **内容：** 限流规则、熔断降级、系统自适应保护
-- **面试题：** 12+ 道
-- **重要程度：** ⭐⭐⭐⭐
-
-#### 6. [06-RPC核心原理与实战指南.md](./06-RPC核心原理与实战指南.md)
-
-- **内容：** RPC 架构、序列化协议、通信协议、负载均衡、容错机制
-- **面试题：** 8+ 道
-- **重要程度：** ⭐⭐⭐⭐⭐
-
-#### 7. [07-RabbitMQ核心知识点详解.md](./07-RabbitMQ核心知识点详解.md)
-
-- **内容：** 五种工作模式、高级特性（延迟队列、死信队列、优先级）、可靠性保障、高频面试题
-- **面试题：** 20+ 道
-- **重要程度：** ⭐⭐⭐⭐⭐
-- **配套代码：** `interview-microservices-parent/interview-rabbitmq/`
-
-#### 8. [08-HBase详解.md](./08-HBase详解.md)
-
-- **内容：** 数据模型、架构原理、核心操作、过滤器、性能优化、Row Key 设计
-- **面试题：** 7+ 道
-- **重要程度：** ⭐⭐⭐⭐
-- **配套代码：** `interview-microservices-parent/interview-provider/hbase/`
-
-#### 9. [09-Kafka高吞吐消息队列详解.md](09-Kafka高吞吐消息队列详解.md)
-
-- **内容：** 架构设计、高吞吐原理、Offset 管理、Exactly Once 语义、ISR 副本同步
-- **面试题：** 6+ 道
-- **重要程度：** ⭐⭐⭐⭐⭐
-- **配套代码：** `interview-microservices-parent/interview-kafka/`
-
-#### 10. [10-Netty高性能框架详解.md](./10-Netty高性能框架详解.md) ⭐新增
-
-- **内容：** NIO实战、Reactor模式、零拷贝、ByteBuf、编解码器
-- **面试题：** 10+ 道
-- **重要程度：** ⭐⭐⭐⭐⭐
-- **配套代码：** `interview-microservices-parent/interview-provider/netty/`
-
-#### 11. [11-大数据技术栈详解.md](./11-大数据技术栈详解.md)
-
-- **内容：** Hadoop、Spark、Flink、Hive 等大数据技术
-- **面试题：** 6+ 道
-- **重要程度：** ⭐⭐⭐
-
-#### 12. [12-AI工程化与LLM应用开发.md](./12-AI%E5%B7%A5%E7%A8%8B%E5%8C%96%E4%B8%8ELLM%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91.md)
-
-- **内容：** RAG架构、AI Agent、向量数据库、Spring AI、模型部署
-- **面试题：** 4+ 道
-- **重要程度：** ⭐⭐⭐⭐
-
-#### 13. [13-Flowable工作流引擎详解.md](./13-Flowable%E5%B7%A5%E4%BD%9C%E6%B5%81%E5%BC%95%E6%93%8E%E8%AF%A6%E8%A7%A3.md) ⭐ NEW
-
-- **内容：** BPMN 2.0、流程定义、监听器、动态审批人、会签、历史数据
-- **面试题：** 10+ 道
-- **重要程度：** ⭐⭐⭐⭐⭐
-- **配套代码：** `interview-microservices-parent/interview-workflow/`
-
-#### 14. [14-XXL-JOB分布式任务调度详解.md](./14-XXL-JOB分布式任务调度详解.md) ⭐ NEW
-
-- **内容：** 分布式调度、弹性扩容、故障转移、任务分片、监控告警
-- **面试题：** 15+ 道
-- **重要程度：** ⭐⭐⭐⭐⭐
-- **配套代码：** `interview-microservices-parent/interview-xxljob/`
-
-#### 15. [15-Spring-Data-JPA详解.md](./15-Spring-Data-JPA详解.md) ⭐ NEW
+#### 4. [04-Spring-Data-JPA详解.md](./04-Spring-Data-JPA%E8%AF%A6%E8%A7%A3.md) ⭐ NEW
 
 - **内容：** 实体映射、Repository 接口、方法名派生查询、@Query、Specification 动态查询、分页排序、N+1 问题、乐观锁/悲观锁、实体生命周期、审计功能
 - **面试题：** 10+ 道
 - **重要程度：** ⭐⭐⭐⭐⭐
 - **配套代码：** `interview-microservices-parent/interview-spring-ai/`（KnowledgeDocument 实战案例）
 
+#### 5. [05-Nacos核心知识点详解.md](./05-Nacos%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%86%E7%82%B9%E8%AF%A6%E8%A7%A3.md)
+
+- **内容：** 服务发现、配置管理、服务注册与发现
+- **面试题：** 15+ 道
+- **重要程度：** ⭐⭐⭐⭐⭐
+
+#### 6. [06-Sentinel限流熔断详解.md](./06-Sentinel%E9%99%90%E6%B5%81%E7%86%94%E6%96%AD%E8%AF%A6%E8%A7%A3.md)
+
+- **内容：** 限流规则、熔断降级、系统自适应保护
+- **面试题：** 12+ 道
+- **重要程度：** ⭐⭐⭐⭐
+
+#### 7. [07-RPC核心原理与实战指南.md](./07-RPC%E6%A0%B8%E5%BF%83%E5%8E%9F%E7%90%86%E4%B8%8E%E5%AE%9E%E6%88%98%E6%8C%87%E5%8D%97.md)
+
+- **内容：** RPC 架构、序列化协议、通信协议、负载均衡、容错机制
+- **面试题：** 8+ 道
+- **重要程度：** ⭐⭐⭐⭐⭐
+
+#### 8. [08-RabbitMQ核心知识点详解.md](./08-RabbitMQ%E6%A0%B8%E5%BF%83%E7%9F%A5%E8%AF%86%E7%82%B9%E8%AF%A6%E8%A7%A3.md)
+
+- **内容：** 五种工作模式、高级特性（延迟队列、死信队列、优先级）、可靠性保障、高频面试题
+- **面试题：** 20+ 道
+- **重要程度：** ⭐⭐⭐⭐⭐
+- **配套代码：** `interview-microservices-parent/interview-rabbitmq/`
+
+#### 9. [09-Kafka高吞吐消息队列详解.md](./09-Kafka%E9%AB%98%E5%90%9E%E5%90%90%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E8%AF%A6%E8%A7%A3.md)
+
+- **内容：** 架构设计、高吞吐原理、Offset 管理、Exactly Once 语义、ISR 副本同步
+- **面试题：** 6+ 道
+- **重要程度：** ⭐⭐⭐⭐⭐
+- **配套代码：** `interview-microservices-parent/interview-kafka/`
+
+#### 10. [10-Netty高性能框架详解.md](./10-Netty%E9%AB%98%E6%80%A7%E8%83%BD%E6%A1%86%E6%9E%B6%E8%AF%A6%E8%A7%A3.md)
+
+- **内容：** NIO实战、Reactor模式、零拷贝、ByteBuf、编解码器
+- **面试题：** 10+ 道
+- **重要程度：** ⭐⭐⭐⭐⭐
+- **配套代码：** `interview-microservices-parent/interview-provider/netty/`
+
+#### 11. [11-HBase详解.md](./11-HBase%E8%AF%A6%E8%A7%A3.md)
+
+- **内容：** 数据模型、架构原理、核心操作、过滤器、性能优化、Row Key 设计
+- **面试题：** 7+ 道
+- **重要程度：** ⭐⭐⭐⭐
+- **配套代码：** `interview-microservices-parent/interview-provider/hbase/`
+
+#### 12. [12-大数据技术栈详解.md](./12-%E5%A4%A7%E6%95%B0%E6%8D%AE%E6%8A%80%E6%9C%AF%E6%A0%88%E8%AF%A6%E8%A7%A3.md)
+
+- **内容：** Hadoop、Spark、Flink、Hive 等大数据技术
+- **面试题：** 6+ 道
+- **重要程度：** ⭐⭐⭐
+
+#### 13. [13-Flowable工作流引擎详解.md](./13-Flowable%E5%B7%A5%E4%BD%9C%E6%B5%81%E5%BC%95%E6%93%8E%E8%AF%A6%E8%A7%A3.md)
+
+- **内容：** BPMN 2.0、流程定义、监听器、动态审批人、会签、历史数据
+- **面试题：** 10+ 道
+- **重要程度：** ⭐⭐⭐⭐⭐
+- **配套代码：** `interview-microservices-parent/interview-workflow/`
+
+#### 14. [14-XXL-JOB分布式任务调度详解.md](./14-XXL-JOB%E5%88%86%E5%B8%83%E5%BC%8F%E4%BB%BB%E5%8A%A1%E8%B0%83%E5%BA%A6%E8%AF%A6%E8%A7%A3.md)
+
+- **内容：** 分布式调度、弹性扩容、故障转移、任务分片、监控告警
+- **面试题：** 15+ 道
+- **重要程度：** ⭐⭐⭐⭐⭐
+- **配套代码：** `interview-microservices-parent/interview-xxljob/`
+
 ---
 
 ## 📊 统计信息
 
-- **文档数：** 15 个
-- **面试题总数：** 165+ 道
+- **文档数：** 14 个（删除 AI工程化文档，AI 内容已并入 `07-SpringCloud微服务/05-Spring-AI智能体详解.md`）
+- **面试题总数：** 160+ 道
 - **代码示例：** 配套 Java 代码在 `interview-service/rpc/`、`interview-rabbitmq/`、`interview-kafka/`、
   `interview-provider/hbase/`、`interview-provider/elasticsearch/`、`interview-provider/netty/`、`interview-workflow/`、`interview-xxljob/` 等目录（~15,000 行代码）
 
@@ -112,21 +106,18 @@
 
 ## 🎯 学习建议
 
-### MyBatis（2-3 天）
+### MyBatis + JPA（3-4 天）
 
-1. **核心概念**
+1. **MyBatis 核心概念**
     - SqlSessionFactory、SqlSession
     - Mapper 接口绑定
     - 动态 SQL 标签
 
-2. **缓存机制**
-    - 一级缓存（SqlSession 级别）
-    - 二级缓存（Namespace 级别）
-    - 缓存失效场景
-
-3. **插件开发**
-    - Interceptor 接口
-    - 拦截 Executor、StatementHandler
+2. **JPA / Hibernate**
+    - 实体映射与生命周期
+    - Repository 方法名派生查询
+    - N+1 问题与解决方案
+    - 乐观锁（@Version）与悲观锁（@Lock）
 
 ### Nacos（2-3 天）
 
@@ -198,72 +189,57 @@
 
 ### 前置知识
 
-- ✅ **[Spring框架](../04-Spring框架/README.md)** - IOC、AOP
-- ✅ **[MySQL](../07-MySQL 数据库/README.md)** - SQL 语法、索引优化
+- ✅ **[Spring框架](../05-Spring框架/README.md)** - IOC、AOP
+- ✅ **[MySQL](../08-MySQL数据库/README.md)** - SQL 语法、索引优化
 
 ### 后续进阶
 
-- 📚 **[SpringBoot](../05-SpringBoot 与自动装配/README.md)** - Starter 集成
-- 📚 **[分布式系统](../12-分布式系统/README.md)** - 配置中心实战
+- 📚 **[SpringBoot与自动装配](../06-SpringBoot与自动装配/README.md)** - Starter 集成
+- 📚 **[分布式系统](../14-分布式系统/README.md)** - 配置中心实战
+- 📚 **[SpringCloud微服务](../07-SpringCloud微服务/README.md)** - Spring AI 智能体
 
 ### 知识点对应
 
 | 中间件 | 应用场景 |
 |--------|------|
-| MyBatis | ORM 映射、动态 SQL |
+| MyBatis / MyBatis-Plus | ORM 映射、动态 SQL、快速 CRUD |
+| Spring Data JPA | ORM 标准规范、Repository 快速开发、审计 |
 | Nacos | 微服务注册发现、配置管理 |
 | Sentinel | 高并发限流、熔断降级 |
-| MyBatis-Plus | 快速开发、通用 CRUD |
 | **RPC** | **微服务远程调用、高性能通信** |
+| **RabbitMQ / Kafka** | **异步消息、事件驱动、削峰填谷** |
 | **Flowable** | **工作流审批、流程编排、任务管理** |
-| **Spring Data JPA** | **ORM 标准规范、Repository 快速开发、审计** |
+| **XXL-JOB** | **分布式定时任务调度、分片、故障转移** |
 
 ---
 
-## 💡 高频面试题 Top 15
+## 💡 高频面试题 Top 25
 
 1. **MyBatis 的一级缓存和二级缓存区别？**
 2. **MyBatis 的插件原理是什么？**
 3. **#{}和${}的区别？如何防止 SQL 注入？**
-4. **Nacos 如何实现服务注册与发现？**
-5. **Nacos 配置中心是如何实现动态刷新的？**
-6. **Sentinel 的限流算法有哪些？**
-7. **Sentinel 如何实现熔断降级？**
-8. **MyBatis-Plus 相比 MyBatis 有什么优势？**
-9. **MyBatis 的动态 SQL 有哪些常用标签？**
-10. **Nacos 和 Eureka 的区别？**
-11. **Sentinel 和 Hystrix 的区别？**
-12. **MyBatis 中 ResultMap 的作用？**
-13. **MyBatis 的分页插件原理？**
-14. **Nacos 支持哪些配置格式？**
-15. **Sentinel 的规则如何持久化？**
-16. **什么是 RPC？它的核心优势是什么？**
-17. **RPC 的完整工作流程是什么？**
-18. **RPC 框架需要解决哪些核心问题？**
-19. **JDK动态代理在 RPC 中是如何应用的？**
-20. **RPC 中的序列化协议有哪些？如何选择？**
-21. **RabbitMQ 是什么？为什么要用它？**
-22. **RabbitMQ 有哪些组成部分？**
-23. **说说 RabbitMQ 的五种工作模式？**
-24. **如何保证消息不丢失？**
-25. **如何保证消息的顺序性？**
-26. **如何保证消息不重复消费？**
-27. **延迟队列如何实现？**
-28. **死信队列有什么用？**
-29. **RabbitMQ 和 Kafka 的区别？**
-30. **什么是 Flowable？和 Activiti 有什么区别？**
-31. **Flowable 的核心表有哪些？**
-32. **ExecutionListener 和 TaskListener 的区别？**
-33. **如何实现动态审批人？**
-34. **如何实现会签（多人审批）？**
-35. **流程变量的作用域有哪些？**
-36. **JPA 和 Hibernate 是什么关系？**
-37. **什么是 N+1 问题？如何解决？**
-38. **@Version 乐观锁原理是什么？**
-39. **JPA 一级缓存和二级缓存的区别？**
-40. **save() 与 saveAndFlush() 的区别？**
-41. **Hibernate 的脏检查是如何实现的？**
-42. **open-in-view 是什么？为什么推荐关闭？**
+4. **JPA 和 Hibernate 是什么关系？**
+5. **什么是 N+1 问题？如何解决？**
+6. **@Version 乐观锁原理是什么？**
+7. **Nacos 如何实现服务注册与发现？**
+8. **Nacos 配置中心是如何实现动态刷新的？**
+9. **Sentinel 的限流算法有哪些？**
+10. **Sentinel 如何实现熔断降级？**
+11. **什么是 RPC？它的核心优势是什么？**
+12. **RabbitMQ 有哪些组成部分？**
+13. **如何保证消息不丢失？**
+14. **延迟队列如何实现？**
+15. **RabbitMQ 和 Kafka 的区别？**
+16. **RPC 的完整工作流程是什么？**
+17. **JDK动态代理在 RPC 中是如何应用的？**
+18. **RPC 中的序列化协议有哪些？如何选择？**
+19. **什么是 Flowable？Flowable 的核心表有哪些？**
+20. **ExecutionListener 和 TaskListener 的区别？**
+21. **如何实现动态审批人？**
+22. **如何实现会签（多人审批）？**
+23. **open-in-view 是什么？为什么推荐关闭？**
+24. **Hibernate 的脏检查是如何实现的？**
+25. **save() 与 saveAndFlush() 的区别？**
 
 ---
 
@@ -311,21 +287,15 @@ public class RpcProxy {
             interfaceClass.getClassLoader(),
             new Class<?>[]{interfaceClass},
             (proxy, method, args) -> {
-                // 1. 封装 RPC 请求
                 RpcRequest request = new RpcRequest();
                 request.setMethodName(method.getName());
                 request.setParameterTypes(method.getParameterTypes());
                 request.setParameters(args);
-                
-                // 2. 发送请求到服务器
                 Socket socket = new Socket(host, port);
                 ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
                 output.writeObject(request);
-                
-                // 3. 接收服务器响应
                 ObjectInputStream input = new ObjectInputStream(socket.getInputStream());
                 RpcResponse response = (RpcResponse) input.readObject();
-                
                 socket.close();
                 return response.getResult();
             }
@@ -346,7 +316,6 @@ public Queue orderDelayQueue() {
             .build();
 }
 
-// 发送延迟消息
 public void sendOrderTimeoutMessage(Order order) {
     rabbitTemplate.convertAndSend("exchange.order.delay", 
         "order.delay", order,
@@ -362,27 +331,21 @@ public void sendOrderTimeoutMessage(Order order) {
 ## 📖 推荐学习顺序
 
 ```
-MyBatis 基础
+MyBatis 基础 → 动态 SQL → 缓存机制
    ↓
-动态 SQL
+Spring Data JPA → 实体映射 → N+1 优化 → 乐观锁
    ↓
-缓存机制
+Nacos 服务发现 → Nacos 配置中心
    ↓
-插件开发
+Sentinel 限流 → 熔断降级
    ↓
-Nacos 服务发现
+RPC 原理 → 动态代理 → 序列化
    ↓
-Nacos 配置中心
+RabbitMQ 基础 → 延迟队列、死信队列 → 可靠性保障
    ↓
-Sentinel 限流
+Kafka → 高吞吐 → 分区 → ISR
    ↓
-RPC 原理
-   ↓
-RabbitMQ 基础
-   ↓
-延迟队列、死信队列
-   ↓
-可靠性保障
+Flowable 工作流 → XXL-JOB 调度
    ↓
 综合实战
 ```
@@ -391,19 +354,25 @@ RabbitMQ 基础
 
 ## 📈 更新日志
 
+### v2.7 - 2026-03-24
+
+- ✅ 删除「12-AI工程化与LLM应用开发」，AI 内容已全量并入 `docs/07-SpringCloud微服务/05-Spring-AI智能体详解.md`
+- ✅ 将「JPA详解」提前到第 04 号（ORM 参考实现，与 MyBatis 组合学习）
+- ✅ HBase 移到 11 号，大数据移到 12 号，目录结构更合理
+- ✅ Spring AI 主文档新增 LLM 对比、Agent 类型、安全风险、RAG 评估 4 道新面试题（问题 12-14）
+- ✅ 文档总数 15 → 14，面试题总量 165+ → 160+（AI 内容已并入 Spring AI 专题，避免重复）
+
 ### v2.6 - 2026-03-24
 
-- ✅ 新增《15-Spring-Data-JPA详解》文档（10+ 道面试题）
+- ✅ 新增「15-Spring-Data-JPA详解」文档（10+ 道面试题）
 - ✅ 涵盖实体映射、Repository 方法派生、@Query、Specification、N+1 优化、乐观锁/悲观锁、审计功能
 - ✅ 配套本项目 KnowledgeDocument 实战案例
-- ✅ 更新文档统计信息（15 个文档，165+ 面试题）
 
 ### v2.5 - 2026-03-21
 
 - ✅ 新增《16-MongoDB详解》文档（10+ 道面试题）
 - ✅ 包含文档模型、索引机制、聚合管道、副本集、分片集群
 - ✅ 配套代码：Spring Data MongoDB 完整示例
-- ✅ 更新文档统计信息（16 个文档，155+ 面试题）
 
 ### v2.4 - 2026-03-17
 
@@ -411,36 +380,28 @@ RabbitMQ 基础
 - ✅ 包含完整的请假/报销审批流程图
 - ✅ 涵盖监听器、动态审批人、会签等高级特性
 - ✅ 配套代码：`interview-workflow/` 模块
-- ✅ 更新文档统计信息（14 个文档，130+ 面试题）
 
 ### v2.3 - 2026-03-15
 
 - ✅ 新增《10-Elasticsearch 进阶详解》文档（8+ 道面试题）
 - ✅ 新增《12-大数据技术栈详解》文档（6+ 道面试题）
 - ✅ 更新文档统计信息（11 个文档，106+ 面试题）
-- ✅ 更新代码示例规模和路径
 
 ### v2.2 - 2026-03-14
 
 - ✅ 新增《RabbitMQ核心知识点详解》文档（20道面试题）
-- ✅ 更新文档统计信息为7个文档、79+面试题
 - ✅ 补充 RabbitMQ五种工作模式、高级特性、可靠性保障等知识点
-- ✅ 添加 RabbitMQ延迟队列配置示例代码
-- ✅ 更新推荐学习顺序，增加 RabbitMQ 学习路径
 
 ### v2.1 - 2026-03-08
 
 - ✅ 新增《RPC核心原理与实战指南》文档（8 道面试题）
-- ✅ 更新文档统计信息
 - ✅ 补充 RPC 原理、序列化协议、负载均衡等知识点
-- ✅ 添加 RPC 动态代理示例代码
 
 ### v2.0 - 2026-03-08
 
 - ✅ 新增跨模块关联章节
 - ✅ 补充 51+ 道高频面试题
 - ✅ 添加学习建议和实战技巧
-- ✅ 完善推荐学习顺序
 
 ### v1.0 - 早期版本
 
