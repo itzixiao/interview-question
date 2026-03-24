@@ -7,15 +7,17 @@
 Spring AI 是 Spring 官方推出的 AI 集成框架，旨在简化 AI 能力在 Spring 应用中的集成。它提供了统一的抽象层，支持多种 AI
 模型提供商：
 
-| AI 提供商           | 模型类型           | 特点            |
-|------------------|----------------|---------------|
-| OpenAI           | Chat/Embedding | GPT 系列，功能最全面  |
-| Azure OpenAI     | Chat/Embedding | 企业级，数据合规      |
-| Ollama           | Chat/Embedding | 本地部署，隐私保护     |
-| Anthropic Claude | Chat           | 长上下文，安全对齐     |
-| Google Gemini    | Chat/Embedding | 多模态，Google 生态 |
-| 阿里通义千问           | Chat/Embedding | 国产模型，中文优化     |
-| 百度文心一言           | Chat           | 国产模型，企业应用     |
+| AI 提供商           | 模型类型           | 特点                  |
+|------------------|----------------|---------------------|
+| OpenAI           | Chat/Embedding | GPT 系列，功能最全面        |
+| Azure OpenAI     | Chat/Embedding | 企业级，数据合规            |
+| Ollama           | Chat/Embedding | 本地部署，隐私保护           |
+| Anthropic Claude | Chat           | 长上下文，安全对齐           |
+| Google Gemini    | Chat/Embedding | 多模态，Google 生态       |
+| 阿里云 DashScope    | Chat/Embedding | 通义千问系列，兼容 OpenAI 接口 |
+| 百度文心一言           | Chat           | 国产模型，企业应用           |
+
+> **本项目实际接入**：使用阿里云 DashScope OpenAI 兼容接口，模型 `qwen-plus`，Embedding 模型 `text-embedding-v3`。
 
 ### 1.2 核心功能
 
@@ -111,6 +113,8 @@ Spring AI 是 Spring 官方推出的 AI 集成框架，旨在简化 AI 能力在
 
 ### 2.2 配置文件
 
+#### 2.2.1 接入 OpenAI（标准配置）
+
 ```yaml
 spring:
   ai:
@@ -127,6 +131,64 @@ spring:
           model: text-embedding-3-small  # Embedding 模型
 ```
 
+#### 2.2.2 接入阿里云 DashScope（本项目实际配置）
+
+DashScope 提供了 OpenAI 兼容接口，无需更换任何依赖，只需修改 `base-url` 和 `api-key`：
+
+```yaml
+server:
+  port: 8092
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 100MB
+
+spring:
+  application:
+    name: interview-spring-ai
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/interview?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: root
+    password: ${MYSQL_PASSWORD:}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: ${REDIS_PASSWORD:}
+
+  # Spring AI 配置 —— 通过 OpenAI Starter 对接 DashScope 兼容接口
+  ai:
+    openai:
+      api-key: ${DASHSCOPE_API_KEY:}        # 阿里云 DashScope API Key（环境变量）
+      base-url: https://dashscope.aliyuncs.com/compatible-mode  # ⚠️ 不含 /v1，框架自动追加
+      chat:
+        options:
+          model: qwen-plus                  # 通义千问标准版
+          temperature: 0.7
+      embedding:
+        options:
+          model: text-embedding-v3          # DashScope 文本向量模型
+    vectorstore:
+      simple:
+        embedding-dimension: 1536
+```
+
+**关键注意事项**：
+
+| 配置项        | 正确值                                              | 错误值（常见坑）                      | 说明                                                                      |
+|------------|--------------------------------------------------|-------------------------------|-------------------------------------------------------------------------|
+| `base-url` | `https://dashscope.aliyuncs.com/compatible-mode` | `...compatible-mode/v1`       | Spring AI 0.8.x 会自动追加 `/v1`，手动加会导致路径变 `/v1/v1/...` 报 404                |
+| `model`    | `qwen-plus`                                      | `qwen3-vl-235b-a22b-thinking` | thinking 模型的流式输出在 `reasoning_content` 字段，Spring AI 0.8.x 无法获取，导致 SSE 静默 |
+| `api-key`  | `${DASHSCOPE_API_KEY:}`                          | 直接写明文                         | 必须通过环境变量注入，避免泄露                                                         |
+
 ### 2.3 基础使用
 
 ```java
@@ -134,34 +196,52 @@ spring:
 @RestController
 @RequestMapping("/api/ai")
 @RequiredArgsConstructor
-public class ChatController {
+@Tag(name = "AI 智能体", description = "Spring AI 智能体相关接口")
+public class AiAgentController {
 
-    private final ChatClient chatClient;
+    private final AiAgentService aiAgentService;
+    private final RagService ragService;
 
-    /**
-     * 简单对话
-     */
-    @GetMapping("/chat")
-    public String chat(@RequestParam String message) {
-        return chatClient.call(message);
+    /** 单轮/多轮对话 */
+    @PostMapping("/chat")
+    public ChatResponse chat(@RequestBody ChatRequest request) {
+        return aiAgentService.chat(request);
     }
 
-    /**
-     * 带系统提示词的对话
-     */
-    @GetMapping("/chat-with-system")
-    public String chatWithSystem(@RequestParam String message) {
-        Prompt prompt = new Prompt(
-                List.of(
-                        new SystemMessage("你是一个专业的 Java 面试官，请用简洁专业的方式回答问题。"),
-                        new UserMessage(message)
-                )
-        );
-        ChatResponse response = chatClient.call(prompt);
-        return response.getResult().getOutput().getContent();
+    /** 流式对话（SSE） */
+    @PostMapping(value = "/chat/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<ChatResponse> chatStream(@RequestBody ChatRequest request) {
+        return aiAgentService.chatStream(request);
+    }
+
+    /** RAG 知识库问答 */
+    @PostMapping("/rag/ask")
+    public ChatResponse ragAsk(
+            @RequestParam("question") String question,
+            @RequestParam(name = "topK", required = false, defaultValue = "3") int topK) {
+        String answer = ragService.answerQuestion(question, topK);
+        return ChatResponse.builder().content(answer).success(true).build();
+    }
+
+    /** 加载文本到知识库（JSON Body，避免 HTTP 431） */
+    @PostMapping("/rag/load-text")
+    public Map<String, Object> loadText(@RequestBody Map<String, String> body) {
+        String text = body.getOrDefault("text", "");
+        String title = body.get("title");
+        if (text.isBlank()) {
+            return Map.of("success", false, "message", "text 内容不能为空");
+        }
+        Map<String, Object> metadata = new HashMap<>();
+        metadata.put("title", title != null ? title : "未命名文档");
+        metadata.put("filename", title != null ? title : "未命名文档");
+        ragService.loadText(text, metadata);
+        return Map.of("success", true, "message", "文本已加载到知识库");
     }
 }
 ```
+
+> **HTTP 431 陷阱**：若把大段文本放在 `@RequestParam` 中（URL query string），超大 Header 会触发 431。
+> 必须改用 `@RequestBody` + JSON 方式传输文本内容。
 
 ---
 
@@ -216,15 +296,69 @@ public class ChatService {
 
 #### 3.1.2 流式响应
 
+本项目的流式实现使用 `StreamingChatClient` + `Flux.create`，并加入了 **thinking 模型兼容处理**：
+
 ```java
 
-@GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-public Flux<String> streamChat(@RequestParam String message) {
-    Prompt prompt = new Prompt(message);
-    return chatClient.stream(prompt)
-            .map(response -> response.getResult().getOutput().getContent());
+@Override
+public Flux<ChatResponse> chatStream(ChatRequest request) {
+    String sessionId = Objects.requireNonNullElse(request.getSessionId(), IdUtil.fastSimpleUUID());
+    List<Message> messages = buildMessages(request);
+    Prompt prompt = new Prompt(messages);
+    StringBuilder fullContent = new StringBuilder();
+
+    return Flux.create(sink -> {
+        try {
+            streamingChatClient.stream(prompt).subscribe(
+                    chunk -> {
+                        // thinking 模型：content 可能为 null（推理阶段），正文在 reasoning_content
+                        // Spring AI 0.8.x 无法读取 reasoning_content，因此只处理非空 content
+                        String text = chunk.getResult().getOutput().getContent();
+                        if (text != null && !text.isEmpty()) {
+                            fullContent.append(text);
+                            sink.next(ChatResponse.builder()
+                                    .content(text).sessionId(sessionId).success(true).build());
+                        }
+                    },
+                    error -> {
+                        log.error("Stream error: {}", error.getMessage(), error);
+                        // 中途报错时，若已有内容则返回已有内容
+                        if (!fullContent.isEmpty()) {
+                            sink.next(ChatResponse.builder().content(fullContent.toString())
+                                    .sessionId(sessionId).success(true).build());
+                        } else {
+                            sink.next(ChatResponse.failure("流式聊天异常: " + error.getMessage()));
+                        }
+                        sink.complete();
+                    },
+                    () -> {
+                        // 流结束但无任何内容 → thinking 模型场景，推送提示
+                        if (fullContent.isEmpty()) {
+                            sink.next(ChatResponse.builder()
+                                    .content("[模型已完成思考，但未输出正文内容，" +
+                                            "请尝试非 thinking 模式或检查模型配置]")
+                                    .sessionId(sessionId).success(true).build());
+                        }
+                        sink.complete();
+                    }
+            );
+        } catch (Exception e) {
+            sink.next(ChatResponse.failure("流式聊天异常: " + e.getMessage()));
+            sink.complete();
+        }
+    });
 }
 ```
+
+**Thinking 模型问题说明**：
+
+| 模型                 | content 字段 | reasoning_content 字段 | Spring AI 0.8.x 是否可读 |
+|--------------------|------------|----------------------|----------------------|
+| `qwen-plus`（标准）    | 正文 token   | 无                    | ✅ 正常                 |
+| `qwen3-*-thinking` | null（推理阶段） | 推理过程                 | ❌ 无法读取               |
+
+**结论**：Spring AI 0.8.x 不支持 thinking 模型的 `reasoning_content`，流式时全程 `content=null`，SSE 静默无响应。生产环境应使用
+`qwen-plus`、`qwen-max` 等非 thinking 模型。
 
 ### 3.2 RAG (检索增强生成)
 
@@ -272,10 +406,14 @@ public class SpringAiConfig {
 }
 ```
 
-#### 3.2.3 RAG 服务实现
+#### 3.2.3 RAG 服务实现（生产级）
+
+本项目的 [RagService](../../../interview-microservices-parent/interview-spring-ai/src/main/java/cn/itzixiao/interview/springai/service/RagService.java)
+实现了**向量检索 → 关键词降级**的双重保障：
 
 ```java
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class RagService {
@@ -283,40 +421,91 @@ public class RagService {
     private final ChatClient chatClient;
     private final EmbeddingClient embeddingClient;
     private final VectorStore vectorStore;
+    private final KnowledgeDocumentRepository documentRepository;
 
     /**
-     * 加载文档到知识库
+     * 加载文本到知识库
+     * 1. 按 \n\n 段落切分
+     * 2. 存向量库（失败时降级，不影响 DB 持久化）
+     * 3. 持久化元数据到 knowledge_document 表（按 title 去重）
      */
-    public void loadDocument(String text, Map<String, Object> metadata) {
-        // 按段落切分
-        String[] paragraphs = text.split("\\n\\n");
+    public void loadText(String text, Map<String, Object> metadata) {
+        String[] paragraphs = text.split("\n\n");
         List<Document> documents = new ArrayList<>();
-
         for (String paragraph : paragraphs) {
             if (!paragraph.trim().isEmpty()) {
                 documents.add(new Document(paragraph.trim(), metadata));
             }
         }
 
-        // 存储到向量数据库
-        vectorStore.add(documents);
+        // 向量存储（DashScope 不可用时降级，不抛异常）
+        try {
+            vectorStore.add(documents);
+        } catch (Exception e) {
+            log.warn("向量存储失败，内容已保存至数据库: {}", e.getMessage());
+        }
+
+        // 持久化到 knowledge_document 表（title 精确匹配去重）
+        String title = metadata.getOrDefault("title", "未命名文档").toString();
+        String filename = metadata.getOrDefault("filename", title).toString();
+        boolean exists = documentRepository.findByTitleContaining(title)
+                .stream().anyMatch(d -> title.equals(d.getTitle()));
+        if (!exists) {
+            KnowledgeDocument doc = new KnowledgeDocument();
+            doc.setTitle(title);
+            doc.setFilename(filename);
+            doc.setContent(text.substring(0, Math.min(text.length(), 1000)));
+            doc.setChunkCount(documents.size());
+            doc.setCharCount(text.length());
+            doc.setDocType(getDocType(filename));
+            Object sizeObj = metadata.get("size");
+            if (sizeObj instanceof Long size) doc.setFileSize(size);
+            else if (sizeObj instanceof Number n) doc.setFileSize(n.longValue());
+            documentRepository.save(doc);
+        }
     }
 
     /**
-     * 基于知识库回答问题
+     * 相似度检索（失败时降级为关键词检索）
+     */
+    public List<Document> retrieveSimilarDocuments(String query, int topK) {
+        try {
+            return vectorStore.similaritySearch(SearchRequest.query(query).withTopK(topK));
+        } catch (Exception e) {
+            log.warn("向量检索失败，降级为关键词检索: {}", e.getMessage());
+            return fallbackKeywordSearch(query, topK);
+        }
+    }
+
+    /** 关键词降级检索（从 DB 按标题+内容匹配） */
+    private List<Document> fallbackKeywordSearch(String query, int topK) {
+        String[] keywords = query.split("[\\s，,。.！!？?]+");
+        return documentRepository.findAll().stream()
+                .filter(doc -> {
+                    String combined = (doc.getTitle() + " " +
+                            (doc.getContent() != null ? doc.getContent() : "")).toLowerCase();
+                    for (String kw : keywords) {
+                        if (kw.length() > 1 && combined.contains(kw.toLowerCase())) return true;
+                    }
+                    return false;
+                })
+                .limit(topK)
+                .map(doc -> new Document(
+                        doc.getTitle() + "\n" + (doc.getContent() != null ? doc.getContent() : ""),
+                        Map.of("title", doc.getTitle(), "source", "keyword-search")
+                ))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 基于知识库回答问题（带 AI 不可用降级）
      */
     public String answerQuestion(String question, int topK) {
-        // 检索相似文档
-        List<Document> similarDocs = vectorStore.similaritySearch(
-                SearchRequest.query(question).withTopK(topK)
-        );
-
-        // 构建上下文
-        String context = similarDocs.stream()
+        List<Document> similarDocuments = retrieveSimilarDocuments(question, topK);
+        String context = similarDocuments.stream()
                 .map(Document::getContent)
-                .collect(Collectors.joining("\\n\\n---\\n\\n"));
+                .collect(Collectors.joining("\n\n---\n\n"));
 
-        // 构建 RAG 提示词
         String systemPrompt = """
                 你是一个专业的知识库助手。请基于以下知识库内容回答用户问题。
                 如果知识库中没有相关信息，请明确告知用户。
@@ -325,14 +514,31 @@ public class RagService {
                 %s
                 """.formatted(context);
 
-        Prompt prompt = new Prompt(
-                List.of(
-                        new SystemMessage(systemPrompt),
-                        new UserMessage(question)
-                )
-        );
+        try {
+            return chatClient.call(new Prompt(List.of(
+                    new SystemMessage(systemPrompt),
+                    new UserMessage(question)
+            ))).getResult().getOutput().getContent();
+        } catch (Exception e) {
+            // AI 不可用时返回原始检索结果
+            if (!similarDocuments.isEmpty()) {
+                return "《知识库检索结果》（AI 当前不可用）：\n\n" +
+                        similarDocuments.stream()
+                                .map(d -> "- " + d.getContent())
+                                .collect(Collectors.joining("\n"));
+            }
+            return "当前 AI 服务不可用，请检查 DASHSCOPE_API_KEY 环境变量是否正确配置。";
+        }
+    }
 
-        return chatClient.call(prompt).getResult().getOutput().getContent();
+    private String getDocType(String filename) {
+        if (filename == null) return "unknown";
+        String lower = filename.toLowerCase();
+        if (lower.endsWith(".pdf")) return "pdf";
+        if (lower.endsWith(".txt")) return "text";
+        if (lower.endsWith(".md")) return "markdown";
+        if (lower.endsWith(".doc") || lower.endsWith(".docx")) return "word";
+        return "text";
     }
 }
 ```
@@ -662,13 +868,16 @@ spring:
 Spring AI 提供了统一的抽象层，核心设计理念：
 
 1. **统一接口**：
-    - `ChatClient`：聊天对话接口
-    - `EmbeddingClient`：向量化接口
+    - `ChatClient`：同步聊天对话接口
+    - `StreamingChatClient`：流式聊天接口，返回 `Flux<ChatResponse>`
+    - `EmbeddingClient`：文本向量化接口
     - `VectorStore`：向量存储接口
 
 2. **Provider 模式**：
     - 通过 SPI 机制支持多种 AI 提供商
     - 自动配置类：`OpenAiAutoConfiguration`、`OllamaAutoConfiguration` 等
+    - **DashScope 兼容**：阿里云提供 OpenAI 兼容接口，使用 `spring-ai-openai-spring-boot-starter` 即可直接对接，只需修改
+      `base-url` 和 `api-key`
 
 3. **Prompt 抽象**：
     - `Message`：消息抽象（System/User/Assistant）
@@ -736,6 +945,86 @@ Spring AI 提供了统一的抽象层，核心设计理念：
        return () -> weatherService.getWeather();
    }
    ```
+
+---
+
+---
+
+**问题 9：Spring AI 接入 DashScope 报 404 路径重复 `/v1/v1/` 如何解决？**
+
+**参考答案：**
+
+Spring AI 0.8.x 的 OpenAI 客户端会在 `base-url` 后**自动追加 `/v1`**，若配置时已包含 `/v1` 则路径重复：
+
+```
+# 错误配置（会生成 /v1/v1/chat/completions）
+base-url: https://dashscope.aliyuncs.com/compatible-mode/v1
+
+# 正确配置
+base-url: https://dashscope.aliyuncs.com/compatible-mode
+```
+
+---
+
+**问题 10：为什么使用 thinking 模型（如 qwen3-vl-235b-a22b-thinking）流式聊天没有任何响应？**
+
+**参考答案：**
+
+Thinking 模型在推理阶段将内容输出到 `reasoning_content` 字段，而非 `content` 字段。Spring AI 0.8.x 的
+`ChatResponse.getResult().getOutput().getContent()` 只读 `content`，导致：
+
+1. 推理阶段：`content = null` → 被过滤 → SSE 无事件
+2. 正文阶段：部分 thinking 模型的正文也在 `reasoning_content` → 整个流静默
+
+**解决方案**：
+
+- 换用非 thinking 模型（`qwen-plus`、`qwen-max` 等）
+- 升级 Spring AI 到支持 `reasoning_content` 的版本（1.0.x+）
+- 在 `onComplete` 回调中增加兜底提示，避免客户端无限等待
+
+---
+
+**问题 11：知识库管理如何避免统计接口触发多次全表扫描？**
+
+**参考答案：**
+
+错误做法（3 次 SQL，2 次全表）：
+
+```java
+long documentCount = documentRepository.count();       // SQL 1
+long totalChunks = documentRepository.findAll()      // SQL 2（全表）
+        .stream().mapToLong(KnowledgeDocument::getChunkCount).sum();
+long totalSize = documentRepository.findAll()      // SQL 3（全表）
+        .stream().mapToLong(KnowledgeDocument::getCharCount).sum();
+```
+
+正确做法（2 次 SQL，0 次全表）：
+
+```java
+// Repository 中添加聚合查询
+@Query("SELECT COALESCE(SUM(d.chunkCount), 0), COALESCE(SUM(d.charCount), 0) FROM KnowledgeDocument d")
+List<Object[]> sumChunksAndChars();
+
+// Controller 中使用
+long documentCount = documentRepository.count();
+List<Object[]> sums = documentRepository.sumChunksAndChars();
+        long totalChunks = 0, totalSize = 0;
+if(!sums.
+
+isEmpty() &&sums.
+
+get(0) !=null){
+Object[] row = sums.get(0);
+totalChunks =row[0]instanceof
+Number n ?n.
+
+longValue() :0L;
+totalSize   =row[1]instanceof
+Number n ?n.
+
+longValue() :0L;
+        }
+```
 
 ---
 
@@ -861,31 +1150,50 @@ Spring AI 依赖 Spring AOP，需要添加 AspectJ 依赖：
 
 ### 7.1 模块结构
 
-| 文件路径                                | 说明               |
-|-------------------------------------|------------------|
-| `interview-spring-ai/`              | Spring AI 模块根目录  |
-| `controller/AiAgentController.java` | AI Agent REST 接口 |
-| `service/ChatService.java`          | 对话聊天服务           |
-| `service/RagService.java`           | RAG 知识库服务        |
-| `service/AgentService.java`         | Agent 任务编排服务     |
-| `function/WeatherFunction.java`     | 天气查询函数示例         |
-| `config/SpringAiConfig.java`        | Spring AI 配置类    |
+| 文件路径                                          | 说明                         |
+|-----------------------------------------------|----------------------------|
+| `interview-spring-ai/`                        | Spring AI 模块根目录            |
+| `controller/AiAgentController.java`           | AI 聊天 + RAG 接口（端口 8092）    |
+| `controller/KnowledgeBaseController.java`     | 知识库管理接口（上传、检索、统计）          |
+| `service/impl/AiAgentServiceImpl.java`        | 聊天 + 流式实现（含 thinking 模型兼容） |
+| `service/RagService.java`                     | RAG 服务（向量检索 + 关键词降级）       |
+| `entity/KnowledgeDocument.java`               | 知识库文档实体（JPA）               |
+| `repository/KnowledgeDocumentRepository.java` | 文档仓库（含聚合查询）                |
+| `config/SpringAiConfig.java`                  | VectorStore Bean 配置        |
+| `function/WeatherFunction.java`               | 天气查询函数示例                   |
+| `resources/application.yml`                   | DashScope 接入配置             |
 
-### 7.2 启动方式
+### 7.2 关联前端
 
-1. 配置环境变量：
-   ```bash
-   export OPENAI_API_KEY=your-api-key
+| 前端目录                      | 技术栈                         | 端口   |
+|---------------------------|-----------------------------|------|
+| `interview-ui/ai/`        | Vue 3 + Element Plus + Vite | 3000 |
+| `src/views/Chat.vue`      | SSE 流式对话页面                  | -    |
+| `src/views/Knowledge.vue` | 知识库管理页面                     | -    |
+| `src/views/Search.vue`    | 知识库检索页面                     | -    |
+| `src/api/ai.js`           | Axios 封装的 API 调用            | -    |
+
+### 7.3 启动方式
+
+1. 配置环境变量（Windows PowerShell）：
+   ```powershell
+   $env:DASHSCOPE_API_KEY = "your-dashscope-api-key"
+   $env:MYSQL_PASSWORD    = "your-mysql-password"
    ```
 
-2. 启动应用：
+2. 启动后端（端口 8092）：
    ```bash
    mvn spring-boot:run -pl interview-microservices-parent/interview-spring-ai
    ```
 
-3. 访问 API 文档：
+3. 启动前端（端口 3000，自动代理到 8092）：
+   ```bash
+   cd interview-ui/ai && npm run dev
    ```
-   http://localhost:8083/doc.html
+
+4. 访问 API 文档：
+   ```
+   http://localhost:8092/doc.html
    ```
 
 ---
@@ -912,6 +1220,20 @@ Spring AI 为 Java 开发者提供了便捷的 AI 集成能力：
 
 ---
 
+---
+
+## 九、扩展文档
+
+本模块已拆分为三个文档，按需查阅：
+
+| 文档                                                     | 内容                                 |
+|--------------------------------------------------------|------------------------------------|
+| [05-Spring-AI智能体详解.md](./05-Spring-AI智能体详解.md)         | 框架基础、配置、Chat、RAG、Agent、面试题         |
+| [06-Spring-AI知识库与RAG实战.md](./06-Spring-AI知识库与RAG实战.md) | 知识库实体设计、文件上传解析、聚合统计、向量降级检索         |
+| [07-Spring-AI前端集成实战.md](./07-Spring-AI前端集成实战.md)       | Vue3 前端架构、SSE 流式对话、知识库管理、Vite 代理配置 |
+
+---
+
 **维护者：** itzixiao  
-**最后更新：** 2026-03-23  
+**最后更新：** 2026-03-24  
 **问题反馈：** 欢迎提 Issue 或 PR

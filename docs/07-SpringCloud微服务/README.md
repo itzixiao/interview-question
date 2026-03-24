@@ -32,18 +32,32 @@
 
 ### 5. [05-Spring-AI智能体详解.md](./05-Spring-AI智能体详解.md)
 
-- **内容：** Spring AI 框架、Chat 聊天、RAG 知识库、Function Calling、Agent 编排
-- **面试题：** 8+ 道
+- **内容：** Spring AI 框架、DashScope 接入、Chat 聊天、RAG、流式响应、Agent 编排、面试题（含 Thinking 模型问题解析）
+- **面试题：** 11+ 道
 - **重要程度：** ⭐⭐⭐⭐⭐
 - **难度：** 中级 ~ 高级
+
+### 6. [06-Spring-AI知识库与RAG实战.md](./06-Spring-AI知识库与RAG实战.md)
+
+- **内容：** KnowledgeDocument 实体设计、文件上传解析（Tika）、RagService 双写策略、降级检索、统计聚合查询优化
+- **面试题：** 实战问题排查
+- **重要程度：** ⭐⭐⭐⭐⭐
+- **难度：** 中级
+
+### 7. [07-Spring-AI前端集成实战.md](./07-Spring-AI前端集成实战.md)
+
+- **内容：** Vue 3 + Element Plus 架构、Vite 代理、SSE 流式聊天实现、Pinia 状态管理、Markdown 渲染、常见坑点
+- **面试题：** 前端工程化实战
+- **重要程度：** ⭐⭐⭐⭐
+- **难度：** 中级
 
 ---
 
 ## 📊 统计信息
 
-- **文档数：** 5 个
-- **面试题总数：** 38+ 道
-- **代码示例：** 配套 Java 代码在 `interview-microservices-parent/` 模块中
+- **文档数：** 7 个
+- **面试题总数：** 50+ 道
+- **代码示例：** 配套 Java 代码在 `interview-microservices-parent/`，前端代码在 `interview-ui/ai/`
 
 ---
 
@@ -58,7 +72,11 @@ Gateway 鉴权与路由实战（实战应用）
           ↓
 OpenFeign（服务调用）
           ↓
-Spring AI（智能体）
+Spring AI（智能体框架）
+          ↓
+Spring AI（知识库与RAG实战）
+          ↓
+Spring AI（前端集成）
           ↓
 Sentinel（限流熔断）
           ↓
@@ -92,11 +110,12 @@ Sleuth + Zipkin（链路追踪）
 
 ### Spring AI
 
-1. **核心概念**：ChatClient、EmbeddingClient、VectorStore
-2. **对话聊天**：单轮/多轮对话、流式响应、系统提示词
-3. **RAG 知识库**：文档向量化、相似度检索、上下文增强
-4. **Function Calling**：工具调用、实时数据获取
-5. **Agent 编排**：任务规划、多步执行、自主决策
+1. **核心概念**：ChatClient、StreamingChatClient、EmbeddingClient、VectorStore
+2. **DashScope 接入**：`base-url` 不含 `/v1`、使用 `qwen-plus` 避免 thinking 模型问题
+3. **对话聊天**：单轮/多轮对话、SSE 流式响应、多轮历史传递
+4. **RAG 知识库**：文档向量化、相似度检索、关键词降级、双写持久化
+5. **前端集成**：Vue 3 + fetch SSE、Pinia 状态、Vite 代理
+6. **工程陷阱**：HTTP 431、404 路径重复、thinking 模型静默
 
 ---
 
@@ -107,10 +126,17 @@ Sleuth + Zipkin（链路追踪）
 - [Provider 示例代码](../../../interview-microservices-parent/interview-provider/)
 - [Service 示例代码](../../../interview-microservices-parent/interview-service/)
 - [Spring AI 示例代码](../../../interview-microservices-parent/interview-spring-ai/)
+- [Spring AI 前端代码](../../../interview-ui/ai/)
 
 ---
 
 ## 📈 更新日志
+
+### v5.0 - 2026-03-24
+
+- ✅ 更新 05-Spring-AI智能体详解.md（DashScope 接入、流式兼容、面试题扩充至 11 道）
+- ✅ 新增 06-Spring-AI知识库与RAG实战.md（实体设计、Tika 解析、双写策略、聚合查询优化）
+- ✅ 新增 07-Spring-AI前端集成实战.md（Vue 3 SSE、Pinia、Vite 代理、常见坑点）
 
 ### v4.0 - 2026-03-23
 
@@ -131,5 +157,5 @@ Sleuth + Zipkin（链路追踪）
 ---
 
 **维护者：** itzixiao  
-**最后更新：** 2026-03-20  
+**最后更新：** 2026-03-24  
 **问题反馈：** 欢迎提 Issue 或 PR
