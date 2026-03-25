@@ -8,38 +8,61 @@
 ### 1.1 模块职责划分
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                         客户端请求                                │
-└─────────────────────────────────────────────────────────────────┘
-                                │
-                                ▼
-┌─────────────────────────────────────────────────────────────────┐
+┌──────────────────────────────────────────────────────────────────┐
+│                          客户端请求                                │
+└──────────────────────────────────────────────────────────────────┘
+                                 │
+                                 ▼
+┌──────────────────────────────────────────────────────────────────┐
 │                    interview-gateway (8080)                      │
-│  ┌─────────────────┐    ┌─────────────────┐     ┌──────────────┐ │
-│  │  路由转发         │───▶│  鉴权过滤器       │───▶│  负载均衡      │ │
-│  │  StripPrefix    │    │  AuthenticationFilter │  lb://xxx    │ │
-│  └─────────────────┘    └─────────────────┘     └──────────────┘ │
-│                                │                                 │
-│                                │ 依赖                            │
-│                                ▼                                 │
-│  ┌─────────────────────────────────────────────────────────────┐│
-│  │              interview-security (公共模块)                    ││
-│  │  ├── GatewayJwtService        JWT 验证服务                    ││
-│  │  ├── AuthenticationFilter     鉴权过滤器（响应式）              ││
-│  │  ├── WhiteListProperties      白名单配置                      ││
-│  │  ├── JwtProperties            JWT 配置                       ││
-│  │  └── GatewayAuthAutoConfiguration 自动配置                    ││
-│  └─────────────────────────────────────────────────────────────┘│
-└─────────────────────────────────────────────────────────────────┘
-                                │
-                                ▼
-┌─────────────────────────────────────────────────────────────────┐
+│                                                                  │
+│  ┌──────────────────────────────────────────────────────────────┐│
+│  │                GatewayRedisAuthConfig                        ││
+│  │  @Primary TokenBlacklistService（直接注入 StringRedisTemplate）││
+│  │  覆盖 security 模块的懒加载实现，Gateway 内直接读写 Redis          ││
+│  └──────────────────────────────────────────────────────────────┘│
+│                            │                                     │
+│                            ▼                                     │
+│  ┌───────────────┐   ┌───────────────────────┐    ┌───────────┐  │
+│  │  路由转发      │──▶│  AuthenticationFilter  │──▶│  负载均衡   │  │
+│  │  StripPrefix  │   │  order = -100          │   │ lb://xxx  │  │
+│  └───────────────┘   └──────────┬────────────┘    └───────────┘  │
+│                                 │                                │
+│                         Redis 双重校验                            │
+│                    ┌────────────┴────────────┐                   │
+│                    │  1. jti 黑名单校验        │                    │
+│                    │  2. 在线 token 一致性     │                    │
+│                    │     jwt:token:{username} │                   │
+│                    └────────────────────────-┘                    │
+│                                                                  │
+│  ┌──────────────────────────────────────────────────────────┐   │
+│  │              interview-security (公共模块)                 │   │
+│  │  ├── GatewayAuthAutoConfiguration   自动配置（SPI）         │   │
+│  │  ├── AuthenticationFilter           鉴权过滤器（响应式）     │   │
+│  │  ├── GatewayJwtService              JWT 验证服务           │   │
+│  │  ├── TokenBlacklistService          黑名单+踢下线校验        │   │
+│  │  ├── RedisAccessor                  Redis 访问器（类隔离）   │   │
+│  │  ├── WhiteListProperties            白名单配置              │   │
+│  │  └── JwtProperties                  JWT 配置               │   │
+│  └───────────────────────────────────────────────────────────┘   │
+└──────────────────────────────────────────────────────────────────┘
+                                 │
+                                 ▼
+┌──────────────────────────────────────────────────────────────────┐
 │                    interview-provider (8082)                     │
 │  context-path: /provider                                         │
-│  ├── /api/auth/login    登录接口（生成 Token）                      │
-│  ├── /api/auth/verify   验证接口                                  │
-│  └── /api/users/*       用户接口（受保护）                          │
-└─────────────────────────────────────────────────────────────────┘
+│  ├── /api/auth/login    登录接口（生成 Token + 存入 Redis）          │
+│  ├── /api/auth/logout   登出接口（写黑名单 + 删除 Redis key）        │
+│  ├── /api/auth/kick     踢下线接口（管理员主动失效指定用户 token）     │
+│  └── /api/users/*       用户接口（受保护，需携带有效 Token）          │
+└──────────────────────────────────────────────────────────────────┘
+                                 │ 读写 Redis
+                                 ▼
+┌──────────────────────────────────────────────────────────────────┐
+│                           Redis                                  │
+│  jwt:token:{username}     当前在线 Token（单设备登录）               │
+│  jwt:blacklist:{jti}      已吊销的 Token（logout/踢下线写入）        │
+└──────────────────────────────────────────────────────────────────┘
 ```
 
 ### 1.2 核心设计原则
@@ -155,27 +178,43 @@ interview-security/
 ├── src/main/java/cn/itzixiao/interview/security/gateway/
 │   ├── GatewayAuthAutoConfiguration.java   # 自动配置类
 │   ├── AuthenticationFilter.java           # 鉴权过滤器
-│   ├── GatewayJwtService.java              # JWT 服务
+│   ├── GatewayJwtService.java              # JWT 验证服务（Gateway 专用）
+│   ├── TokenBlacklistService.java          # Token 黑名单 + 踢下线校验服务
+│   ├── RedisAccessor.java                  # Redis 访问器（隔离类，避免类加载异常）
 │   ├── WhiteListProperties.java            # 白名单配置
 │   └── JwtProperties.java                  # JWT 配置
 └── src/main/resources/META-INF/spring/
     └── org.springframework.boot.autoconfigure.AutoConfiguration.imports
+
+interview-gateway/
+└── src/main/java/cn/itzixiao/interview/gateway/config/
+    └── GatewayRedisAuthConfig.java         # Gateway 本地 Redis 直连配置（覆盖懒加载实现）
+
+interview-provider/
+└── src/main/java/cn/itzixiao/interview/provider/service/business/
+    └── JwtService.java                     # Token 签发 + Redis 存储 + 踢下线逻辑
 ```
 
 ### 3.2 自动配置类
 
 ```java
 /**
- * Gateway 鉴权自动配置
+ * 网关鉴权自动配置类
  *
  * 条件加载：
- * 1. @ConditionalOnClass: 需要 DispatcherHandler 和 GlobalFilter 类存在
- * 2. @ConditionalOnWebApplication: 需要是响应式 Web 应用
- * 3. @ConditionalOnProperty: 配置 gateway.auth.enabled=true（默认启用）
+ * 1. @ConditionalOnWebApplication(REACTIVE)：需要是响应式 Web 应用（Gateway 基于 WebFlux）
+ * 2. @ConditionalOnProperty：配置 gateway.auth.enabled=true（默认启用）
+ * 3. @AutoConfigureBefore：在 GatewayAutoConfiguration 之前加载
+ *
+ * 设计要点：
+ * - TokenBlacklistService 注入 ApplicationContext 而非 StringRedisTemplate
+ *   原因：本类先于 Redis 自动配置执行，直接注入会报 "No bean named 'stringRedisTemplate'"
+ * - 懒加载方案：首次 Redis 操作时才从容器获取 StringRedisTemplate
+ * - Gateway 模块内 GatewayRedisAuthConfig 通过 @Primary 覆盖本类提供的 Bean
+ *   实现直连 StringRedisTemplate，性能更好
  */
 @Slf4j
 @Configuration
-@ConditionalOnClass({DispatcherHandler.class, GlobalFilter.class})
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
 @ConditionalOnProperty(prefix = "gateway.auth", name = "enabled",
         havingValue = "true", matchIfMissing = true)
@@ -184,23 +223,35 @@ interview-security/
 public class GatewayAuthAutoConfiguration {
 
     /**
-     * 创建 JWT 验证服务
+     * 网关 JWT 验证服务
      */
     @Bean
     public GatewayJwtService gatewayJwtService(JwtProperties jwtProperties) {
-        log.info("初始化 Gateway JWT 服务");
+        log.info("【网关鉴权】初始化 JWT 验证服务, issuer: {}, expiration: {}s",
+                jwtProperties.getIssuer(), jwtProperties.getExpiration());
         return new GatewayJwtService(jwtProperties.getSecretKey());
     }
 
     /**
-     * 创建鉴权过滤器
+     * Token 黑名单服务（懒加载 Redis）
+     * 由 GatewayRedisAuthConfig 的 @Primary Bean 覆盖，优先级更高
+     */
+    @Bean
+    @ConditionalOnMissingBean(TokenBlacklistService.class)
+    public TokenBlacklistService tokenBlacklistService(ApplicationContext context) {
+        log.info("【网关鉴权】初始化 Token 黑名单服务（懒加载 Redis，首次请求时建立连接）");
+        return new TokenBlacklistService(context);
+    }
+
+    /**
+     * 网关鉴权过滤器，order = -100，确保在所有业务过滤器之前执行
      */
     @Bean
     public AuthenticationFilter authenticationFilter(
             WhiteListProperties whiteListProperties,
-            GatewayJwtService jwtService) {
-        log.info("初始化 Gateway 鉴权过滤器");
-        return new AuthenticationFilter(whiteListProperties, jwtService);
+            GatewayJwtService jwtService,
+            @Autowired(required = false) TokenBlacklistService tokenBlacklistService) {
+        return new AuthenticationFilter(whiteListProperties, jwtService, tokenBlacklistService);
     }
 }
 ```
@@ -212,136 +263,302 @@ public class GatewayAuthAutoConfiguration {
  * Gateway 全局鉴权过滤器
  *
  * 实现原理：
- * 1. 实现 GlobalFilter 接口，自动注册为全局过滤器
- * 2. 使用 Ordered 接口控制执行顺序
- * 3. 返回 Mono<Void> 实现响应式编程
+ * 1. 白名单路径直接放行
+ * 2. 提取 Token 并一次解析 Claims（避免重复解析带来的性能开销）
+ * 3. 检查 Token 过期
+ * 4. Redis 可用时两重校验：jti 黑名单 + 在线 token 一致性
+ * 5. 校验通过后掌蔽 Authorization 头，并注入 X-User-* 头给下游
  */
 @Slf4j
 public class AuthenticationFilter implements GlobalFilter, Ordered {
 
     private final WhiteListProperties whiteListProperties;
     private final GatewayJwtService jwtService;
+    private final TokenBlacklistService tokenBlacklistService;  // 可为 null（Redis 不可用时降级）
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
         String path = request.getURI().getPath();
 
-        // 1. 检查白名单
-        if (isWhiteListed(path)) {
+        // 1. 白名单路径，直接放行
+        if (isWhitePath(path)) {
             return chain.filter(exchange);
         }
 
-        // 2. 获取 Authorization Header
-        String authHeader = request.getHeaders().getFirst("Authorization");
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return unauthorized(exchange, "缺少认证令牌");
+        // 2. 检查 Authorization header
+        String authorizationHeader = request.getHeaders().getFirst("Authorization");
+        if (!StringUtils.hasText(authorizationHeader)) {
+            return buildUnauthorizedResponse(exchange, "缺少认证令牌");
+        }
+        if (!authorizationHeader.startsWith("Bearer ")) {
+            return buildUnauthorizedResponse(exchange, "认证令牌格式错误，需要 Bearer 前缀");
         }
 
-        // 3. 提取并验证 Token
-        String token = authHeader.substring(7);
+        // 3. 提取 token 并一次解析 Claims
+        String token = authorizationHeader.substring(7);
+        Claims claims;
         try {
-            if (!jwtService.validateToken(token)) {
-                return unauthorized(exchange, "认证令牌无效或已过期");
-            }
-
-            // 4. 解析用户信息并添加到请求头
-            Claims claims = jwtService.parseToken(token);
-            ServerHttpRequest mutatedRequest = request.mutate()
-                    .header("X-User-Id", claims.getSubject())
-                    .header("X-User-Roles", String.valueOf(claims.get("roles")))
-                    .build();
-
-            return chain.filter(exchange.mutate().request(mutatedRequest).build());
-
+            claims = jwtService.parseToken(token);
         } catch (Exception e) {
-            return unauthorized(exchange, "认证令牌无效或已过期");
+            return buildUnauthorizedResponse(exchange, "认证令牌无效或已过期");
         }
-    }
 
-    /**
-     * 检查路径是否在白名单中
-     */
-    private boolean isWhiteListed(String path) {
-        for (String pattern : whiteListProperties.getPaths()) {
-            if (pattern.endsWith("/**")) {
-                String prefix = pattern.substring(0, pattern.length() - 3);
-                if (path.startsWith(prefix)) {
-                    return true;
-                }
-            } else if (path.contains(pattern)) {
-                return true;
+        // 4. 检查 Token 是否过期
+        if (claims.getExpiration().before(new Date())) {
+            return buildUnauthorizedResponse(exchange, "认证令牌已过期");
+        }
+
+        // 5. Redis 可用时：黑名单 + 在线 token 一致性双重校验
+        if (tokenBlacklistService != null) {
+            // 5.1 jti 黑名单校验（logout 主动登出 / kickOut 踢下线时写入）
+            String jti = claims.getId();
+            if (jti != null && tokenBlacklistService.isBlacklisted(jti)) {
+                return buildUnauthorizedResponse(exchange, "认证令牌已被呀销，请重新登录");
+            }
+            // 5.2 在线 token 一致性校验（踢下线 / 单设备登录失效的核心防线）
+            //    jwt:token:{username} 不存在（被踢下线删除）或与当前 token 不一致 -> 401
+            String usernameForCheck = claims.getSubject();
+            if (!tokenBlacklistService.isOnlineTokenValid(usernameForCheck, token)) {
+                return buildUnauthorizedResponse(exchange, "认证令牌已失效，请重新登录");
             }
         }
-        return false;
-    }
 
-    /**
-     * 返回 401 未授权响应
-     */
-    private Mono<Void> unauthorized(ServerWebExchange exchange, String message) {
-        ServerHttpResponse response = exchange.getResponse();
-        response.setStatusCode(HttpStatus.UNAUTHORIZED);
-        response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
+        // 6. 解析用户信息并注入请求头，掌蔽 Authorization 头（防止下游二次鉴权）
+        String username = claims.getSubject();
+        Object roles = claims.get("roles");
+        Object userIdObj = claims.get("userId");
+        String userId = userIdObj != null ? userIdObj.toString() : username;
 
-        String body = String.format(
-                "{\"code\":401,\"data\":null,\"message\":\"%s\"}", message);
-        DataBuffer buffer = response.bufferFactory().wrap(body.getBytes());
+        ServerHttpRequest mutableReq = request.mutate()
+                .header("X-User-Id", userId)
+                .header("X-User-Name", username)
+                .header("X-User-Roles", roles != null ? roles.toString() : "")
+                .header("X-Auth-Source", "gateway")
+                .headers(headers -> headers.remove("Authorization"))  // 掌蔽 Authorization 头
+                .build();
 
-        return response.writeWith(Mono.just(buffer));
+        return chain.filter(exchange.mutate().request(mutableReq).build());
     }
 
     @Override
     public int getOrder() {
-        return -100;  // 优先级：在路由转发之前执行
+        return -100;  // 大厂规范：在路由转发和所有业务过滤器之前执行鉴权
     }
 }
 ```
 
-### 3.4 JWT 服务类
+### 3.4 JWT 服务类（GatewayJwtService）
 
 ```java
 /**
- * Gateway JWT 验证服务
+ * 网关 JWT 验证服务（interview-security 模块，Gateway 专用）
  *
- * 职责：
- * 1. 验证 Token 签名和有效期
- * 2. 解析 Token 获取 Claims
+ * 职责：网关层只做验证，不做签发
+ *
+ * 大厂规范：
+ * 1. 一次 parseToken 获取全部 Claims，避免重复解析
+ * 2. jti（JWT ID）用于黑名单标识，生成 Token 时必须写入
+ * 3. 封装实用小方法，方便 filter 一次调用得到全部信息
  */
+@Slf4j
 public class GatewayJwtService {
 
-    private final String secretKey;
+    private final SecretKey secretKey;
 
     public GatewayJwtService(String secretKey) {
-        this.secretKey = secretKey;
+        // 将字符串密鑰转换为 SecretKey 对象
+        this.secretKey = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
     }
 
     /**
-     * 验证 Token 有效性
+     * 解析 JWT token，获取全部 Claims（一次解析，多次使用）
+     */
+    public Claims parseToken(String token) {
+        return Jwts.parser()
+                .verifyWith(secretKey)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+    }
+
+    /**
+     * 验证 token 是否有效
      */
     public boolean validateToken(String token) {
         try {
-            Claims claims = Jwts.parserBuilder()
-                    .setSigningKey(Keys.hmacShaKeyFor(secretKey.getBytes()))
-                    .build()
-                    .parseClaimsJws(token)
-                    .getBody();
+            Claims claims = parseToken(token);
             return !claims.getExpiration().before(new Date());
         } catch (Exception e) {
+            log.warn("JWT token 验证失败: {}", e.getMessage());
             return false;
         }
     }
 
-    /**
-     * 解析 Token 获取 Claims
-     */
-    public Claims parseToken(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(Keys.hmacShaKeyFor(secretKey.getBytes()))
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
+    /** 提取用户名（subject） */
+    public String getUsernameFromToken(String token) {
+        return parseToken(token).getSubject();
     }
+
+    /** 提取角色信息 */
+    public Object getRolesFromToken(String token) {
+        return parseToken(token).get("roles");
+    }
+
+    /**
+     * 提取用户 ID（优先读取 userId 字段，没有则回退 subject）
+     */
+    public String getUserIdFromToken(String token) {
+        Claims claims = parseToken(token);
+        Object userId = claims.get("userId");
+        return userId != null ? userId.toString() : claims.getSubject();
+    }
+
+    /**
+     * 提取 JWT ID（jti），用于黑名单匹配
+     */
+    public String getJtiFromToken(String token) {
+        return parseToken(token).getId();
+    }
+
+    /**
+     * 获取 Token 剩余有效秒数（用于黑名单 TTL 设置）
+     */
+    public long getRemainTtlSeconds(String token) {
+        try {
+            Date expiration = parseToken(token).getExpiration();
+            long remainMs = expiration.getTime() - System.currentTimeMillis();
+            return remainMs > 0 ? remainMs / 1000 : 0;
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+}
+```
+
+### 3.5 Provider JwtService（Token 签发 + Redis 存储 + 踢下线）
+
+```java
+/**
+ * Provider JWT 服务
+ *
+ * 职责：
+ * 1. 签发 JWT Token（包含 jti、userId、roles）
+ * 2. 登录时将 token 存入 Redis（jwt:token:{username}），实现单设备登录
+ * 3. 踢下线操作：取在线 token -> 解析 jti 写黑名单 -> 删除 Redis key
+ * 4. validateToken 支持黑名单校验降级
+ *
+ * Redis key 规则：
+ *   jwt:token:{username}    -> 当前在线 token
+ *   jwt:blacklist:{jti}    -> 已吐销的 jti（黑名单）
+ */
+@Slf4j
+@Service
+public class JwtService {
+
+    public static final String TOKEN_PREFIX = "jwt:token:";
+    public static final String BLACKLIST_PREFIX = "jwt:blacklist:";
+
+    private final JwtConfig jwtConfig;
+    private final SecretKey secretKey;
+    /** 可选依赖：Redis 不可用时降级运行，登录/登出不操作 Redis */
+    private final StringRedisTemplate redisTemplate;
+
+    public JwtService(JwtConfig jwtConfig, SecretKey secretKey,
+                      @Autowired(required = false) StringRedisTemplate redisTemplate) { ... }
+
+    /**
+     * 生成 Token：写入 jti + userId + roles，登录后将 token 存入 Redis
+     */
+    public String generateToken(String username, Long userId, Map<String, Object> roles) {
+        String jti = UUID.randomUUID().toString();
+
+        String token = Jwts.builder()
+                .claims(claims)    // roles / userId
+                .subject(username)
+                .issuer(jwtConfig.getIssuer())
+                .issuedAt(now)
+                .expiration(expiryDate)
+                .id(jti)           // jti：踢下线时写入黑名单的唯一标识
+                .signWith(secretKey)
+                .compact();
+
+        // Redis 可用时：将 token 存入 Redis，实现单设备登录（新 token 覆盖旧 token）
+        if (redisTemplate != null) {
+            redisTemplate.opsForValue().set(
+                    TOKEN_PREFIX + username, token, expirationSeconds, TimeUnit.SECONDS);
+        }
+        return token;
+    }
+
+    /**
+     * 踢下线：取在线 token -> 解析 jti 写黑名单 -> 删除 Redis key
+     */
+    public String kickOut(String username) {
+        String token = redisTemplate.opsForValue().get(TOKEN_PREFIX + username);
+        if (!StringUtils.hasText(token)) return "用户当前不在线，无需踢下线";
+
+        // 解析 token 获取 jti 和剩余有效期并写入黑名单
+        Claims claims = parseToken(token);
+        String jti = claims.getId();
+        long remainTtl = (claims.getExpiration().getTime() - System.currentTimeMillis()) / 1000;
+        if (StringUtils.hasText(jti) && remainTtl > 0) {
+            redisTemplate.opsForValue().set(BLACKLIST_PREFIX + jti, username, remainTtl, TimeUnit.SECONDS);
+        }
+
+        // 删除在线 token key，断开登录状态
+        redisTemplate.delete(TOKEN_PREFIX + username);
+        return "踢下线成功";
+    }
+
+    /**
+     * 验证 token：签名 + 过期检查 + jti 黑名单检查（Redis 可用时）
+     */
+    public boolean validateToken(String token) { ... }
+}
+```
+
+### 3.6 RedisAccessor（类隔离，避免 NoClassDefFoundError）
+
+```java
+/**
+ * Redis 访问适配器
+ *
+ * 【设计目的】将所有 StringRedisTemplate 操作封装在该类中，
+ * 与 TokenBlacklistService 隔离在不同类文件中。
+ *
+ * 【JVM 类加载机制】
+ * - TokenBlacklistService 主类字节码中不出现任何 Redis 类型引用
+ * - JVM 内省 getDeclaredMethods 时不触发 Redis 类加载
+ * - 彻底规避后端编排时不展开 NoClassDefFoundError：StringRedisTemplate
+ *
+ * 【若卌时运行时未有 Redis jar】ClassLoader 懒加载机制保证本类不被加载，
+ * 不会安全地提前抛出 NoClassDefFoundError。
+ */
+class RedisAccessor {
+
+    private final StringRedisTemplate redisTemplate;
+
+    private RedisAccessor(StringRedisTemplate redisTemplate) {
+        this.redisTemplate = redisTemplate;
+    }
+
+    /**
+     * 工厂方法：从 ApplicationContext 获取 StringRedisTemplate 并创建访问器
+     * Redis jar 不存在或 Bean 未就绪时抛出异常，由调用方处理
+     */
+    static RedisAccessor create(ApplicationContext context) {
+        StringRedisTemplate template = context.getBean("stringRedisTemplate", StringRedisTemplate.class);
+        return new RedisAccessor(template);
+    }
+
+    Boolean hasKey(String key)    { return redisTemplate.hasKey(key); }
+    String  get(String key)       { return redisTemplate.opsForValue().get(key); }
+    void    set(String key, String value, long timeout, TimeUnit unit) {
+        redisTemplate.opsForValue().set(key, value, timeout, unit);
+    }
+    void    delete(String key)    { redisTemplate.delete(key); }
 }
 ```
 
@@ -633,22 +850,40 @@ gateway:
 cn.itzixiao.interview.security.gateway.GatewayAuthAutoConfiguration
 ```
 
-**装配条件链（四重条件全部满足才生效）：**
+**装配条件链（三重条件全部满足才生效）：**
 
 ```java
-@ConditionalOnClass({DispatcherHandler.class, GlobalFilter.class})
-// 条件1：classpath 中存在 Gateway 核心类（引入了 spring-cloud-starter-gateway）
-
-@ConditionalOnWebApplication(type = REACTIVE)
-// 条件2：当前是响应式 Web 应用（Gateway 基于 WebFlux）
+@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
+// 条件1：当前是响应式 Web 应用（Gateway 基于 WebFlux），Servlet 应用不触发
 
 @ConditionalOnProperty(prefix = "gateway.auth", name = "enabled",
         havingValue = "true", matchIfMissing = true)
-// 条件3：gateway.auth.enabled=true（默认为 true，不配置也生效）
+// 条件2：gateway.auth.enabled=true（默认为 true，不配置也生效，可通过配置关闭）
 
 @AutoConfigureBefore(GatewayAutoConfiguration.class)
-// 条件4：在 GatewayAutoConfiguration 之前加载，确保过滤器优先注册
+// 条件3：在 GatewayAutoConfiguration 之前加载，确保鉴权过滤器先于路由过滤器注册
 ```
+
+**Bean 覆盖机制：**
+
+```java
+// interview-security 中（兜底实现）：
+@Bean
+@ConditionalOnMissingBean(TokenBlacklistService.class)  // 容器中不存在时才创建
+public TokenBlacklistService tokenBlacklistService(ApplicationContext context) {
+    return new TokenBlacklistService(context);  // 懒加载 Redis
+}
+
+// interview-gateway 中（优先使用）：
+@Bean
+@Primary                                               // 同类型多 Bean 时优先注入
+@ConditionalOnBean(StringRedisTemplate.class)          // Redis Bean 就绪后才创建
+public TokenBlacklistService tokenBlacklistService(StringRedisTemplate redisTemplate, ...) {
+    return new DirectRedisTokenBlacklistService(redisTemplate);  // 直接持有 RedisTemplate
+}
+```
+
+> **为什么不用 `@ConditionalOnClass`？** 当前版本已确认 Gateway 始终有 Redis 依赖，classpath 条件没有意义。同时 `@ConditionalOnClass` 在某些 IDE 运行时的类加载顺序下会提前触发 Redis 类加载，反而引发问题。
 
 ### 8.3 密钥共享机制
 
@@ -666,18 +901,18 @@ Gateway 和 Provider 使用**相同的 JWT 密钥**，这是 Token 能被 Gatewa
 │         密钥只定义一次，所有服务引用这一处                         │
 └──────────────────────────────────────────────────────────────────┘
              ↓ 下发到 Gateway                    ↓ 下发到 Provider
-┌───────────────────────┐  ┌──────────────────────────────┐
-│  interview-gateway       │  │      interview-provider           │
+┌──────────────────────────┐  ┌──────────────────────────────┐
+│  interview-gateway      │  │      interview-provider       │
 │                         │  │                                │
-│  security.jwt.secret-key│  │  jwt.secret-key                 │
+│  security.jwt.secret-key│  │  jwt.secret-key                │
 │  = ${jwt.secret-key}    │  │  = ${jwt.secret-key}           │
 │                         │  │                                │
 │  Spring 绑定前缀不同，    │  │  Spring 绑定前缀不同，           │
-│  但引用的全局变量相同  │  │  但引用的全局变量相同           │
+│  但引用的全局变量相同      │  │  但引用的全局变量相同             │
 │                         │  │                                │
-│  GatewayJwtService       │  │  JwtService                     │
+│  GatewayJwtService       │  │  JwtService                   │
 │  validateToken() 验证    │  │  generateToken() 签发          │
-└───────────────────────┘  └──────────────────────────────┘
+└───────────────────────┘  └─────────────────────────────────┘
 ```
 
 **为什么不应该各自硬编码？**
@@ -694,7 +929,7 @@ Gateway 和 Provider 使用**相同的 JWT 密钥**，这是 Token 能被 Gatewa
 
 ### 9.1 Token 存储位置
 
-本项目采用**无状态 JWT 方案**，Token 不在服务端存储，完全依赖签名验证：
+本项目采用 **JWT + Redis 引状态方案**，Token 同时存在于客户端和服务端 Redis，支持主动吐销和踢下线：
 
 ```
 ┌──────────────────────────────────────────────────────────────────┐
@@ -702,30 +937,39 @@ Gateway 和 Provider 使用**相同的 JWT 密钥**，这是 Token 能被 Gatewa
 │                                                                  │
 │  1. 生成阶段（Provider）                                            │
 │     JwtService.generateToken()                                    │
+│     → 写入 jti（UUID，用于黑名单标识）                               │
+│     → 写入 userId（数字 ID，透传给下游）                             │
 │     → 写入 username（subject）                                     │
 │     → 写入 roles（自定义 claims）                                   │
-│     → 写入 iat（签发时间）                                          │
-│     → 写入 exp（过期时间 = 当前时间 + 86400秒）                      │
+│     → 写入 iat（签发时间）、exp（过期时间）                           │
 │     → 使用 SecretKey HMAC-SHA 签名                                │
-│     → 返回 Base64Url 编码的三段式字符串                              │
+│     → 同时将 token 存入 Redis（jwt:token:{username}）               │
+│       实现单设备登录，新 token 覆盖旧 token                          │
 │                                                                   │
-│  2. 存储阶段（客户端负责）                                           │
+│  2. 存储阶段（客户端 + Redis 双存）                                  │
 │     ├── Web 端：localStorage / sessionStorage / Cookie            │
-│     └── App 端：本地安全存储（KeyChain / SharedPreferences）        │
-│     服务端：无存储，无 Session，完全无状态                            │
+│     ├── App 端：本地安全存储（KeyChain / SharedPreferences）        │
+│     └── Redis：jwt:token:{username} = token，TTL = 过期时间        │
 │                                                                 │
 │  3. 使用阶段（每次请求携带）                                         │
 │     请求头：Authorization: Bearer eyJhbGciOiJIUzI1NiJ9...         │
 │                                                                 │
 │  4. 验证阶段（Gateway 拦截）                                        │
-│     GatewayJwtService.validateToken()                           │
-│     → 用相同 SecretKey 重新计算签名，与 Token 签名比对                │
-│     → 检查 exp 是否早于当前时间                                     │
-│     → 验证通过后解析 claims，注入请求头传递给下游                      │
+│     AuthenticationFilter：                                        │
+│     → 签名验证 + 过期检查（JJWT 内置）                              │
+│     → jti 黑名单检查（Redis jwt:blacklist:{jti}）                  │
+│     → 在线 token 一致性检查（Redis jwt:token:{username}）           │
+│     → 通过后解析 claims，注入 X-User-* 头给下游                     │
 │                                                                 │
-│  5. 过期阶段                                                      │
+│  5. 主动吊销阶段（logout / 踢下线）                                  │
+│     → 解析 jti 写入 Redis 黑名单（TTL = 剩余有效期）                 │
+│     → 删除 jwt:token:{username}，断开登录状态                       │
+│     → 下次请求 Gateway 返回 401                                    │
+│                                                                 │
+│  6. 自然过期阶段                                                   │
 │     → 客户端重新登录获取新 Token                                    │
-│     → 旧 Token 自然失效（无需服务端操作）                             │
+│     → 旧 Token 自然失效（JJWT 过期报错）                            │
+│     → Redis key 自动 TTL 到期清理                                  │
 └──────────────────────────────────────────────────────────────────┘
 ```
 
@@ -741,6 +985,8 @@ Provider 生成的 Token 包含以下 Payload 信息：
 
 // Payload（实际存储内容）
 {
+  "jti": "550e8400-e29b-41d4-a716-446655440000",
+  // JWT ID，唯一标识（用于黑名单匹配）
   "sub": "admin",
   // 用户名（subject）
   "iss": "interview-provider",
@@ -749,6 +995,8 @@ Provider 生成的 Token 包含以下 Payload 信息：
   // 签发时间（issuedAt）
   "exp": 1742947200,
   // 过期时间（expiration）
+  "userId": 1001,
+  // 用户数字 ID（透传给下游，避免下游查表）
   "roles": {
     "role": "ADMIN",
     "permissions": [
@@ -768,38 +1016,52 @@ HMACSHA256(base64(header) + "." + base64(payload), secretKey)
 ```java
 // 1. 登录请求进入 JwtController.login()
 @PostMapping("/api/auth/login")
-public Result<Map<String, Object>> login(@RequestBody Map<String, String> loginRequest) {
-    // 验证用户名密码（生产环境查数据库）
-    String username = loginRequest.get("username");
+public Result<Map<String, Object>> login(@RequestBody LoginRequest loginRequest) {
+    String username = loginRequest.getUsername();
+    Long userId = user.getId();
 
     // 构建角色信息（写入 Token Payload）
     Map<String, Object> roles = new HashMap<>();
     roles.put("role", "ADMIN");
     roles.put("permissions", new String[]{"read", "write", "delete"});
 
-    // 2. 调用 JwtService.generateToken() 生成 Token
-    String token = jwtService.generateToken(username, roles);
+    // 2. 调用 JwtService.generateToken() 生成 Token（同时存入 Redis）
+    String token = jwtService.generateToken(username, userId, roles);
 
     // 3. 返回 Token 给客户端（客户端自行存储）
     response.put("token", token);
     response.put("tokenType", "Bearer");
-    response.put("expiresIn", 86400);
+    response.put("expiresIn", jwtService.getJwtConfig().getExpiration());
     return Result.success(response);
 }
 
-// 2. JwtService.generateToken() 内部实现
-public String generateToken(String username, Map<String, Object> roles) {
+// 2. JwtService.generateToken() 内部实现（含 jti + userId + Redis 存储）
+public String generateToken(String username, Long userId, Map<String, Object> roles) {
     Date now = new Date();
-    Date expiryDate = new Date(now.getTime() + expiration * 1000); // 86400秒后过期
+    long expirationSeconds = jwtConfig.getExpiration();
+    Date expiryDate = new Date(now.getTime() + expirationSeconds * 1000);
+    String jti = UUID.randomUUID().toString();  // 生成唯一 jti
 
-    return Jwts.builder()
-            .claims(claims)          // 写入 roles 等自定义 claims
+    Map<String, Object> claims = new HashMap<>();
+    if (userId != null) claims.put("userId", userId);
+    if (roles != null)  claims.put("roles", roles);
+
+    String token = Jwts.builder()
+            .claims(claims)
             .subject(username)       // 写入 sub = username
-            .issuer(issuer)          // 写入 iss = "interview-provider"
+            .issuer(jwtConfig.getIssuer())
             .issuedAt(now)           // 写入 iat = 当前时间
-            .expiration(expiryDate)  // 写入 exp = 当前时间 + 86400s
+            .expiration(expiryDate)  // 写入 exp = 当前时间 + 配置秒数
+            .id(jti)                 // 写入 jti = UUID（用于黑名单）
             .signWith(secretKey)     // HMAC-SHA256 签名
-            .compact();              // 生成 Base64Url 三段式字符串
+            .compact();
+
+    // Redis 可用时：存入在线 token，实现单设备登录（新 token 覆盖旧 token）
+    if (redisTemplate != null) {
+        redisTemplate.opsForValue().set(
+                TOKEN_PREFIX + username, token, expirationSeconds, TimeUnit.SECONDS);
+    }
+    return token;
 }
 ```
 
@@ -812,17 +1074,19 @@ public String generateToken(String username, Map<String, Object> roles) {
 Gateway 验证 Token 通过后，会将用户信息**解析并注入到请求头**，下游服务无需重复验证 Token：
 
 ```java
-// AuthenticationFilter.java - 验证通过后的处理
-String username = jwtService.getUsernameFromToken(token);  // 从 Token 解析用户名
-Object roles = jwtService.getRolesFromToken(token);     // 从 Token 解析角色
-String userId = jwtService.getUserIdFromToken(token);    // 从 Token 解析用户ID
+// AuthenticationFilter.java - 验证通过后的处理（一次解析 Claims，多次使用）
+String username = claims.getSubject();       // 从 Claims 获取用户名
+Object roles = claims.get("roles");          // 从 Claims 获取角色
+Object userIdObj = claims.get("userId");     // 从 Claims 获取用户 ID
+String userId = userIdObj != null ? userIdObj.toString() : username;
 
 // 将用户信息写入请求头，转发给下游服务
 ServerHttpRequest mutableReq = request.mutate()
-        .header("X-User-Id", userId)                      // 用户ID
-        .header("X-User-Name", username)                    // 用户名
-        .header("X-User-Roles", roles != null ? roles.toString() : "")  // 角色
-        .header("X-Auth-Source", "gateway")                   // 标记来源为网关
+        .header("X-User-Id", userId)                                        // 用户ID
+        .header("X-User-Name", username)                                    // 用户名
+        .header("X-User-Roles", roles != null ? roles.toString() : "")     // 角色
+        .header("X-Auth-Source", "gateway")                                 // 标记来源为网关
+        .headers(headers -> headers.remove("Authorization"))  // 屏蔽 Authorization 头，下游服务不再鉴权
         .build();
 ```
 
@@ -912,7 +1176,8 @@ public class FeignUserContextInterceptor implements RequestInterceptor {
   │                       │─────────────────────────▶│                      │
   │                       │                          │ JwtService           │
   │                       │                          │ .generateToken()     │
-  │                       │                          │ 生成含 roles 的 JWT   │
+  │                       │                          │ 生成含 jti+userId 的 JWT│
+  │                       │                          │ 存入 Redis           │
   │◀──────────────────────│◀─────────────────────────│                      │
   │ {token: "eyJ..."}     │                          │                      │
   │                       │                          │                      │
@@ -924,10 +1189,11 @@ public class FeignUserContextInterceptor implements RequestInterceptor {
   │                       │ AuthenticationFilter     │                      │
   │                       │ 1. 不在白名单              │                      │
   │                       │ 2. 提取 Bearer Token      │                      │
-  │                       │ 3. GatewayJwtService     │                      │
-  │                       │    .validateToken()      │                      │
-  │                       │ 4. 解析 username/roles    │                      │
-  │                       │ 5. 注入 X-User-* 请求头    │                      │
+  │                       │ 3. 解析 Claims           │                      │
+  │                       │ 4. 黑名单校验（Redis）      │                      │
+  │                       │ 5. 在线 token 一致性（Redis）│                      │
+  │                       │ 6. 屏蔽 Authorization 头   │                      │
+  │                       │ 7. 注入 X-User-* 请求头    │                      │
   │                       │─────────────────────────▶│                      │
   │                       │                          │ @RequestHeader       │
   │                       │                          │ 获取 X-User-Id 等     │
@@ -1001,27 +1267,37 @@ public class NewServiceController {
 | **引入 security 模块自鉴权** | 直连场景/内部服务  | 是                  | 使用 JwtTokenProvider 独立验证 |
 | **Feign 透传**          | 微服务间调用     | 否                  | 通过 RequestInterceptor 透传 |
 
-### 11.3 Token 主动失效方案（扩展）
+### 11.3 Token 主动失效方案（已实现）
 
-标准 JWT 无法主动失效，以下是生产中常用的补充方案：
+本项目已实现方案一（Redis 黑名单）和在线 token 一致性校验：
 
 ```
-方案一：Redis 黑名单（推荐）
-  退出登录 → 将 Token 的 jti（JWT ID）写入 Redis 黑名单
-  Gateway 验证时 → 额外检查 jti 是否在黑名单中
-  黑名单 TTL = Token 剩余有效时间
+方案一：Redis 黑名单（已实现 - logout 主动登出）
+  Provider logout 接口：
+    1. 解析当前请求的 token 获取 jti和剩余有效期
+    2. 将 jti 写入 Redis 黑名单（KEY: jwt:blacklist:{jti}，TTL = 剩余有效期）
+    3. 删除 jwt:token:{username} key
+  Gateway 验证时：
+    → 读取 jti -> 检查 jwt:blacklist:{jti} -> 存在则 401
 
-方案二：版本号机制
+方案二：在线 Token 一致性校验（已实现 - 踢下线、单设备登录）
+  Provider kickOut 接口 / 新登录覆盖：
+    1. 将当前用户的在线 token 写入黑名单（kickOut 时）
+    2. 删除 jwt:token:{username}（kickOut） 或 覆盖写入（新登录）
+  Gateway 验证时：
+    → 读取 jwt:token:{username} -> 不存在或不一致 -> 401
+
+方案三：版本号机制（未实现——备选方案）
   用户表维护 token_version 字段
   Token Payload 中写入 token_version
   Gateway 验证时调用 Provider 接口比对版本号
   修改密码/强制下线 → 自增 token_version，旧 Token 失效
 
-方案三：短有效期 + Refresh Token
+方案四：短有效期 + Refresh Token（未实现——适合下一期迭代）
   Access Token：15分钟有效
   Refresh Token：7天有效，存 Redis
   Access Token 过期 → 用 Refresh Token 换取新 Access Token
-  主动吊销 → 删除 Redis 中的 Refresh Token
+  主动吐销 → 删除 Redis 中的 Refresh Token
 ```
 
 ---
@@ -1036,9 +1312,12 @@ public class NewServiceController {
 | `spring.cloud.gateway.routes` | Gateway  | 路由规则                          |
 | `StripPrefix`                 | Gateway  | 路径前缀剥离数量                      |
 | `gateway.white-list.paths`    | Gateway  | 白名单路径                         |
-| `security.jwt.secret-key`     | Gateway  | 网关 JWT 验证密钥                   |
-| `jwt.secret-key`              | Provider | 业务服务 JWT 签发密钥（与 Gateway 必须一致） |
+| `security.jwt.secret-key`     | Gateway  | 网关 JWT 验证密鑰                   |
+| `jwt.secret-key`              | Provider | 业务服务 JWT 签发密鑰（与 Gateway 必须一致） |
 | `gateway.auth.enabled`        | Gateway  | 是否启用鉴权（默认 true）               |
+| `spring.data.redis.host`      | Gateway  | Redis 地址（黑名单和在线 token 存储）   |
+| `spring.data.redis.port`      | Gateway  | Redis 端口（默认 6379）              |
+| `spring.data.redis.database`  | Gateway  | Redis 数据库编号（与 Provider 保持一致）  |
 
 ### 12.2 最佳实践
 
