@@ -136,9 +136,11 @@ spring:
             allowedHeaders: "*"
             allowCredentials: true
 
-# JWT 配置（必须与 interview-provider 使用相同的密钥）
+# JWT 配置
+# 密钥统一由 Nacos common.yml 下发，此处使用 ${jwt.secret-key} 引用
+# 开发环境本地无 Nacos 时回退到默认值（仅供本地调试，与 Provider 保持一致）
 security:
   jwt:
-    secret-key: "itzixiao-interview-system-secret-key-2026-this-is-a-demo-for-learning"
-    issuer: "interview-provider"
-    expiration: 86400
+    secret-key: ${jwt.secret-key:itzixiao-interview-system-secret-key-2026-this-is-a-demo-for-learning}
+    issuer: ${jwt.issuer:interview-provider}
+    expiration: ${jwt.expiration:86400}

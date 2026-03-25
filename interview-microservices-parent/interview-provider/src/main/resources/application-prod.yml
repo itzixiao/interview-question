@@ -135,8 +135,10 @@ info:
     description: 服务提供者 - OpenFeign 微服务调用演示
     environment: production
 
-# JWT 配置 - 生产环境应使用环境变量或配置中心
+# JWT 配置 - 生产环境
+# 优先级：1.环境变量 JWT_SECRET_KEY  2.Nacos common.yml 下发的 jwt.secret-key
+# 必须与 Gateway 服务保持一致
 jwt:
-  secret-key: "${JWT_SECRET_KEY:interview-production-secure-secret-key-change-in-real-env}"  # 从环境变量读取，或使用默认值
-  expiration: 7200  # token 过期时间（秒），生产环境建议 2 小时
-  issuer: "interview-provider"
+  secret-key: ${JWT_SECRET_KEY:${jwt.secret-key:}}
+  expiration: ${jwt.expiration:7200}
+  issuer: ${jwt.issuer:interview-provider}

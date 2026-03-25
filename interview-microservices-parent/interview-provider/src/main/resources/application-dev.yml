@@ -148,7 +148,9 @@ info:
     environment: development
 
 # JWT 配置
+# 密钥统一由 Nacos common.yml 下发的 jwt.secret-key 提供
+# 开发环境本地无 Nacos 时回退到默认值（必须与 Gateway 保持一致）
 jwt:
-  secret-key: "itzixiao-interview-system-secret-key-2026-this-is-a-demo-for-learning"  # JWT 密钥（生产环境应使用环境变量）
-  expiration: 86400  # token 过期时间（秒），默认 24 小时
-  issuer: "interview-provider"  # token 签发者
+  secret-key: ${jwt.secret-key:itzixiao-interview-system-secret-key-2026-this-is-a-demo-for-learning}
+  expiration: ${jwt.expiration:86400}
+  issuer: ${jwt.issuer:interview-provider}
