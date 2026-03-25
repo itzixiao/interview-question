@@ -137,9 +137,8 @@ spring:
             allowCredentials: true
 
 # JWT 配置
-# 密鑐统一由 Nacos common.yml 下发，此处使用 ${jwt.*} 引用
-# 开发环境本地无 Nacos 时回退到默认值（仅供本地调试）
+# 开发环境本地默认值（Nacos 可用时会被 common.yml 中的 jwt.* 覆盖）
 jwt:
-  secret-key: ${jwt.secret-key:itzixiao-interview-system-secret-key-2026-this-is-a-demo-for-learning}
-  issuer: ${jwt.issuer:interview-provider}
-  expiration: ${jwt.expiration:7200}
+  secret-key: itzixiao-interview-system-secret-key-2026-this-is-a-demo-for-learning
+  issuer: interview-provider
+  expiration: 7200

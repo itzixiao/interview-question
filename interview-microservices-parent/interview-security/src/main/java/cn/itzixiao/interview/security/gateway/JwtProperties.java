@@ -1,6 +1,7 @@
 package cn.itzixiao.interview.security.gateway;
 
 import lombok.Data;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
@@ -12,12 +13,16 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * 1. 密钥由配置中心统一管理，禁止硬编码
  * 2. 生产环境通过环境变量 JWT_SECRET_KEY 覆盖
  * 3. Gateway 只做验证，Provider 负责签发，共享同一密钥
+ * <p>
+ * 重要：此类仅在 WebFlux（Gateway）环境下生效，避免被 Servlet 应用（Provider）扫描
+ * 导致与 Provider 的 JwtConfig（同为 jwt.* 前缀）重复注册，引发 factoryBeanObjectType 冲突。
  *
  * @author itzixiao
  * @date 2026-03-20
  */
 @Data
 @ConfigurationProperties(prefix = "jwt")
+@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
 public class JwtProperties {
 
     /**

@@ -64,6 +64,15 @@
             <groupId>cn.itzixiao</groupId>
             <artifactId>interview-security</artifactId>
         </dependency>
+
+        <!-- Redis 可选依赖：不引入的话 Token 黑名单功能自动禁用，开启则支持登出吹销 Token -->
+        <!-- 要开启黑名单，取消注释即可 -->
+        <!--
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+        -->
     </dependencies>
 
     <build>
