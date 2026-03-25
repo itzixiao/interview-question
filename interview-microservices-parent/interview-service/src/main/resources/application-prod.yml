@@ -2,22 +2,24 @@
 
 # 服务端口
 server:
-  port: 8080
+  port: 8081
+  servlet:
+    context-path: /service
 
 # Nacos 生产环境配置
 spring:
   config:
-    import: optional:nacos:interview-service-prod.yml
+    import: optional:nacos:interview-service.yml
   cloud:
     nacos:
       discovery:
-        server-addr: ${NACOS_SERVER_ADDR:nacos.example.com:8848}
+        server-addr: ${NACOS_SERVER_ADDR:localhost:8848}
         namespace: prod
-        group: PROD_GROUP
+        group: DEFAULT_GROUP
       config:
-        server-addr: ${NACOS_SERVER_ADDR:nacos.example.com:8848}
+        server-addr: ${NACOS_SERVER_ADDR:localhost:8848}
         namespace: prod
-        group: PROD_GROUP
+        group: DEFAULT_GROUP
         file-extension: yml
     sentinel:
       transport:
@@ -26,7 +28,7 @@ spring:
 
   # 生产环境数据源（建议从 Nacos 配置中心读取）
   datasource:
-    url: ${MYSQL_URL:jdbc:mysql://localhost:3306/interview?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=Asia/Shanghai}
+    url: ${MYSQL_URL:jdbc:mysql://localhost:3306/interview?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true}
     username: ${MYSQL_USERNAME:root}
     password: ${MYSQL_PASSWORD:}
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -37,17 +39,29 @@ spring:
       max-lifetime: 1800000
       connection-timeout: 30000
 
-  # 生产环境 Redis
-  redis:
-    host: ${REDIS_HOST:localhost}
-    port: ${REDIS_PORT:6379}
-    password: ${REDIS_PASSWORD:}
-    database: 0
-    lettuce:
-      pool:
-        max-active: 20
-        max-idle: 10
-        min-idle: 5
+  # 生产环境 Redis + MongoDB
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      database: ${REDIS_DATABASE:0}
+      lettuce:
+        pool:
+          max-active: 20
+          max-idle: 10
+          min-idle: 5
+    mongodb:
+      host: ${MONGO_HOST:localhost}
+      port: ${MONGO_PORT:27017}
+      database: ${MONGO_DATABASE:interview_db}
+      username: ${MONGO_USERNAME:root}
+      password: ${MONGO_PASSWORD:}
+      authentication-database: admin
+
+# MongoDB 功能开关
+mongodb:
+  enabled: true
 
 # 日志级别
 logging:

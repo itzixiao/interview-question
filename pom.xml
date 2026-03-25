@@ -199,6 +199,13 @@
                 <version>${mybatis-spring-boot.version}</version>
             </dependency>
 
+            <!-- mybatis-spring 强制升级到 3.0.4，修复与 spring-beans-6.1.6 的 factoryBeanObjectType 兼容性问题 -->
+            <dependency>
+                <groupId>org.mybatis</groupId>
+                <artifactId>mybatis-spring</artifactId>
+                <version>3.0.4</version>
+            </dependency>
+
             <!-- Druid -->
             <dependency>
                 <groupId>com.alibaba</groupId>

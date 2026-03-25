@@ -95,7 +95,7 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- ShardingSphere-JDBC（用于分库分表） -->
+        <!-- ShardingSphere-JDBC（用于分库分表演示） -->
         <dependency>
             <groupId>org.apache.shardingsphere</groupId>
             <artifactId>shardingsphere-jdbc-core</artifactId>

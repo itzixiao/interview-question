@@ -3,61 +3,49 @@
 # 服务端口（与 interview-service 8081 区分）
 server:
   port: 8082
+  servlet:
+    context-path: /provider
 
 # Spring Cloud Nacos 配置
 spring:
-  # ShardingSphere 分库分表配置（4.1.1 版本）
+  # ShardingSphere 分库分表演示功能（已禁用）
+  # ShardingSphere 5.4.1 与 Spring Boot 3.2.x / JDK 17 存在多个不兼容问题：
+  #   1. factoryBeanObjectType 类型冲突（mybatis-spring 3.0.3 问题）
+  #   2. JAXB-API 在 JDK 17 中已移除
+  # 设置 enabled=false 禁用 ShardingDataSourceConfig，DataSource 由 MyBatis-Plus 自动配置提供
   shardingsphere:
-    # 开启 SQL 显示（生产环境建议关闭）
+    enabled: false
     props:
-      sql:
-        show: false
-    
-    # 数据源配置
+      sql-show: false
     datasource:
-      names: ds0
       ds0:
-        type: com.zaxxer.hikari.HikariDataSource
-        driver-class-name: com.mysql.cj.jdbc.Driver
-        jdbc-url: jdbc:mysql://localhost:3306/interview?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
-        username: root
+        jdbc-url: ${MYSQL_URL:jdbc:mysql://localhost:3306/interview?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true}
+        username: ${MYSQL_USERNAME:root}
         password: ${MYSQL_PASSWORD:}
-        hikari:
-          minimum-idle: 10             # 生产环境调大最小空闲连接
-          maximum-pool-size: 50        # 生产环境调大最大连接数
-          connection-timeout: 30000
-          idle-timeout: 600000
-          max-lifetime: 1800000
-    
-    # 分库分表规则
-    sharding:
-      # 默认数据库策略（不分片）
-      default-database-strategy:
-        none:
-      
-      # 表分片规则
-      tables:
-        device_operation_log:
-          # 实际数据节点：ds0.device_operation_log_202601 ~ ds0.device_operation_log_202612
-          actual-data-nodes: ds0.device_operation_log_202601,ds0.device_operation_log_202602,ds0.device_operation_log_202603,ds0.device_operation_log_202604,ds0.device_operation_log_202605,ds0.device_operation_log_202606,ds0.device_operation_log_202607,ds0.device_operation_log_202608,ds0.device_operation_log_202609,ds0.device_operation_log_202610,ds0.device_operation_log_202611,ds0.device_operation_log_202612
-          # 表分片策略
-          table-strategy:
-            standard:
-              # 分片列（必须是数据库字段名）
-              sharding-column: operation_time
-              # 精确分片算法
-              precise-algorithm-class-name: cn.itzixiao.interview.provider.config.sharding.DeviceOperationLogMonthShardingAlgorithm
-              # 范围分片算法
-              range-algorithm-class-name: cn.itzixiao.interview.provider.config.sharding.DeviceOperationLogMonthShardingAlgorithm
+
+  # 普通 DataSource 配置（供 MyBatis-Plus 使用）
+  datasource:
+    url: ${MYSQL_URL:jdbc:mysql://localhost:3306/interview?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true}
+    username: ${MYSQL_USERNAME:root}
+    password: ${MYSQL_PASSWORD:}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      minimum-idle: 10             # 生产环境调大最小空闲连接
+      maximum-pool-size: 50        # 生产环境调大最大连接数
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
 
   cloud:
     nacos:
       discovery:
-        enabled: false
-        server-addr: localhost:8848
+        enabled: true
+        server-addr: ${NACOS_SERVER_ADDR:localhost:8848}
+        namespace: prod
+        group: DEFAULT_GROUP
       config:
         enabled: false
-        server-addr: localhost:8848
+        server-addr: ${NACOS_SERVER_ADDR:localhost:8848}
         file-extension: yml
         namespace: prod
         group: DEFAULT_GROUP
@@ -66,23 +54,24 @@ spring:
 
   # Elasticsearch 配置
   elasticsearch:
-    uris: http://localhost:19200
-    username: elastic
+    uris: ${ES_URIS:http://localhost:19200}
+    username: ${ES_USERNAME:elastic}
     password: ${ES_PASSWORD:}
 
   # Redis 配置
-  redis:
-    host: localhost
-    port: 6379
-    password: ${REDIS_PASSWORD:}  # 如果有密码请设置环境变量
-    database: 10
-    timeout: 5000ms
-    lettuce:
-      pool:
-        max-active: 8
-        max-idle: 8
-        min-idle: 0
-        max-wait: -1ms
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      database: ${REDIS_DATABASE:10}
+      timeout: 5000ms
+      lettuce:
+        pool:
+          max-active: 16
+          max-idle: 8
+          min-idle: 2
+          max-wait: -1ms
 
 # Spring Boot Actuator 配置 - 生产环境安全加固
 management:

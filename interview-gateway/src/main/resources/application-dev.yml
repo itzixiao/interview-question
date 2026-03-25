@@ -4,6 +4,13 @@ server:
 spring:
   config:
     import: optional:nacos:interview-gateway.yml
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: ${REDIS_PASSWORD:}
+      database: 10
+      timeout: 3000ms
   cloud:
     nacos:
       discovery:
@@ -142,3 +149,4 @@ jwt:
   secret-key: itzixiao-interview-system-secret-key-2026-this-is-a-demo-for-learning
   issuer: interview-provider
   expiration: 7200
+

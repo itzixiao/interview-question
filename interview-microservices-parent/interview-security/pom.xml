@@ -61,11 +61,11 @@
             <artifactId>guava</artifactId>
         </dependency>
 
-        <!-- Redis（可选依赖，用于 Token 黑名单） -->
+        <!-- Redis（可选依赖，用于 Token 黑名单；provided 确保编译期可见，运行时由宿主模块提供） -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis</artifactId>
-            <optional>true</optional>
+            <scope>provided</scope>
         </dependency>
 
         <!-- Lombok -->

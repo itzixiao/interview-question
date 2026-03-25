@@ -26,7 +26,7 @@ import java.util.Map;
  * 大厂规范设计：
  * 1. order = -100，确保在所有业务过滤器之前执行
  * 2. 白名单路径直接放行，无需鉴权
- * 3. JWT Token 校验：签名验证 + 过期检查 + 黑名单校验（主动吹销支持）
+ * 3. JWT Token 校验：签名验证 + 过期检查 + 黑名单校验（主动吊销）+ 在线 token 一致性校验（踢下线）
  * 4. Claims 一次解析，避免重复解析带来的性能开销
  * 5. 透传标准化用户信息头：X-User-Id、X-User-Name、X-User-Roles、X-Auth-Source
  * 6. 移除下游 Authorization 头，防止下游服务进行二次鉴权
@@ -39,7 +39,7 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
 
     private final WhiteListProperties whiteListProperties;
     private final GatewayJwtService jwtService;
-    /** 可选依赖：未引入 Redis 时为 null，黑名单功能自动跳过 */
+    /** 可选依赖：未引入 Redis 时为 null，黑名单和在线 token 校验自动跳过 */
     private final TokenBlacklistService tokenBlacklistService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -97,12 +97,21 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
             return buildUnauthorizedResponse(exchange, "认证令牌已过期");
         }
 
-        // 黑名单校验（主动吹销支持）：仅在 Redis 可用时才执行
+        // Redis 可用时：黑名单 + 在线 token 一致性双重校验
         if (tokenBlacklistService != null) {
+            // 1. jti 黑名单校验（logout 主动登出 / kickOut 踢下线时写入）
             String jti = claims.getId();
             if (jti != null && tokenBlacklistService.isBlacklisted(jti)) {
-                log.warn("【网关鉴权】Token 已被吹销（黑名单）, jti: {}, path: {}", jti, path);
-                return buildUnauthorizedResponse(exchange, "认证令牌已被吹销，请重新登录");
+                log.warn("【网关鉴权】Token 已被吊销（黑名单）, jti: {}, path: {}", jti, path);
+                return buildUnauthorizedResponse(exchange, "认证令牌已被吊销，请重新登录");
+            }
+            // 2. 在线 token 一致性校验（踢下线 / 单设备登录失效的核心防线）
+            //    jwt:token:{username} 不存在（被踢下线删除）或与当前 token 不一致 -> 401
+            String usernameForCheck = claims.getSubject();
+            if (!tokenBlacklistService.isOnlineTokenValid(usernameForCheck, token)) {
+                log.warn("【网关鉴权】token 已失效（踢下线或已被新 token 替换）, username: {}, path: {}",
+                        usernameForCheck, path);
+                return buildUnauthorizedResponse(exchange, "认证令牌已失效，请重新登录");
             }
         }
 

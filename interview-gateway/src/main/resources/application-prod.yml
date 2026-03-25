@@ -4,6 +4,13 @@ server:
 spring:
   config:
     import: optional:nacos:interview-gateway.yml
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      database: ${REDIS_DATABASE:10}
+      timeout: 3000ms
   cloud:
     nacos:
       discovery:
@@ -31,12 +38,15 @@ spring:
           lower-case-service-id: true
 
       # 路由配置
+      # 各服务已配置 context-path，Gateway 只需转发到服务即可
+      # 例如：/api/provider/xxx → provider服务的 /provider/xxx
       routes:
-        # 面试题服务
-        - id: interview-service
-          uri: lb://interview-service
+        # 服务提供者（interview-provider）
+        # 访问 /api/provider/xxx → 转发到 provider 服务的 /provider/xxx
+        - id: interview-provider
+          uri: lb://interview-provider
           predicates:
-            - Path=/api/interview/**
+            - Path=/api/provider/**
           filters:
             - StripPrefix=1
             - name: Retry
@@ -44,11 +54,79 @@ spring:
                 retries: 3
                 statuses: BAD_GATEWAY
 
-        # 用户服务（示例）
-        - id: user-service
-          uri: lb://user-service
+        # 面试题服务
+        - id: interview-service
+          uri: lb://interview-service
           predicates:
-            - Path=/api/user/**
+            - Path=/api/service/**
+          filters:
+            - StripPrefix=1
+            - name: Retry
+              args:
+                retries: 3
+                statuses: BAD_GATEWAY
+
+        # 算法服务
+        - id: interview-algorithm
+          uri: lb://interview-algorithm
+          predicates:
+            - Path=/api/algorithm/**
+          filters:
+            - StripPrefix=1
+
+        # Kafka 服务
+        - id: interview-kafka
+          uri: lb://interview-kafka
+          predicates:
+            - Path=/api/kafka/**
+          filters:
+            - StripPrefix=1
+
+        # RabbitMQ 服务
+        - id: interview-rabbitmq
+          uri: lb://interview-rabbitmq
+          predicates:
+            - Path=/api/rabbitmq/**
+          filters:
+            - StripPrefix=1
+
+        # 事务演示服务
+        - id: interview-transaction-demo
+          uri: lb://interview-transaction-demo
+          predicates:
+            - Path=/api/transaction/**
+          filters:
+            - StripPrefix=1
+
+        # 工作流服务
+        - id: interview-workflow
+          uri: lb://interview-workflow
+          predicates:
+            - Path=/api/workflow/**
+          filters:
+            - StripPrefix=1
+
+        # XXL-JOB 服务
+        - id: interview-xxljob
+          uri: lb://interview-xxljob
+          predicates:
+            - Path=/api/xxljob/**
+          filters:
+            - StripPrefix=1
+
+        # 性能调优服务
+        - id: interview-performance-tuning
+          uri: lb://interview-performance-tuning
+          predicates:
+            - Path=/api/performance/**
+          filters:
+            - StripPrefix=1
+
+        # 可观测性服务
+        - id: interview-observability
+          uri: lb://interview-observability
+          predicates:
+            - Path=/api/observability/**
           filters:
             - StripPrefix=1
 

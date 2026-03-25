@@ -3,6 +3,7 @@ package cn.itzixiao.interview.gateway.config;
 import org.springframework.cloud.gateway.filter.ratelimit.KeyResolver;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import reactor.core.publisher.Mono;
 
 /**
@@ -76,6 +77,7 @@ public class RateLimiterConfig {
      * 同一 IP 地址的请求共享令牌桶
      */
     @Bean
+    @Primary
     public KeyResolver ipKeyResolver() {
         return exchange -> {
             String ip = exchange.getRequest().getRemoteAddress().getAddress().getHostAddress();

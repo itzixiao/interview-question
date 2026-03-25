@@ -3,9 +3,9 @@
 ### 
 ### 测试流程：
 ### 1. 直接访问受保护接口 → 401 未授权
-### 2. 登录获取 Token → 白名单接口，无需鉴权
+### 2. 登录获取 Token → 自动写入环境变量 authToken
 ### 3. 携带 Token 访问受保护接口 → 200 成功
-### 4. 携带无效 Token 访问 → 401 未授权
+### 4. 踢下线 → 再次请求 → 401 未授权
 ###
 ### 路由说明：
 ### - Provider 服务 context-path: /provider
@@ -27,7 +27,7 @@ Accept: application/json
 
 ### ========================================
 ### 测试 2: 登录获取 Token（白名单接口）
-### 预期结果: 200 成功，返回 token
+### 预期结果: 200 成功，token 自动写入环境变量 authToken
 ### ========================================
 POST {{baseUrl}}/api/provider/api/auth/login
 Content-Type: application/json
@@ -37,14 +37,26 @@ Content-Type: application/json
   "password": "123456"
 }
 
+> {% 
+  // 自动提取 token 并写入环境变量，后续所有请求使用 {{authToken}}
+  if (response.status === 200) {
+    var token = response.body.data.token;
+    if (token) {
+      client.global.set("authToken", token);
+      client.log("✅ Token 已自动写入环境变量 authToken: " + token.substring(0, 30) + "...");
+    } else {
+      client.log("❌ 未找到 token 字段，请检查响应结构");
+    }
+  }
+%}
+
 ### ========================================
 ### 测试 3: 携带 Token 访问受保护接口
 ### 预期结果: 200 成功
-### 注意: 请将下面的 <TOKEN> 替换为上一步获取的实际 token
 ### ========================================
 GET {{baseUrl}}/api/provider/api/users/1
 Accept: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6eyJyb2xlIjoiQURNSU4iLCJwZXJtaXNzaW9ucyI6WyJyZWFkIiwid3JpdGUiLCJkZWxldGUiXX0sInN1YiI6ImFkbWluIiwiaXNzIjoiaW50ZXJ2aWV3LXByb3ZpZGVyIiwiaWF0IjoxNzc0MDExMzU3LCJleHAiOjE3NzQwOTc3NTd9.wfcBtptboJcctWW_x_DzAscs-3Mx2YuidxKOlKwpNoY
+Authorization: Bearer {{authToken}}
 
 ### ========================================
 ### 测试 4: 携带无效 Token 访问
@@ -52,13 +64,13 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6eyJyb2xlIjoiQURNSU4iLCJwZ
 ### ========================================
 GET {{baseUrl}}/api/provider/api/users/1
 Accept: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6eyJyb2xlIjoiQURNSU4iLCJwZXJtaXNzaW9ucyI6WyJyZWFkIiwid3JpdGUiLCJkZWxldGUiXX0sInN1YiI6ImFkbWluIiwiaXNzIjoiaW50ZXJ2aWV3LXByb3ZpZGVyIiwiaWF0IjoxNzc0MDExMzU3LCJleHAiOjE3NzQwOTc3NTd9.wfcBtptboJcctWW_x_DzAscs-3Mx2YuidxKOlKwpNoY
+Authorization: Bearer invalid_token_for_testing
 
 ### ========================================
 ### 测试 5: 验证 Token 有效性（白名单接口）
 ### 预期结果: 200 成功
 ### ========================================
-GET {{baseUrl}}/api/provider/api/auth/verify?token=<TOKEN>
+GET {{baseUrl}}/api/provider/api/auth/verify?token={{authToken}}
 Accept: application/json
 
 ### ========================================
@@ -67,7 +79,7 @@ Accept: application/json
 ### ========================================
 GET {{baseUrl}}/api/provider/api/auth/info
 Accept: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6eyJyb2xlIjoiQURNSU4iLCJwZXJtaXNzaW9ucyI6WyJyZWFkIiwid3JpdGUiLCJkZWxldGUiXX0sInN1YiI6ImFkbWluIiwiaXNzIjoiaW50ZXJ2aWV3LXByb3ZpZGVyIiwiaWF0IjoxNzc0MDExMzU3LCJleHAiOjE3NzQwOTc3NTd9.wfcBtptboJcctWW_x_DzAscs-3Mx2YuidxKOlKwpNoY
+Authorization: Bearer {{authToken}}
 
 ### ========================================
 ### 测试 7: 访问用户列表（需要 Token）
@@ -75,7 +87,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6eyJyb2xlIjoiQURNSU4iLCJwZ
 ### ========================================
 GET {{baseUrl}}/api/provider/api/users/list?page=1&size=10
 Accept: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6eyJyb2xlIjoiQURNSU4iLCJwZXJtaXNzaW9ucyI6WyJyZWFkIiwid3JpdGUiLCJkZWxldGUiXX0sInN1YiI6ImFkbWluIiwiaXNzIjoiaW50ZXJ2aWV3LXByb3ZpZGVyIiwiaWF0IjoxNzc0MDExMzU3LCJleHAiOjE3NzQwOTc3NTd9.wfcBtptboJcctWW_x_DzAscs-3Mx2YuidxKOlKwpNoY
+Authorization: Bearer {{authToken}}
 
 ### ========================================
 ### 测试 8: 创建用户（需要 Token）
@@ -83,7 +95,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6eyJyb2xlIjoiQURNSU4iLCJwZ
 ### ========================================
 POST {{baseUrl}}/api/provider/api/users
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6eyJyb2xlIjoiQURNSU4iLCJwZXJtaXNzaW9ucyI6WyJyZWFkIiwid3JpdGUiLCJkZWxldGUiXX0sInN1YiI6ImFkbWluIiwiaXNzIjoiaW50ZXJ2aWV3LXByb3ZpZGVyIiwiaWF0IjoxNzc0MDExMzU3LCJleHAiOjE3NzQwOTc3NTd9.wfcBtptboJcctWW_x_DzAscs-3Mx2YuidxKOlKwpNoY
+Authorization: Bearer {{authToken}}
 
 {
   "username": "testuser",
@@ -97,7 +109,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6eyJyb2xlIjoiQURNSU4iLCJwZ
 ### 用于对比测试
 ### ========================================
 
-### 直接访问 Provider - 登录
+### 直接访问 Provider - 登录（token 同样写入 authToken）
 POST {{providerUrl}}/provider/api/auth/login
 Content-Type: application/json
 
@@ -106,6 +118,42 @@ Content-Type: application/json
   "password": "123456"
 }
 
+> {%
+  if (response.status === 200) {
+    var token = response.body.data.token;
+    if (token) {
+      client.global.set("authToken", token);
+      client.log("✅ Token 已自动写入环境变量 authToken（直连 Provider）");
+    }
+  }
+%}
+
 ### 直接访问 Provider - 获取用户列表（无需鉴权）
 GET {{providerUrl}}/provider/api/users/list
 Accept: application/json
+
+### ========================================
+### 踢下线（管理员将指定用户强制下线）
+### 流程说明：
+###   1. 先执行「测试 2: 登录」→ token 自动写入 authToken
+###   2. 用 authToken 请求接口 → 应返回 200
+###   3. 执行踢下线 → 应返回「踢下线成功」
+###   4. 再次请求接口 → 应返回 401
+### ========================================
+
+### 踢下线 - 通过网关
+POST {{baseUrl}}/api/provider/api/auth/kick
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "username": "admin"
+}
+
+### 踢下线 - 直接访问 Provider
+POST {{providerUrl}}/provider/api/auth/kick
+Content-Type: application/json
+
+{
+  "username": "admin"
+}

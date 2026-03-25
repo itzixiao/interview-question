@@ -3,13 +3,12 @@ package cn.itzixiao.interview.security.gateway;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.gateway.config.GatewayAutoConfiguration;
-import org.springframework.cloud.gateway.filter.GlobalFilter;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.DispatcherHandler;
@@ -21,24 +20,19 @@ import org.springframework.web.reactive.DispatcherHandler;
  * 1. 自动配置 JWT 验证服务
  * 2. 自动配置白名单属性
  * 3. 自动配置鉴权过滤器（order = -100，最高优先级）
- * 4. 可选配置 Token 黑名单服务（通过内部类隔离 Redis 依赖）
+ * 4. 配置 Token 黑名单服务（注入 ApplicationContext，懒加载 StringRedisTemplate）
  * <p>
- * 黑名单隔离原理：
- * - Redis 相关代码放在 {@link RedisBlacklistConfiguration} 内部类中
- * - 该内部类标注了 @ConditionalOnClass(StringRedisTemplate.class)
- * - 没有 Redis jar 包时，整个内部类都不会被加载，彻底避免 NoClassDefFoundError
- * <p>
- * 启用条件：
- * 1. 存在 Gateway 类（spring-cloud-starter-gateway）
- * 2. 响应式 Web 应用
- * 3. 配置项 gateway.auth.enabled=true（默认启用）
+ * 设计原则：
+ * - 方法签名中不直接引用 StringRedisTemplate，避免 Redis jar 不存在时 NoClassDefFoundError
+ * - TokenBlacklistService 持有 ApplicationContext，首次 Redis 操作时懒加载 StringRedisTemplate
+ * - 避免自动配置顺序问题：本类先于 Redis 自动配置执行，直接注入 StringRedisTemplate 会报 "No bean"
+ * - 所有 Redis 操作均有 try-catch 降级，运行时故障不影响正常请求
  *
  * @author itzixiao
  * @date 2026-03-20
  */
 @Slf4j
 @Configuration
-@ConditionalOnClass({DispatcherHandler.class, GlobalFilter.class})
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
 @ConditionalOnProperty(prefix = "gateway.auth", name = "enabled", havingValue = "true", matchIfMissing = true)
 @AutoConfigureBefore(GatewayAutoConfiguration.class)
@@ -47,9 +41,6 @@ public class GatewayAuthAutoConfiguration {
 
     /**
      * 网关 JWT 验证服务
-     *
-     * @param jwtProperties JWT 配置属性
-     * @return GatewayJwtService
      */
     @Bean
     public GatewayJwtService gatewayJwtService(JwtProperties jwtProperties) {
@@ -59,47 +50,32 @@ public class GatewayAuthAutoConfiguration {
     }
 
     /**
+     * Token 黑名单服务
+     * <p>
+     * 注入 ApplicationContext 而非 StringRedisTemplate，由 TokenBlacklistService 内部懒加载。
+     * 原因：本配置类通过 @AutoConfigureBefore 先于 Redis 自动配置执行，
+     * 此时 StringRedisTemplate Bean 尚未注册，直接注入会报 "No bean named 'stringRedisTemplate'"。
+     * 懒加载方案：首次实际 Redis 操作时才从容器获取 StringRedisTemplate，此时 Redis 已完成配置。
+     */
+    @Bean
+    @ConditionalOnMissingBean(TokenBlacklistService.class)
+    public TokenBlacklistService tokenBlacklistService(ApplicationContext context) {
+        log.info("【网关鉴权】初始化 Token 黑名单服务（懒加载 Redis，首次请求时建立连接）");
+        return new TokenBlacklistService(context);
+    }
+
+    /**
      * 网关鉴权过滤器
      * <p>
      * order = -100，确保在所有业务过滤器之前执行。
-     * TokenBlacklistService 为可选注入，未配置 Redis 时黑名单校验自动跳过。
-     *
-     * @param whiteListProperties   白名单配置属性
-     * @param jwtService            JWT 验证服务
-     * @param tokenBlacklistService Token 黑名单服务（可选，依赖 Redis）
-     * @return AuthenticationFilter
      */
     @Bean
     public AuthenticationFilter authenticationFilter(
             WhiteListProperties whiteListProperties,
             GatewayJwtService jwtService,
             @Autowired(required = false) TokenBlacklistService tokenBlacklistService) {
-        log.info("【网关鉴权】初始化鉴权过滤器, 白名单路径数量: {}, 黑名单服务: {}",
-                whiteListProperties.getPaths() != null ? whiteListProperties.getPaths().size() : 0,
-                tokenBlacklistService != null ? "已启用" : "未启用（无 Redis）");
+        log.info("【网关鉴权】初始化鉴权过滤器, 白名单路径数量: {}, 黑名单服务: 已启用（Redis 懒加载）",
+                whiteListProperties.getPaths() != null ? whiteListProperties.getPaths().size() : 0);
         return new AuthenticationFilter(whiteListProperties, jwtService, tokenBlacklistService);
-    }
-
-    // -------------------------------------------------------------------------
-    // 内部配置类：将 Redis 相关代码完全隔离
-    // @ConditionalOnClass 加在类级别，无 Redis jar 时整个内部类不被 JVM 加载，
-    // 彻底解决方法签名中的 StringRedisTemplate 引起的 NoClassDefFoundError。
-    // -------------------------------------------------------------------------
-
-    /**
-     * Redis 黑名单配置（仅在引入 spring-data-redis 时生效）
-     */
-    @Configuration
-    @ConditionalOnClass(name = "org.springframework.data.redis.core.StringRedisTemplate")
-    static class RedisBlacklistConfiguration {
-
-        @Bean
-        @ConditionalOnMissingBean(TokenBlacklistService.class)
-        @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")  // Redis 运行时条件注入，IDEA 静态误报可忽略
-        public TokenBlacklistService tokenBlacklistService(
-                org.springframework.data.redis.core.StringRedisTemplate redisTemplate) {
-            log.info("【网关鉴权】初始化 Token 黑名单服务（Redis 模式）");
-            return new TokenBlacklistService(redisTemplate);
-        }
     }
 }

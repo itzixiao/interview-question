@@ -16,10 +16,11 @@ import java.util.concurrent.TimeUnit;
  * JWT 模拟接口
  * <p>
  * 接口列表：
- * 1. POST /api/auth/login  - 登录获取 token（生成包含 jti + userId 的标准 token）
- * 2. POST /api/auth/logout - 登出（将 jti 加入 Redis 黑名单，实现主动吹销）
- * 3. GET  /api/auth/verify - 验证 token 有效性
- * 4. GET  /api/auth/info   - 从网关透传的头获取用户信息
+ * 1. POST /api/auth/login    - 登录获取 token（生成包含 jti + userId 的标准 token，Redis 可用时存入 Redis）
+ * 2. POST /api/auth/logout   - 登出（将 jti 加入 Redis 黑名单，实现主动吹销）
+ * 3. GET  /api/auth/verify   - 验证 token 有效性（包含黑名单检查）
+ * 4. GET  /api/auth/info     - 从网关透传的头获取用户信息
+ * 5. POST /api/auth/kick     - 踢下线（管理员将指定用户强制下线）
  *
  * @author itzixiao
  * @date 2026-03-20
@@ -29,10 +30,8 @@ import java.util.concurrent.TimeUnit;
 @RequestMapping("/api/auth")
 public class JwtController {
 
-    private static final String BLACKLIST_PREFIX = "jwt:blacklist:";
-
     private final JwtService jwtService;
-    /** 可选依赖：未引入 Redis 时为 null，登出时仅返回成功但不写黑名单 */
+    /** 可选依赖：登出时写黑名单；未引入 Redis 时仅日志警告 */
     private final StringRedisTemplate redisTemplate;
 
     public JwtController(JwtService jwtService,
@@ -130,7 +129,7 @@ public class JwtController {
             if (remainTtl > 0) {
                 // jti 加入黑名单，TTL 与 Token 剩余有效期保持一致，到期自动清除
                 redisTemplate.opsForValue().set(
-                        BLACKLIST_PREFIX + jti, username, remainTtl, TimeUnit.SECONDS);
+                        JwtService.BLACKLIST_PREFIX + jti, username, remainTtl, TimeUnit.SECONDS);
                 log.info("【登出】Token 已加入黑名单, username: {}, jti: {}, ttl: {}s",
                         username, jti, remainTtl);
             }
@@ -212,5 +211,32 @@ public class JwtController {
         userInfo.put("authSource", authSource);
 
         return Result.success(userInfo);
+    }
+
+    /**
+     * 踢下线接口 - 管理员将指定用户强制下线
+     * <p>
+     * 大厂规范：
+     * 1. 从 Redis 获取该用户当前在线 token
+     * 2. 解析 jti 后将其写入黑名单（TTL = token 剩余有效期）
+     * 3. 删除 jwt:token:{username}，断开登录状态
+     * 4. 用户再次请求时 Gateway 返回 401
+     * <p>
+     * 请求示例：
+     * POST http://localhost:8082/provider/api/auth/kick
+     * {"username": "admin"}
+     *
+     * @param body 请求体，必须包含 username 字段
+     * @return Result - 踢下线结果
+     */
+    @PostMapping("/kick")
+    public Result<String> kickOut(@RequestBody Map<String, String> body) {
+        String username = body.get("username");
+        if (!StringUtils.hasText(username)) {
+            return Result.error("用户名不能为空");
+        }
+        String result = jwtService.kickOut(username);
+        log.info("【踢下线】操作完成, username: {}, result: {}", username, result);
+        return Result.success(result);
     }
 }
