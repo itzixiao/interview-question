@@ -69,8 +69,7 @@ spring:
 # JWT 配置
 # 生产环境优先级：1.环境变量 JWT_SECRET_KEY  2.Nacos common.yml 下发的 jwt.secret-key
 # 两种方式任意一种即可，必须与 Provider 服务保持一致
-security:
-  jwt:
-    secret-key: ${JWT_SECRET_KEY:${jwt.secret-key:}}
-    issuer: ${jwt.issuer:interview-provider}
-    expiration: ${jwt.expiration:7200}
+jwt:
+  secret-key: ${JWT_SECRET_KEY:${jwt.secret-key:}}
+  issuer: ${jwt.issuer:interview-provider}
+  expiration: ${jwt.expiration:7200}

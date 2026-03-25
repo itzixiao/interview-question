@@ -2,7 +2,9 @@ spring:
   application:
     name: interview-gateway
   profiles:
-    active: dev
+    # Maven Profile 占位符：打包时自动替换为 dev 或 prod
+    # IDEA: 右侧 Maven 面板 → Profiles → 勾选环境名即可切换
+    active: '@spring.profiles.active@'
 
 # 白名单配置（无需鉴权的路径）
 # 支持前缀匹配： /api/interview/**  → /api/interview/ 开头的所有路径
@@ -14,6 +16,7 @@ gateway:
       - /register
       - /api/provider/api/auth/login   # JWT 登录接口
       - /api/provider/api/auth/verify  # JWT 验证接口
+      - /actuator/**                   # Actuator 健康检查（K8s 读就绪探针/存活探针）
       - /api/service/**                 # 面试题服务所有接口
       - /api/algorithm/**               # 算法服务所有接口
       - /api/kafka/**                   # Kafka 服务所有接口

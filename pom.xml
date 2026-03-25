@@ -450,7 +450,54 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
         </plugins>
+
+        <!-- 资源过滤：将 @spring.profiles.active@ 占位符替换为 Maven Profile 属性实际值
+             所有子模块继承此配置，无需各自配置。 -->
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
     </build>
+
+    <!-- ============================================================
+         Maven Profiles - 控制激活哪套 Spring Boot 环境配置
+
+         用法（IDEA 中）：
+           右侧 Maven 面板 → Profiles → 勾选 dev / prod
+         用法（命令行）：
+           mvn spring-boot:run -P dev
+           mvn package -P prod
+
+         原理：
+           Maven 打包时将 spring.profiles.active 写入
+           application.yml 的 @spring.profiles.active@ 占位符，
+           从而控制 Spring Boot 加载哪个 application-{env}.yml。
+         ============================================================ -->
+    <profiles>
+        <!-- 开发环境（默认激活） -->
+        <profile>
+            <id>dev</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <spring.profiles.active>dev</spring.profiles.active>
+            </properties>
+        </profile>
+
+        <!-- 生产环境 -->
+        <profile>
+            <id>prod</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <properties>
+                <spring.profiles.active>prod</spring.profiles.active>
+            </properties>
+        </profile>
+    </profiles>
 
     <!-- 仓库配置 -->
     <repositories>

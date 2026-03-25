@@ -4,45 +4,42 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * JWT 配置属性
+ * Gateway JWT 配置属性
  * <p>
- * 配置项：security.jwt.*
+ * 配置项：jwt.*（与 interview-provider 使用相同前缀，由 Nacos common.yml 统一下发）
  * <p>
- * 注意：网关和业务服务需要使用相同的密钥才能验证 Token
+ * 大厂规范：
+ * 1. 密钥由配置中心统一管理，禁止硬编码
+ * 2. 生产环境通过环境变量 JWT_SECRET_KEY 覆盖
+ * 3. Gateway 只做验证，Provider 负责签发，共享同一密钥
  *
  * @author itzixiao
  * @date 2026-03-20
  */
 @Data
-@ConfigurationProperties(prefix = "security.jwt")
+@ConfigurationProperties(prefix = "jwt")
 public class JwtProperties {
 
     /**
      * JWT 签名密钥
-     * <p>
-     * 要求：
-     * 1. HS256 算法至少需要 256 位（32 字节）
-     * 2. 生产环境应使用环境变量或配置中心
-     * 3. 所有服务必须使用相同密钥
+     * 来源优先级：环境变量 JWT_SECRET_KEY > Nacos common.yml > 此处默认值
      */
-    private String secretKey = "mySecretKeyForJWTGenerationMustBeLongEnoughAndSecure123456";
+    private String secretKey = "itzixiao-interview-system-secret-key-2026-must-be-32-bytes";
 
     /**
-     * Access Token 过期时间（秒）
-     * 默认 1 小时
+     * Access Token 过期时间（秒），默认 2 小时
      */
-    private Long expiration = 3600L;
+    private Long expiration = 7200L;
 
     /**
-     * Refresh Token 过期时间（秒）
-     * 默认 7 天
+     * Refresh Token 过期时间（秒），默认 7 天
      */
     private Long refreshExpiration = 604800L;
 
     /**
      * Token 签发者
      */
-    private String issuer = "interview-system";
+    private String issuer = "interview-provider";
 
     /**
      * Token 类型

@@ -3,4 +3,6 @@ spring:
   application:
     name: interview-provider
   profiles:
-    active: dev
+    # Maven Profile 占位符：打包时自动替换为 dev 或 prod
+    # IDEA: 右侧 Maven 面板 → Profiles → 勾选环境名即可切换
+    active: '@spring.profiles.active@'

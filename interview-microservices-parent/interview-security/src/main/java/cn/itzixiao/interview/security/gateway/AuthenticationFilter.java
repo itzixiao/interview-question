@@ -23,11 +23,13 @@ import java.util.Map;
 /**
  * API 网关鉴权过滤器 - 统一认证授权
  * <p>
- * 功能：
- * 1. JWT Token 校验
- * 2. 白名单路径管理
- * 3. 用户信息传递给下游服务
- * 4. 统一错误响应格式
+ * 大厂规范设计：
+ * 1. order = -100，确保在所有业务过滤器之前执行
+ * 2. 白名单路径直接放行，无需鉴权
+ * 3. JWT Token 校验：签名验证 + 过期检查 + 黑名单校验（主动吹销支持）
+ * 4. Claims 一次解析，避免重复解析带来的性能开销
+ * 5. 透传标准化用户信息头：X-User-Id、X-User-Name、X-User-Roles、X-Auth-Source
+ * 6. 移除下游 Authorization 头，防止下游服务进行二次鉴权
  *
  * @author itzixiao
  * @date 2026-03-20
@@ -37,11 +39,16 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
 
     private final WhiteListProperties whiteListProperties;
     private final GatewayJwtService jwtService;
+    /** 可选依赖：未引入 Redis 时为 null，黑名单功能自动跳过 */
+    private final TokenBlacklistService tokenBlacklistService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public AuthenticationFilter(WhiteListProperties whiteListProperties, GatewayJwtService jwtService) {
+    public AuthenticationFilter(WhiteListProperties whiteListProperties,
+                                GatewayJwtService jwtService,
+                                TokenBlacklistService tokenBlacklistService) {
         this.whiteListProperties = whiteListProperties;
         this.jwtService = jwtService;
+        this.tokenBlacklistService = tokenBlacklistService;
     }
 
     @Override
@@ -75,25 +82,46 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
         // 提取 token（去掉 "Bearer " 前缀）
         String token = authorizationHeader.substring(7);
 
-        // 验证 token 有效性
-        if (!jwtService.validateToken(token)) {
-            log.warn("【网关鉴权】Token 无效或已过期, path: {}", path);
+        // 一次解析 Claims，避免重复解析带来的性能开销
+        io.jsonwebtoken.Claims claims;
+        try {
+            claims = jwtService.parseToken(token);
+        } catch (Exception e) {
+            log.warn("【网关鉴权】Token 解析失败: {}, path: {}", e.getMessage(), path);
             return buildUnauthorizedResponse(exchange, "认证令牌无效或已过期");
         }
 
-        // 从 token 中提取用户信息
-        String username = jwtService.getUsernameFromToken(token);
-        Object roles = jwtService.getRolesFromToken(token);
-        String userId = jwtService.getUserIdFromToken(token);
+        // 检查 Token 是否过期
+        if (claims.getExpiration().before(new java.util.Date())) {
+            log.warn("【网关鉴权】Token 已过期, path: {}", path);
+            return buildUnauthorizedResponse(exchange, "认证令牌已过期");
+        }
 
-        log.debug("【网关鉴权】Token 验证通过, username: {}, path: {}", username, path);
+        // 黑名单校验（主动吹销支持）：仅在 Redis 可用时才执行
+        if (tokenBlacklistService != null) {
+            String jti = claims.getId();
+            if (jti != null && tokenBlacklistService.isBlacklisted(jti)) {
+                log.warn("【网关鉴权】Token 已被吹销（黑名单）, jti: {}, path: {}", jti, path);
+                return buildUnauthorizedResponse(exchange, "认证令牌已被吹销，请重新登录");
+            }
+        }
 
-        // 传递用户信息到下游服务
+        // 从 Claims 中提取用户信息
+        String username = claims.getSubject();
+        Object roles = claims.get("roles");
+        // userId 支持数字 ID 和字符串 ID 两种写入方式
+        Object userIdObj = claims.get("userId");
+        String userId = userIdObj != null ? userIdObj.toString() : username;
+
+        log.debug("【网关鉴权】Token 验证通过, username: {}, userId: {}, path: {}", username, userId, path);
+
+        // 传递用户信息到下游服务，并移除 Authorization 头（防止下游二次鉴权）
         ServerHttpRequest mutableReq = request.mutate()
                 .header("X-User-Id", userId)
                 .header("X-User-Name", username)
                 .header("X-User-Roles", roles != null ? roles.toString() : "")
                 .header("X-Auth-Source", "gateway")
+                .headers(headers -> headers.remove("Authorization"))  // 屏蔽 Authorization 头，下游服务不再鉴权
                 .build();
         ServerWebExchange mutableExchange = exchange.mutate()
                 .request(mutableReq)
@@ -104,7 +132,8 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
 
     @Override
     public int getOrder() {
-        return 0;
+        // 大厂规范：-100 确保在路由转发和所有业务过滤器之前执行鉴权
+        return -100;
     }
 
     /**
