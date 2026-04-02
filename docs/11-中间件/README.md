@@ -93,12 +93,19 @@
 - **重要程度：** ⭐⭐⭐⭐⭐
 - **配套代码：** `interview-microservices-parent/interview-xxljob/`
 
+#### 15. [15-Jsoup网络爬虫实战.md](./15-Jsoup%E7%BD%91%E7%BB%9C%E7%88%AC%E8%99%AB%E5%AE%9E%E6%88%98.md) ⭐ NEW
+
+- **内容：** HTML 解析、CSS 选择器、数据提取、网站资源批量下载
+- **面试题：** 3+ 道
+- **重要程度：** ⭐⭐⭐⭐
+- **配套代码：** `interview-microservices-parent/interview-service/src/main/java/cn/itzixiao/interview/downloader/service/HttpDownloaderService.java`
+
 ---
 
 ## 📊 统计信息
 
-- **文档数：** 14 个（删除 AI工程化文档，AI 内容已并入 `07-SpringCloud微服务/05-Spring-AI智能体详解.md`）
-- **面试题总数：** 160+ 道
+- **文档数：** 15 个
+- **面试题总数：** 165+ 道
 - **代码示例：** 配套 Java 代码在 `interview-service/rpc/`、`interview-rabbitmq/`、`interview-kafka/`、
   `interview-provider/hbase/`、`interview-provider/elasticsearch/`、`interview-provider/netty/`、`interview-workflow/`、`interview-xxljob/` 等目录（~15,000 行代码）
 
