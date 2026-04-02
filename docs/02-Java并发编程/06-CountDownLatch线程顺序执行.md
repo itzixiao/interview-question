@@ -303,3 +303,89 @@ for(Task task :tasks){
     latch.await();
     executor.shutdown();
 ```
+
+---
+
+## 实战案例：多线程并行下载
+
+### 场景描述
+
+需要并发下载大量文件，要求：
+- 使用线程池控制并发数
+- 等待所有下载任务完成
+- 实时统计成功/失败数量
+- 支持超时控制
+
+### 完整实现
+
+```java
+protected void parallelDownloadFiles(List<DownloadTask> tasks, int timeoutMinutes) {
+    // 1. 创建 CountDownLatch，计数器 = 任务数量
+    CountDownLatch latch = new CountDownLatch(tasks.size());
+    
+    // 2. 使用原子类统计结果
+    AtomicInteger successCount = new AtomicInteger(0);
+    AtomicInteger failCount = new AtomicInteger(0);
+    
+    // 3. 使用线程安全列表收集结果
+    List<String> results = Collections.synchronizedList(new ArrayList<>());
+
+    // 4. 提交所有下载任务到线程池
+    for (DownloadTask downloadTask : tasks) {
+        downloadExecutor.submit(() -> {
+            try {
+                String downloaded = downloadFile(downloadTask.url, ...);
+                if (downloaded != null) {
+                    results.add(downloaded);
+                    successCount.incrementAndGet();
+                } else {
+                    failCount.incrementAndGet();
+                }
+            } catch (Exception e) {
+                failCount.incrementAndGet();
+            } finally {
+                // 5. 关键：必须在 finally 中 countDown()
+                latch.countDown();
+            }
+        });
+    }
+
+    // 6. 等待所有下载完成（带超时）
+    try {
+        latch.await(timeoutMinutes, TimeUnit.MINUTES);
+    } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+    }
+}
+```
+
+### 关键技术点
+
+| 技术 | 作用 | 注意事项 |
+|-----|------|---------|
+| `CountDownLatch` | 等待所有线程完成 | 必须在 finally 中 countDown() |
+| `AtomicInteger` | 线程安全计数 | 比 volatile 更安全 |
+| `synchronizedList` | 线程安全列表 | 迭代时仍需同步 |
+| `await(timeout, unit)` | 超时等待 | 防止永久阻塞 |
+
+### 常见问题
+
+**Q: 为什么 countDown() 要放在 finally 中？**
+
+A: 防止任务执行异常时无法减少计数器，导致主线程永远等待。
+
+```java
+try {
+    doWork();  // 可能抛出异常
+} finally {
+    latch.countDown();  // 确保一定会执行
+}
+```
+
+**Q: 为什么使用 AtomicInteger 而不是 volatile int？**
+
+A: `count++` 不是原子操作（读取→修改→写入），多线程下会丢失更新。AtomicInteger 使用 CAS 保证原子性。
+
+**Q: 为什么用 synchronized 包裹两个 AtomicInteger 的读取？**
+
+A: 虽然单个读取是原子的，但**连续两个读取**需要保证一致性，防止读到中间状态。
