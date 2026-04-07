@@ -93,19 +93,27 @@
 - **重要程度：** ⭐⭐⭐⭐⭐
 - **配套代码：** `interview-microservices-parent/interview-xxljob/`
 
-#### 15. [15-Jsoup网络爬虫实战.md](./15-Jsoup%E7%BD%91%E7%BB%9C%E7%88%AC%E8%99%AB%E5%AE%9E%E6%88%98.md) ⭐ NEW
+#### 15. [15-Jsoup网络爬虫实战.md](./15-Jsoup%E7%BD%91%E7%BB%9C%E7%88%AC%E8%99%AB%E5%AE%9E%E6%88%98.md)
 
-- **内容：** HTML 解析、CSS 选择器、数据提取、网站资源批量下载
-- **面试题：** 3+ 道
+- **内容：** HTML 解析、CSS 选择器、数据提取、DOM 操作、HTML 清理、批量下载、新闻抓取、反爬虫策略、合规性
+- **面试题：** 10+ 道
 - **重要程度：** ⭐⭐⭐⭐
 - **配套代码：** `interview-microservices-parent/interview-service/src/main/java/cn/itzixiao/interview/downloader/service/HttpDownloaderService.java`
+
+#### 16. [16-Dubbo RPC框架详解.md](./16-Dubbo%20RPC%E6%A1%86%E6%9E%B6%E8%AF%A6%E8%A7%A3.md) ⭐ 架构师级（大幅完善）
+
+- **内容：** Dubbo 核心架构、Triple 协议、SPI 机制、负载均衡、集群容错、服务治理、源码级原理剖析、Filter 链机制、异步调用模型、服务拆分与 DDD、服务编排与聚合模式、分布式事务 Seata 实战、服务灰度发布、全链路压测、生产级监控告警、性能调优、SpringBoot 整合实战
+- **面试题：** 42+ 道（基础 20 道 + 高级 22 道）
+- **重要程度：** ⭐⭐⭐⭐⭐
+- **关联文档：** `07-RPC核心原理与实战指南.md`
+- **新增章节：** 服务拆分与 DDD、服务编排与聚合模式、高级分布式事务、全链路灰度、全链路压测、生产级监控告警
 
 ---
 
 ## 📊 统计信息
 
-- **文档数：** 15 个
-- **面试题总数：** 165+ 道
+- **文档数：** 16 个
+- **面试题总数：** 196+ 道（Dubbo 新增 12 道高级题）
 - **代码示例：** 配套 Java 代码在 `interview-service/rpc/`、`interview-rabbitmq/`、`interview-kafka/`、
   `interview-provider/hbase/`、`interview-provider/elasticsearch/`、`interview-provider/netty/`、`interview-workflow/`、`interview-xxljob/` 等目录（~15,000 行代码）
 
@@ -165,6 +173,51 @@
     - 负载均衡策略
     - 容错机制
 
+### Dubbo（5-7 天）⭐ 架构师级
+
+1. **核心架构**
+    - 十层架构模型
+    - Provider/Consumer/Registry 交互
+    - 调用链路：Proxy → Router → LoadBalance → Cluster → Filter → Protocol → Transport
+
+2. **协议与 SPI**
+    - Dubbo 协议 vs Triple 协议
+    - Dubbo SPI vs JDK SPI
+    - @Adaptive 自适应扩展
+    - ExtensionLoader 源码剖析
+
+3. **服务治理**
+    - 超时/重试/版本控制
+    - Mock 降级机制
+    - 条件路由/标签路由
+
+4. **源码级原理**
+    - Invoker 模型（一切皆 Invoker）
+    - Javassist Wrapper 避免反射
+    - Filter 链构建原理与自定义 Filter
+
+5. **高级特性**
+    - CompletableFuture 异步调用
+    - 优雅停机与 K8s 适配
+    - 服务预热与连接管理
+
+6. **生产架构方案**
+    - 分布式事务（Seata AT/TCC/可靠消息）
+    - 安全机制（认证/授权/加密/防重放）
+    - 可观测性（SkyWalking/Prometheus/Grafana）
+    - 云原生部署（K8s/HPA/Istio）
+    - 大规模集群治理与容量规划
+
+7. **性能调优**
+    - 线程池调优（queues=0 关键）
+    - 序列化性能对比（Protobuf/Kryo/Hessian2）
+    - JVM 协同调优（G1/ZGC）
+    - 全链路压测与瓶颈定位
+
+8. **实战整合**
+    - SpringBoot + Dubbo + Nacos 快速搭建
+    - Sentinel 限流熔断整合
+
 ### RabbitMQ（3-4 天）
 
 1. **基础概念**
@@ -214,13 +267,14 @@
 | Nacos | 微服务注册发现、配置管理 |
 | Sentinel | 高并发限流、熔断降级 |
 | **RPC** | **微服务远程调用、高性能通信** |
+| **Dubbo** | **Java RPC 框架、服务治理、负载均衡、集群容错** |
 | **RabbitMQ / Kafka** | **异步消息、事件驱动、削峰填谷** |
 | **Flowable** | **工作流审批、流程编排、任务管理** |
 | **XXL-JOB** | **分布式定时任务调度、分片、故障转移** |
 
 ---
 
-## 💡 高频面试题 Top 25
+## 💡 高频面试题 Top 40
 
 1. **MyBatis 的一级缓存和二级缓存区别？**
 2. **MyBatis 的插件原理是什么？**
@@ -247,6 +301,21 @@
 23. **open-in-view 是什么？为什么推荐关闭？**
 24. **Hibernate 的脏检查是如何实现的？**
 25. **save() 与 saveAndFlush() 的区别？**
+26. **Dubbo 的核心架构包含哪些角色？各自的职责是什么？**
+27. **Dubbo SPI 与 JDK SPI 有什么区别？**
+28. **Dubbo 支持哪些负载均衡策略？默认是哪个？**
+29. **Dubbo 3.x Triple 协议相比 Dubbo 协议有什么优势？**
+30. **Dubbo 如何实现服务降级？Mock 机制 fail 和 force 的区别？**
+31. **⭐ Dubbo 的 Invoker 模型是什么？为什么说它是 Dubbo 的灵魂？**
+32. **⭐ 为什么 Dubbo 用 Javassist 而不是 JDK 反射调用方法？**
+33. **⭐ 线上 Dubbo 线程池耗尽，如何排查和解决？**
+34. **⭐ Dubbo 的优雅停机原理是什么？K8s 环境下有什么坑？**
+35. **⭐ Dubbo 的 Filter 链是如何构建的？自定义 Filter 的优先级如何控制？**
+36. **⭐ Dubbo 如何与 Sentinel/Resilience4j 整合实现限流熔断？**
+37. **⭐ Dubbo 异步调用和 CompletableFuture 的实现原理？**
+38. **⭐ 生产环境中如何规划 Dubbo 的连接数？**
+39. **⭐ Dubbo 跨机房调用延迟高，如何优化？**
+40. **⭐ 如何保证 Dubbo 接口的幂等性？**
 
 ---
 
@@ -348,6 +417,8 @@ Sentinel 限流 → 熔断降级
    ↓
 RPC 原理 → 动态代理 → 序列化
    ↓
+Dubbo 架构 → SPI 机制 → 服务治理 → SpringBoot 整合
+   ↓
 RabbitMQ 基础 → 延迟队列、死信队列 → 可靠性保障
    ↓
 Kafka → 高吞吐 → 分区 → ISR
@@ -360,6 +431,39 @@ Flowable 工作流 → XXL-JOB 调度
 ---
 
 ## 📈 更新日志
+
+### v2.9 - 2026-04-07
+
+- ✅ 完善「15-Jsoup网络爬虫实战」文档（3 → 10+ 道面试题）
+- ✅ 新增内容：
+  - 高级选择器与数据提取技巧（正则匹配、伪类选择器）
+  - DOM 操作与修改（增删改查）
+  - HTML 清理与 XSS 防护
+  - 新闻网站数据抓取实战案例
+  - 反爬虫策略与合规性指南
+  - 常见问题解决方案（编码/超时/内存）
+- ✅ 面试题从 3 道扩展到 10 道
+
+### v2.8 - 2026-04-07
+
+- ✅ **大幅完善**《16-Dubbo RPC框架详解》文档（42+ 道面试题，5,990+ 行）
+- ✅ 新增 7 个高级章节：
+  - 服务拆分与领域驱动设计（DDD）
+  - 服务编排与聚合模式（BFF、Saga）
+  - 高级分布式事务（Seata AT/TCC 完整实战）
+  - 服务灰度发布与全链路灰度
+  - 全链路压测与性能调优实战
+  - 生产级监控与告警体系（SkyWalking + Prometheus + ELK）
+- ✅ 新增 22 道高级面试题（Q21-Q42）：
+  - 服务拆分原则、DDD 分层架构
+  - 分布式事务方案选型、TCC 三大难题
+  - 全链路灰度、线程池耗尽排查
+  - 全链路压测、循环依赖解决
+  - 接口幂等性、服务雪崩预防
+  - 应用级服务发现原理、序列化攻击防范
+  - 10 万 QPS 集群架构设计
+- ✅ 适用级别：初中级 + 高级架构师
+- ✅ 文档总数 16 个，面试题总量 184+ → 196+ 道
 
 ### v2.7 - 2026-03-24
 
@@ -417,5 +521,5 @@ Flowable 工作流 → XXL-JOB 调度
 ---
 
 **维护者：** itzixiao  
-**最后更新：** 2026-03-24  
+**最后更新：** 2026-04-07  
 **问题反馈：** 欢迎提 Issue 或 PR
