@@ -27,9 +27,17 @@ interview-ui/
 │   ├── axios-interceptor.js    # Axios 拦截器封装
 │   └── virtual-list.jsx        # 虚拟列表实现
 │
-└── micro-frontend/             # 微前端架构
-    ├── qiankun-main.js         # qiankun 主应用配置
-    └── qiankun-child.js        # qiankun 子应用配置
+├── micro-frontend/             # 微前端架构
+│   ├── qiankun-main.js         # qiankun 主应用配置
+│   └── qiankun-child.js        # qiankun 子应用配置
+│
+└── warm-flow/                  # Warm-Flow 工作流前端集成
+    ├── README.md               # 集成文档
+    ├── WorkflowDesigner.vue    # 流程设计器组件（Vue 3）
+    ├── ProcessInstanceList.vue # 流程实例管理
+    ├── TodoTaskList.vue        # 待办任务列表
+    ├── router.js               # 路由配置示例
+    └── package.json            # 依赖配置
 ```
 
 ## 使用说明
@@ -160,6 +168,44 @@ export async function unmount() {
 }
 ```
 
+### Warm-Flow 工作流
+
+**流程设计器：**
+
+```vue
+<template>
+  <WorkflowDesigner />
+</template>
+
+<script setup>
+import WorkflowDesigner from './warm-flow/WorkflowDesigner.vue'
+</script>
+```
+
+**流程实例管理：**
+
+```vue
+<template>
+  <ProcessInstanceList />
+</template>
+
+<script setup>
+import ProcessInstanceList from './warm-flow/ProcessInstanceList.vue'
+</script>
+```
+
+**待办任务：**
+
+```vue
+<template>
+  <TodoTaskList />
+</template>
+
+<script setup>
+import TodoTaskList from './warm-flow/TodoTaskList.vue'
+</script>
+```
+
 ## 对应文档
 
 | 代码目录               | 对应文档                                                               |
@@ -172,6 +218,7 @@ export async function unmount() {
 | `api-performance/` | [06-前后端联调最佳实践.md](../docs/18-前端开发/06-前后端联调最佳实践.md)                 |
 | `api-performance/` | [07-前端性能优化全链路.md](../docs/18-前端开发/07-前端性能优化全链路.md)                 |
 | `micro-frontend/`  | [08-微前端架构实战.md](../docs/18-前端开发/08-微前端架构实战.md)                     |
+| `warm-flow/`       | [17-Warm-Flow审批工作流详解.md](../docs/11-中间件/17-Warm-Flow审批工作流详解.md)     |
 
 ## 运行环境
 

@@ -1,0 +1,66 @@
+server:
+  port: 8095
+
+spring:
+  application:
+    name: interview-warm-flow
+  
+  # 数据源配置
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/interview_warm_flow?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: root
+    password: ${MYSQL_PASSWORD:}
+  
+  # Jackson 配置
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+  
+  # 文件上传配置
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+# MyBatis Plus 配置
+mybatis-plus:
+  mapper-locations: classpath*:mapper/**/*.xml
+  type-aliases-package: cn.itzixiao.interview.warmflow.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      id-type: auto
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+# Warm-Flow 工作流配置
+warm-flow:
+  # 是否开启工作流
+  enabled: true
+  # 数据库类型
+  db-type: mysql
+  # 是否打印SQL日志
+  print-sql: true
+  # 表前缀
+  table-prefix: flow_
+  # 设计器配置
+  show-ui: true
+  # 如果需要共享业务系统权限，配置token名称
+  token-name: Authorization
+
+# Knife4j 配置
+knife4j:
+  enable: true
+  setting:
+    language: zh_cn
+    swagger-model-name: 实体类列表
+
+# 日志配置
+logging:
+  level:
+    cn.itzixiao.interview.warmflow: debug
+    org.dromara.warm: debug

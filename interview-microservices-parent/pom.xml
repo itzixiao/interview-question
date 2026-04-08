@@ -33,6 +33,7 @@
         <module>interview-bigdata</module>
         <module>interview-lowcode</module>
         <module>interview-workflow</module>
+        <module>interview-warm-flow</module>
         <module>interview-xxljob</module>
         <module>interview-spring-ai</module>
     </modules>

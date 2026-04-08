@@ -108,14 +108,21 @@
 - **关联文档：** `07-RPC核心原理与实战指南.md`
 - **新增章节：** 服务拆分与 DDD、服务编排与聚合模式、高级分布式事务、全链路灰度、全链路压测、生产级监控告警
 
+#### 17. [17-Warm-Flow审批工作流详解.md](./17-Warm-Flow%E5%AE%A1%E6%89%B9%E5%B7%A5%E4%BD%9C%E6%B5%81%E8%AF%A6%E8%A7%A3.md) ⭐ NEW
+
+- **内容：** Warm-Flow 核心概念、快速开始、动态审批人、会签/或签、条件分支、监听器、架构原理、与 Flowable 对比
+- **面试题：** 10+ 道
+- **重要程度：** ⭐⭐⭐⭐
+- **配套代码：** `interview-microservices-parent/interview-warm-flow/`
+
 ---
 
 ## 📊 统计信息
 
-- **文档数：** 16 个
-- **面试题总数：** 196+ 道（Dubbo 新增 12 道高级题）
+- **文档数：** 17 个
+- **面试题总数：** 206+ 道（Dubbo 新增 12 道高级题，Warm-Flow 新增 10 道）
 - **代码示例：** 配套 Java 代码在 `interview-service/rpc/`、`interview-rabbitmq/`、`interview-kafka/`、
-  `interview-provider/hbase/`、`interview-provider/elasticsearch/`、`interview-provider/netty/`、`interview-workflow/`、`interview-xxljob/` 等目录（~15,000 行代码）
+  `interview-provider/hbase/`、`interview-provider/elasticsearch/`、`interview-provider/netty/`、`interview-workflow/`、`interview-xxljob/`、`interview-warm-flow/` 等目录（~16,000 行代码）
 
 ---
 
@@ -270,6 +277,7 @@
 | **Dubbo** | **Java RPC 框架、服务治理、负载均衡、集群容错** |
 | **RabbitMQ / Kafka** | **异步消息、事件驱动、削峰填谷** |
 | **Flowable** | **工作流审批、流程编排、任务管理** |
+| **Warm-Flow** | **轻量级审批工作流、简单易用、高性能** |
 | **XXL-JOB** | **分布式定时任务调度、分片、故障转移** |
 
 ---
@@ -316,6 +324,11 @@
 38. **⭐ 生产环境中如何规划 Dubbo 的连接数？**
 39. **⭐ Dubbo 跨机房调用延迟高，如何优化？**
 40. **⭐ 如何保证 Dubbo 接口的幂等性？**
+41. **Warm-Flow 是什么？它的核心优势是什么？**
+42. **Warm-Flow 需要创建多少张数据库表？**
+43. **如何实现会签和或签？**
+44. **Warm-Flow 与 Flowable 的核心区别是什么？**
+45. **如何在 Warm-Flow 中实现动态审批人？**
 
 ---
 
@@ -423,7 +436,7 @@ RabbitMQ 基础 → 延迟队列、死信队列 → 可靠性保障
    ↓
 Kafka → 高吞吐 → 分区 → ISR
    ↓
-Flowable 工作流 → XXL-JOB 调度
+Flowable 工作流 → Warm-Flow 轻量级工作流 → XXL-JOB 调度
    ↓
 综合实战
 ```
@@ -431,6 +444,13 @@ Flowable 工作流 → XXL-JOB 调度
 ---
 
 ## 📈 更新日志
+
+### v3.0 - 2026-04-08
+
+- ✅ 新增《17-Warm-Flow审批工作流详解》文档（10+ 道面试题）
+- ✅ 包含 Warm-Flow 核心概念、快速开始、动态审批人、会签/或签、条件分支等
+- ✅ 配套代码：`interview-microservices-parent/interview-warm-flow/` 完整示例
+- ✅ 文档总数 16 → 17，面试题总量 196+ → 206+ 道
 
 ### v2.9 - 2026-04-07
 
@@ -521,5 +541,5 @@ Flowable 工作流 → XXL-JOB 调度
 ---
 
 **维护者：** itzixiao  
-**最后更新：** 2026-04-07  
+**最后更新：** 2026-04-08  
 **问题反馈：** 欢迎提 Issue 或 PR
