@@ -46,7 +46,7 @@
           </template>
           <el-descriptions :column="2" border>
             <el-descriptions-item label="工作流引擎">Warm-Flow 1.7.2</el-descriptions-item>
-            <el-descriptions-item label="后端端口">8085</el-descriptions-item>
+            <el-descriptions-item label="后端端口">8095</el-descriptions-item>
             <el-descriptions-item label="前端端口">5174</el-descriptions-item>
             <el-descriptions-item label="技术栈">Vue 3 + Element Plus + bpmn-js</el-descriptions-item>
           </el-descriptions>

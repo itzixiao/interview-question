@@ -67,7 +67,7 @@ const goBack = () => {
 }
 
 // 设计器地址
-const backendUrl = 'http://localhost:8085'
+const backendUrl = 'http://localhost:8095'
 const designerUrl = ref(`${backendUrl}/warm-flow-ui/index.html`)
 
 const openDesigner = () => {

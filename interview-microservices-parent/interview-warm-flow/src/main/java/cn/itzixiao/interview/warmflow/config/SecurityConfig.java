@@ -29,7 +29,10 @@ public class SecurityConfig {
                 .requestMatchers("/api/workflow/**").permitAll()
                 // 其他请求需要认证
                 .anyRequest().authenticated()
-            );
+            )
+            // 禁用表单登录和 HTTP Basic，允许完全匿名访问
+            .formLogin(form -> form.disable())
+            .httpBasic(basic -> basic.disable());
         
         return http.build();
     }

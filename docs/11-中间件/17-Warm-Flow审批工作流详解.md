@@ -177,41 +177,318 @@ public String submitLeaveRequest(LeaveRequest leaveRequest) {
 }
 ```
 
-### 2. 审批请假申请
+### 2. 审批请假申请（含权限处理）
+
+```java
+@Autowired
+private CustomPermissionHandler permissionHandler;
+
+@Override
+@Transactional(rollbackFor = Exception.class)
+public void approveLeaveRequest(String flowInstanceId, Boolean approved, String comment, Long approverId) {
+    // 设置当前审批人到 ThreadLocal
+    String handler = String.valueOf(approverId);
+    CustomPermissionHandler.setCurrentHandler(handler);
+    
+    try {
+        // 构建审批参数
+        Map<String, Object> variable = new HashMap<>();
+        variable.put("approved", approved);
+        variable.put("comment", comment);
+
+        Long instanceId = Long.valueOf(flowInstanceId);
+
+        if (approved) {
+            // 审批通过
+            FlowParams passParams = FlowParams.build()
+                    .flowCode("leave_approval")
+                    .variable(variable)
+                    .skipType("PASS")
+                    .handler(handler);
+            
+            taskService.skipByInsId(instanceId, passParams);
+            
+            // 重新查询流程实例，检查流程是否结束
+            Instance updatedInstance = insService.getById(instanceId);
+            
+            // 判断流程是否已完成
+            if (FlowStatus.FINISHED.getKey().equals(updatedInstance.getFlowStatus()) || "end".equals(updatedInstance.getNodeCode())) {
+                // 流程结束，更新业务表状态为已通过
+                LeaveRequest leaveRequest = this.lambdaQuery()
+                        .eq(LeaveRequest::getFlowInstanceId, flowInstanceId)
+                        .one();
+                if (leaveRequest != null) {
+                    leaveRequest.setStatus(2); // 已通过
+                    leaveRequest.setApprovalComment(comment);
+                    this.updateById(leaveRequest);
+                }
+            }
+        } else {
+            // 审批驳回
+            FlowParams rejectParams = FlowParams.build()
+                    .flowCode("leave_approval")
+                    .variable(variable)
+                    .skipType("REJECT")
+                    .handler(handler);
+            taskService.terminationByInsId(instanceId, rejectParams);
+            
+            // 更新业务表状态为已驳回
+            LeaveRequest leaveRequest = this.lambdaQuery()
+                    .eq(LeaveRequest::getFlowInstanceId, flowInstanceId)
+                    .one();
+            if (leaveRequest != null) {
+                leaveRequest.setStatus(3); // 已驳回
+                leaveRequest.setApprovalComment(comment);
+                this.updateById(leaveRequest);
+            }
+        }
+    } finally {
+        // 清除 ThreadLocal，防止内存泄漏
+        CustomPermissionHandler.clearCurrentHandler();
+    }
+}
+```
+
+**关键点说明：**
+- ✅ **ThreadLocal 管理**：使用 `CustomPermissionHandler` 传递当前审批人信息
+- ✅ **权限校验**：Warm-Flow 会自动调用 `PermissionHandler.permissions()` 进行权限校验
+- ✅ **流程结束判断**：使用 `FlowStatus.FINISHED.getKey()` 或 `node_code == "end"` 判断流程是否完成
+- ✅ **业务表同步**：流程结束后及时更新业务表状态
+- ✅ **资源清理**：在 finally 块中清除 ThreadLocal，防止内存泄漏
+
+### 3. 自定义权限处理器（CustomPermissionHandler）
+
+```java
+@Slf4j
+@Component
+public class CustomPermissionHandler implements PermissionHandler {
+    // 使用 ThreadLocal 存储当前审批人ID
+    private static final ThreadLocal<String> currentHandler = new ThreadLocal<>();
+
+    /**
+     * 设置当前审批人
+     */
+    public static void setCurrentHandler(String handler) {
+        currentHandler.set(handler);
+        log.debug("设置当前审批人: {}", handler);
+    }
+
+    /**
+     * 清除当前审批人
+     */
+    public static void clearCurrentHandler() {
+        currentHandler.remove();
+    }
+
+    /**
+     * 返回当前用户的权限列表
+     * Warm-Flow 会调用此方法进行权限校验
+     */
+    @Override
+    public List<String> permissions() {
+        String handler = currentHandler.get();
+        if (handler != null) {
+            List<String> permissions = new ArrayList<>();
+            permissions.add(handler);
+            return permissions;
+        }
+        return Collections.emptyList();
+    }
+
+    /**
+     * 返回当前办理人
+     */
+    @Override
+    public String getHandler() {
+        String handler = currentHandler.get();
+        log.debug("获取当前办理人: {}", handler);
+        return handler;
+    }
+}
+```
+
+**工作原理：**
+1. 业务代码调用 `CustomPermissionHandler.setCurrentHandler("2001")`
+2. Warm-Flow 执行时调用 `PermissionHandler.permissions()` 获取权限列表 `["2001"]`
+3. Warm-Flow 校验权限列表是否包含节点的 `permission_flag`（如 `"2001"`）
+4. 校验通过则执行任务跳转
+5. 最后在 finally 块中调用 `clearCurrentHandler()` 清理资源
+
+### 4. 撤销流程（忽略权限校验）
 
 ```java
 @Override
 @Transactional(rollbackFor = Exception.class)
-public void approveLeaveRequest(String flowInstanceId, Boolean approved, String comment) {
-    // 查询当前待办任务
-    List<Task> taskList = taskService.listByInstanceId(flowInstanceId);
+public void cancelLeaveRequest(String flowInstanceId, Long userId) {
+    // 设置当前操作人到 ThreadLocal
+    String handler = String.valueOf(userId);
+    CustomPermissionHandler.setCurrentHandler(handler);
     
-    if (taskList == null || taskList.isEmpty()) {
-        throw new RuntimeException("未找到待办任务");
-    }
-
-    Task task = taskList.get(0);
-
-    // 构建审批参数
-    FlowParams flowParams = FlowParams.build()
-            .variable("approved", approved)
-            .variable("comment", comment);
-
-    if (approved) {
-        // 审批通过
-        taskService.skip(task.getId(), flowParams);
+    try {
+        Long instanceId = Long.valueOf(flowInstanceId);
         
-        // 检查流程是否结束
-        Instance instance = insService.getById(flowInstanceId);
-        if (instance.getFlowStatus().equals(FlowStatus.FINISHED.getValue())) {
-            // 流程结束,更新状态为已通过
-            // ... 更新业务数据
+        // 查询流程实例
+        Instance instance = insService.getById(instanceId);
+        if (instance == null) {
+            throw new RuntimeException("流程实例不存在");
         }
-    } else {
-        // 审批驳回
-        taskService.terminate(task.getId(), flowParams);
-        // ... 更新业务数据
+
+        // 终止流程 - 需要传入handler参数，并忽略权限校验
+        FlowParams cancelParams = FlowParams.build()
+                .flowCode("leave_approval")
+                .handler(handler)
+                .ignore(true);  // 忽略权限校验（申请人可以撤销自己的申请）
+        taskService.terminationByInsId(instanceId, cancelParams);
+
+        // 更新业务表状态为已撤销
+        LeaveRequest leaveRequest = this.lambdaQuery()
+                .eq(LeaveRequest::getFlowInstanceId, flowInstanceId)
+                .one();
+        if (leaveRequest != null) {
+            leaveRequest.setStatus(4); // 已撤销
+            this.updateById(leaveRequest);
+        }
+    } finally {
+        // 清除 ThreadLocal，防止内存泄漏
+        CustomPermissionHandler.clearCurrentHandler();
     }
+}
+```
+
+**关键点说明：**
+- ✅ **`.ignore(true)`**：忽略权限校验，允许申请人撤销自己提交的申请
+- ✅ **即使当前节点不是申请人**：例如部门经理审批中，申请人仍可撤销
+- ✅ **必须设置 handler**：即使忽略权限校验，也需要传入 handler 用于记录
+
+---
+
+## ⚠️ 常见问题
+
+### 1. 权限校验失败
+
+**错误信息：** `无法跳转到该节点,请检查当前用户是否有权限!`
+
+**原因：**
+- 未设置 `handler` 参数
+- 未实现 `PermissionHandler` 接口
+- 节点的 `permission_flag` 与传入的 `handler` 不匹配
+
+**解决方案：**
+```java
+// 1. 实现 PermissionHandler 接口（见上文 CustomPermissionHandler）
+// 2. 在业务代码中设置 handler
+CustomPermissionHandler.setCurrentHandler(String.valueOf(approverId));
+try {
+    FlowParams params = FlowParams.build()
+            .flowCode("leave_approval")
+            .handler(String.valueOf(approverId))  // 必须设置
+            .skipType("PASS");
+    taskService.skipByInsId(instanceId, params);
+} finally {
+    CustomPermissionHandler.clearCurrentHandler();
+}
+```
+
+### 2. NullPointerException: Cannot invoke "String.toCharArray()"
+
+**错误信息：** `java.lang.NullPointerException: Cannot invoke "String.toCharArray()" because "val" is null`
+
+**原因：** 节点的 `node_ratio` 字段为 NULL
+
+**解决方案：**
+```sql
+-- 为审批节点设置 node_ratio = 100.000
+UPDATE flow_node SET node_ratio = 100.000 WHERE node_type = 1;
+```
+
+### 3. 流程结束后业务表状态未更新
+
+**原因：** 判断流程结束的条件不正确
+
+**解决方案：**
+```java
+// 正确的方式：同时判断 flow_status 和 node_code
+Instance instance = insService.getById(instanceId);
+if (FlowStatus.FINISHED.getKey().equals(instance.getFlowStatus()) || "end".equals(instance.getNodeCode())) {
+    // 流程已结束，更新业务表
+}
+```
+
+### 4. ThreadLocal 内存泄漏
+
+**原因：** 未在 finally 块中清除 ThreadLocal
+
+**解决方案：**
+```java
+CustomPermissionHandler.setCurrentHandler(handler);
+try {
+    // 业务逻辑
+} finally {
+    CustomPermissionHandler.clearCurrentHandler();  // 必须清理
+}
+```
+
+---
+
+## 🎯 最佳实践
+
+### 1. 流程节点配置
+
+| 节点类型 | permission_flag | node_ratio | 说明 |
+|---------|----------------|------------|------|
+| 开始节点 | NULL | NULL | 不需要权限校验 |
+| 审批节点 | 审批人ID（如 "2001"） | 100.000 | 单人审批 |
+| 会签节点 | 多个审批人ID | 100.000 | 所有人都需同意 |
+| 或签节点 | 多个审批人ID | 50.000 | 任意一人同意即可 |
+| 结束节点 | NULL | NULL | 不需要权限校验 |
+
+### 2. 数据库初始化
+
+```sql
+-- 清理旧数据
+DELETE FROM flow_skip WHERE definition_id = 1001;
+DELETE FROM flow_node WHERE definition_id = 1001;
+DELETE FROM flow_definition WHERE id = 1001;
+
+-- 插入流程定义
+INSERT INTO flow_definition (...) VALUES (...);
+
+-- 插入节点（注意设置 node_ratio）
+INSERT INTO flow_node (id, node_type, permission_flag, node_ratio, ...) 
+VALUES (2001, 1, '2001', 100.000, ...);
+
+-- 插入流转关系
+INSERT INTO flow_skip (...) VALUES (...);
+```
+
+### 3. 代码结构建议
+
+```
+src/main/java/
+├── config/
+│   └── CustomPermissionHandler.java    # 权限处理器
+├── service/
+│   ├── LeaveRequestService.java        # 业务接口
+│   └── impl/
+│       └── LeaveRequestServiceImpl.java # 业务实现
+└── controller/
+    └── LeaveRequestController.java     # 控制器
+```
+
+### 4. 日志记录
+
+```java
+log.info("审批操作，approverId: {}, handler: {}", approverId, handler);
+log.info("流程状态: {}, 当前节点: {}", instance.getFlowStatus(), instance.getNodeCode());
+log.info("业务表状态已更新为已通过");
+```
+
+### 5. 事务管理
+
+```java
+@Transactional(rollbackFor = Exception.class)  // 所有异常都回滚
+public void approveLeaveRequest(...) {
+    // Warm-Flow 操作和业务表更新在同一事务中
 }
 ```
 

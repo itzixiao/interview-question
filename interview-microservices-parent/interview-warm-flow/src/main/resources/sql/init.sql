@@ -81,17 +81,49 @@ CREATE TABLE IF NOT EXISTS `reimbursement_request` (
 -- flow_variable
 
 -- ========================================
--- 测试数据
+-- 请假审批流程定义初始化数据
 -- ========================================
+-- 注意：以下数据需要在框架启动并自动建表后执行
+-- 或者通过官方设计器UI创建（推荐方式）
 
--- 插入测试请假申请数据
-INSERT INTO `leave_request` (`user_id`, `user_name`, `leave_type`, `start_time`, `end_time`, `days`, `reason`, `status`) 
+-- 1. 插入流程定义 (leave_approval)
+INSERT INTO `flow_definition` (`id`, `flow_code`, `flow_name`, `model_value`, `category`, `version`, `is_publish`, `form_custom`, `form_path`, `activity_status`, `listener_type`, `listener_path`, `ext`, `create_time`, `create_by`, `update_time`, `update_by`, `del_flag`, `tenant_id`) 
 VALUES 
-(1001, '张三', 3, '2026-04-10 09:00:00', '2026-04-12 18:00:00', 3.0, '年假休息', 0),
-(1002, '李四', 1, '2026-04-15 09:00:00', '2026-04-15 18:00:00', 1.0, '处理个人事务', 0);
+(1001, 'leave_approval', '请假审批流程', 'CLASSICS', 'business', '1', 1, 'N', NULL, 1, NULL, NULL, NULL, NOW(), 'system', NOW(), 'system', '0', NULL);
 
--- 插入测试报销申请数据
-INSERT INTO `reimbursement_request` (`user_id`, `user_name`, `reimbursement_type`, `amount`, `reason`, `status`) 
+-- 2. 插入流程节点
+-- 开始节点（不需要node_ratio）
+INSERT INTO `flow_node` (`id`, `node_type`, `definition_id`, `node_code`, `node_name`, `permission_flag`, `node_ratio`, `coordinate`, `any_node_skip`, `listener_type`, `listener_path`, `handler_type`, `handler_path`, `form_custom`, `form_path`, `version`, `create_time`, `create_by`, `update_time`, `update_by`, `ext`, `del_flag`, `tenant_id`) 
 VALUES 
-(1001, '张三', 1, 2500.00, '北京出差差旅费', 0),
-(1003, '王五', 3, 350.00, '客户招待餐费', 0);
+(1001, 0, 1001, 'start', '开始', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'N', NULL, '1', NOW(), 'system', NOW(), 'system', NULL, '0', NULL);
+
+-- 一级审批节点（部门经理）- 审批人ID: 2001，签署比例100%
+INSERT INTO `flow_node` (`id`, `node_type`, `definition_id`, `node_code`, `node_name`, `permission_flag`, `node_ratio`, `coordinate`, `any_node_skip`, `listener_type`, `listener_path`, `handler_type`, `handler_path`, `form_custom`, `form_path`, `version`, `create_time`, `create_by`, `update_time`, `update_by`, `ext`, `del_flag`, `tenant_id`) 
+VALUES 
+(2001, 1, 1001, 'dept_manager', '部门经理审批', '2001', 100.000, NULL, NULL, NULL, NULL, NULL, NULL, 'N', NULL, '1', NOW(), 'system', NOW(), 'system', NULL, '0', NULL);
+
+-- 二级审批节点（HR）- 审批人ID: 3001，签署比例100%
+INSERT INTO `flow_node` (`id`, `node_type`, `definition_id`, `node_code`, `node_name`, `permission_flag`, `node_ratio`, `coordinate`, `any_node_skip`, `listener_type`, `listener_path`, `handler_type`, `handler_path`, `form_custom`, `form_path`, `version`, `create_time`, `create_by`, `update_time`, `update_by`, `ext`, `del_flag`, `tenant_id`) 
+VALUES 
+(3001, 1, 1001, 'hr_approval', 'HR审批', '3001', 100.000, NULL, NULL, NULL, NULL, NULL, NULL, 'N', NULL, '1', NOW(), 'system', NOW(), 'system', NULL, '0', NULL);
+
+-- 结束节点（不需要node_ratio）
+INSERT INTO `flow_node` (`id`, `node_type`, `definition_id`, `node_code`, `node_name`, `permission_flag`, `node_ratio`, `coordinate`, `any_node_skip`, `listener_type`, `listener_path`, `handler_type`, `handler_path`, `form_custom`, `form_path`, `version`, `create_time`, `create_by`, `update_time`, `update_by`, `ext`, `del_flag`, `tenant_id`) 
+VALUES 
+(4001, 2, 1001, 'end', '结束', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'N', NULL, '1', NOW(), 'system', NOW(), 'system', NULL, '0', NULL);
+
+-- 3. 插入流程流转关系
+-- 开始 -> 一级审批（部门经理）
+INSERT INTO `flow_skip` (`id`, `definition_id`, `now_node_code`, `now_node_type`, `next_node_code`, `next_node_type`, `skip_name`, `skip_type`, `skip_condition`, `coordinate`, `create_time`, `create_by`, `update_time`, `update_by`, `del_flag`, `tenant_id`) 
+VALUES 
+(1001, 1001, 'start', 0, 'dept_manager', 1, '提交申请', NULL, NULL, NULL, NOW(), 'system', NOW(), 'system', '0', NULL);
+
+-- 一级审批 -> 二级审批（HR）
+INSERT INTO `flow_skip` (`id`, `definition_id`, `now_node_code`, `now_node_type`, `next_node_code`, `next_node_type`, `skip_name`, `skip_type`, `skip_condition`, `coordinate`, `create_time`, `create_by`, `update_time`, `update_by`, `del_flag`, `tenant_id`) 
+VALUES 
+(2001, 1001, 'dept_manager', 1, 'hr_approval', 1, '经理通过', 'PASS', NULL, NULL, NOW(), 'system', NOW(), 'system', '0', NULL);
+
+-- 二级审批 -> 结束
+INSERT INTO `flow_skip` (`id`, `definition_id`, `now_node_code`, `now_node_type`, `next_node_code`, `next_node_type`, `skip_name`, `skip_type`, `skip_condition`, `coordinate`, `create_time`, `create_by`, `update_time`, `update_by`, `del_flag`, `tenant_id`) 
+VALUES 
+(3001, 1001, 'hr_approval', 1, 'end', 2, 'HR通过', 'PASS', NULL, NULL, NOW(), 'system', NOW(), 'system', '0', NULL);
